@@ -201,64 +201,89 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
 
 ## 2. User Stories
 
+### Epic: User Authentication
+
+#### Must Have (P0)
+
+**US-001: User Account Registration**
+- **As** Sarah the Freelancer, **I want to** create a new LifeStint account with my email and password **so that I can** securely track my client projects and maintain data privacy.
+- **Prerequisites:** None
+- **Acceptance Criteria:**
+  - Given I click "Sign Up", when registration modal opens, then I can enter email and password fields
+  - Given I enter valid email and password, when I submit registration, then account is created and I'm automatically logged in within 3 seconds
+  - Given I successfully register, when account creation completes, then I'm redirected to empty dashboard with onboarding guidance
+  - Edge case: Email already exists shows "Account exists, try signing in" with link to login
+
+**US-002: User Login/Signin**
+- **As** Marcus the Product Manager, **I want to** sign into my existing LifeStint account **so that I can** access my project data and continue tracking my focus sessions.
+- **Prerequisites:** US-001
+- **Acceptance Criteria:**
+  - Given I have an existing account, when I click "Sign In", then login modal opens with email and password fields
+  - Given I enter correct credentials, when I submit login, then I'm authenticated and redirected to my dashboard within 2 seconds
+  - Given I enter incorrect credentials, when I submit login, then clear error message appears: "Invalid email or password"
+  - Edge case: Failed login attempts don't lock account but show progressive delay (1s, 2s, 4s)
+
+**US-003: Session Persistence & Management**
+- **As** Alex the Graduate Student, **I want my** login session to persist across browser sessions **so that I can** continue my research tracking without re-authenticating frequently.
+- **Prerequisites:** US-002
+- **Acceptance Criteria:**
+  - Given I successfully log in, when I close and reopen browser, then I remain logged in without re-authentication
+  - Given I have an active session, when I navigate between LifeStint pages, then authentication state is maintained seamlessly
+  - Given my session expires, when I attempt any action, then I'm prompted to re-authenticate with current page preserved
+  - Edge case: Session expiration shows 5-minute warning with option to extend
+
 ### Epic: Project Management
 
 #### Must Have (P0)
 
-**US-001: Create New Project**
+**US-004: Create New Project**
 - **As** Sarah the Freelancer, **I want to** quickly create a new project with expected daily stints **so that I can** start tracking focused work immediately without administrative overhead.
-- **Prerequisites:** None
+- **Prerequisites:** US-002
 - **Acceptance Criteria:**
   - Given I click "Add Project" button, when modal opens, then I can enter project name and expected daily stints
+  - Given I set a custom stint duration during creation, when I save, then future stints for that project use the custom duration
   - Given I create a project, when I save, then project card appears on dashboard within 1 second
   - Given I don't specify expected stints, when I create project, then system defaults to 2 stints per day
   - Edge case: Project names must be unique within user account
+  - Edge case: Custom stint duration cannot exceed global maximum limit
 
-**US-002: Edit Existing Projects**
+**US-005: Edit Existing Projects**
 - **As** Marcus the Product Manager, **I want to** modify project settings and expected stint counts **so that I can** adapt tracking to changing project priorities.
-- **Prerequisites:** US-001
+- **Prerequisites:** US-004
 - **Acceptance Criteria:**
   - Given I click "Edit" on project card, when modal opens, then current settings are pre-populated
   - Given I modify expected daily stints, when I save, then dashboard immediately reflects new progress calculations
+  - Given I adjust custom stint duration, when I save, then future stints use the updated duration
+  - Given I clear custom stint duration, when I save, then project reverts to the global default duration
   - Given I change project name, when I save, then all historical data remains associated with project
   - Edge case: Cannot edit project name to duplicate existing project name
+  - Edge case: Custom stint duration updates must remain within the allowed global maximum
 
-**US-003: Activate/Deactivate Projects**
+**US-006: Activate/Deactivate Projects**
 - **As** Alex the Graduate Student, **I want to** hide completed or paused projects **so that my** dashboard focuses on current priorities without losing historical data.
-- **Prerequisites:** US-001
+- **Prerequisites:** US-004
 - **Acceptance Criteria:**
   - Given I deactivate a project, when viewing dashboard, then project is hidden by default
   - Given I toggle "Show inactive projects", when enabled, then deactivated projects appear with distinct styling
   - Given I reactivate a project, when action completes, then project appears in main dashboard view
   - Edge case: Cannot deactivate project with active stint running
 
-#### Should Have (P1)
-
-**US-004: Project Duration Customization**
-- **As** Jennifer the Marketing Consultant, **I want to** set custom stint durations per project **so that I can** match tracking to different types of client work.
-- **Prerequisites:** US-001, US-002
-- **Acceptance Criteria:**
-  - Given I edit a project, when I set custom stint duration, then future stints use project-specific duration
-  - Given project has custom duration, when I start stint, then timer shows project-specific maximum time
-  - Given I remove custom duration, when I save, then project reverts to global default duration
-  - Edge case: Custom duration cannot exceed global maximum limit
-
 ### Epic: Stint Tracking
 
 #### Must Have (P0)
 
-**US-005: Start Focused Work Session**
+**US-007: Start Focused Work Session**
 - **As** Sarah the Freelancer, **I want to** start a stint with one click **so that I can** begin focused work without losing momentum.
-- **Prerequisites:** US-001, US-020
+- **Prerequisites:** US-004
 - **Acceptance Criteria:**
   - Given I click "Start" on any project, when action triggers, then timer begins immediately with visual feedback
   - Given another stint is active, when I start new stint, then previous stint automatically stops
   - Given stint starts, when dashboard updates, then active project shows highlighted styling and real-time timer
   - Edge case: Starting stint while offline queues action for sync when connection restored
 
-**US-007: Stop and Complete Stints**
+**US-008: Stop and Complete Stints**
 - **As** Alex the Graduate Student, **I want to** manually stop stints when I complete focused work **so that I can** capture exact work duration and close out the session cleanly.
-- **Prerequisites:** US-005
+- **Prerequisites:** US-007
 - **Acceptance Criteria:**
   - Given I have active stint, when I click "Stop", then timer ends and completion summary appears
   - Given stint auto-stops at maximum duration, when timeout occurs, then system records timeout reason
@@ -267,18 +292,18 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
 
 #### Should Have (P1)
 
-**US-006: Pause and Resume Active Stints**
+**US-012: Pause and Resume Active Stints**
 - **As** Marcus the Product Manager, **I want to** pause active stints for interruptions **so that I can** handle urgent matters without losing tracked time.
-- **Prerequisites:** US-005, US-007
+- **Prerequisites:** US-007
 - **Acceptance Criteria:**
   - Given I have active stint, when I click "Pause", then timer stops and button changes to "Resume"
   - Given I have paused stint, when I click "Resume", then timer continues from paused time
   - Given I pause a stint, when I start different project, then paused stint is permanently stopped
   - Edge case: Cannot resume stint that has been manually stopped
 
-**US-008: Stint Documentation**
+**US-013: Stint Documentation**
 - **As** Jennifer the Marketing Consultant, **I want to** add detailed notes to completed stints **so that I can** document insights and deliverables for client reporting.
-- **Prerequisites:** US-005, US-007
+- **Prerequisites:** US-007, US-008
 - **Acceptance Criteria:**
   - Given stint completes, when notes modal appears, then I can write formatted text with Markdown
   - Given I add notes, when I save, then notes are permanently associated with stint record
@@ -291,7 +316,7 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
 
 **US-009: Real-Time Dashboard Updates**
 - **As** Sarah the Freelancer, **I want to** see live progress updates **so that I can** stay motivated and aware of daily progress without manual refresh.
-- **Prerequisites:** US-005, US-007
+- **Prerequisites:** US-007, US-008
 - **Acceptance Criteria:**
   - Given I have active stint, when timer runs, then dashboard shows real-time countdown without page reload
   - Given I complete a stint, when action finishes, then daily progress badge updates immediately
@@ -300,31 +325,20 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
 
 **US-010: Clear Active Stint Indication**
 - **As** Marcus the Product Manager, **I want to** easily identify which project has active stint **so that I can** quickly understand current focus without scanning entire dashboard.
-- **Prerequisites:** US-005
+- **Prerequisites:** US-007
 - **Acceptance Criteria:**
   - Given I have active stint, when viewing dashboard, then active project card has distinct visual highlighting
   - Given active stint is running, when I view from any device, then highlighting is consistent across platforms
   - Given no active stint, when viewing dashboard, then no projects show active styling
   - Edge case: Visual highlighting works in both light and dark mode themes
 
-#### Nice to Have (P2)
-
-**US-011: Dashboard Customization**
-- **As** Alex the Graduate Student, **I want to** organize project cards by priority **so that I can** focus on most important work first.
-- **Prerequisites:** US-009, US-010
-- **Acceptance Criteria:**
-  - Given I have multiple projects, when I drag project cards, then order is preserved across sessions
-  - Given I set project priorities, when viewing dashboard, then high-priority projects appear first
-  - Given I customize layout, when I access from different device, then preferences sync automatically
-  - Edge case: Card ordering preferences are preserved during project activation/deactivation
-
 ### Epic: Analytics & Progress Tracking
 
 #### Must Have (P0)
 
-**US-012: Daily Progress Tracking**
+**US-011: Daily Progress Tracking**
 - **As** Sarah the Freelancer, **I want to** see daily stint progress per project **so that I can** understand if I'm meeting my planned focus goals.
-- **Prerequisites:** US-005, US-007, US-009
+- **Prerequisites:** US-007, US-008, US-009
 - **Acceptance Criteria:**
   - Given I complete stints, when viewing project cards, then progress shows "X of Y stints today"
   - Given new day starts, when I view dashboard, then daily counters reset to 0
@@ -333,27 +347,27 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
 
 #### Should Have (P1)
 
-**US-013: Focus Consistency Visualization**
+**US-014: Focus Consistency Visualization**
 - **As** Marcus the Product Manager, **I want to** see my consistency patterns **so that I can** identify and maintain productive work rhythms.
-- **Prerequisites:** US-005, US-007, US-012
+- **Prerequisites:** US-011
 - **Acceptance Criteria:**
   - Given I have stint history, when viewing analytics, then GitHub-style heatmap shows daily consistency
   - Given I click heatmap dates, when detail view opens, then specific day's stints are listed
   - Given I maintain streaks, when viewing dashboard, then streak counter motivates continued consistency
   - Edge case: Heatmap handles leap years and different calendar months correctly
 
-**US-014: Weekly Analytics Summary**
+**US-015: Weekly Analytics Summary**
 - **As** Jennifer the Marketing Consultant, **I want to** review weekly performance metrics **so that I can** report focus time and productivity trends to clients.
-- **Prerequisites:** US-012, US-013
+- **Prerequisites:** US-011
 - **Acceptance Criteria:**
   - Given I access analytics page, when weekly view loads, then total focus time and stint completion rate display
   - Given I view weekly trends, when chart renders, then I can see week-over-week improvement or decline
   - Given I need client reporting, when I export data, then professional summary format is available
   - Edge case: Weekly boundaries respect user's configured week start day (Sunday/Monday)
 
-**US-015: Project Comparison Analytics**
+**US-016: Project Comparison Analytics**
 - **As** Alex the Graduate Student, **I want to** compare focus time across different academic projects **so that I can** balance attention appropriately.
-- **Prerequisites:** US-012
+- **Prerequisites:** US-011
 - **Acceptance Criteria:**
   - Given I have multiple projects, when viewing analytics, then side-by-side comparison chart shows relative time investment
   - Given I analyze project balance, when viewing pie chart, then time distribution is clearly visualized
@@ -364,9 +378,9 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
 
 #### Should Have (P1)
 
-**US-016: Stint Completion Warnings**
+**US-017: Stint Completion Warnings**
 - **As** Marcus the Product Manager, **I want to** receive advance warning before stint completion **so that I can** prepare to transition or extend focused work.
-- **Prerequisites:** US-005, US-007, US-009
+- **Prerequisites:** US-007, US-008, US-009
 - **Acceptance Criteria:**
   - Given stint has 5 minutes remaining, when warning triggers, then notification appears within 2 seconds
   - Given I receive warning, when notification shows, then I can quickly extend stint or prepare to stop
@@ -375,35 +389,104 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
 
 #### Nice to Have (P2)
 
-**US-017: Daily Goal Reminders**
+**US-024: Daily Goal Reminders**
 - **As** Alex the Graduate Student, **I want to** receive gentle reminders about incomplete daily goals **so that I can** maintain consistent study habits.
-- **Prerequisites:** US-012, US-016
+- **Prerequisites:** US-011, US-017
 - **Acceptance Criteria:**
   - Given I haven't met daily stint goals, when evening time arrives, then optional reminder notification appears
   - Given I consistently meet goals, when system detects pattern, then reminder frequency automatically decreases
   - Given I set "Do Not Disturb" periods, when reminders would trigger, then notifications are appropriately delayed
   - Edge case: Reminder timing adapts to user's typical work schedule patterns
+  - Given I analyze project balance, when viewing pie chart, then time distribution is clearly visualized
+  - Given I review project consistency, when comparing metrics, then each project's completion rates are visible
+  - Edge case: Comparison analytics handle projects with different creation dates appropriately
+
+#### Nice to Have (P2)
+
+**US-017: Stint Completion Warnings**
+- **As** Marcus the Product Manager, **I want to** receive advance warning before stint completion **so that I can** prepare to transition or extend focused work.
+- **Prerequisites:** US-007, US-008, US-009
+- **Acceptance Criteria:**
+  - Given stint has 5 minutes remaining, when warning triggers, then notification appears within 2 seconds
+  - Given I receive warning, when notification shows, then I can quickly extend stint or prepare to stop
+  - Given I'm working offline, when connection restores, then missed notifications are delivered appropriately
+  - Edge case: Notifications respect browser permission settings and don't spam if permission denied
 
 ### Epic: Offline Capability & Sync
 
 #### Should Have (P1)
 
-**US-018: Offline Stint Tracking**
+**US-018: Password Reset/Recovery**
+- **As** Marcus the Product Manager, **I want to** reset my password when I forget it **so that I can** regain access to my productivity tracking data without losing progress.
+- **Prerequisites:** US-001, US-002
+- **Acceptance Criteria:**
+  - Given I forgot my password, when I click "Forgot Password" on login page, then password reset modal opens with email field
+  - Given I enter my account email, when I submit reset request, then confirmation message appears and reset email is sent within 1 minute
+  - Given I receive reset email, when I click reset link, then secure reset page opens with new password fields
+  - Edge case: Reset link expires after 1 hour with clear expiration message
+
+### Epic: Planning & Scheduling
+
+#### Future Consideration (P3)
+
+**US-019: Authentication Error Handling**
+- **As** Sarah the Freelancer, **I want to** receive clear feedback when authentication issues occur **so that I can** understand and resolve login problems quickly.
+- **Prerequisites:** US-001, US-002
+- **Acceptance Criteria:**
+  - Given network connection fails during authentication, when error occurs, then clear message appears: "Connection issue, please try again"
+  - Given Supabase service is temporarily unavailable, when authentication fails, then helpful error message with retry option appears
+  - Given I enter malformed email, when I attempt signin/signup, then real-time validation prevents form submission with guidance
+  - Given authentication takes longer than expected, when delay occurs, then loading indicator with "Signing you in..." message appears
+  - Edge case: Browser blocks third-party cookies shows specific guidance for enabling authentication
+  - Edge case: JavaScript disabled shows fallback message explaining authentication requirements
+
+### Epic: User Authentication
+
+#### Must Have (P0)
+
+**US-020: Email Verification**
+- **As** Alex the Graduate Student, **I want to** verify my email address during registration **so that I can** ensure secure account recovery and receive important product updates.
+- **Prerequisites:** US-001
+- **Acceptance Criteria:**
+  - Given I complete registration, when account is created, then verification email is sent and banner appears: "Check email to verify account"
+  - Given I click verification link in email, when verification completes, then account is confirmed and success message appears
+  - Given I haven't verified email, when I log in, then gentle reminder banner appears with "Resend verification" option
+  - Given verification email doesn't arrive, when I click "Resend", then new verification email is sent with 60-second cooldown
+  - Edge case: Verification link expires after 24 hours with option to request new verification
+  - Edge case: Already verified email clicking verification link shows "Email already verified" confirmation
+
+**US-022: Offline Stint Tracking**
 - **As** Jennifer the Marketing Consultant, **I want to** track stints without internet connection **so that I can** maintain productivity tracking in client offices with poor connectivity.
-- **Prerequisites:** US-005, US-007, US-009
+- **Prerequisites:** US-007, US-008, US-009
 - **Acceptance Criteria:**
   - Given I'm offline, when I start/stop stints, then actions are queued for sync when connection restores
   - Given I work offline, when viewing dashboard, then cached data shows my current projects and progress
   - Given connection restores, when sync occurs, then all offline actions are committed to database without data loss
   - Edge case: Conflicting offline actions (same project started on multiple devices) are resolved using most recent timestamp
 
-### Epic: Planning & Scheduling
+**US-023: Dashboard Customization**
+- **As** Alex the Graduate Student, **I want to** organize project cards by priority **so that I can** focus on most important work first.
+- **Prerequisites:** US-009, US-010
+- **Acceptance Criteria:**
+  - Given I have multiple projects, when I drag project cards, then order is preserved across sessions
+  - Given I set project priorities, when viewing dashboard, then high-priority projects appear first
+  - Given I customize layout, when I access from different device, then preferences sync automatically
+  - Edge case: Card ordering preferences are preserved during project activation/deactivation
 
-#### Future Consideration (P3)
+#### Should Have (P1)
 
-**US-019: Weekly Project Planning View**
+**US-024: Daily Goal Reminders**
+- **As** Alex the Graduate Student, **I want to** receive gentle reminders about incomplete daily goals **so that I can** maintain consistent study habits.
+- **Prerequisites:** US-011, US-017
+- **Acceptance Criteria:**
+  - Given I haven't met daily stint goals, when evening time arrives, then optional reminder notification appears
+  - Given I consistently meet goals, when system detects pattern, then reminder frequency automatically decreases
+  - Given I set "Do Not Disturb" periods, when reminders would trigger, then notifications are appropriately delayed
+  - Edge case: Reminder timing adapts to user's typical work schedule patterns
+
+**US-025: Weekly Project Planning View**
 - **As** Sarah the Freelancer, **I want to** visually plan my weekly project schedule **so that I can** proactively distribute workload and avoid overcommitting to clients.
-- **Prerequisites:** US-001, US-012, US-015
+- **Prerequisites:** US-004, US-011, US-016
 - **Acceptance Criteria:**
   - Given I access weekly planner, when view loads, then I see 7-day calendar grid with my active projects available for scheduling
   - Given I drag a project onto a specific day, when I drop it, then I can set expected stint count for that project on that day
@@ -413,46 +496,9 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
   - Edge case: Weekly boundaries respect user's configured week start day preference
   - Edge case: Drag-and-drop works on both desktop and mobile interfaces
 
-### Epic: User Authentication
-
-#### Must Have (P0)
-
-**US-020: User Account Registration**
-- **As** Sarah the Freelancer, **I want to** create a new LifeStint account with my email and password **so that I can** securely track my client projects and maintain data privacy.
-- **Prerequisites:** None
-- **Acceptance Criteria:**
-  - Given I visit LifeStint without an account, when I click "Sign Up", then registration modal opens with email and password fields
-  - Given I enter valid email and password, when I submit registration, then account is created and I'm automatically logged in within 3 seconds
-  - Given I successfully register, when account creation completes, then I'm redirected to empty dashboard with onboarding guidance
-  - Given I enter invalid email format, when I attempt registration, then clear validation error appears without form submission
-  - Edge case: Email already exists shows "Account exists, try signing in" with link to login
-  - Edge case: Password must be minimum 8 characters with validation feedback
-
-**US-021: User Login/Signin**
-- **As** Marcus the Product Manager, **I want to** sign into my existing LifeStint account **so that I can** access my project data and continue tracking my focus sessions.
-- **Prerequisites:** US-020
-- **Acceptance Criteria:**
-  - Given I have an existing account, when I click "Sign In", then login modal opens with email and password fields
-  - Given I enter correct credentials, when I submit login, then I'm authenticated and redirected to my dashboard within 2 seconds
-  - Given I enter incorrect credentials, when I submit login, then clear error message appears: "Invalid email or password"
-  - Given I'm on any LifeStint page while logged out, when I attempt restricted action, then login modal appears automatically
-  - Edge case: Failed login attempts don't lock account but show progressive delay (1s, 2s, 4s)
-  - Edge case: Login form maintains email field value after failed attempts
-
-**US-022: Session Persistence & Management**
-- **As** Alex the Graduate Student, **I want my** login session to persist across browser sessions **so that I can** continue my research tracking without re-authenticating frequently.
-- **Prerequisites:** US-021
-- **Acceptance Criteria:**
-  - Given I successfully log in, when I close and reopen browser, then I remain logged in without re-authentication
-  - Given I have an active session, when I navigate between LifeStint pages, then authentication state is maintained seamlessly
-  - Given my session expires, when I attempt any action, then I'm prompted to re-authenticate with current page preserved
-  - Given I log in on multiple devices, when I use LifeStint, then sessions remain active on all devices independently
-  - Edge case: Session expiration shows 5-minute warning with option to extend
-  - Edge case: Concurrent sessions on multiple devices work without conflicts
-
-**US-023: User Logout**
+**US-026: User Logout**
 - **As** Jennifer the Marketing Consultant, **I want to** securely log out of LifeStint **so that I can** protect my project data when working on client devices.
-- **Prerequisites:** US-021
+- **Prerequisites:** US-002
 - **Acceptance Criteria:**
   - Given I'm logged in, when I click "Logout" in user menu, then I'm immediately signed out and redirected to login page
   - Given I log out, when logout completes, then all local session data is cleared and I cannot access protected pages
@@ -460,41 +506,6 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
   - Given I log out, when I use browser back button, then I cannot access previously visited protected pages
   - Edge case: Logout works even with network connectivity issues by clearing local session
   - Edge case: Active stint continues counting during logout but requires re-authentication to access
-
-#### Should Have (P1)
-
-**US-024: Password Reset/Recovery**
-- **As** Marcus the Product Manager, **I want to** reset my password when I forget it **so that I can** regain access to my productivity tracking data without losing progress.
-- **Prerequisites:** US-020, US-021
-- **Acceptance Criteria:**
-  - Given I forgot my password, when I click "Forgot Password" on login page, then password reset modal opens with email field
-  - Given I enter my account email, when I submit reset request, then confirmation message appears and reset email is sent within 1 minute
-  - Given I receive reset email, when I click reset link, then secure reset page opens with new password fields
-  - Given I set new password, when I submit, then password is updated and I'm automatically logged in
-  - Edge case: Reset link expires after 1 hour with clear expiration message
-  - Edge case: Reset request for non-existent email shows same confirmation for security
-
-**US-025: Authentication Error Handling**
-- **As** Sarah the Freelancer, **I want to** receive clear feedback when authentication issues occur **so that I can** understand and resolve login problems quickly.
-- **Prerequisites:** US-020, US-021
-- **Acceptance Criteria:**
-  - Given network connection fails during authentication, when error occurs, then clear message appears: "Connection issue, please try again"
-  - Given Supabase service is temporarily unavailable, when authentication fails, then helpful error message with retry option appears
-  - Given I enter malformed email, when I attempt signin/signup, then real-time validation prevents form submission with guidance
-  - Given authentication takes longer than expected, when delay occurs, then loading indicator with "Signing you in..." message appears
-  - Edge case: Browser blocks third-party cookies shows specific guidance for enabling authentication
-  - Edge case: JavaScript disabled shows fallback message explaining authentication requirements
-
-**US-026: Email Verification**
-- **As** Alex the Graduate Student, **I want to** verify my email address during registration **so that I can** ensure secure account recovery and receive important product updates.
-- **Prerequisites:** US-020
-- **Acceptance Criteria:**
-  - Given I complete registration, when account is created, then verification email is sent and banner appears: "Check email to verify account"
-  - Given I click verification link in email, when verification completes, then account is confirmed and success message appears
-  - Given I haven't verified email, when I log in, then gentle reminder banner appears with "Resend verification" option
-  - Given verification email doesn't arrive, when I click "Resend", then new verification email is sent with 60-second cooldown
-  - Edge case: Verification link expires after 24 hours with option to request new verification
-  - Edge case: Already verified email clicking verification link shows "Email already verified" confirmation
 
 ---
 
@@ -705,6 +716,7 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
    - Create new projects with name and expected daily stint count
    - Edit project settings (name, expected stints)
    - Activate/deactivate projects without deletion
+   - Set custom stint durations per project with guardrails against invalid values
    - Project card dashboard with progress indicators
 
 3. **Basic Progress Tracking**
@@ -750,7 +762,6 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
 2. **Enhanced Stint Management**
    - Pause/resume functionality
    - Stint notes with Markdown support
-   - Custom stint durations per project
    - 5-minute completion warnings
 
 3. **Improved User Experience**
@@ -998,13 +1009,13 @@ Unlike complex time-tracking tools, LifeStint focuses specifically on "stints" -
 - Basic daily progress tracking
 - 30-day analytics history
 - Web-only access
+- Custom stint durations per project
 
 **Pro Tier ($9/month or $89/year):**
 - Unlimited analytics history
 - Advanced reporting and exports
 - Mobile app access
 - Priority customer support
-- Custom stint durations per project
 
 **Team Tier ($19/month per user, min 3 users):**
 - All Pro features
