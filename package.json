@@ -6,13 +6,17 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "supabase:types": "supabase gen types typescript --local > types/supabase.ts"
   },
   "dependencies": {
     "@nuxt/eslint": "^1.9.0",
     "@nuxt/test-utils": "^3.19.2",
     "@nuxt/ui": "^3.3.4",
+    "@nuxtjs/supabase": "^1.6.2",
     "@supabase/supabase-js": "^2.57.4",
     "eslint": "^9.36.0",
     "nuxt": "^4.1.2",
