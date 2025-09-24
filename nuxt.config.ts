@@ -25,8 +25,12 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       supabase: {
-        url: process.env.SUPABASE_URL,
-        key: process.env.SUPABASE_ANON_KEY,
+        url: process.env.SUPABASE_URL || (() => {
+          throw new Error('SUPABASE_URL is required')
+        })(),
+        key: process.env.SUPABASE_ANON_KEY || (() => {
+          throw new Error('SUPABASE_ANON_KEY is required')
+        })(),
       },
     },
   },
