@@ -134,6 +134,24 @@
             "details": "Use Supabase CLI to generate TypeScript types: 'supabase gen types typescript --project-id=PROJECT_ID > types/database.ts'. Create types directory if it doesn't exist. Generate complete type definitions for all tables, views, and functions. Set up proper imports and exports for use throughout the Nuxt application. Create utility types for common operations like InsertPayload, UpdatePayload, and SelectResult for each table. Ensure types include proper nullable field handling and foreign key relationships.",
             "status": "done",
             "testStrategy": "Verify generated types match database schema, test type safety in IDE with sample queries, validate that nullable fields are properly typed"
+          },
+          {
+            "id": 6,
+            "title": "Add tests for Row Level Security policies",
+            "description": "Implement comprehensive test coverage for RLS policies including policy enforcement (users can only access their own data), performance optimization (the recent RLS performance fix migration), and cross-table policy validation (stints-projects relationship)",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 2
+          },
+          {
+            "id": 7,
+            "title": "Add tests for utility functions",
+            "description": "Implement comprehensive test coverage for 248 lines in utils/supabase.ts including authentication functions (signInWithEmail, signUpWithEmail, etc.), database query helpers (safeQuery, paginatedQuery), file upload/storage functions, error handling and response wrapping, and real-time subscription helpers",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 2
           }
         ]
       },
@@ -689,7 +707,7 @@
     ],
     "metadata": {
       "created": "2025-09-24T05:01:54.439Z",
-      "updated": "2025-09-24T18:09:55.302Z",
+      "updated": "2025-09-25T17:11:09.359Z",
       "description": "Tasks for master context"
     }
   }
