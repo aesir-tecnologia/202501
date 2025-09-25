@@ -77,7 +77,7 @@
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -85,7 +85,7 @@
             "description": "Design and create the core database tables using Supabase SQL editor",
             "dependencies": [],
             "details": "Create users table with id (uuid primary key), email (unique text), created_at, updated_at, and auth integration fields. Create projects table with id (uuid primary key), user_id (foreign key), name (text), expected_daily_stints (integer, default 2), custom_stint_duration (integer nullable), is_active (boolean default true), created_at, updated_at. Create stints table with id (uuid primary key), project_id (foreign key), user_id (foreign key), started_at (timestamp), ended_at (timestamp nullable), duration_minutes (integer), notes (text nullable), is_completed (boolean default false), created_at, updated_at. Use UUID primary keys for security and set up proper foreign key constraints between tables.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify tables are created with correct column types and constraints, test foreign key relationships work correctly, validate UUID generation for primary keys"
           },
           {
@@ -96,7 +96,7 @@
               "2.1"
             ],
             "details": "Enable RLS on all three tables (users, projects, stints). Create policies for users table: users can only read/update their own profile based on auth.uid(). Create policies for projects table: users can only CRUD their own projects where user_id = auth.uid(). Create policies for stints table: users can only CRUD stints for their own projects through a join with projects table. Test that users cannot access other users' data through any query method. Add policies for INSERT, SELECT, UPDATE, DELETE operations on each table.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test cross-user data access prevention by attempting to query other users' data, verify all CRUD operations work for authenticated users, validate policy enforcement at database level"
           },
           {
@@ -107,7 +107,7 @@
               "2.1"
             ],
             "details": "Create index on users.email for authentication lookups. Create index on projects.user_id for user-specific project queries. Create composite index on (projects.user_id, projects.is_active) for active project filtering. Create index on stints.project_id for stint queries by project. Create composite index on (stints.user_id, stints.started_at) for user timeline queries. Create index on stints.started_at for date-based filtering and ordering. Consider partial indexes for active stints (where ended_at IS NULL) to optimize real-time queries.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run EXPLAIN ANALYZE on common queries to verify index usage, test query performance with sample data, measure query execution time improvements"
           },
           {
@@ -118,7 +118,7 @@
               "2.1"
             ],
             "details": "Create a reusable trigger function update_updated_at_column() that sets NEW.updated_at = NOW() when any row is updated. Apply this trigger to all three tables (users, projects, stints) so that updated_at is automatically maintained without requiring application-level logic. Test that the triggers fire correctly on UPDATE operations but not on INSERT operations. Ensure triggers work with RLS policies enabled.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test that updated_at timestamps are automatically set when records are modified, verify triggers don't interfere with INSERT operations, validate triggers work with RLS enabled"
           },
           {
@@ -132,8 +132,26 @@
               "2.4"
             ],
             "details": "Use Supabase CLI to generate TypeScript types: 'supabase gen types typescript --project-id=PROJECT_ID > types/database.ts'. Create types directory if it doesn't exist. Generate complete type definitions for all tables, views, and functions. Set up proper imports and exports for use throughout the Nuxt application. Create utility types for common operations like InsertPayload, UpdatePayload, and SelectResult for each table. Ensure types include proper nullable field handling and foreign key relationships.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify generated types match database schema, test type safety in IDE with sample queries, validate that nullable fields are properly typed"
+          },
+          {
+            "id": 6,
+            "title": "Add tests for Row Level Security policies",
+            "description": "Implement comprehensive test coverage for RLS policies including policy enforcement (users can only access their own data), performance optimization (the recent RLS performance fix migration), and cross-table policy validation (stints-projects relationship)",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 2
+          },
+          {
+            "id": 7,
+            "title": "Add tests for utility functions",
+            "description": "Implement comprehensive test coverage for 248 lines in utils/supabase.ts including authentication functions (signInWithEmail, signUpWithEmail, etc.), database query helpers (safeQuery, paginatedQuery), file upload/storage functions, error handling and response wrapping, and real-time subscription helpers",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 2
           }
         ]
       },
@@ -689,7 +707,7 @@
     ],
     "metadata": {
       "created": "2025-09-24T05:01:54.439Z",
-      "updated": "2025-09-24T15:49:00.102Z",
+      "updated": "2025-09-25T17:11:09.359Z",
       "description": "Tasks for master context"
     }
   }

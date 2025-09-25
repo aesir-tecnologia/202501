@@ -10,6 +10,9 @@
     "lint:fix": "eslint . --fix",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
     "supabase:types": "supabase gen types typescript --local > types/supabase.ts"
   },
   "dependencies": {
@@ -24,5 +27,8 @@
     "typescript": "^5.9.2",
     "vue": "^3.5.21",
     "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
   }
 }

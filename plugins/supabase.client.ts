@@ -11,7 +11,8 @@ export default defineNuxtPlugin(async () => {
       if (error) {
         console.warn('Supabase client initialization warning:', error.message)
       }
-    } catch (err) {
+    }
+    catch (err) {
       console.error('Supabase client initialization failed:', err)
     }
 
@@ -19,7 +20,8 @@ export default defineNuxtPlugin(async () => {
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
         console.log('User signed in:', session?.user?.email)
-      } else if (event === 'SIGNED_OUT') {
+      }
+      else if (event === 'SIGNED_OUT') {
         console.log('User signed out')
       }
     })
@@ -28,7 +30,7 @@ export default defineNuxtPlugin(async () => {
   return {
     provide: {
       supabase,
-      user
-    }
+      user,
+    },
   }
 })
