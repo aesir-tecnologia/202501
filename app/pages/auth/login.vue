@@ -179,8 +179,6 @@ async function handleLogin(event: FormSubmitEvent<LoginSchema>) {
     }
   }
   catch (err: unknown) {
-    console.error('Login error:', err)
-
     // Handle specific error types
     const errorMessage = err instanceof Error ? err.message : String(err)
     switch (errorMessage) {
