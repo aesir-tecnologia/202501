@@ -225,10 +225,10 @@
       },
       {
         "id": 4,
-        "title": "Core API Routes and Server Functions",
-        "description": "Build server-side API routes for secure data operations",
-        "details": "Create server/api/projects/ routes for CRUD operations. Implement server/api/stints/ for stint management with timer validation. Add proper error handling and validation using Zod schemas. Use Supabase service role key for admin operations. Implement rate limiting and request validation. Create API middleware for authentication verification. Use Nitro's built-in caching where appropriate.",
-        "testStrategy": "Test all API endpoints with authenticated and unauthenticated requests, validate request/response schemas, test error handling for invalid data, verify rate limiting works, test database constraints are enforced.",
+        "title": "Supabase Data Access and Validation Layer",
+        "description": "Build shared Supabase data-access helpers and validation utilities for direct client-side CRUD operations.",
+        "details": "Replace Nitro server routes with typed Supabase client modules that run entirely in the static Nuxt app. Implement consistent error handling, optimistic updates, and RLS-aware patterns so all CRUD flows talk directly to Supabase. Create reusable validation logic that mirrors database constraints and supports form usage across the dashboard.",
+        "testStrategy": "Exercise Supabase client helpers against a seeded project to verify CRUD, optimistic updates, and error cases. Run integration tests in the browser to confirm RLS prevents cross-user access and validation rejects invalid payloads. Simulate network failures to ensure retry and rollback behaviour works without a custom server.",
         "priority": "high",
         "dependencies": [
           2,
@@ -238,59 +238,59 @@
         "subtasks": [
           {
             "id": 1,
-            "title": "Set up server directory structure and middleware foundation",
-            "description": "Create the basic Nuxt server API directory structure and implement core authentication middleware",
+            "title": "Create Supabase data access modules",
+            "description": "Establish typed helper modules for interacting with Supabase tables and RPC endpoints from the client.",
             "dependencies": [],
-            "details": "Create server/api/ directory structure, implement server/middleware/auth.ts for request authentication verification, set up server/middleware/rateLimit.ts for API rate limiting, create server/utils/supabase.ts for server-side Supabase client with service role key, and establish error handling patterns using h3 utilities",
+            "details": "Build lib/supabase/projects.ts and lib/supabase/stints.ts modules that wrap the Supabase JS client with the existing Database types. Expose CRUD helpers (list, create, update, delete) that automatically scope queries by auth.uid() and include standard error handling via utils/supabase.ts. Document how each helper should be consumed by composables and components.",
             "status": "pending",
-            "testStrategy": "Test middleware functions independently, verify authentication middleware correctly validates JWT tokens, test rate limiting blocks excessive requests, ensure Supabase client connects with proper permissions"
+            "testStrategy": "Write unit tests that mock the Supabase client to confirm helpers call the expected PostgREST endpoints. Verify type inference works in IDE and that helpers reject missing auth state."
           },
           {
             "id": 2,
-            "title": "Implement Zod validation schemas and request validators",
-            "description": "Create comprehensive Zod schemas for all API request and response validation",
+            "title": "Define shared Zod schemas for Supabase payloads",
+            "description": "Create client-side validation schemas that mirror database constraints for projects and stints.",
             "dependencies": [
               "4.1"
             ],
-            "details": "Install and configure Zod, create server/schemas/projects.ts with project CRUD validation schemas, create server/schemas/stints.ts with stint management and timer validation schemas, implement server/utils/validation.ts helper functions for request validation, and establish consistent error response formats for validation failures",
+            "details": "Add schemas/projects.ts and schemas/stints.ts using Zod to validate create/update payloads before sending them to Supabase. Share schemas with form components and data helpers so validation logic stays consistent. Include refinement rules for stint duration limits, single-active requirements, and note length constraints.",
             "status": "pending",
-            "testStrategy": "Test all validation schemas with valid and invalid data, verify error messages are descriptive and consistent, test edge cases for timer validation (negative durations, future timestamps), ensure proper TypeScript integration"
+            "testStrategy": "Test schemas with valid/invalid payloads, ensuring errors surface correctly in forms. Add regression tests to guarantee constraints match the database (e.g., max stint duration, project name requirements)."
           },
           {
             "id": 3,
-            "title": "Build projects API routes with CRUD operations",
-            "description": "Implement complete project management API endpoints with proper validation and security",
+            "title": "Implement project CRUD helpers with optimistic UI patterns",
+            "description": "Use Supabase client helpers to power project creation, updates, activation toggles, and deletion without a custom API.",
             "dependencies": [
               "4.1",
               "4.2"
             ],
-            "details": "Create server/api/projects/index.get.ts for listing user projects, implement server/api/projects/index.post.ts for project creation, build server/api/projects/[id].get.ts for single project retrieval, create server/api/projects/[id].put.ts for project updates, implement server/api/projects/[id].delete.ts for project deletion, and add proper RLS enforcement and data validation",
+            "details": "Extend lib/supabase/projects.ts with optimistic mutation helpers that update local state immediately and roll back on failure. Ensure helpers respect RLS, pass validation results back to callers, and support multi-tab updates via existing Supabase realtime integrations.",
             "status": "pending",
-            "testStrategy": "Test all CRUD operations with authenticated users, verify data isolation between users, test error handling for non-existent projects, validate request/response schemas, test proper HTTP status codes and error messages"
+            "testStrategy": "Test optimistic flows by simulating failures and confirming UI rolls back cleanly. Verify project CRUD works across multiple browser tabs pointing at the same account."
           },
           {
             "id": 4,
-            "title": "Build stints API routes with timer validation",
-            "description": "Create stint management endpoints with comprehensive timer validation and business logic",
+            "title": "Implement stint lifecycle helpers with single-active enforcement",
+            "description": "Create Supabase-driven start/stop/pause flows that guarantee only one active stint per user.",
             "dependencies": [
               "4.1",
               "4.2"
             ],
-            "details": "Implement server/api/stints/index.get.ts for listing stints with filtering, create server/api/stints/index.post.ts for stint creation with timer validation, build server/api/stints/[id].get.ts for single stint retrieval, implement server/api/stints/[id].put.ts for stint updates (end time, notes), create server/api/stints/[id].delete.ts for stint deletion, and add business rules for overlapping stints and minimum duration validation",
+            "details": "Add startStint, stopStint, pauseStint, and resumeStint helpers that coordinate with Supabase RPC or transactional SQL functions to enforce the single-active constraint. Update helpers to derive authoritative timing from Supabase (planned vs actual duration) and to record completion types in line with the PRD.",
             "status": "pending",
-            "testStrategy": "Test stint CRUD operations, validate timer logic prevents invalid durations and overlapping stints, test start/stop functionality, verify proper project association, test batch operations for performance"
+            "testStrategy": "Validate helpers prevent overlapping stints by attempting concurrent starts. Run long-lived timer simulations to ensure actual_duration stays accurate when synced with Supabase."
           },
           {
             "id": 5,
-            "title": "Implement API caching, optimization, and comprehensive error handling",
-            "description": "Add Nitro caching, performance optimizations, and robust error handling across all API routes",
+            "title": "Add client-side caching, retry, and error surfacing",
+            "description": "Harden Supabase interactions with caching, retry rules, and consistent error messaging.",
             "dependencies": [
               "4.3",
               "4.4"
             ],
-            "details": "Implement Nitro's built-in caching for read operations using defineCachedFunction, add server/utils/cache.ts for cache key management and invalidation strategies, create comprehensive error handling in server/utils/errors.ts with proper HTTP status codes, implement request logging and monitoring, add database query optimization and connection pooling configuration, and create API health check endpoint",
+            "details": "Integrate Nuxt query caching (e.g., useAsyncData or Vue Query) around Supabase calls to coalesce requests and provide stale-while-revalidate behaviour. Implement retry logic for transient Supabase errors and emit structured error objects for UI consumption. Create toast/notification patterns for failures so users understand when Supabase rejects an operation.",
             "status": "pending",
-            "testStrategy": "Test caching behavior with different cache keys and invalidation scenarios, verify error handling returns consistent JSON responses, test API performance under load, validate health check endpoint functionality, test cache invalidation on data updates"
+            "testStrategy": "Simulate network outages to ensure retries back off correctly and user feedback appears. Profile caching behaviour to confirm repeated navigations avoid redundant Supabase calls."
           }
         ]
       },
@@ -463,9 +463,9 @@
               "7.1",
               "7.2"
             ],
-            "details": "Create project editing functionality that immediately updates the UI (optimistic updates) before server confirmation. Implement rollback mechanism for failed updates. Add inline editing or edit modal options. Handle concurrent editing conflicts and provide user feedback for save status.",
+            "details": "Create project editing functionality that immediately updates the UI (optimistic updates) before Supabase confirmation. Implement rollback mechanism for failed updates. Add inline editing or edit modal options. Handle concurrent editing conflicts and provide user feedback for save status.",
             "status": "pending",
-            "testStrategy": "Test optimistic updates with successful saves, test rollback on server errors, verify conflict resolution for concurrent edits, validate loading states during saves."
+            "testStrategy": "Test optimistic updates with successful saves, test rollback on Supabase errors, verify conflict resolution for concurrent edits, validate loading states during saves."
           },
           {
             "id": 4,
@@ -497,7 +497,7 @@
         "id": 8,
         "title": "Stint Tracking and Timer System",
         "description": "Core stint tracking with accurate timing and state management",
-        "details": "Implement composables/useStints.ts with Web Worker for background timing accuracy. Create single active stint enforcement using global state. Add start/stop stint functionality with automatic project switching. Implement 5-minute completion warnings using browser notifications. Create stint completion flow with optional notes. Add pause/resume functionality for interrupted sessions. Use server-side validation for stint duration accuracy. Implement cross-device stint synchronization using Supabase real-time.",
+        "details": "Implement composables/useStints.ts with Web Worker for background timing accuracy. Create single active stint enforcement using global state. Add start/stop stint functionality with automatic project switching. Implement 5-minute completion warnings using browser notifications. Create stint completion flow with optional notes. Add pause/resume functionality for interrupted sessions. Use Supabase constraints and RPC validation for stint duration accuracy. Implement cross-device stint synchronization using Supabase real-time.",
         "testStrategy": "Test timer accuracy over 2+ hour sessions, validate single active stint enforcement across tabs, test completion warnings and notifications, verify stint data persistence during network interruptions, test cross-device synchronization.",
         "priority": "high",
         "dependencies": [
@@ -557,9 +557,9 @@
             "dependencies": [
               "8.3"
             ],
-            "details": "Add pauseStint() and resumeStint() methods with pause timestamp tracking. Implement server-side validation for stint duration accuracy and conflict resolution. Create Supabase real-time subscriptions for cross-device synchronization of stint state. Add conflict resolution for concurrent stint operations across devices. Implement optimistic updates with rollback on sync conflicts.",
+            "details": "Add pauseStint() and resumeStint() methods with pause timestamp tracking. Leverage Supabase validation for stint duration accuracy and conflict resolution. Create Supabase real-time subscriptions for cross-device synchronization of stint state. Add conflict resolution for concurrent stint operations across devices. Implement optimistic updates with rollback on sync conflicts.",
             "status": "pending",
-            "testStrategy": "Test pause/resume functionality maintains accurate duration tracking, validate server-side stint duration validation, test cross-device synchronization updates stint state in real-time, verify conflict resolution handles concurrent operations correctly"
+            "testStrategy": "Test pause/resume functionality maintains accurate duration tracking, validate Supabase-enforced stint duration validation, test cross-device synchronization updates stint state in real-time, verify conflict resolution handles concurrent operations correctly"
           }
         ]
       },
@@ -599,11 +599,11 @@
           {
             "id": 3,
             "title": "Implement Optimistic Updates with Conflict Resolution",
-            "description": "Create optimistic update system that immediately updates UI and handles conflicts when server data differs",
+            "description": "Create optimistic update system that immediately updates UI and handles conflicts when Supabase data differs",
             "dependencies": [
               "9.1"
             ],
-            "details": "Implement optimistic updates that immediately update local state before server confirmation. Create conflict resolution strategy that handles cases where server data differs from optimistic updates. Include rollback mechanism for failed operations and merge strategies for concurrent edits. Use timestamps and version fields to detect conflicts.",
+            "details": "Implement optimistic updates that immediately update local state before Supabase confirmation. Create conflict resolution strategy that handles cases where Supabase data differs from optimistic updates. Include rollback mechanism for failed operations and merge strategies for concurrent edits. Use timestamps and version fields to detect conflicts.",
             "status": "pending",
             "testStrategy": "Test optimistic updates provide immediate UI feedback, verify conflict resolution works with concurrent edits from multiple devices, test rollback functionality on operation failures, validate merge strategies preserve data integrity."
           },
