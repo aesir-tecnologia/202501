@@ -2,8 +2,12 @@
   <div class="min-h-screen bg-[#060709] py-8 px-4">
     <div class="max-w-7xl mx-auto">
       <div class="text-center mb-12">
-        <h1 class="text-3xl font-bold text-[#F5F7FA] mb-4">Login Page Design Variations</h1>
-        <p class="text-[#B6BDCF] text-lg">Three unique takes on the LifeStint login experience</p>
+        <h1 class="text-3xl font-bold text-[#F5F7FA] mb-4">
+          Login Page Design Variations
+        </h1>
+        <p class="text-[#B6BDCF] text-lg">
+          Three unique takes on the LifeStint login experience
+        </p>
       </div>
 
       <!-- First Row: All three variations -->

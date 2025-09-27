@@ -8,7 +8,6 @@ const displayName = computed(() => {
 })
 
 definePageMeta({
-  middleware: 'auth',
   title: 'Dashboard',
 })
 

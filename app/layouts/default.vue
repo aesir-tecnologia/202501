@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import type { NavigationMenuItem } from '#ui/components/NavigationMenu.vue'
+
+const appConfig = useAppConfig()
 const route = useRoute()
+const supabase = useSupabaseClient()
 
 const items = computed<NavigationMenuItem[]>(() => [{
   label: 'Dashboard',
@@ -14,6 +18,15 @@ const items = computed<NavigationMenuItem[]>(() => [{
   to: 'https://github.com/nuxt/ui/releases',
   target: '_blank',
 }])
+
+const signOut = async () => {
+  const { error } = await supabase.auth.signOut()
+  if (error) {
+    alert(error.message)
+  }
+
+  navigateTo(appConfig.auth.home)
+}
 </script>
 
 <template>
@@ -27,6 +40,12 @@ const items = computed<NavigationMenuItem[]>(() => [{
 
       <template #right>
         <UColorModeButton />
+        <UButton
+          icon="i-heroicons-arrow-right-start-on-rectangle"
+          variant="ghost"
+          color="neutral"
+          @click="signOut"
+        />
       </template>
     </UHeader>
 

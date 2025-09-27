@@ -1,106 +1,20 @@
-<template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 transition-colors duration-200 dark:bg-gray-950">
-    <div class="max-w-md w-full text-gray-900 dark:text-gray-100">
-      <UCard class="p-8 text-center bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-        <div
-          v-if="loading"
-          class="space-y-4"
-        >
-          <UIcon
-            name="i-heroicons-arrow-path"
-            class="w-8 h-8 mx-auto text-primary-600 animate-spin dark:text-primary-400"
-          />
-          <h2 class="text-xl font-semibold">
-            Verifying your account...
-          </h2>
-          <p class="text-gray-600 dark:text-gray-300">
-            Please wait while we complete your authentication.
-          </p>
-        </div>
-
-        <div
-          v-else-if="error"
-          class="space-y-4"
-        >
-          <UIcon
-            name="i-heroicons-exclamation-triangle"
-            class="w-8 h-8 mx-auto text-red-500 dark:text-red-400"
-          />
-          <h2 class="text-xl font-semibold">
-            Authentication Error
-          </h2>
-          <p class="text-gray-600 dark:text-gray-300">
-            {{ error }}
-          </p>
-          <div class="flex flex-col sm:flex-row gap-3 justify-center">
-            <UButton
-              to="/auth/login"
-              variant="solid"
-              color="primary"
-            >
-              Back to Sign In
-            </UButton>
-            <UButton
-              to="/auth/register"
-              variant="outline"
-              color="primary"
-            >
-              Create Account
-            </UButton>
-          </div>
-        </div>
-
-        <div
-          v-else-if="success"
-          class="space-y-4"
-        >
-          <UIcon
-            name="i-heroicons-check-circle"
-            class="w-8 h-8 mx-auto text-green-500 dark:text-green-400"
-          />
-          <h2 class="text-xl font-semibold">
-            Welcome to LifeStint!
-          </h2>
-          <p class="text-gray-600 dark:text-gray-300">
-            Your account has been successfully verified. Redirecting to your dashboard...
-          </p>
-          <div class="flex justify-center">
-            <UButton
-              to="/"
-              variant="solid"
-              color="primary"
-            >
-              Go to Dashboard
-            </UButton>
-          </div>
-        </div>
-      </UCard>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-// Page meta
 definePageMeta({
   layout: false,
 })
 
-// SEO
 useSeoMeta({
   title: 'Authenticating - LifeStint',
   description: 'Completing your authentication to LifeStint.',
 })
 
-// State
 const loading = ref(true)
 const error = ref('')
 const success = ref(false)
 
-// Supabase client and user
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 
-// Handle authentication callback
 async function handleAuthCallback() {
   try {
     // Get the current URL and check for auth parameters
@@ -115,9 +29,10 @@ async function handleAuthCallback() {
       success.value = true
 
       // Redirect after a short delay to show success message
-      setTimeout(() => {
-        navigateTo('/', { replace: true })
-      }, 2000)
+      // setTimeout(() => {
+      //   navigateTo('/dashboard', { replace: true })
+      // }, 2000)
+      alert('Redirect from success')
     }
     else {
       // Check for URL hash parameters (email confirmation)
@@ -142,19 +57,22 @@ async function handleAuthCallback() {
 
           if (type === 'signup') {
             success.value = true
-            setTimeout(() => {
-              navigateTo('/', { replace: true })
-            }, 2000)
+            // setTimeout(() => {
+            //   navigateTo('/dashboard', { replace: true })
+            // }, 2000)
+            alert('Redirect from token')
           }
           else if (type === 'recovery') {
             // Redirect to password reset page
-            navigateTo('/auth/reset-password', { replace: true })
+            // navigateTo('/auth/reset-password', { replace: true })
+            alert('Redirect TO reset password')
           }
           else {
             success.value = true
-            setTimeout(() => {
-              navigateTo('/', { replace: true })
-            }, 2000)
+            // setTimeout(() => {
+            //   navigateTo('/dashboard', { replace: true })
+            // }, 2000)
+            alert('Redirect from type')
           }
         }
         else {
@@ -199,9 +117,93 @@ onMounted(() => {
 watch(user, (newUser) => {
   if (newUser && !success.value && !error.value) {
     success.value = true
-    setTimeout(() => {
-      navigateTo('/', { replace: true })
-    }, 2000)
+    // setTimeout(() => {
+    //   navigateTo('/dashboard', { replace: true })
+    // }, 2000)
+    alert('Redirect from watch')
   }
 })
 </script>
+
+<template>
+  <UApp>
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 transition-colors duration-200 dark:bg-gray-950">
+      <div class="max-w-md w-full text-gray-900 dark:text-gray-100">
+        <UCard class="p-8 text-center bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+          <div
+            v-if="loading"
+            class="space-y-4"
+          >
+            <UIcon
+              name="i-heroicons-arrow-path"
+              class="w-8 h-8 mx-auto text-primary-600 animate-spin dark:text-primary-400"
+            />
+            <h2 class="text-xl font-semibold">
+              Verifying your account...
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300">
+              Please wait while we complete your authentication.
+            </p>
+          </div>
+
+          <div
+            v-else-if="error"
+            class="space-y-4"
+          >
+            <UIcon
+              name="i-heroicons-exclamation-triangle"
+              class="w-8 h-8 mx-auto text-red-500 dark:text-red-400"
+            />
+            <h2 class="text-xl font-semibold">
+              Authentication Error
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300">
+              {{ error }}
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+              <UButton
+                to="/auth/login"
+                variant="solid"
+                color="primary"
+              >
+                Back to Sign In
+              </UButton>
+              <UButton
+                to="/auth/register"
+                variant="outline"
+                color="primary"
+              >
+                Create Account
+              </UButton>
+            </div>
+          </div>
+
+          <div
+            v-else-if="success"
+            class="space-y-4"
+          >
+            <UIcon
+              name="i-heroicons-check-circle"
+              class="w-8 h-8 mx-auto text-green-500 dark:text-green-400"
+            />
+            <h2 class="text-xl font-semibold">
+              Welcome to LifeStint!
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300">
+              Your account has been successfully verified. Redirecting to your dashboard...
+            </p>
+            <div class="flex justify-center">
+              <UButton
+                to="/dashboard"
+                variant="solid"
+                color="primary"
+              >
+                Go to Dashboard
+              </UButton>
+            </div>
+          </div>
+        </UCard>
+      </div>
+    </div>
+  </UApp>
+</template>

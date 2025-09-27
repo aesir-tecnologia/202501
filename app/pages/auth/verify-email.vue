@@ -1,99 +1,101 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
-    <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
-      <div class="text-center space-y-3">
-        <h2 class="text-3xl font-bold">
-          Check your email
-        </h2>
-        <p class="text-sm text-gray-600 dark:text-gray-300">
-          We've sent a verification link to your email address
-        </p>
-      </div>
+  <UApp>
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
+      <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
+        <div class="text-center space-y-3">
+          <h2 class="text-3xl font-bold">
+            Check your email
+          </h2>
+          <p class="text-sm text-gray-600 dark:text-gray-300">
+            We've sent a verification link to your email address
+          </p>
+        </div>
 
-      <UCard class="p-8 text-center bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-        <div class="space-y-6">
-          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40">
-            <UIcon
-              name="i-heroicons-envelope"
-              class="h-6 w-6 text-green-600 dark:text-green-400"
+        <UCard class="p-8 text-center bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+          <div class="space-y-6">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40">
+              <UIcon
+                name="i-heroicons-envelope"
+                class="h-6 w-6 text-green-600 dark:text-green-400"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <h3 class="text-lg font-medium">
+                Verification email sent
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300">
+                Please check your inbox and click the verification link to complete your registration.
+                <span
+                  v-if="email"
+                  class="block font-medium mt-1"
+                >{{ email }}</span>
+              </p>
+            </div>
+
+            <div class="space-y-3">
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                Didn't receive the email? Check your spam folder or click below to resend.
+              </p>
+
+              <UButton
+                :loading="resending"
+                :disabled="resending || cooldownActive"
+                variant="outline"
+                class="w-full"
+                @click="resendVerification"
+              >
+                {{ resendButtonText }}
+              </UButton>
+
+              <div
+                v-if="cooldownActive"
+                class="text-xs text-gray-500 dark:text-gray-400"
+              >
+                You can request another email in {{ cooldownSeconds }} seconds
+              </div>
+            </div>
+
+            <UAlert
+              v-if="resendError"
+              icon="i-heroicons-exclamation-triangle"
+              color="red"
+              variant="soft"
+              :title="resendError"
+              class="mt-4"
+            />
+
+            <UAlert
+              v-if="resendSuccess"
+              icon="i-heroicons-check-circle"
+              color="green"
+              variant="soft"
+              :title="resendSuccess"
+              class="mt-4"
             />
           </div>
 
-          <div class="space-y-2">
-            <h3 class="text-lg font-medium">
-              Verification email sent
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">
-              Please check your inbox and click the verification link to complete your registration.
-              <span
-                v-if="email"
-                class="block font-medium mt-1"
-              >{{ email }}</span>
-            </p>
-          </div>
-
-          <div class="space-y-3">
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              Didn't receive the email? Check your spam folder or click below to resend.
-            </p>
-
-            <UButton
-              :loading="resending"
-              :disabled="resending || cooldownActive"
-              variant="outline"
-              class="w-full"
-              @click="resendVerification"
-            >
-              {{ resendButtonText }}
-            </UButton>
-
-            <div
-              v-if="cooldownActive"
-              class="text-xs text-gray-500 dark:text-gray-400"
-            >
-              You can request another email in {{ cooldownSeconds }} seconds
+          <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
+            <div class="space-y-2">
+              <NuxtLink
+                to="/auth/login"
+                class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                Back to sign in
+              </NuxtLink>
+              <br>
+              <NuxtLink
+                to="/auth/register"
+                class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                Use a different email address
+              </NuxtLink>
             </div>
           </div>
-
-          <UAlert
-            v-if="resendError"
-            icon="i-heroicons-exclamation-triangle"
-            color="red"
-            variant="soft"
-            :title="resendError"
-            class="mt-4"
-          />
-
-          <UAlert
-            v-if="resendSuccess"
-            icon="i-heroicons-check-circle"
-            color="green"
-            variant="soft"
-            :title="resendSuccess"
-            class="mt-4"
-          />
-        </div>
-
-        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
-          <div class="space-y-2">
-            <NuxtLink
-              to="/auth/login"
-              class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-            >
-              Back to sign in
-            </NuxtLink>
-            <br>
-            <NuxtLink
-              to="/auth/register"
-              class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              Use a different email address
-            </NuxtLink>
-          </div>
-        </div>
-      </UCard>
+        </UCard>
+      </div>
     </div>
-  </div>
+  </UApp>
 </template>
 
 <script setup lang="ts">

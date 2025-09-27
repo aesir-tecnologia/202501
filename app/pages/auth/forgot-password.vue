@@ -1,77 +1,79 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
-    <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
-      <div class="text-center space-y-3">
-        <h2 class="text-3xl font-bold">
-          Reset your password
-        </h2>
-        <p class="text-sm text-gray-600 dark:text-gray-300">
-          Enter your email address and we'll send you a reset link
-        </p>
-      </div>
-
-      <UCard class="p-8 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-        <UForm
-          :schema="forgotPasswordSchema"
-          :state="state"
-          class="space-y-6"
-          @submit="handleForgotPassword"
-        >
-          <UFormField
-            label="Email address"
-            name="email"
-            required
-          >
-            <UInput
-              v-model="state.email"
-              type="email"
-              placeholder="Enter your email address"
-              autocomplete="email"
-              :disabled="loading"
-            />
-          </UFormField>
-
-          <UButton
-            type="submit"
-            :loading="loading"
-            :disabled="loading"
-            class="w-full"
-            size="lg"
-          >
-            {{ loading ? 'Sending reset link...' : 'Send reset link' }}
-          </UButton>
-        </UForm>
-
-        <div class="text-center mt-6 text-gray-600 dark:text-gray-300">
-          <NuxtLink
-            to="/auth/login"
-            class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-          >
-            Back to sign in
-          </NuxtLink>
+  <UApp>
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
+      <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
+        <div class="text-center space-y-3">
+          <h2 class="text-3xl font-bold">
+            Reset your password
+          </h2>
+          <p class="text-sm text-gray-600 dark:text-gray-300">
+            Enter your email address and we'll send you a reset link
+          </p>
         </div>
 
-        <UAlert
-          v-if="error"
-          icon="i-heroicons-exclamation-triangle"
-          color="red"
-          variant="soft"
-          :title="error"
-          class="mt-4"
-        />
+        <UCard class="p-8 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+          <UForm
+            :schema="forgotPasswordSchema"
+            :state="state"
+            class="space-y-6"
+            @submit="handleForgotPassword"
+          >
+            <UFormField
+              label="Email address"
+              name="email"
+              required
+            >
+              <UInput
+                v-model="state.email"
+                type="email"
+                placeholder="Enter your email address"
+                autocomplete="email"
+                :disabled="loading"
+              />
+            </UFormField>
 
-        <UAlert
-          v-if="success"
-          icon="i-heroicons-check-circle"
-          color="green"
-          variant="soft"
-          :title="success"
-          :description="successDescription"
-          class="mt-4"
-        />
-      </UCard>
+            <UButton
+              type="submit"
+              :loading="loading"
+              :disabled="loading"
+              class="w-full"
+              size="lg"
+            >
+              {{ loading ? 'Sending reset link...' : 'Send reset link' }}
+            </UButton>
+          </UForm>
+
+          <div class="text-center mt-6 text-gray-600 dark:text-gray-300">
+            <NuxtLink
+              to="/auth/login"
+              class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+            >
+              Back to sign in
+            </NuxtLink>
+          </div>
+
+          <UAlert
+            v-if="error"
+            icon="i-heroicons-exclamation-triangle"
+            color="red"
+            variant="soft"
+            :title="error"
+            class="mt-4"
+          />
+
+          <UAlert
+            v-if="success"
+            icon="i-heroicons-check-circle"
+            color="green"
+            variant="soft"
+            :title="success"
+            :description="successDescription"
+            class="mt-4"
+          />
+        </UCard>
+      </div>
     </div>
-  </div>
+  </UApp>
 </template>
 
 <script setup lang="ts">

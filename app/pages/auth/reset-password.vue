@@ -1,96 +1,98 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
-    <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
-      <div class="text-center space-y-3">
-        <h2 class="text-3xl font-bold">
-          Set your new password
-        </h2>
-        <p class="text-sm text-gray-600 dark:text-gray-300">
-          Enter your new password below
-        </p>
-      </div>
-
-      <UCard class="p-8 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-        <UForm
-          :schema="resetPasswordSchema"
-          :state="state"
-          class="space-y-6"
-          @submit="handleResetPassword"
-        >
-          <UFormField
-            label="New Password"
-            name="password"
-            required
-          >
-            <UInput
-              v-model="state.password"
-              type="password"
-              placeholder="Enter your new password"
-              autocomplete="new-password"
-              :disabled="loading"
-            />
-            <template #hint>
-              <div class="text-xs text-gray-500 mt-1 dark:text-gray-400">
-                Password must be at least 8 characters with uppercase, lowercase, number, and special character
-              </div>
-            </template>
-          </UFormField>
-
-          <UFormField
-            label="Confirm New Password"
-            name="confirmPassword"
-            required
-          >
-            <UInput
-              v-model="state.confirmPassword"
-              type="password"
-              placeholder="Confirm your new password"
-              autocomplete="new-password"
-              :disabled="loading"
-            />
-          </UFormField>
-
-          <UButton
-            type="submit"
-            :loading="loading"
-            :disabled="loading"
-            class="w-full"
-            size="lg"
-          >
-            {{ loading ? 'Updating password...' : 'Update password' }}
-          </UButton>
-        </UForm>
-
-        <div class="text-center mt-6 text-gray-600 dark:text-gray-300">
-          <NuxtLink
-            to="/auth/login"
-            class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-          >
-            Back to sign in
-          </NuxtLink>
+  <UApp>
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
+      <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
+        <div class="text-center space-y-3">
+          <h2 class="text-3xl font-bold">
+            Set your new password
+          </h2>
+          <p class="text-sm text-gray-600 dark:text-gray-300">
+            Enter your new password below
+          </p>
         </div>
 
-        <UAlert
-          v-if="error"
-          icon="i-heroicons-exclamation-triangle"
-          color="red"
-          variant="soft"
-          :title="error"
-          class="mt-4"
-        />
+        <UCard class="p-8 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+          <UForm
+            :schema="resetPasswordSchema"
+            :state="state"
+            class="space-y-6"
+            @submit="handleResetPassword"
+          >
+            <UFormField
+              label="New Password"
+              name="password"
+              required
+            >
+              <UInput
+                v-model="state.password"
+                type="password"
+                placeholder="Enter your new password"
+                autocomplete="new-password"
+                :disabled="loading"
+              />
+              <template #hint>
+                <div class="text-xs text-gray-500 mt-1 dark:text-gray-400">
+                  Password must be at least 8 characters with uppercase, lowercase, number, and special character
+                </div>
+              </template>
+            </UFormField>
 
-        <UAlert
-          v-if="success"
-          icon="i-heroicons-check-circle"
-          color="green"
-          variant="soft"
-          :title="success"
-          :description="successDescription"
-          class="mt-4"
-        />
-      </UCard>
+            <UFormField
+              label="Confirm New Password"
+              name="confirmPassword"
+              required
+            >
+              <UInput
+                v-model="state.confirmPassword"
+                type="password"
+                placeholder="Confirm your new password"
+                autocomplete="new-password"
+                :disabled="loading"
+              />
+            </UFormField>
+
+            <UButton
+              type="submit"
+              :loading="loading"
+              :disabled="loading"
+              class="w-full"
+              size="lg"
+            >
+              {{ loading ? 'Updating password...' : 'Update password' }}
+            </UButton>
+          </UForm>
+
+          <div class="text-center mt-6 text-gray-600 dark:text-gray-300">
+            <NuxtLink
+              to="/auth/login"
+              class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+            >
+              Back to sign in
+            </NuxtLink>
+          </div>
+
+          <UAlert
+            v-if="error"
+            icon="i-heroicons-exclamation-triangle"
+            color="red"
+            variant="soft"
+            :title="error"
+            class="mt-4"
+          />
+
+          <UAlert
+            v-if="success"
+            icon="i-heroicons-check-circle"
+            color="green"
+            variant="soft"
+            :title="success"
+            :description="successDescription"
+            class="mt-4"
+          />
+        </UCard>
+      </div>
     </div>
-  </div>
+  </UApp>
 </template>
 
 <script setup lang="ts">

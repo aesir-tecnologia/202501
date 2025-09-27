@@ -1,160 +1,164 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
-    <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
-      <div class="text-center space-y-3">
-        <h2 class="text-3xl font-bold">
-          Create your account
-        </h2>
-        <p class="text-sm text-gray-600 dark:text-gray-300">
-          Already have an account?
-          <NuxtLink
-            to="/auth/login"
-            class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-          >
-            Sign in here
-          </NuxtLink>
-        </p>
-      </div>
+  <UApp>
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
+      <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
+        <div class="text-center space-y-3">
+          <h2 class="text-3xl font-bold">
+            Create your account
+          </h2>
+          <p class="text-sm text-gray-600 dark:text-gray-300">
+            Already have an account?
+            <NuxtLink
+              to="/auth/login"
+              class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+            >
+              Sign in here
+            </NuxtLink>
+          </p>
+        </div>
 
-      <UCard class="p-8 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-        <UForm
-          :schema="registerSchema"
-          :state="state"
-          class="space-y-6"
-          @submit="handleRegister"
-        >
-          <UFormField
-            label="Full Name"
-            name="fullName"
-            required
+        <UCard class="p-8 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+          <UForm
+            :schema="registerSchema"
+            :state="state"
+            class="space-y-6"
+            @submit="handleRegister"
           >
-            <UInput
-              v-model="state.fullName"
-              placeholder="Enter your full name"
-              autocomplete="name"
-              :disabled="loading"
-            />
-          </UFormField>
-
-          <UFormField
-            label="Email address"
-            name="email"
-            required
-          >
-            <UInput
-              v-model="state.email"
-              type="email"
-              placeholder="Enter your email"
-              autocomplete="email"
-              :disabled="loading"
-            />
-          </UFormField>
-
-          <UFormField
-            label="Password"
-            name="password"
-            required
-          >
-            <UInput
-              v-model="state.password"
-              type="password"
-              placeholder="Create a password"
-              autocomplete="new-password"
-              :disabled="loading"
-            />
-            <template #hint>
-              <div class="text-xs text-gray-500 mt-1">
-                Password must be at least 8 characters with uppercase, lowercase, number, and special character
-              </div>
-            </template>
-          </UFormField>
-
-          <UFormField
-            label="Confirm Password"
-            name="confirmPassword"
-            required
-          >
-            <UInput
-              v-model="state.confirmPassword"
-              type="password"
-              placeholder="Confirm your password"
-              autocomplete="new-password"
-              :disabled="loading"
-            />
-          </UFormField>
-
-          <div class="space-y-3 text-gray-600 dark:text-gray-300">
-            <UCheckbox
-              v-model="state.acceptTerms"
-              :disabled="loading"
+            <UFormField
+              label="Full Name"
+              name="fullName"
               required
             >
-              <template #label>
-                <span class="text-sm">
-                  I agree to the
-                  <NuxtLink
-                    to="/legal/terms"
-                    class="text-primary-600 hover:text-primary-500 font-medium dark:text-primary-400 dark:hover:text-primary-300"
-                    target="_blank"
-                  >
-                    Terms of Service
-                  </NuxtLink>
-                  and
-                  <NuxtLink
-                    to="/legal/privacy"
-                    class="text-primary-600 hover:text-primary-500 font-medium dark:text-primary-400 dark:hover:text-primary-300"
-                    target="_blank"
-                  >
-                    Privacy Policy
-                  </NuxtLink>
-                </span>
-              </template>
-            </UCheckbox>
+              <UInput
+                v-model="state.fullName"
+                placeholder="Enter your full name"
+                autocomplete="name"
+                :disabled="loading"
+                class="w-full"
+              />
+            </UFormField>
 
-            <UCheckbox
-              v-model="state.emailNotifications"
-              :disabled="loading"
+            <UFormField
+              label="Email address"
+              name="email"
+              required
             >
-              <template #label>
-                <span class="text-sm">
-                  I would like to receive email updates about new features (optional)
-                </span>
-              </template>
-            </UCheckbox>
-          </div>
+              <UInput
+                v-model="state.email"
+                type="email"
+                placeholder="Enter your email"
+                autocomplete="email"
+                :disabled="loading"
+                class="w-full"
+              />
+            </UFormField>
 
-          <UButton
-            type="submit"
-            :loading="loading"
-            :disabled="loading || !state.acceptTerms"
-            class="w-full"
-            size="lg"
-          >
-            {{ loading ? 'Creating account...' : 'Create account' }}
-          </UButton>
-        </UForm>
+            <UFormField
+              label="Password"
+              name="password"
+              required
+            >
+              <UInput
+                v-model="state.password"
+                type="password"
+                placeholder="Create a password"
+                autocomplete="new-password"
+                :disabled="loading"
+                class="w-full"
+              />
+            </UFormField>
+            <div class="text-xs text-gray-500 -mt-4 mb-2">
+              Password must be at least 8 characters with uppercase, lowercase, number, and special character
+            </div>
 
-        <UAlert
-          v-if="error"
-          icon="i-heroicons-exclamation-triangle"
-          color="red"
-          variant="soft"
-          :title="error"
-          class="mt-4"
-        />
+            <UFormField
+              label="Confirm Password"
+              name="confirmPassword"
+              required
+            >
+              <UInput
+                v-model="state.confirmPassword"
+                type="password"
+                placeholder="Confirm your password"
+                autocomplete="new-password"
+                :disabled="loading"
+                class="w-full"
+              />
+            </UFormField>
 
-        <UAlert
-          v-if="success"
-          icon="i-heroicons-check-circle"
-          color="green"
-          variant="soft"
-          :title="success"
-          :description="successDescription"
-          class="mt-4"
-        />
-      </UCard>
+            <div class="space-y-3 text-gray-600 dark:text-gray-300">
+              <UCheckbox
+                v-model="state.acceptTerms"
+                :disabled="loading"
+                required
+              >
+                <template #label>
+                  <span class="text-sm">
+                    I agree to the
+                    <NuxtLink
+                      to="/legal/terms"
+                      class="text-primary-600 hover:text-primary-500 font-medium dark:text-primary-400 dark:hover:text-primary-300"
+                      target="_blank"
+                    >
+                      Terms of Service
+                    </NuxtLink>
+                    and
+                    <NuxtLink
+                      to="/legal/privacy"
+                      class="text-primary-600 hover:text-primary-500 font-medium dark:text-primary-400 dark:hover:text-primary-300"
+                      target="_blank"
+                    >
+                      Privacy Policy
+                    </NuxtLink>
+                  </span>
+                </template>
+              </UCheckbox>
+
+              <UCheckbox
+                v-model="state.emailNotifications"
+                :disabled="loading"
+              >
+                <template #label>
+                  <span class="text-sm">
+                    I would like to receive email updates about new features (optional)
+                  </span>
+                </template>
+              </UCheckbox>
+            </div>
+
+            <UButton
+              type="submit"
+              :loading="loading"
+              :disabled="loading || !state.acceptTerms"
+              class="w-full"
+              size="lg"
+            >
+              {{ loading ? 'Creating account...' : 'Create account' }}
+            </UButton>
+          </UForm>
+
+          <UAlert
+            v-if="error"
+            icon="i-heroicons-exclamation-triangle"
+            color="red"
+            variant="soft"
+            :title="error"
+            class="mt-4"
+          />
+
+          <UAlert
+            v-if="success"
+            icon="i-heroicons-check-circle"
+            color="green"
+            variant="soft"
+            :title="success"
+            :description="successDescription"
+            class="mt-4"
+          />
+        </UCard>
+      </div>
     </div>
-  </div>
+  </UApp>
 </template>
 
 <script setup lang="ts">
