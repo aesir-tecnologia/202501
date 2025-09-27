@@ -31,20 +31,7 @@ export default defineNuxtConfig({
     '@nuxtjs/supabase',
   ],
   pages: true,
-  css: ['~/assets/css/main.css'],
   devtools: { enabled: true },
-  ui: {
-    colorMode: {
-      preference: 'system',
-      fallback: 'light',
-    },
-  },
-  colorMode: {
-    preference: 'system',
-    fallback: 'light',
-    classSuffix: '',
-    dataValue: 'theme',
-  },
   // Content Security Policy
   app: {
     head: {
@@ -64,6 +51,16 @@ export default defineNuxtConfig({
         },
       ],
     },
+  },
+  css: ['~/assets/css/main.css'],
+  colorMode: {
+    preference: 'system',
+    fallback: 'light',
+    classSuffix: '',
+    dataValue: 'theme',
+  },
+  ui: {
+    colorMode: true,
   },
   runtimeConfig: {
     public: {

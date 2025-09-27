@@ -42,7 +42,6 @@
 </template>
 
 <script setup lang="ts">
-// Page meta
 definePageMeta({
   layout: false,
 })
@@ -52,4 +51,10 @@ useSeoMeta({
   title: 'LifeStint - Focus Tracking Made Simple',
   description: 'Track your focus sessions and boost productivity with LifeStint.',
 })
+
+const runtimeConfig = useRuntimeConfig()
+console.log('runtimeConfig', runtimeConfig)
+
+const appConfig = useAppConfig()
+console.log('appConfig', appConfig)
 </script>

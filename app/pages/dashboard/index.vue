@@ -1,3 +1,23 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+
+const user = useSupabaseUser()
+
+const displayName = computed(() => {
+  return user.value?.user_metadata?.full_name || user.value?.email || 'there'
+})
+
+definePageMeta({
+  middleware: 'auth',
+  title: 'Dashboard',
+})
+
+useSeoMeta({
+  title: 'Dashboard - LifeStint',
+  description: 'Review your focus progress and personalized insights.',
+})
+</script>
+
 <template>
   <div class="min-h-screen bg-gray-50 py-16 px-4 transition-colors duration-200 dark:bg-gray-950">
     <div class="max-w-3xl mx-auto space-y-8 text-gray-900 dark:text-gray-100">
@@ -33,23 +53,3 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { computed } from 'vue'
-
-const user = useSupabaseUser()
-
-const displayName = computed(() => {
-  return user.value?.user_metadata?.full_name || user.value?.email || 'there'
-})
-
-definePageMeta({
-  middleware: 'auth',
-  title: 'Dashboard',
-})
-
-useSeoMeta({
-  title: 'Dashboard - LifeStint',
-  description: 'Review your focus progress and personalized insights.',
-})
-</script>
