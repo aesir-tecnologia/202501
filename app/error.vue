@@ -1,14 +1,27 @@
 <script setup lang="ts">
 import type { NuxtError } from '#app'
+import type { ButtonProps } from '#ui/types'
 
-const _props = defineProps({
+defineProps({
   error: Object as () => NuxtError,
 })
+
+const user = useSupabaseUser()
+
+const clear: Partial<ButtonProps> = {
+  size: 'lg',
+  color: 'primary',
+  variant: 'outline',
+  label: user.value ? 'Back to Dashboard' : 'Back to home',
+}
+
+const redirect = user.value ? '/dashboard' : '/'
 </script>
 
 <template>
-  <div>
-    <h1>{{ error?.statusCode }}</h1>
-    <NuxtLink to="/">Go back home</NuxtLink>
-  </div>
+  <UError
+    :clear="clear"
+    :error="error"
+    :redirect="redirect"
+  />
 </template>
