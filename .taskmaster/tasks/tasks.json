@@ -159,7 +159,7 @@
         "id": 3,
         "title": "User Authentication System",
         "description": "Implement complete authentication flow using Supabase Auth",
-        "details": "Create pages/auth/login.vue and pages/auth/register.vue using @nuxt/ui Form components. Implement email/password authentication with Supabase Auth. Add email verification flow with resend capability. Create password recovery system. Set up authentication middleware for protected routes. Use useSupabaseUser() and useSupabaseClient() composables. Handle authentication state persistence and automatic session refresh.",
+        "details": "Create pages/auth/login.vue and pages/auth/register.vue using @nuxt/ui v4 Form components. Implement email/password authentication with Supabase Auth. Add email verification flow with resend capability. Create password recovery system. Set up authentication middleware for protected routes. Use useSupabaseUser() and useSupabaseClient() composables. Handle authentication state persistence and automatic session refresh.",
         "testStrategy": "Test complete registration flow with email verification, validate login/logout functionality, verify password recovery works, test session persistence across browser refreshes, validate protected route middleware.",
         "priority": "high",
         "dependencies": [
@@ -170,8 +170,8 @@
         "subtasks": [
           {
             "id": 1,
-            "title": "Create Authentication Pages with Nuxt UI Forms",
-            "description": "Create pages/auth/login.vue and pages/auth/register.vue with responsive forms using @nuxt/ui Form components and Zod validation schemas",
+            "title": "Create Authentication Pages with Nuxt UI 4 Forms",
+            "description": "Create pages/auth/login.vue and pages/auth/register.vue with responsive forms using @nuxt/ui v4 Form components and Zod validation schemas",
             "dependencies": [],
             "details": "Build login and registration forms using UForm components with proper validation, error handling, and loading states. Include email and password fields with appropriate input types, validation feedback, and accessibility features. Use UCard for layout and UButton for form submission. Implement proper form state management with reactive validation.",
             "status": "done",
@@ -298,7 +298,7 @@
         "id": 5,
         "title": "Reusable UI Components and Design System",
         "description": "Create core UI components and establish design system",
-        "details": "Create components/ProjectCard.vue with progress indicators using @nuxt/ui Badge and Progress components. Build components/Timer.vue with Web Worker for accuracy. Create components/Modal/ components for project creation/editing. Implement components/AppHeader.vue with user menu. Set up Tailwind CSS custom theme configuration. Create composables/useTimer.ts for timer logic. Implement proper loading states and error boundaries.",
+        "details": "Create components/ProjectCard.vue with progress indicators using @nuxt/ui v4 Badge and Progress components. Build components/Timer.vue with Web Worker for accuracy. Create components/Modal/ components for project creation/editing. Implement components/AppHeader.vue with user menu. Set up Tailwind CSS custom theme configuration. Create composables/useTimer.ts for timer logic. Implement proper loading states and error boundaries.",
         "testStrategy": "Test components render correctly with various prop combinations, validate timer accuracy over extended periods, test modal functionality across different screen sizes, verify accessibility standards compliance.",
         "priority": "medium",
         "dependencies": [
@@ -309,7 +309,7 @@
           {
             "id": 1,
             "title": "Create ProjectCard.vue component with progress indicators",
-            "description": "Build reusable ProjectCard component using @nuxt/ui Badge and Progress components",
+            "description": "Build reusable ProjectCard component using @nuxt/ui v4 Badge and Progress components",
             "dependencies": [],
             "details": "Create components/ProjectCard.vue with props for project data, implement progress indicators using UProgress component, add UBadge for status display, include hover effects and responsive design, support different card sizes and layouts.",
             "status": "pending",
@@ -331,7 +331,7 @@
             "dependencies": [
               "5.1"
             ],
-            "details": "Create components/Modal/ directory with ProjectCreateModal.vue and ProjectEditModal.vue, use UModal from @nuxt/ui, implement form validation with proper error handling, add confirmation dialogs for destructive actions, ensure mobile responsiveness.",
+            "details": "Create components/Modal/ directory with ProjectCreateModal.vue and ProjectEditModal.vue, use UModal from @nuxt/ui v4, implement form validation with proper error handling, add confirmation dialogs for destructive actions, ensure mobile responsiveness.",
             "status": "pending",
             "testStrategy": "Test modal functionality across different screen sizes, validate form submission and error handling, test modal accessibility with keyboard navigation, verify modal backdrop behavior and escape key functionality."
           },
@@ -349,7 +349,7 @@
             "title": "Setup Tailwind CSS custom theme and composables",
             "description": "Configure custom Tailwind theme and create timer composable logic",
             "dependencies": [],
-            "details": "Create tailwind.config.js with custom color palette and typography, extend @nuxt/ui theme configuration, build composables/useTimer.ts with timer state management, implement proper loading states and error boundaries throughout components, add TypeScript interfaces for component props.",
+            "details": "Create tailwind.config.js with custom color palette and typography, extend @nuxt/ui v4 theme configuration, build composables/useTimer.ts with timer state management, implement proper loading states and error boundaries throughout components, add TypeScript interfaces for component props.",
             "status": "pending",
             "testStrategy": "Verify custom theme colors and typography render correctly, test useTimer composable functionality with different timer states, validate TypeScript type checking works properly, test error boundaries handle component failures gracefully."
           }
@@ -359,7 +359,7 @@
         "id": 6,
         "title": "Main Dashboard Layout and Navigation",
         "description": "Build responsive dashboard with project grid and navigation",
-        "details": "Create layouts/default.vue with navigation using @nuxt/ui NavigationMenu. Build pages/index.vue (dashboard) with responsive project grid using CSS Grid. Implement user profile management in app header. Add breadcrumb navigation and page titles. Use Nuxt's built-in loading states and error handling. Create composables/useAuth.ts for authentication state management. Implement proper meta tags and SEO optimization.",
+        "details": "Create layouts/default.vue with navigation using @nuxt/ui v4 NavigationMenu. Build pages/index.vue (dashboard) with responsive project grid using CSS Grid. Implement user profile management in app header. Add breadcrumb navigation and page titles. Use Nuxt's built-in loading states and error handling. Create composables/useAuth.ts for authentication state management. Implement proper meta tags and SEO optimization.",
         "testStrategy": "Test responsive design on mobile, tablet, and desktop viewports, validate navigation works correctly, test user profile management functionality, verify SEO meta tags are correct, test loading states.",
         "priority": "medium",
         "dependencies": [
@@ -370,10 +370,10 @@
         "subtasks": [
           {
             "id": 1,
-            "title": "Create layouts/default.vue with @nuxt/ui NavigationMenu",
+            "title": "Create layouts/default.vue with @nuxt/ui v4 NavigationMenu",
             "description": "Implement the main layout component with responsive navigation structure",
             "dependencies": [],
-            "details": "Create the layouts/default.vue file using @nuxt/ui NavigationMenu component. Include responsive sidebar navigation for mobile/desktop, user profile section in header, and proper semantic HTML structure. Set up navigation links for dashboard, projects, and analytics. Implement responsive breakpoints for mobile, tablet, and desktop viewports.",
+            "details": "Create the layouts/default.vue file using @nuxt/ui v4 NavigationMenu component. Include responsive sidebar navigation for mobile/desktop, user profile section in header, and proper semantic HTML structure. Set up navigation links for dashboard, projects, and analytics. Implement responsive breakpoints for mobile, tablet, and desktop viewports.",
             "status": "pending",
             "testStrategy": "Test navigation responsiveness across all viewport sizes, verify menu items link correctly, test user profile dropdown functionality"
           },
@@ -406,7 +406,7 @@
             "dependencies": [
               "6.2"
             ],
-            "details": "Create breadcrumb navigation component using @nuxt/ui Breadcrumb. Implement dynamic page titles that update based on current route. Add comprehensive SEO meta tags including Open Graph and Twitter Card data. Use Nuxt's built-in head management for proper meta tag handling and social sharing optimization.",
+            "details": "Create breadcrumb navigation component using @nuxt/ui v4 Breadcrumb. Implement dynamic page titles that update based on current route. Add comprehensive SEO meta tags including Open Graph and Twitter Card data. Use Nuxt's built-in head management for proper meta tag handling and social sharing optimization.",
             "status": "pending",
             "testStrategy": "Verify breadcrumbs update correctly on navigation, test page titles in browser tabs, validate meta tags with social media preview tools"
           },
@@ -425,7 +425,7 @@
         "id": 7,
         "title": "Project Management CRUD System",
         "description": "Implement complete project creation, editing, and management",
-        "details": "Create composables/useProjects.ts for project state management using useState(). Implement project creation modal with form validation using @nuxt/ui Form and Zod schemas. Add project editing functionality with optimistic updates. Create project deletion with confirmation dialogs. Implement project activation/deactivation toggle. Add custom stint duration settings per project. Use Supabase real-time subscriptions for live updates across tabs.",
+        "details": "Create composables/useProjects.ts for project state management using useState(). Implement project creation modal with form validation using @nuxt/ui v4 Form and Zod schemas. Add project editing functionality with optimistic updates. Create project deletion with confirmation dialogs. Implement project activation/deactivation toggle. Add custom stint duration settings per project. Use Supabase real-time subscriptions for live updates across tabs.",
         "testStrategy": "Test project CRUD operations with various data inputs, validate form validation works correctly, test optimistic updates and error rollback, verify real-time updates across multiple browser tabs, test project settings persistence.",
         "priority": "medium",
         "dependencies": [
@@ -447,11 +447,11 @@
           {
             "id": 2,
             "title": "Implement project creation modal with form validation",
-            "description": "Build project creation modal using @nuxt/ui Form components and Zod schemas",
+            "description": "Build project creation modal using @nuxt/ui v4 Form components and Zod schemas",
             "dependencies": [
               "7.1"
             ],
-            "details": "Create a modal component for project creation using @nuxt/ui Modal and Form components. Implement Zod schema validation for project fields (name, description, stint duration, etc.). Add form field validation, error handling, and success feedback. Use @nuxt/ui Input, Textarea, and Select components for the form.",
+            "details": "Create a modal component for project creation using @nuxt/ui v4 Modal and Form components. Implement Zod schema validation for project fields (name, description, stint duration, etc.). Add form field validation, error handling, and success feedback. Use @nuxt/ui v4 Input, Textarea, and Select components for the form.",
             "status": "pending",
             "testStrategy": "Test form validation with invalid inputs, verify modal open/close behavior, test successful project creation flow, validate Zod schema enforcement."
           },
@@ -474,7 +474,7 @@
             "dependencies": [
               "7.1"
             ],
-            "details": "Build project deletion functionality with multi-step confirmation dialogs. Handle cascade deletion of related stints and data. Implement soft delete option for data recovery. Add warnings for projects with active stints. Use @nuxt/ui AlertDialog for confirmations.",
+            "details": "Build project deletion functionality with multi-step confirmation dialogs. Handle cascade deletion of related stints and data. Implement soft delete option for data recovery. Add warnings for projects with active stints. Use @nuxt/ui v4 AlertDialog for confirmations.",
             "status": "pending",
             "testStrategy": "Test confirmation dialog flow, verify cascade deletion of related data, test soft delete and recovery, validate prevention of deleting active projects."
           },
@@ -614,7 +614,7 @@
             "dependencies": [
               "9.1"
             ],
-            "details": "Create connection status indicators using @nuxt/ui Badge components to show online/offline/connecting states. Implement offline detection using navigator.onLine and connection events. Queue operations when offline and sync when connection is restored. Add retry logic for failed operations and user notifications for sync status.",
+            "details": "Create connection status indicators using @nuxt/ui v4 Badge components to show online/offline/connecting states. Implement offline detection using navigator.onLine and connection events. Queue operations when offline and sync when connection is restored. Add retry logic for failed operations and user notifications for sync status.",
             "status": "pending",
             "testStrategy": "Test connection status indicators update correctly, verify offline operation queuing works, test automatic sync on reconnection, validate retry logic handles network failures gracefully."
           },
@@ -651,7 +651,7 @@
             "title": "Create Analytics Page Structure and Chart.js Integration",
             "description": "Set up the analytics page with Chart.js integration and implement basic chart rendering infrastructure",
             "dependencies": [],
-            "details": "Create pages/analytics.vue with responsive layout using @nuxt/ui components. Install and configure Chart.js with chartjs-date-adapter for time-based charts. Set up chart containers for daily/weekly/monthly views and project comparison charts. Initialize chart instances with responsive options and proper color scheme matching the @nuxt/ui theme. Create chart loading states and error boundaries.",
+            "details": "Create pages/analytics.vue with responsive layout using @nuxt/ui v4 components. Install and configure Chart.js with chartjs-date-adapter for time-based charts. Set up chart containers for daily/weekly/monthly views and project comparison charts. Initialize chart instances with responsive options and proper color scheme matching the @nuxt/ui v4 theme. Create chart loading states and error boundaries.",
             "status": "pending",
             "testStrategy": "Test chart initialization with empty data, verify responsive behavior on different screen sizes, validate Chart.js library loads correctly, test color scheme integration with UI theme"
           },

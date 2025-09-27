@@ -121,8 +121,9 @@ The target audience consists primarily of independent professionals - freelancer
 
 ### Frontend Architecture
 - **Framework:** Vue.js 3 with Composition API for reactive state management
+- **UI Framework:** Nuxt UI 4 for components, theming, and design system
 - **State Management:** Pinia for centralized application state and real-time updates
-- **Styling:** Tailwind CSS for consistent, responsive design system
+- **Styling:** Tailwind CSS for consistent, responsive design system (configured through Nuxt UI 4)
 - **Charts/Visualization:** Chart.js for analytics dashboards and progress visualization
 - **Real-time Updates:** WebSocket connections for cross-tab synchronization
 

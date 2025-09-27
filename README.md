@@ -40,7 +40,7 @@ bun install
 
 ### Icons
 
-We ship the Lucide icon set locally to avoid CDN fetches and suppress Nuxt UI warnings. The required files live in the `@iconify-json/lucide` dev dependency installed via npm. If you add additional icon collections, install the matching `@iconify-json/<collection>` package so Nuxt can resolve them at build time.
+We ship the Lucide icon set locally to avoid CDN fetches and suppress Nuxt UI 4 warnings. The required files live in the `@iconify-json/lucide` dev dependency installed via npm. If you add additional icon collections, install the matching `@iconify-json/<collection>` package so Nuxt UI 4 can resolve them at build time.
 
 ### Supabase (Local by Default)
 
@@ -48,7 +48,7 @@ Running `npm run dev` automatically points the app at the Supabase CLI stack (`h
 
 ### Theming Guidelines
 
-- Tailwind is configured with `darkMode: 'class'`; Nuxt UI’s color mode module toggles the `dark` class on `<html>`. Use `dark:` variants (e.g. `dark:bg-gray-900`) alongside light defaults for any new surfaces.
+- Tailwind is configured with `darkMode: 'class'`; Nuxt UI 4's color mode module toggles the `dark` class on `<html>`. Use `dark:` variants (e.g. `dark:bg-gray-900`) alongside light defaults for any new surfaces.
 - Prefer translucent cards (`bg-white/80` + `backdrop-blur`) with `dark:bg-gray-900/70` and `dark:border-gray-800` to keep parity with existing pages.
 - Set copy colors with paired tokens (`text-gray-600 dark:text-gray-300`, `text-primary-600 dark:text-primary-400`) so links remain accessible in both schemes.
 - When building new pages, include a quick dark-mode review (toggle the `dark` class in DevTools or via Nuxt color-mode) before shipping.
