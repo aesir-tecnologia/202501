@@ -23,13 +23,13 @@
     "@supabase/supabase-js": "^2.57.4",
     "eslint": "^9.36.0",
     "nuxt": "^4.1.2",
-    "task-master-ai": "^0.27.0",
     "typescript": "^5.9.2",
     "vue": "^3.5.21",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.68",
+    "task-master-ai": "^0.27.3",
     "vitest": "^2.1.8"
   }
 }
