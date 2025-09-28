@@ -8,12 +8,12 @@ useSeoMeta({
   description: 'Completing your authentication to LifeStint.',
 })
 
+const appConfig = useAppConfig()
+const supabase = useSupabaseClient()
+
 const loading = ref(true)
 const error = ref('')
 const success = ref(false)
-
-const supabase = useSupabaseClient()
-const user = useSupabaseUser()
 
 async function handleAuthCallback() {
   try {
@@ -27,20 +27,16 @@ async function handleAuthCallback() {
     // Check if we have a valid session
     if (data.session && data.session.user) {
       success.value = true
-
-      // Redirect after a short delay to show success message
-      // setTimeout(() => {
-      //   navigateTo('/dashboard', { replace: true })
-      // }, 2000)
-      alert('Redirect from success')
+      navigateTo(appConfig.auth.redirectUrl, { replace: true })
     }
     else {
-      // Check for URL hash parameters (email confirmation)
+      // Check for URL query parameters (email confirmation)
       const route = useRoute()
+      const callbackCode = route.query.code
 
       // Handle email confirmation or password reset
-      if (route.hash) {
-        const hashParams = new URLSearchParams(route.hash.substring(1))
+      if (callbackCode) {
+        const hashParams = new URLSearchParams(callbackCode.substring(1))
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
         const type = hashParams.get('type')
@@ -57,10 +53,7 @@ async function handleAuthCallback() {
 
           if (type === 'signup') {
             success.value = true
-            // setTimeout(() => {
-            //   navigateTo('/dashboard', { replace: true })
-            // }, 2000)
-            alert('Redirect from token')
+            navigateTo(appConfig.auth.redirectUrl, { replace: true })
           }
           else if (type === 'recovery') {
             // Redirect to password reset page
@@ -69,10 +62,7 @@ async function handleAuthCallback() {
           }
           else {
             success.value = true
-            // setTimeout(() => {
-            //   navigateTo('/dashboard', { replace: true })
-            // }, 2000)
-            alert('Redirect from type')
+            navigateTo(appConfig.auth.redirectUrl, { replace: true })
           }
         }
         else {
@@ -111,17 +101,6 @@ async function handleAuthCallback() {
 // Handle the callback when component mounts
 onMounted(() => {
   handleAuthCallback()
-})
-
-// Watch for user changes (in case of real-time updates)
-watch(user, (newUser) => {
-  if (newUser && !success.value && !error.value) {
-    success.value = true
-    // setTimeout(() => {
-    //   navigateTo('/dashboard', { replace: true })
-    // }, 2000)
-    alert('Redirect from watch')
-  }
 })
 </script>
 

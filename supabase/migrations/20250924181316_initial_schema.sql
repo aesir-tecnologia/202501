@@ -1,7 +1,8 @@
 -- Database Schema for Time Tracking Application
 -- Initial schema migration
 
--- Enable UUID extension if not already enabled
+-- Enable required extensions if not already enabled
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create user_profiles table
@@ -15,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
 
 -- Create projects table
 CREATE TABLE IF NOT EXISTS public.projects (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
   expected_daily_stints INTEGER DEFAULT 2,
@@ -27,7 +28,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
 
 -- Create stints table
 CREATE TABLE IF NOT EXISTS public.stints (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE NOT NULL,
   user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE NOT NULL,
   started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
