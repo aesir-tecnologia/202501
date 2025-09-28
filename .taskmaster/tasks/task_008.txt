@@ -1,0 +1,43 @@
+# Task ID: 8
+# Title: Stint Tracking and Timer System
+# Status: pending
+# Dependencies: 4, 5, 7
+# Priority: high
+# Description: Core stint tracking with accurate timing and state management
+# Details:
+Implement composables/useStints.ts with Web Worker for background timing accuracy. Create single active stint enforcement using global state. Add start/stop stint functionality with automatic project switching. Implement 5-minute completion warnings using browser notifications. Create stint completion flow with optional notes. Add pause/resume functionality for interrupted sessions. Use Supabase constraints and RPC validation for stint duration accuracy. Implement cross-device stint synchronization using Supabase real-time.
+
+# Test Strategy:
+Test timer accuracy over 2+ hour sessions, validate single active stint enforcement across tabs, test completion warnings and notifications, verify stint data persistence during network interruptions, test cross-device synchronization.
+
+# Subtasks:
+## 1. Create Web Worker for Background Timer Processing [pending]
+### Dependencies: None
+### Description: Implement timer-worker.js Web Worker to handle accurate timing in background tabs and provide timer state management
+### Details:
+Create public/workers/timer-worker.js that handles setInterval timing independent of main thread throttling. Implement message-based communication for start, stop, pause, resume, and time updates. Add automatic 5-minute warning notifications and completion alerts. Worker should maintain timer state and send periodic updates to main thread for UI synchronization.
+
+## 2. Implement useStints Composable with Global State [pending]
+### Dependencies: 8.1
+### Description: Create composables/useStints.ts for centralized stint state management and single active stint enforcement
+### Details:
+Create Nuxt composable using useState() for global stint state across tabs and components. Implement single active stint enforcement logic that automatically stops previous stint when starting new one. Add reactive state for current active stint, timer status, and elapsed time. Integrate with Web Worker for timer updates and handle cross-component state synchronization.
+
+## 3. Build Start/Stop Stint Functionality with Project Switching [pending]
+### Dependencies: 8.2
+### Description: Implement stint start/stop operations with automatic project context switching and timer management
+### Details:
+Add startStint() and stopStint() methods to useStints composable. Implement automatic project switching that stops current stint and starts new one when switching projects. Add stint data persistence with start/end timestamps, duration tracking, and completion type recording. Integrate with timer worker for accurate duration measurement and provide real-time UI updates.
+
+## 4. Implement Browser Notifications and Completion Warnings [pending]
+### Dependencies: 8.1, 8.2
+### Description: Add 5-minute completion warnings and stint completion notifications using browser Notification API
+### Details:
+Request notification permissions on first stint start. Implement 5-minute warning system that triggers from Web Worker and displays browser notification. Add stint completion notifications with optional extension prompts. Create notification click handlers that focus the app window. Implement graceful fallback for browsers without notification support using toast notifications.
+
+## 5. Create Pause/Resume and Cross-Device Synchronization [pending]
+### Dependencies: 8.3
+### Description: Implement pause/resume functionality and cross-device stint synchronization using Supabase real-time
+### Details:
+Add pauseStint() and resumeStint() methods with pause timestamp tracking. Leverage Supabase validation for stint duration accuracy and conflict resolution. Create Supabase real-time subscriptions for cross-device synchronization of stint state. Add conflict resolution for concurrent stint operations across devices. Implement optimistic updates with rollback on sync conflicts.
+

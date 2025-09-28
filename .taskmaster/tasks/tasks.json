@@ -251,14 +251,14 @@
           "2",
           "3"
         ],
-        "status": "done",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
             "title": "Create Supabase data access modules",
             "description": "Establish typed helper modules for interacting with Supabase tables and RPC endpoints from the client.",
             "dependencies": [],
-            "details": "Build lib/supabase/projects.ts and lib/supabase/stints.ts modules that wrap the Supabase JS client with the existing Database types. Expose CRUD helpers (list, create, update, delete) that automatically scope queries by auth.uid() and include standard error handling via utils/supabase.ts. Document how each helper should be consumed by composables and components.",
+            "details": "Build lib/supabase/projects.ts and lib/supabase/stints.ts modules that wrap the Supabase JS client with the existing Database types. Expose CRUD helpers (list, create, update, delete) that automatically scope queries by auth.uid() and include standard error handling via utils/supabase.ts. Document how each helper should be consumed by composables and components.\n<info added on 2025-09-28T05:11:01.890Z>\nLooking at the project structure and existing codebase to understand the current implementation and inform the enhanced approach...\n</info added on 2025-09-28T05:11:01.890Z>",
             "status": "pending",
             "testStrategy": "Write unit tests that mock the Supabase client to confirm helpers call the expected PostgREST endpoints. Verify type inference works in IDE and that helpers reject missing auth state.",
             "parentId": "undefined"
@@ -296,7 +296,7 @@
               "4.1",
               "4.2"
             ],
-            "details": "Add startStint, stopStint, pauseStint, and resumeStint helpers that coordinate with Supabase RPC or transactional SQL functions to enforce the single-active constraint. Update helpers to derive authoritative timing from Supabase (planned vs actual duration) and to record completion types in line with the PRD.",
+            "details": "Add startStint, stopStint, pauseStint, and resumeStint helpers that coordinate with Supabase RPC or transactional SQL functions to enforce the single-active constraint. Update helpers to derive authoritative timing from Supabase (planned vs actual duration) and to record completion types in line with the PRD.\n<info added on 2025-09-28T05:11:59.850Z>\nI'll analyze the codebase to understand the current implementation and provide specific recommendations based on the project structure.\n</info added on 2025-09-28T05:11:59.850Z>",
             "status": "pending",
             "testStrategy": "Validate helpers prevent overlapping stints by attempting concurrent starts. Run long-lived timer simulations to ensure actual_duration stays accurate when synced with Supabase.",
             "parentId": "undefined"
@@ -313,6 +313,19 @@
             "status": "pending",
             "testStrategy": "Simulate network outages to ensure retries back off correctly and user feedback appears. Profile caching behaviour to confirm repeated navigations avoid redundant Supabase calls.",
             "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Implement offline-first capabilities with sync",
+            "description": "Add local storage queuing for offline mutations and conflict resolution",
+            "details": "Create composables/useOfflineSupport.ts with local storage mutation queue, auto-sync when connection restored, and conflict resolution for offline changes. Implement connection state monitoring, offline indicator UI, and graceful handling of network failures during active stints. Include retry mechanisms and data consistency checks for synchronized operations.",
+            "status": "pending",
+            "dependencies": [
+              "4.3",
+              "4.4",
+              "4.5"
+            ],
+            "parentTaskId": 4
           }
         ]
       },
@@ -767,7 +780,7 @@
       ],
       "created": "2025-09-28T04:26:02.283Z",
       "description": "Tasks for master context",
-      "updated": "2025-09-28T04:26:02.283Z"
+      "updated": "2025-09-28T05:13:56.980Z"
     }
   }
 }

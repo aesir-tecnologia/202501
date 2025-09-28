@@ -1,0 +1,43 @@
+# Task ID: 6
+# Title: Main Dashboard Layout and Navigation
+# Status: pending
+# Dependencies: 3, 5
+# Priority: medium
+# Description: Build responsive dashboard with project grid and navigation
+# Details:
+Create layouts/default.vue with navigation using @nuxt/ui v4 NavigationMenu. Build pages/index.vue (dashboard) with responsive project grid using CSS Grid. Implement user profile management in app header. Add breadcrumb navigation and page titles. Use Nuxt's built-in loading states and error handling. Create composables/useAuth.ts for authentication state management. Implement proper meta tags and SEO optimization.
+
+# Test Strategy:
+Test responsive design on mobile, tablet, and desktop viewports, validate navigation works correctly, test user profile management functionality, verify SEO meta tags are correct, test loading states.
+
+# Subtasks:
+## 1. Create layouts/default.vue with @nuxt/ui v4 NavigationMenu [pending]
+### Dependencies: None
+### Description: Implement the main layout component with responsive navigation structure
+### Details:
+Create the layouts/default.vue file using @nuxt/ui v4 NavigationMenu component. Include responsive sidebar navigation for mobile/desktop, user profile section in header, and proper semantic HTML structure. Set up navigation links for dashboard, projects, and analytics. Implement responsive breakpoints for mobile, tablet, and desktop viewports.
+
+## 2. Build pages/index.vue dashboard with responsive project grid [pending]
+### Dependencies: 6.1
+### Description: Create the main dashboard page with CSS Grid layout for project cards
+### Details:
+Implement pages/index.vue as the dashboard homepage. Use CSS Grid for responsive project card layout that adapts to different screen sizes. Create project card components showing progress badges, start buttons, and real-time status updates. Include proper loading states and empty state handling when no projects exist.
+
+## 3. Implement user profile management in app header [pending]
+### Dependencies: 6.1
+### Description: Add user profile dropdown and management functionality to the header
+### Details:
+Create user profile dropdown in the app header with avatar, user name, and menu options. Include profile settings, preferences, and logout functionality. Integrate with authentication state from composables/useAuth.ts. Add proper accessibility attributes and keyboard navigation support.
+
+## 4. Add breadcrumb navigation and page titles with SEO optimization [pending]
+### Dependencies: 6.2
+### Description: Implement breadcrumb navigation and dynamic page titles with meta tags
+### Details:
+Create breadcrumb navigation component using @nuxt/ui v4 Breadcrumb. Implement dynamic page titles that update based on current route. Add comprehensive SEO meta tags including Open Graph and Twitter Card data. Use Nuxt's built-in head management for proper meta tag handling and social sharing optimization.
+
+## 5. Create composables/useAuth.ts for authentication state management [pending]
+### Dependencies: None
+### Description: Implement authentication composable with Nuxt's useState for global state
+### Details:
+Create composables/useAuth.ts using Nuxt's useState() for reactive authentication state management. Include user profile data, authentication status, login/logout methods, and session persistence. Integrate with Supabase authentication and provide reactive updates across all components. Include proper TypeScript types and error handling.
+
