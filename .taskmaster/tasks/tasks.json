@@ -18,7 +18,8 @@
             "dependencies": [],
             "details": "Create a .env file based on .env.example and add SUPABASE_URL and SUPABASE_ANON_KEY environment variables. These will be used by the Supabase client for authentication and database connection. Values should be obtained from Supabase dashboard.",
             "status": "done",
-            "testStrategy": "Verify environment variables are loaded correctly by checking process.env values in development mode"
+            "testStrategy": "Verify environment variables are loaded correctly by checking process.env values in development mode",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -29,7 +30,8 @@
             ],
             "details": "Install @nuxtjs/supabase module via npm/yarn. Add module to the modules array in nuxt.config.ts. Configure runtimeConfig to expose Supabase environment variables to the client side safely. Set up supabase configuration options for auth redirects and cookies.",
             "status": "done",
-            "testStrategy": "Verify module is properly loaded by checking Nuxt dev server startup logs and runtime config availability"
+            "testStrategy": "Verify module is properly loaded by checking Nuxt dev server startup logs and runtime config availability",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -40,7 +42,8 @@
             ],
             "details": "Create plugins/supabase.client.ts file that initializes the Supabase client using useSupabaseClient() composable from @nuxtjs/supabase. Configure client-side only execution with proper error handling and type safety. Ensure client is available globally across the application.",
             "status": "done",
-            "testStrategy": "Test Supabase client connection by making a simple query to verify database connectivity"
+            "testStrategy": "Test Supabase client connection by making a simple query to verify database connectivity",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -51,7 +54,8 @@
             ],
             "details": "Install Supabase CLI if not available. Run 'supabase gen types typescript --project-id=PROJECT_ID > types/supabase.ts' to generate TypeScript interfaces for all database tables. Create types directory structure and configure proper imports for type safety across the application.\n<info added on 2025-09-24T15:44:29.880Z>\nI'll analyze the codebase first to understand the current implementation and provide a comprehensive update to the subtask details.Based on my codebase analysis, I can see that the current implementation provides a solid foundation for Supabase TypeScript integration. Here's the new text that should be appended to the subtask details:\n\nCOMPLETED: Created placeholder Database interface in types/supabase.ts with comprehensive type helpers (Tables, TablesInsert, TablesUpdate, Enums). Added 'supabase:types' npm script in package.json that uses --local flag for Supabase CLI type generation. The file includes example table structure with Row, Insert, Update, and Relationships interfaces. Type helpers provide strongly-typed access to database operations throughout the application. Integration ready for actual table definitions once Supabase project database schema is established in Task 2.\n</info added on 2025-09-24T15:44:29.880Z>",
             "status": "done",
-            "testStrategy": "Verify TypeScript compilation succeeds and generated types are properly imported in components"
+            "testStrategy": "Verify TypeScript compilation succeeds and generated types are properly imported in components",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -63,7 +67,8 @@
             ],
             "details": "Create utils/supabase.ts with common database operations helpers, error handling utilities, and type-safe query builders. Configure CORS settings in nuxt.config.ts for Supabase domain. Set up security headers for CSP and CSRF protection. Add helper functions for common auth operations and database queries.\n<info added on 2025-09-24T15:48:44.624Z>\nLooking at the subtask context and user request, I'll first analyze the codebase to understand the current implementation and then generate an appropriate update.COMPLETION CONFIRMED: All utilities successfully implemented and tested:\n\nUTILITIES IMPLEMENTATION:\n- Comprehensive utils/supabase.ts created with TypedSupabaseClient wrapper using Database types from types/supabase.ts\n- SupabaseApiError class and wrapSupabaseResponse utility for consistent error handling across all operations\n- Authentication helpers: signInWithEmail, signUpWithEmail, signOut, resetPassword with proper error wrapping\n- Database utilities: safeQuery wrapper, paginatedQuery with sorting/pagination support\n- Real-time subscription helper with configurable event filtering and table monitoring\n- File management utilities: uploadFile and getPublicUrl with comprehensive options and error handling\n- User utilities: isAuthenticated and getUserRole for authentication state and role checking\n\nSECURITY CONFIGURATION IMPLEMENTED:\n- Enhanced nuxt.config.ts with comprehensive security headers via Nitro route rules including X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, and Referrer-Policy\n- Content Security Policy configured to allow necessary Supabase domains (*.supabase.co and wss://*.supabase.co) for connect-src while maintaining strict security posture\n- Permissions-Policy implemented to restrict browser features (camera, microphone, geolocation)\n- Proper CORS configuration allowing Supabase WebSocket and HTTP connections through CSP connect-src directive\n\nBUILD VALIDATION SUCCESSFUL:\n- npm run build completes without TypeScript errors, confirming all type integrations are correct\n- All utilities properly integrate with Database interface from types/supabase.ts\n- Security headers and CSP configuration validated through successful build process\n- No runtime errors detected, confirming Supabase client configuration compatibility\n</info added on 2025-09-24T15:48:44.624Z>",
             "status": "done",
-            "testStrategy": "Test helper functions work correctly, validate security headers are present in network requests, ensure CORS allows Supabase domain access"
+            "testStrategy": "Test helper functions work correctly, validate security headers are present in network requests, ensure CORS allows Supabase domain access",
+            "parentId": "undefined"
           }
         ]
       },
@@ -75,7 +80,7 @@
         "testStrategy": "Test RLS policies prevent cross-user data access, verify foreign key constraints work, validate indexes improve query performance, test all CRUD operations respect security policies.",
         "priority": "high",
         "dependencies": [
-          1
+          "1"
         ],
         "status": "done",
         "subtasks": [
@@ -86,7 +91,8 @@
             "dependencies": [],
             "details": "Create users table with id (uuid primary key), email (unique text), created_at, updated_at, and auth integration fields. Create projects table with id (uuid primary key), user_id (foreign key), name (text), expected_daily_stints (integer, default 2), custom_stint_duration (integer nullable), is_active (boolean default true), created_at, updated_at. Create stints table with id (uuid primary key), project_id (foreign key), user_id (foreign key), started_at (timestamp), ended_at (timestamp nullable), duration_minutes (integer), notes (text nullable), is_completed (boolean default false), created_at, updated_at. Use UUID primary keys for security and set up proper foreign key constraints between tables.",
             "status": "done",
-            "testStrategy": "Verify tables are created with correct column types and constraints, test foreign key relationships work correctly, validate UUID generation for primary keys"
+            "testStrategy": "Verify tables are created with correct column types and constraints, test foreign key relationships work correctly, validate UUID generation for primary keys",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -97,7 +103,8 @@
             ],
             "details": "Enable RLS on all three tables (users, projects, stints). Create policies for users table: users can only read/update their own profile based on auth.uid(). Create policies for projects table: users can only CRUD their own projects where user_id = auth.uid(). Create policies for stints table: users can only CRUD stints for their own projects through a join with projects table. Test that users cannot access other users' data through any query method. Add policies for INSERT, SELECT, UPDATE, DELETE operations on each table.",
             "status": "done",
-            "testStrategy": "Test cross-user data access prevention by attempting to query other users' data, verify all CRUD operations work for authenticated users, validate policy enforcement at database level"
+            "testStrategy": "Test cross-user data access prevention by attempting to query other users' data, verify all CRUD operations work for authenticated users, validate policy enforcement at database level",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -108,7 +115,8 @@
             ],
             "details": "Create index on users.email for authentication lookups. Create index on projects.user_id for user-specific project queries. Create composite index on (projects.user_id, projects.is_active) for active project filtering. Create index on stints.project_id for stint queries by project. Create composite index on (stints.user_id, stints.started_at) for user timeline queries. Create index on stints.started_at for date-based filtering and ordering. Consider partial indexes for active stints (where ended_at IS NULL) to optimize real-time queries.",
             "status": "done",
-            "testStrategy": "Run EXPLAIN ANALYZE on common queries to verify index usage, test query performance with sample data, measure query execution time improvements"
+            "testStrategy": "Run EXPLAIN ANALYZE on common queries to verify index usage, test query performance with sample data, measure query execution time improvements",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -119,7 +127,8 @@
             ],
             "details": "Create a reusable trigger function update_updated_at_column() that sets NEW.updated_at = NOW() when any row is updated. Apply this trigger to all three tables (users, projects, stints) so that updated_at is automatically maintained without requiring application-level logic. Test that the triggers fire correctly on UPDATE operations but not on INSERT operations. Ensure triggers work with RLS policies enabled.",
             "status": "done",
-            "testStrategy": "Test that updated_at timestamps are automatically set when records are modified, verify triggers don't interfere with INSERT operations, validate triggers work with RLS enabled"
+            "testStrategy": "Test that updated_at timestamps are automatically set when records are modified, verify triggers don't interfere with INSERT operations, validate triggers work with RLS enabled",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -133,7 +142,8 @@
             ],
             "details": "Use Supabase CLI to generate TypeScript types: 'supabase gen types typescript --project-id=PROJECT_ID > types/database.ts'. Create types directory if it doesn't exist. Generate complete type definitions for all tables, views, and functions. Set up proper imports and exports for use throughout the Nuxt application. Create utility types for common operations like InsertPayload, UpdatePayload, and SelectResult for each table. Ensure types include proper nullable field handling and foreign key relationships.",
             "status": "done",
-            "testStrategy": "Verify generated types match database schema, test type safety in IDE with sample queries, validate that nullable fields are properly typed"
+            "testStrategy": "Verify generated types match database schema, test type safety in IDE with sample queries, validate that nullable fields are properly typed",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -142,7 +152,8 @@
             "details": "",
             "status": "done",
             "dependencies": [],
-            "parentTaskId": 2
+            "parentTaskId": 2,
+            "parentId": "undefined"
           },
           {
             "id": 7,
@@ -151,7 +162,8 @@
             "details": "",
             "status": "done",
             "dependencies": [],
-            "parentTaskId": 2
+            "parentTaskId": 2,
+            "parentId": "undefined"
           }
         ]
       },
@@ -163,8 +175,8 @@
         "testStrategy": "Test complete registration flow with email verification, validate login/logout functionality, verify password recovery works, test session persistence across browser refreshes, validate protected route middleware.",
         "priority": "high",
         "dependencies": [
-          1,
-          2
+          "1",
+          "2"
         ],
         "status": "done",
         "subtasks": [
@@ -175,7 +187,8 @@
             "dependencies": [],
             "details": "Build login and registration forms using UForm components with proper validation, error handling, and loading states. Include email and password fields with appropriate input types, validation feedback, and accessibility features. Use UCard for layout and UButton for form submission. Implement proper form state management with reactive validation.",
             "status": "done",
-            "testStrategy": "Test form validation with invalid inputs, verify form submission behavior, test responsive design across devices, validate accessibility with screen readers"
+            "testStrategy": "Test form validation with invalid inputs, verify form submission behavior, test responsive design across devices, validate accessibility with screen readers",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -186,7 +199,8 @@
             ],
             "details": "Add @nuxtjs/supabase to nuxt.config.ts modules. Configure environment variables for SUPABASE_URL and SUPABASE_ANON_KEY. Implement authentication functions using useSupabaseClient() composable for sign up, sign in, and sign out operations. Handle authentication errors and provide user feedback. Set up proper TypeScript types for auth responses.",
             "status": "done",
-            "testStrategy": "Test successful and failed authentication attempts, verify error messages display correctly, test sign out functionality, validate session management"
+            "testStrategy": "Test successful and failed authentication attempts, verify error messages display correctly, test sign out functionality, validate session management",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -197,7 +211,8 @@
             ],
             "details": "Configure email confirmation in Supabase Auth settings. Create email verification page to handle confirmation links. Add resend verification email functionality with rate limiting. Implement verification status checks and appropriate user messaging. Handle expired or invalid verification tokens gracefully.",
             "status": "done",
-            "testStrategy": "Test email verification flow end-to-end, verify resend functionality with rate limiting, test handling of expired tokens, validate email template rendering"
+            "testStrategy": "Test email verification flow end-to-end, verify resend functionality with rate limiting, test handling of expired tokens, validate email template rendering",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -208,7 +223,8 @@
             ],
             "details": "Create pages/auth/forgot-password.vue for password reset requests. Implement pages/auth/reset-password.vue for password updates. Use Supabase Auth password recovery methods with proper error handling. Add form validation for password strength requirements. Implement secure token verification and expiration handling.",
             "status": "done",
-            "testStrategy": "Test password reset request flow, verify reset token validation, test new password setting with various strength requirements, validate security against common attacks"
+            "testStrategy": "Test password reset request flow, verify reset token validation, test new password setting with various strength requirements, validate security against common attacks",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -219,7 +235,8 @@
             ],
             "details": "Create middleware/auth.ts for protecting authenticated routes. Implement useSupabaseUser() composable integration for reactive user state. Set up automatic session refresh and persistence. Create navigation guards for authentication-required pages. Handle authentication state changes and route redirections appropriately.",
             "status": "done",
-            "testStrategy": "Test protected route access with authenticated and unauthenticated users, verify session persistence across browser refreshes, test automatic session refresh, validate proper redirections"
+            "testStrategy": "Test protected route access with authenticated and unauthenticated users, verify session persistence across browser refreshes, test automatic session refresh, validate proper redirections",
+            "parentId": "undefined"
           }
         ]
       },
@@ -231,10 +248,10 @@
         "testStrategy": "Exercise Supabase client helpers against a seeded project to verify CRUD, optimistic updates, and error cases. Run integration tests in the browser to confirm RLS prevents cross-user access and validation rejects invalid payloads. Simulate network failures to ensure retry and rollback behaviour works without a custom server.",
         "priority": "high",
         "dependencies": [
-          2,
-          3
+          "2",
+          "3"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -243,7 +260,8 @@
             "dependencies": [],
             "details": "Build lib/supabase/projects.ts and lib/supabase/stints.ts modules that wrap the Supabase JS client with the existing Database types. Expose CRUD helpers (list, create, update, delete) that automatically scope queries by auth.uid() and include standard error handling via utils/supabase.ts. Document how each helper should be consumed by composables and components.",
             "status": "pending",
-            "testStrategy": "Write unit tests that mock the Supabase client to confirm helpers call the expected PostgREST endpoints. Verify type inference works in IDE and that helpers reject missing auth state."
+            "testStrategy": "Write unit tests that mock the Supabase client to confirm helpers call the expected PostgREST endpoints. Verify type inference works in IDE and that helpers reject missing auth state.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -254,7 +272,8 @@
             ],
             "details": "Add schemas/projects.ts and schemas/stints.ts using Zod to validate create/update payloads before sending them to Supabase. Share schemas with form components and data helpers so validation logic stays consistent. Include refinement rules for stint duration limits, single-active requirements, and note length constraints.",
             "status": "pending",
-            "testStrategy": "Test schemas with valid/invalid payloads, ensuring errors surface correctly in forms. Add regression tests to guarantee constraints match the database (e.g., max stint duration, project name requirements)."
+            "testStrategy": "Test schemas with valid/invalid payloads, ensuring errors surface correctly in forms. Add regression tests to guarantee constraints match the database (e.g., max stint duration, project name requirements).",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -266,7 +285,8 @@
             ],
             "details": "Extend lib/supabase/projects.ts with optimistic mutation helpers that update local state immediately and roll back on failure. Ensure helpers respect RLS, pass validation results back to callers, and support multi-tab updates via existing Supabase realtime integrations.",
             "status": "pending",
-            "testStrategy": "Test optimistic flows by simulating failures and confirming UI rolls back cleanly. Verify project CRUD works across multiple browser tabs pointing at the same account."
+            "testStrategy": "Test optimistic flows by simulating failures and confirming UI rolls back cleanly. Verify project CRUD works across multiple browser tabs pointing at the same account.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -278,7 +298,8 @@
             ],
             "details": "Add startStint, stopStint, pauseStint, and resumeStint helpers that coordinate with Supabase RPC or transactional SQL functions to enforce the single-active constraint. Update helpers to derive authoritative timing from Supabase (planned vs actual duration) and to record completion types in line with the PRD.",
             "status": "pending",
-            "testStrategy": "Validate helpers prevent overlapping stints by attempting concurrent starts. Run long-lived timer simulations to ensure actual_duration stays accurate when synced with Supabase."
+            "testStrategy": "Validate helpers prevent overlapping stints by attempting concurrent starts. Run long-lived timer simulations to ensure actual_duration stays accurate when synced with Supabase.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -290,7 +311,8 @@
             ],
             "details": "Integrate Nuxt query caching (e.g., useAsyncData or Vue Query) around Supabase calls to coalesce requests and provide stale-while-revalidate behaviour. Implement retry logic for transient Supabase errors and emit structured error objects for UI consumption. Create toast/notification patterns for failures so users understand when Supabase rejects an operation.",
             "status": "pending",
-            "testStrategy": "Simulate network outages to ensure retries back off correctly and user feedback appears. Profile caching behaviour to confirm repeated navigations avoid redundant Supabase calls."
+            "testStrategy": "Simulate network outages to ensure retries back off correctly and user feedback appears. Profile caching behaviour to confirm repeated navigations avoid redundant Supabase calls.",
+            "parentId": "undefined"
           }
         ]
       },
@@ -302,7 +324,7 @@
         "testStrategy": "Test components render correctly with various prop combinations, validate timer accuracy over extended periods, test modal functionality across different screen sizes, verify accessibility standards compliance.",
         "priority": "medium",
         "dependencies": [
-          1
+          "1"
         ],
         "status": "pending",
         "subtasks": [
@@ -313,7 +335,8 @@
             "dependencies": [],
             "details": "Create components/ProjectCard.vue with props for project data, implement progress indicators using UProgress component, add UBadge for status display, include hover effects and responsive design, support different card sizes and layouts.",
             "status": "pending",
-            "testStrategy": "Test component renders with various prop combinations, validate progress indicators display correctly, test responsive behavior on different screen sizes, verify accessibility standards with screen readers."
+            "testStrategy": "Test component renders with various prop combinations, validate progress indicators display correctly, test responsive behavior on different screen sizes, verify accessibility standards with screen readers.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -322,7 +345,8 @@
             "dependencies": [],
             "details": "Build components/Timer.vue with play/pause/stop functionality, integrate Web Worker for background timing to maintain accuracy, create timer display with hours:minutes:seconds format, add sound notifications and visual indicators for timer states.",
             "status": "pending",
-            "testStrategy": "Test timer accuracy over extended periods, validate Web Worker performance doesn't impact main thread, test timer state persistence across page navigations, verify sound notifications work correctly."
+            "testStrategy": "Test timer accuracy over extended periods, validate Web Worker performance doesn't impact main thread, test timer state persistence across page navigations, verify sound notifications work correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -333,7 +357,8 @@
             ],
             "details": "Create components/Modal/ directory with ProjectCreateModal.vue and ProjectEditModal.vue, use UModal from @nuxt/ui v4, implement form validation with proper error handling, add confirmation dialogs for destructive actions, ensure mobile responsiveness.",
             "status": "pending",
-            "testStrategy": "Test modal functionality across different screen sizes, validate form submission and error handling, test modal accessibility with keyboard navigation, verify modal backdrop behavior and escape key functionality."
+            "testStrategy": "Test modal functionality across different screen sizes, validate form submission and error handling, test modal accessibility with keyboard navigation, verify modal backdrop behavior and escape key functionality.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -342,7 +367,8 @@
             "dependencies": [],
             "details": "Build components/AppHeader.vue with responsive navigation using UDropdownMenu, implement user avatar and account menu, add theme toggle functionality, include search functionality if needed, ensure sticky header behavior.",
             "status": "pending",
-            "testStrategy": "Test header responsiveness on mobile and desktop, validate user menu functionality, test theme toggle works correctly, verify header accessibility and keyboard navigation support."
+            "testStrategy": "Test header responsiveness on mobile and desktop, validate user menu functionality, test theme toggle works correctly, verify header accessibility and keyboard navigation support.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -351,7 +377,8 @@
             "dependencies": [],
             "details": "Create tailwind.config.js with custom color palette and typography, extend @nuxt/ui v4 theme configuration, build composables/useTimer.ts with timer state management, implement proper loading states and error boundaries throughout components, add TypeScript interfaces for component props.",
             "status": "pending",
-            "testStrategy": "Verify custom theme colors and typography render correctly, test useTimer composable functionality with different timer states, validate TypeScript type checking works properly, test error boundaries handle component failures gracefully."
+            "testStrategy": "Verify custom theme colors and typography render correctly, test useTimer composable functionality with different timer states, validate TypeScript type checking works properly, test error boundaries handle component failures gracefully.",
+            "parentId": "undefined"
           }
         ]
       },
@@ -363,8 +390,8 @@
         "testStrategy": "Test responsive design on mobile, tablet, and desktop viewports, validate navigation works correctly, test user profile management functionality, verify SEO meta tags are correct, test loading states.",
         "priority": "medium",
         "dependencies": [
-          3,
-          5
+          "3",
+          "5"
         ],
         "status": "pending",
         "subtasks": [
@@ -375,7 +402,8 @@
             "dependencies": [],
             "details": "Create the layouts/default.vue file using @nuxt/ui v4 NavigationMenu component. Include responsive sidebar navigation for mobile/desktop, user profile section in header, and proper semantic HTML structure. Set up navigation links for dashboard, projects, and analytics. Implement responsive breakpoints for mobile, tablet, and desktop viewports.",
             "status": "pending",
-            "testStrategy": "Test navigation responsiveness across all viewport sizes, verify menu items link correctly, test user profile dropdown functionality"
+            "testStrategy": "Test navigation responsiveness across all viewport sizes, verify menu items link correctly, test user profile dropdown functionality",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -386,7 +414,8 @@
             ],
             "details": "Implement pages/index.vue as the dashboard homepage. Use CSS Grid for responsive project card layout that adapts to different screen sizes. Create project card components showing progress badges, start buttons, and real-time status updates. Include proper loading states and empty state handling when no projects exist.",
             "status": "pending",
-            "testStrategy": "Test grid responsiveness on mobile, tablet, and desktop. Verify project cards display correctly with various data states. Test loading and empty states."
+            "testStrategy": "Test grid responsiveness on mobile, tablet, and desktop. Verify project cards display correctly with various data states. Test loading and empty states.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -397,7 +426,8 @@
             ],
             "details": "Create user profile dropdown in the app header with avatar, user name, and menu options. Include profile settings, preferences, and logout functionality. Integrate with authentication state from composables/useAuth.ts. Add proper accessibility attributes and keyboard navigation support.",
             "status": "pending",
-            "testStrategy": "Test dropdown functionality, verify authentication state updates correctly, test accessibility with keyboard navigation and screen readers"
+            "testStrategy": "Test dropdown functionality, verify authentication state updates correctly, test accessibility with keyboard navigation and screen readers",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -408,7 +438,8 @@
             ],
             "details": "Create breadcrumb navigation component using @nuxt/ui v4 Breadcrumb. Implement dynamic page titles that update based on current route. Add comprehensive SEO meta tags including Open Graph and Twitter Card data. Use Nuxt's built-in head management for proper meta tag handling and social sharing optimization.",
             "status": "pending",
-            "testStrategy": "Verify breadcrumbs update correctly on navigation, test page titles in browser tabs, validate meta tags with social media preview tools"
+            "testStrategy": "Verify breadcrumbs update correctly on navigation, test page titles in browser tabs, validate meta tags with social media preview tools",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -417,7 +448,8 @@
             "dependencies": [],
             "details": "Create composables/useAuth.ts using Nuxt's useState() for reactive authentication state management. Include user profile data, authentication status, login/logout methods, and session persistence. Integrate with Supabase authentication and provide reactive updates across all components. Include proper TypeScript types and error handling.",
             "status": "pending",
-            "testStrategy": "Test authentication state persistence across page refreshes, verify reactivity updates UI correctly, test login/logout flows and error handling"
+            "testStrategy": "Test authentication state persistence across page refreshes, verify reactivity updates UI correctly, test login/logout flows and error handling",
+            "parentId": "undefined"
           }
         ]
       },
@@ -429,9 +461,9 @@
         "testStrategy": "Test project CRUD operations with various data inputs, validate form validation works correctly, test optimistic updates and error rollback, verify real-time updates across multiple browser tabs, test project settings persistence.",
         "priority": "medium",
         "dependencies": [
-          4,
-          5,
-          6
+          "4",
+          "5",
+          "6"
         ],
         "status": "pending",
         "subtasks": [
@@ -442,7 +474,8 @@
             "dependencies": [],
             "details": "Create composables/useProjects.ts that uses Nuxt's useState() for managing project state. Implement reactive state for projects list, current active project, loading states, and error handling. Include functions for state mutations, project filtering, and state reset. Use TypeScript interfaces for type safety.",
             "status": "pending",
-            "testStrategy": "Test state reactivity across components, validate initial state loading, test state mutations and side effects, verify proper TypeScript type checking."
+            "testStrategy": "Test state reactivity across components, validate initial state loading, test state mutations and side effects, verify proper TypeScript type checking.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -453,7 +486,8 @@
             ],
             "details": "Create a modal component for project creation using @nuxt/ui v4 Modal and Form components. Implement Zod schema validation for project fields (name, description, stint duration, etc.). Add form field validation, error handling, and success feedback. Use @nuxt/ui v4 Input, Textarea, and Select components for the form.",
             "status": "pending",
-            "testStrategy": "Test form validation with invalid inputs, verify modal open/close behavior, test successful project creation flow, validate Zod schema enforcement."
+            "testStrategy": "Test form validation with invalid inputs, verify modal open/close behavior, test successful project creation flow, validate Zod schema enforcement.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -465,7 +499,8 @@
             ],
             "details": "Create project editing functionality that immediately updates the UI (optimistic updates) before Supabase confirmation. Implement rollback mechanism for failed updates. Add inline editing or edit modal options. Handle concurrent editing conflicts and provide user feedback for save status.",
             "status": "pending",
-            "testStrategy": "Test optimistic updates with successful saves, test rollback on Supabase errors, verify conflict resolution for concurrent edits, validate loading states during saves."
+            "testStrategy": "Test optimistic updates with successful saves, test rollback on Supabase errors, verify conflict resolution for concurrent edits, validate loading states during saves.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -476,7 +511,8 @@
             ],
             "details": "Build project deletion functionality with multi-step confirmation dialogs. Handle cascade deletion of related stints and data. Implement soft delete option for data recovery. Add warnings for projects with active stints. Use @nuxt/ui v4 AlertDialog for confirmations.",
             "status": "pending",
-            "testStrategy": "Test confirmation dialog flow, verify cascade deletion of related data, test soft delete and recovery, validate prevention of deleting active projects."
+            "testStrategy": "Test confirmation dialog flow, verify cascade deletion of related data, test soft delete and recovery, validate prevention of deleting active projects.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -489,7 +525,8 @@
             ],
             "details": "Set up Supabase real-time subscriptions for the projects table. Handle INSERT, UPDATE, and DELETE events to keep UI synchronized across browser tabs and devices. Implement connection status monitoring and reconnection logic. Update the useProjects composable to handle real-time events and merge changes with local state.",
             "status": "pending",
-            "testStrategy": "Test real-time updates across multiple browser tabs, verify subscription cleanup on component unmount, test offline/online reconnection behavior, validate conflict resolution for simultaneous updates."
+            "testStrategy": "Test real-time updates across multiple browser tabs, verify subscription cleanup on component unmount, test offline/online reconnection behavior, validate conflict resolution for simultaneous updates.",
+            "parentId": "undefined"
           }
         ]
       },
@@ -501,9 +538,9 @@
         "testStrategy": "Test timer accuracy over 2+ hour sessions, validate single active stint enforcement across tabs, test completion warnings and notifications, verify stint data persistence during network interruptions, test cross-device synchronization.",
         "priority": "high",
         "dependencies": [
-          4,
-          5,
-          7
+          "4",
+          "5",
+          "7"
         ],
         "status": "pending",
         "subtasks": [
@@ -514,7 +551,8 @@
             "dependencies": [],
             "details": "Create public/workers/timer-worker.js that handles setInterval timing independent of main thread throttling. Implement message-based communication for start, stop, pause, resume, and time updates. Add automatic 5-minute warning notifications and completion alerts. Worker should maintain timer state and send periodic updates to main thread for UI synchronization.",
             "status": "pending",
-            "testStrategy": "Test timer accuracy over 2+ hour sessions with tab switching, validate worker communication protocols, test automatic notifications trigger correctly, verify timer continues in background tabs"
+            "testStrategy": "Test timer accuracy over 2+ hour sessions with tab switching, validate worker communication protocols, test automatic notifications trigger correctly, verify timer continues in background tabs",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -525,7 +563,8 @@
             ],
             "details": "Create Nuxt composable using useState() for global stint state across tabs and components. Implement single active stint enforcement logic that automatically stops previous stint when starting new one. Add reactive state for current active stint, timer status, and elapsed time. Integrate with Web Worker for timer updates and handle cross-component state synchronization.",
             "status": "pending",
-            "testStrategy": "Test single active stint enforcement across multiple browser tabs, validate state reactivity in components, test automatic stint stopping when starting new stint, verify state persistence during navigation"
+            "testStrategy": "Test single active stint enforcement across multiple browser tabs, validate state reactivity in components, test automatic stint stopping when starting new stint, verify state persistence during navigation",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -536,7 +575,8 @@
             ],
             "details": "Add startStint() and stopStint() methods to useStints composable. Implement automatic project switching that stops current stint and starts new one when switching projects. Add stint data persistence with start/end timestamps, duration tracking, and completion type recording. Integrate with timer worker for accurate duration measurement and provide real-time UI updates.",
             "status": "pending",
-            "testStrategy": "Test stint start/stop functionality across different projects, validate automatic project switching stops previous stint, test stint data persistence with correct timestamps and durations, verify UI updates in real-time"
+            "testStrategy": "Test stint start/stop functionality across different projects, validate automatic project switching stops previous stint, test stint data persistence with correct timestamps and durations, verify UI updates in real-time",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -548,7 +588,8 @@
             ],
             "details": "Request notification permissions on first stint start. Implement 5-minute warning system that triggers from Web Worker and displays browser notification. Add stint completion notifications with optional extension prompts. Create notification click handlers that focus the app window. Implement graceful fallback for browsers without notification support using toast notifications.",
             "status": "pending",
-            "testStrategy": "Test notification permissions flow, validate 5-minute warnings trigger accurately, test completion notifications work across different browsers, verify notification click handlers focus app window, test fallback toast notifications"
+            "testStrategy": "Test notification permissions flow, validate 5-minute warnings trigger accurately, test completion notifications work across different browsers, verify notification click handlers focus app window, test fallback toast notifications",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -559,7 +600,8 @@
             ],
             "details": "Add pauseStint() and resumeStint() methods with pause timestamp tracking. Leverage Supabase validation for stint duration accuracy and conflict resolution. Create Supabase real-time subscriptions for cross-device synchronization of stint state. Add conflict resolution for concurrent stint operations across devices. Implement optimistic updates with rollback on sync conflicts.",
             "status": "pending",
-            "testStrategy": "Test pause/resume functionality maintains accurate duration tracking, validate Supabase-enforced stint duration validation, test cross-device synchronization updates stint state in real-time, verify conflict resolution handles concurrent operations correctly"
+            "testStrategy": "Test pause/resume functionality maintains accurate duration tracking, validate Supabase-enforced stint duration validation, test cross-device synchronization updates stint state in real-time, verify conflict resolution handles concurrent operations correctly",
+            "parentId": "undefined"
           }
         ]
       },
@@ -571,8 +613,8 @@
         "testStrategy": "Test data synchronization across multiple devices, validate updates appear in real-time across browser tabs, test offline/online behavior and data sync on reconnection, verify subscription cleanup prevents memory leaks.",
         "priority": "medium",
         "dependencies": [
-          7,
-          8
+          "7",
+          "8"
         ],
         "status": "pending",
         "subtasks": [
@@ -583,7 +625,8 @@
             "dependencies": [],
             "details": "Implement useRealtime.ts composable that provides connection management, subscription creation/cleanup, and connection status tracking. Include methods for subscribing to specific tables (projects, stints), handling connection events, and automatic reconnection logic. Use Nuxt's built-in reactivity with ref() and reactive() for connection state management.",
             "status": "pending",
-            "testStrategy": "Test connection establishment and cleanup, verify subscription lifecycle management, test reconnection behavior on network interruption, validate proper cleanup prevents memory leaks."
+            "testStrategy": "Test connection establishment and cleanup, verify subscription lifecycle management, test reconnection behavior on network interruption, validate proper cleanup prevents memory leaks.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -594,7 +637,8 @@
             ],
             "details": "Configure Supabase real-time subscriptions for both projects and stints tables. Handle INSERT, UPDATE, and DELETE events for each table. Implement proper filtering for user-specific data using RLS policies. Create event handlers that update local state reactively when data changes occur from other sessions or devices.",
             "status": "pending",
-            "testStrategy": "Test real-time updates across multiple browser tabs, verify user-specific data filtering works correctly, test all CRUD operations trigger appropriate real-time events, validate subscription performance under load."
+            "testStrategy": "Test real-time updates across multiple browser tabs, verify user-specific data filtering works correctly, test all CRUD operations trigger appropriate real-time events, validate subscription performance under load.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -605,7 +649,8 @@
             ],
             "details": "Implement optimistic updates that immediately update local state before Supabase confirmation. Create conflict resolution strategy that handles cases where Supabase data differs from optimistic updates. Include rollback mechanism for failed operations and merge strategies for concurrent edits. Use timestamps and version fields to detect conflicts.",
             "status": "pending",
-            "testStrategy": "Test optimistic updates provide immediate UI feedback, verify conflict resolution works with concurrent edits from multiple devices, test rollback functionality on operation failures, validate merge strategies preserve data integrity."
+            "testStrategy": "Test optimistic updates provide immediate UI feedback, verify conflict resolution works with concurrent edits from multiple devices, test rollback functionality on operation failures, validate merge strategies preserve data integrity.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -616,7 +661,8 @@
             ],
             "details": "Create connection status indicators using @nuxt/ui v4 Badge components to show online/offline/connecting states. Implement offline detection using navigator.onLine and connection events. Queue operations when offline and sync when connection is restored. Add retry logic for failed operations and user notifications for sync status.",
             "status": "pending",
-            "testStrategy": "Test connection status indicators update correctly, verify offline operation queuing works, test automatic sync on reconnection, validate retry logic handles network failures gracefully."
+            "testStrategy": "Test connection status indicators update correctly, verify offline operation queuing works, test automatic sync on reconnection, validate retry logic handles network failures gracefully.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -629,7 +675,8 @@
             ],
             "details": "Integrate real-time subscriptions with project and stint management components. Ensure UI components automatically reflect real-time data changes using Nuxt's reactivity system. Implement proper subscription cleanup on component unmount to prevent memory leaks. Handle loading states during initial subscription setup and data synchronization.",
             "status": "pending",
-            "testStrategy": "Test UI components automatically update when data changes from other devices, verify subscription cleanup prevents memory leaks on component unmount, test loading states during synchronization, validate reactivity works across all project and stint components."
+            "testStrategy": "Test UI components automatically update when data changes from other devices, verify subscription cleanup prevents memory leaks on component unmount, test loading states during synchronization, validate reactivity works across all project and stint components.",
+            "parentId": "undefined"
           }
         ]
       },
@@ -641,8 +688,8 @@
         "testStrategy": "Test chart rendering with various data sets, validate PDF exports format correctly, verify CSV exports contain accurate data, test date range filtering and project comparisons, validate report sharing functionality and privacy controls.",
         "priority": "low",
         "dependencies": [
-          8,
-          9
+          "8",
+          "9"
         ],
         "status": "pending",
         "subtasks": [
@@ -653,7 +700,8 @@
             "dependencies": [],
             "details": "Create pages/analytics.vue with responsive layout using @nuxt/ui v4 components. Install and configure Chart.js with chartjs-date-adapter for time-based charts. Set up chart containers for daily/weekly/monthly views and project comparison charts. Initialize chart instances with responsive options and proper color scheme matching the @nuxt/ui v4 theme. Create chart loading states and error boundaries.",
             "status": "pending",
-            "testStrategy": "Test chart initialization with empty data, verify responsive behavior on different screen sizes, validate Chart.js library loads correctly, test color scheme integration with UI theme"
+            "testStrategy": "Test chart initialization with empty data, verify responsive behavior on different screen sizes, validate Chart.js library loads correctly, test color scheme integration with UI theme",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -664,7 +712,8 @@
             ],
             "details": "Create composables/useAnalytics.ts with functions for fetching stint data from Supabase. Implement server-side data aggregation using Supabase functions or computed queries for performance. Build data transformation utilities for daily, weekly, and monthly views. Create GitHub-style heatmap data processing functions. Add caching layer using Nuxt's built-in caching. Implement date range filtering and project filtering capabilities. Handle timezone considerations for accurate date grouping.",
             "status": "pending",
-            "testStrategy": "Test data aggregation accuracy across different time periods, validate caching mechanisms work correctly, test date range filtering edge cases, verify timezone handling accuracy"
+            "testStrategy": "Test data aggregation accuracy across different time periods, validate caching mechanisms work correctly, test date range filtering edge cases, verify timezone handling accuracy",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -676,7 +725,8 @@
             ],
             "details": "Build reusable chart components for time-series data visualization using Chart.js. Implement GitHub-style heatmap component with hover tooltips showing daily stint counts and focus hours. Create toggle controls for switching between daily, weekly, and monthly views. Add interactive features like clicking on dates to see detailed stint information. Implement color intensity scaling based on productivity levels. Create responsive grid layouts that work on mobile devices.",
             "status": "pending",
-            "testStrategy": "Test heatmap rendering with various data densities, verify interactive tooltips display correct information, test view switching functionality, validate responsive behavior on mobile devices"
+            "testStrategy": "Test heatmap rendering with various data densities, verify interactive tooltips display correct information, test view switching functionality, validate responsive behavior on mobile devices",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -688,7 +738,8 @@
             ],
             "details": "Install and configure jsPDF with appropriate plugins for charts and tables. Create PDF template system for Focus Ledger reports with professional styling and branding. Implement chart-to-image conversion for including visualizations in PDFs. Build report generation functions that compile stint data, charts, and summaries into structured PDF documents. Add customization options for report date ranges and project selection. Implement progress indicators for PDF generation process. Create download management with proper file naming conventions.",
             "status": "pending",
-            "testStrategy": "Test PDF generation with various data sets and date ranges, verify chart rendering quality in PDFs, validate document structure and formatting, test download functionality across browsers"
+            "testStrategy": "Test PDF generation with various data sets and date ranges, verify chart rendering quality in PDFs, validate document structure and formatting, test download functionality across browsers",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -700,15 +751,23 @@
             ],
             "details": "Create CSV export functionality for raw stint data with proper formatting and headers. Implement project comparison charts showing completion rates and productivity metrics across different projects. Build shareable report link system using secure tokens and privacy controls. Create report sharing interface with options for public/private links and expiration dates. Implement server-side report generation for shared links to ensure performance. Add privacy controls allowing users to hide sensitive project information in shared reports. Create email sharing functionality for sending report links directly.",
             "status": "pending",
-            "testStrategy": "Test CSV export accuracy and formatting, verify shareable links work correctly with privacy settings, test report access controls and expiration functionality, validate email sharing works properly"
+            "testStrategy": "Test CSV export accuracy and formatting, verify shareable links work correctly with privacy settings, test report access controls and expiration functionality, validate email sharing works properly",
+            "parentId": "undefined"
           }
         ]
       }
     ],
     "metadata": {
-      "created": "2025-09-24T05:01:54.439Z",
-      "updated": "2025-09-26T01:06:56.106Z",
-      "description": "Tasks for master context"
+      "version": "1.0.0",
+      "lastModified": "2025-09-27T19:55:45.997Z",
+      "taskCount": 10,
+      "completedCount": 4,
+      "tags": [
+        "master"
+      ],
+      "created": "2025-09-28T04:26:02.283Z",
+      "description": "Tasks for master context",
+      "updated": "2025-09-28T04:26:02.283Z"
     }
   }
 }
