@@ -96,6 +96,5 @@ export default defineNuxtConfig({
       callback: '/auth/callback',
       exclude: ['/', '/auth/*'],
     },
-    types: './types/supabase.ts',
   },
 })

@@ -2,7 +2,7 @@
 -- This prevents potential SQL injection through search_path manipulation
 
 -- Drop existing triggers that depend on the function
-DROP TRIGGER IF EXISTS update_users_updated_at ON public.users;
+DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON public.user_profiles;
 DROP TRIGGER IF EXISTS update_projects_updated_at ON public.projects;
 DROP TRIGGER IF EXISTS update_stints_updated_at ON public.stints;
 
@@ -22,7 +22,7 @@ END;
 $$;
 
 -- Recreate triggers with the secure function
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON public.users
+CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON public.user_profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON public.projects

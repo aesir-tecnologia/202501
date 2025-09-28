@@ -57,16 +57,16 @@ describe('Row Level Security Policies', () => {
       password: testPassword,
     })
 
-    // Insert users into the users table (required for foreign key constraints)
+    // Insert users into the user_profiles table (required for foreign key constraints)
     if (testUser1) {
-      await testUser1Client.from('users').insert({
+      await testUser1Client.from('user_profiles').insert({
         id: testUser1.id,
         email: testUser1.email,
       })
     }
 
     if (testUser2) {
-      await testUser2Client.from('users').insert({
+      await testUser2Client.from('user_profiles').insert({
         id: testUser2.id,
         email: testUser2.email,
       })
@@ -86,12 +86,12 @@ describe('Row Level Security Policies', () => {
     // This requires admin privileges to delete auth users
   })
 
-  describe('Users table RLS policies', () => {
+  describe('User profiles table RLS policies', () => {
     it('should allow users to read their own profile', async () => {
       if (!testUser1) throw new Error('Test user 1 not created')
 
       const { data, error } = await testUser1Client
-        .from('users')
+        .from('user_profiles')
         .select('*')
         .eq('id', testUser1.id)
         .single()
@@ -107,7 +107,7 @@ describe('Row Level Security Policies', () => {
 
       // User 1 tries to read User 2's profile
       const { data } = await testUser1Client
-        .from('users')
+        .from('user_profiles')
         .select('*')
         .eq('id', testUser2.id)
         .single()
@@ -120,7 +120,7 @@ describe('Row Level Security Policies', () => {
       if (!testUser1) throw new Error('Test user 1 not created')
 
       const { data, error } = await testUser1Client
-        .from('users')
+        .from('user_profiles')
         .update({ email: testUser1.email }) // Update with same email
         .eq('id', testUser1.id)
         .select()
@@ -135,7 +135,7 @@ describe('Row Level Security Policies', () => {
 
       // User 1 tries to update User 2's profile
       const { data, error } = await testUser1Client
-        .from('users')
+        .from('user_profiles')
         .update({ email: 'malicious@example.com' })
         .eq('id', testUser2.id)
         .select()

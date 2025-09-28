@@ -4,9 +4,9 @@
 -- Enable UUID extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Create users table
+-- Create user_profiles table
 -- This extends the built-in auth.users with additional profile data
-CREATE TABLE IF NOT EXISTS public.users (
+CREATE TABLE IF NOT EXISTS public.user_profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.users (
 -- Create projects table
 CREATE TABLE IF NOT EXISTS public.projects (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
   expected_daily_stints INTEGER DEFAULT 2,
   custom_stint_duration INTEGER, -- in minutes, nullable for default duration
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
 CREATE TABLE IF NOT EXISTS public.stints (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE NOT NULL,
-  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES public.user_profiles(id) ON DELETE CASCADE NOT NULL,
   started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   ended_at TIMESTAMP WITH TIME ZONE, -- nullable for active stints
   duration_minutes INTEGER, -- calculated field, nullable for active stints
@@ -49,7 +49,7 @@ END;
 $$ language 'plpgsql';
 
 -- Create triggers to automatically update updated_at on record changes
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON public.users
+CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON public.user_profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON public.projects
@@ -59,8 +59,8 @@ CREATE TRIGGER update_stints_updated_at BEFORE UPDATE ON public.stints
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Create indexes for performance optimization
--- Index on users.email for authentication lookups
-CREATE INDEX IF NOT EXISTS idx_users_email ON public.users(email);
+-- Index on user_profiles.email for authentication lookups
+CREATE INDEX IF NOT EXISTS idx_user_profiles_email ON public.user_profiles(email);
 
 -- Index on projects.user_id for user-specific project queries
 CREATE INDEX IF NOT EXISTS idx_projects_user_id ON public.projects(user_id);
@@ -82,19 +82,19 @@ CREATE INDEX IF NOT EXISTS idx_stints_active ON public.stints(user_id, started_a
 WHERE ended_at IS NULL;
 
 -- Enable Row Level Security on all tables
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.stints ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for users table
+-- RLS Policies for user_profiles table
 -- Users can only read/update their own profile
-CREATE POLICY "Users can view own profile" ON public.users
+CREATE POLICY "Users can view own profile" ON public.user_profiles
   FOR SELECT USING (auth.uid() = id);
 
-CREATE POLICY "Users can update own profile" ON public.users
+CREATE POLICY "Users can update own profile" ON public.user_profiles
   FOR UPDATE USING (auth.uid() = id);
 
-CREATE POLICY "Users can insert own profile" ON public.users
+CREATE POLICY "Users can insert own profile" ON public.user_profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- RLS Policies for projects table

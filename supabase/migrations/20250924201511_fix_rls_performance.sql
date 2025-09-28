@@ -2,9 +2,9 @@
 -- Replace auth.uid() with (select auth.uid()) to prevent re-evaluation per row
 
 -- Drop existing policies
-DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
-DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
-DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
+DROP POLICY IF EXISTS "Users can view own profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.user_profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.user_profiles;
 
 DROP POLICY IF EXISTS "Users can view own projects" ON public.projects;
 DROP POLICY IF EXISTS "Users can insert own projects" ON public.projects;
@@ -16,15 +16,15 @@ DROP POLICY IF EXISTS "Users can insert own stints" ON public.stints;
 DROP POLICY IF EXISTS "Users can update own stints" ON public.stints;
 DROP POLICY IF EXISTS "Users can delete own stints" ON public.stints;
 
--- Create optimized RLS Policies for users table
+-- Create optimized RLS Policies for user_profiles table
 -- Users can only read/update their own profile
-CREATE POLICY "Users can view own profile" ON public.users
+CREATE POLICY "Users can view own profile" ON public.user_profiles
   FOR SELECT USING ((select auth.uid()) = id);
 
-CREATE POLICY "Users can update own profile" ON public.users
+CREATE POLICY "Users can update own profile" ON public.user_profiles
   FOR UPDATE USING ((select auth.uid()) = id);
 
-CREATE POLICY "Users can insert own profile" ON public.users
+CREATE POLICY "Users can insert own profile" ON public.user_profiles
   FOR INSERT WITH CHECK ((select auth.uid()) = id);
 
 -- Create optimized RLS Policies for projects table

@@ -70,7 +70,7 @@ export type Database = {
             foreignKeyName: 'projects_user_id_fkey'
             columns: ['user_id']
             isOneToOne: false
-            referencedRelation: 'users'
+            referencedRelation: 'user_profiles'
             referencedColumns: ['id']
           },
         ]
@@ -124,12 +124,12 @@ export type Database = {
             foreignKeyName: 'stints_user_id_fkey'
             columns: ['user_id']
             isOneToOne: false
-            referencedRelation: 'users'
+            referencedRelation: 'user_profiles'
             referencedColumns: ['id']
           },
         ]
       }
-      users: {
+      user_profiles: {
         Row: {
           created_at: string | null
           email: string
