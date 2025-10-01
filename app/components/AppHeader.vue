@@ -1,6 +1,5 @@
 <script setup lang="ts">
-const user = useSupabaseUser()
-const supabase = useSupabaseClient()
+const { user, userProfile, userInitials, signOut } = useAuth()
 const colorMode = useColorMode()
 const router = useRouter()
 
@@ -12,14 +11,18 @@ const isDark = computed({
 })
 
 async function handleSignOut() {
-  await supabase.auth.signOut()
-  router.push('/auth/login')
+  try {
+    await signOut()
+  }
+  catch (error) {
+    console.error('Sign out error:', error)
+  }
 }
 
 const userMenuItems = computed(() => [
   [
     {
-      label: user.value?.email || 'User',
+      label: userProfile.value?.email || 'User',
       slot: 'account',
       disabled: true,
     },
@@ -44,12 +47,6 @@ const userMenuItems = computed(() => [
     },
   ],
 ])
-
-const userInitials = computed(() => {
-  if (!user.value?.email)
-    return 'U'
-  return user.value.email.substring(0, 2).toUpperCase()
-})
 </script>
 
 <template>
@@ -107,7 +104,8 @@ const userInitials = computed(() => {
           :popper="{ placement: 'bottom-end' }"
         >
           <UAvatar
-            :alt="user.email || 'User'"
+            :alt="userProfile?.email || 'User'"
+            :src="userProfile?.avatarUrl"
             size="sm"
             class="cursor-pointer"
           >
@@ -118,8 +116,11 @@ const userInitials = computed(() => {
 
           <template #account>
             <div class="text-left">
-              <p class="truncate font-medium text-sm">
-                {{ user.email }}
+              <p v-if="userProfile?.fullName" class="font-medium text-sm">
+                {{ userProfile.fullName }}
+              </p>
+              <p class="truncate text-xs text-gray-600 dark:text-gray-400">
+                {{ userProfile?.email }}
               </p>
             </div>
           </template>
