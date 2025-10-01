@@ -251,15 +251,15 @@
           "2",
           "3"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
             "title": "Create Supabase data access modules",
             "description": "Establish typed helper modules for interacting with Supabase tables and RPC endpoints from the client.",
             "dependencies": [],
-            "details": "Build lib/supabase/projects.ts and lib/supabase/stints.ts modules that wrap the Supabase JS client with the existing Database types. Expose CRUD helpers (list, create, update, delete) that automatically scope queries by auth.uid() and include standard error handling via utils/supabase.ts. Document how each helper should be consumed by composables and components.\n<info added on 2025-09-28T05:11:01.890Z>\nLooking at the project structure and existing codebase to understand the current implementation and inform the enhanced approach...\n</info added on 2025-09-28T05:11:01.890Z>",
-            "status": "pending",
+            "details": "Build lib/supabase/projects.ts and lib/supabase/stints.ts modules that wrap the Supabase JS client with the existing Database types. Expose CRUD helpers (list, create, update, delete) that automatically scope queries by auth.uid() and include standard error handling via utils/supabase.ts. Document how each helper should be consumed by composables and components.",
+            "status": "done",
             "testStrategy": "Write unit tests that mock the Supabase client to confirm helpers call the expected PostgREST endpoints. Verify type inference works in IDE and that helpers reject missing auth state.",
             "parentId": "undefined"
           },
@@ -271,7 +271,7 @@
               "4.1"
             ],
             "details": "Add schemas/projects.ts and schemas/stints.ts using Zod to validate create/update payloads before sending them to Supabase. Share schemas with form components and data helpers so validation logic stays consistent. Include refinement rules for stint duration limits, single-active requirements, and note length constraints.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test schemas with valid/invalid payloads, ensuring errors surface correctly in forms. Add regression tests to guarantee constraints match the database (e.g., max stint duration, project name requirements).",
             "parentId": "undefined"
           },
@@ -283,7 +283,7 @@
               "4.1",
               "4.2"
             ],
-            "details": "Extend lib/supabase/projects.ts with optimistic mutation helpers that update local state immediately and roll back on failure. Ensure helpers respect RLS, pass validation results back to callers, and support multi-tab updates via existing Supabase realtime integrations.",
+            "details": "Extend lib/supabase/projects.ts with optimistic mutation helpers that update local state immediately and roll back on failure. Ensure helpers respect RLS, pass validation results back to callers, and support multi-tab updates via existing Supabase realtime integrations.\n<info added on 2025-10-01T02:47:48.962Z>\nLooking at the codebase to understand the current implementation and what needs to be added for optimistic UI patterns.\n</info added on 2025-10-01T02:47:48.962Z>",
             "status": "pending",
             "testStrategy": "Test optimistic flows by simulating failures and confirming UI rolls back cleanly. Verify project CRUD works across multiple browser tabs pointing at the same account.",
             "parentId": "undefined"
@@ -296,7 +296,7 @@
               "4.1",
               "4.2"
             ],
-            "details": "Add startStint, stopStint, pauseStint, and resumeStint helpers that coordinate with Supabase RPC or transactional SQL functions to enforce the single-active constraint. Update helpers to derive authoritative timing from Supabase (planned vs actual duration) and to record completion types in line with the PRD.\n<info added on 2025-09-28T05:11:59.850Z>\nI'll analyze the codebase to understand the current implementation and provide specific recommendations based on the project structure.\n</info added on 2025-09-28T05:11:59.850Z>",
+            "details": "Add startStint, stopStint, pauseStint, and resumeStint helpers that coordinate with Supabase RPC or transactional SQL functions to enforce the single-active constraint. Update helpers to derive authoritative timing from Supabase (planned vs actual duration) and to record completion types in line with the PRD.\n<info added on 2025-09-28T05:11:59.850Z>\nI'll analyze the codebase to understand the current implementation and provide specific recommendations based on the project structure.\n</info added on 2025-09-28T05:11:59.850Z>\n<info added on 2025-10-01T02:48:51.832Z>\nConfirmed gaps in app/lib/supabase/stints.ts: basic CRUD functions exist (createStint, updateStint, deleteStint, getActiveStint) but no lifecycle state machine helpers (startStint, stopStint, pauseStint, resumeStint). No single-active constraint enforcement logic - getActiveStint queries but doesn't prevent multiple active stints. Missing Supabase RPC functions for atomic operations. Database schema shows stints table with is_completed boolean and ended_at timestamp but no state machine or transition validation. Need to implement: 1) Supabase RPC functions in supabase/migrations/ for atomic stint lifecycle operations with single-active enforcement 2) Lifecycle helpers in app/lib/supabase/stints.ts that call these RPCs 3) State validation logic ensuring proper transitions (pending -> active -> completed/paused) 4) Error handling for constraint violations 5) Integration with existing validation schemas in app/schemas/stints.ts for timing/duration tracking.\n</info added on 2025-10-01T02:48:51.832Z>",
             "status": "pending",
             "testStrategy": "Validate helpers prevent overlapping stints by attempting concurrent starts. Run long-lived timer simulations to ensure actual_duration stays accurate when synced with Supabase.",
             "parentId": "undefined"
@@ -309,7 +309,7 @@
               "4.3",
               "4.4"
             ],
-            "details": "Integrate Nuxt query caching (e.g., useAsyncData or Vue Query) around Supabase calls to coalesce requests and provide stale-while-revalidate behaviour. Implement retry logic for transient Supabase errors and emit structured error objects for UI consumption. Create toast/notification patterns for failures so users understand when Supabase rejects an operation.",
+            "details": "Integrate Nuxt query caching (e.g., useAsyncData or Vue Query) around Supabase calls to coalesce requests and provide stale-while-revalidate behaviour. Implement retry logic for transient Supabase errors and emit structured error objects for UI consumption. Create toast/notification patterns for failures so users understand when Supabase rejects an operation.\n<info added on 2025-10-01T02:49:33.556Z>\nI'll analyze the codebase to understand the current implementation and provide specific recommendations for the caching and error handling layer.\n</info added on 2025-10-01T02:49:33.556Z>",
             "status": "pending",
             "testStrategy": "Simulate network outages to ensure retries back off correctly and user feedback appears. Profile caching behaviour to confirm repeated navigations avoid redundant Supabase calls.",
             "parentId": "undefined"
@@ -318,7 +318,7 @@
             "id": 6,
             "title": "Implement offline-first capabilities with sync",
             "description": "Add local storage queuing for offline mutations and conflict resolution",
-            "details": "Create composables/useOfflineSupport.ts with local storage mutation queue, auto-sync when connection restored, and conflict resolution for offline changes. Implement connection state monitoring, offline indicator UI, and graceful handling of network failures during active stints. Include retry mechanisms and data consistency checks for synchronized operations.",
+            "details": "Create composables/useOfflineSupport.ts with local storage mutation queue, auto-sync when connection restored, and conflict resolution for offline changes. Implement connection state monitoring, offline indicator UI, and graceful handling of network failures during active stints. Include retry mechanisms and data consistency checks for synchronized operations.\n<info added on 2025-10-01T02:50:16.256Z>\nI'll analyze the project structure first to understand the current codebase and then provide the appropriate update for the subtask.\n</info added on 2025-10-01T02:50:16.256Z>",
             "status": "pending",
             "dependencies": [
               "4.3",
@@ -780,7 +780,7 @@
       ],
       "created": "2025-09-28T04:26:02.283Z",
       "description": "Tasks for master context",
-      "updated": "2025-09-28T05:13:56.980Z"
+      "updated": "2025-10-01T02:53:36.360Z"
     }
   }
 }
