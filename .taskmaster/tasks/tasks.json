@@ -283,8 +283,8 @@
               "4.1",
               "4.2"
             ],
-            "details": "Extend lib/supabase/projects.ts with optimistic mutation helpers that update local state immediately and roll back on failure. Ensure helpers respect RLS, pass validation results back to callers, and support multi-tab updates via existing Supabase realtime integrations.\n<info added on 2025-10-01T02:47:48.962Z>\nLooking at the codebase to understand the current implementation and what needs to be added for optimistic UI patterns.\n</info added on 2025-10-01T02:47:48.962Z>",
-            "status": "pending",
+            "details": "Extend lib/supabase/projects.ts with optimistic mutation helpers that update local state immediately and roll back on failure. Ensure helpers respect RLS, pass validation results back to callers, and support multi-tab updates via existing Supabase realtime integrations.\n<info added on 2025-10-01T02:47:48.962Z>\nLooking at the codebase to understand the current implementation and what needs to be added for optimistic UI patterns.\n</info added on 2025-10-01T02:47:48.962Z>\n<info added on 2025-10-01T03:04:10.127Z>\nImplementation completed successfully. Created `app/composables/useProjectMutations.ts` with complete optimistic UI patterns: createProject, updateProject, toggleActive, and deleteProject functions. Each function validates input with Zod schemas, immediately updates local state for responsive UI, executes database operations, and rolls back on failures. All functions return OptimisticResult<T> interface with data/error structure. Comprehensive test coverage in `tests/composables/useProjectMutations.test.ts` validates happy paths, error handling, rollback behavior, and edge cases. All 9 tests passing. Integration points ready for UI components via the composable's returned function interface.\n</info added on 2025-10-01T03:04:10.127Z>",
+            "status": "done",
             "testStrategy": "Test optimistic flows by simulating failures and confirming UI rolls back cleanly. Verify project CRUD works across multiple browser tabs pointing at the same account.",
             "parentId": "undefined"
           },
@@ -780,7 +780,7 @@
       ],
       "created": "2025-09-28T04:26:02.283Z",
       "description": "Tasks for master context",
-      "updated": "2025-10-01T02:53:36.360Z"
+      "updated": "2025-10-01T03:04:10.175Z"
     }
   }
 }
