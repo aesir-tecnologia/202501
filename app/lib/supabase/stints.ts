@@ -123,3 +123,85 @@ export async function deleteStint(
     .select('*')
     .maybeSingle<StintRow>()
 }
+
+/**
+ * Lifecycle operation: Start a new stint
+ * Automatically stops any existing active stint
+ */
+export async function startStint(
+  client: TypedSupabaseClient,
+  projectId: string,
+  options?: {
+    notes?: string
+    startedAt?: Date
+  },
+) {
+  await requireUserId(client)
+
+  return client.rpc('start_stint', {
+    p_project_id: projectId,
+    p_notes: options?.notes ?? null,
+    p_started_at: options?.startedAt?.toISOString() ?? null,
+  }).select('*').single<StintRow>()
+}
+
+/**
+ * Lifecycle operation: Stop an active stint
+ * Marks stint as completed
+ */
+export async function stopStint(
+  client: TypedSupabaseClient,
+  stintId: string,
+  options?: {
+    endedAt?: Date
+    notes?: string
+  },
+) {
+  await requireUserId(client)
+
+  return client.rpc('stop_stint', {
+    p_stint_id: stintId,
+    p_ended_at: options?.endedAt?.toISOString() ?? null,
+    p_notes: options?.notes ?? null,
+  }).select('*').single<StintRow>()
+}
+
+/**
+ * Lifecycle operation: Pause an active stint
+ * Sets ended_at but keeps is_completed false
+ */
+export async function pauseStint(
+  client: TypedSupabaseClient,
+  stintId: string,
+  options?: {
+    pausedAt?: Date
+    notes?: string
+  },
+) {
+  await requireUserId(client)
+
+  return client.rpc('pause_stint', {
+    p_stint_id: stintId,
+    p_paused_at: options?.pausedAt?.toISOString() ?? null,
+    p_notes: options?.notes ?? null,
+  }).select('*').single<StintRow>()
+}
+
+/**
+ * Lifecycle operation: Resume a paused stint
+ * Creates a new stint continuing from the paused one
+ */
+export async function resumeStint(
+  client: TypedSupabaseClient,
+  pausedStintId: string,
+  options?: {
+    resumedAt?: Date
+  },
+) {
+  await requireUserId(client)
+
+  return client.rpc('resume_stint', {
+    p_paused_stint_id: pausedStintId,
+    p_resumed_at: options?.resumedAt?.toISOString() ?? null,
+  }).select('*').single<StintRow>()
+}
