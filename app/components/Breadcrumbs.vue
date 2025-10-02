@@ -33,8 +33,14 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
 </script>
 
 <template>
-  <nav v-if="breadcrumbs.length > 1" class="flex items-center gap-2 text-sm">
-    <template v-for="(item, index) in breadcrumbs" :key="item.label">
+  <nav
+    v-if="breadcrumbs.length > 1"
+    class="flex items-center gap-2 text-sm"
+  >
+    <template
+      v-for="(item, index) in breadcrumbs"
+      :key="item.label"
+    >
       <UIcon
         v-if="index > 0"
         name="i-lucide-chevron-right"
@@ -49,7 +55,10 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => {
         {{ item.label }}
       </NuxtLink>
 
-      <span v-else class="font-medium text-gray-900 dark:text-gray-100">
+      <span
+        v-else
+        class="font-medium text-gray-900 dark:text-gray-100"
+      >
         {{ item.label }}
       </span>
     </template>

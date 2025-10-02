@@ -1,41 +1,25 @@
 <script setup lang="ts">
-import { getProjects } from '~/lib/supabase/projects'
 import type { ProjectRow } from '~/lib/supabase/projects'
 
 const { user, userProfile } = useAuth()
-const client = useSupabaseClient()
 
 const displayName = computed(() => {
   return userProfile.value?.fullName || userProfile.value?.email || 'there'
 })
 
-// Project state
-const projects = ref<ProjectRow[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
+// Use real-time composables for automatic sync
+const { projects, activeProjects, isLoading, error, fetchProjects } = useProjects()
+const { deleteProject } = useProjectMutations()
 
 // Modal states
 const isCreateModalOpen = ref(false)
 const isEditModalOpen = ref(false)
 const selectedProject = ref<ProjectRow | null>(null)
 
-// Load projects
-async function loadProjects() {
-  loading.value = true
-  error.value = null
-
-  try {
-    const result = await getProjects(client, { includeInactive: true })
-    projects.value = result
-  }
-  catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load projects'
-    console.error('Error loading projects:', err)
-  }
-  finally {
-    loading.value = false
-  }
-}
+// Load projects on mount (subscribeToProjects happens automatically)
+onMounted(async () => {
+  await fetchProjects()
+})
 
 // Handle project actions
 function handleProjectClick(project: ProjectRow) {
@@ -52,27 +36,15 @@ async function handleProjectDelete(project: ProjectRow) {
     return
   }
 
-  // TODO: Implement delete with useProjectMutations
-  console.log('Delete project:', project.id)
-  await loadProjects()
+  const result = await deleteProject(project.id)
+  if (result.error) {
+    console.error('Error deleting project:', result.error)
+  }
 }
-
-function handleProjectCreated() {
-  loadProjects()
-}
-
-function handleProjectUpdated() {
-  loadProjects()
-}
-
-// Load projects on mount
-onMounted(() => {
-  loadProjects()
-})
 
 // Computed values
-const activeProjects = computed(() => projects.value.filter(p => p.is_active))
 const hasProjects = computed(() => projects.value.length > 0)
+const errorMessage = computed(() => error.value?.message || null)
 
 definePageMeta({
   title: 'Dashboard',
@@ -112,7 +84,10 @@ useSeoMeta({
       <UCard>
         <div class="flex items-center gap-4">
           <div class="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-            <UIcon name="i-lucide-folder" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <UIcon
+              name="i-lucide-folder"
+              class="w-6 h-6 text-blue-600 dark:text-blue-400"
+            />
           </div>
           <div>
             <div class="text-2xl font-bold">
@@ -128,7 +103,10 @@ useSeoMeta({
       <UCard>
         <div class="flex items-center gap-4">
           <div class="p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
-            <UIcon name="i-lucide-check-circle" class="w-6 h-6 text-green-600 dark:text-green-400" />
+            <UIcon
+              name="i-lucide-check-circle"
+              class="w-6 h-6 text-green-600 dark:text-green-400"
+            />
           </div>
           <div>
             <div class="text-2xl font-bold">
@@ -144,7 +122,10 @@ useSeoMeta({
       <UCard>
         <div class="flex items-center gap-4">
           <div class="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-            <UIcon name="i-lucide-timer" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <UIcon
+              name="i-lucide-timer"
+              class="w-6 h-6 text-purple-600 dark:text-purple-400"
+            />
           </div>
           <div>
             <div class="text-2xl font-bold">
@@ -175,25 +156,35 @@ useSeoMeta({
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <UCard v-for="i in 3" :key="i" class="animate-pulse">
+      <div
+        v-if="isLoading"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        <UCard
+          v-for="i in 3"
+          :key="i"
+          class="animate-pulse"
+        >
           <div class="h-32 bg-gray-200 dark:bg-gray-800 rounded" />
         </UCard>
       </div>
 
       <!-- Error State -->
       <UAlert
-        v-else-if="error"
+        v-else-if="errorMessage"
         color="red"
         variant="subtle"
         title="Error loading projects"
-        :description="error"
+        :description="errorMessage"
       />
 
       <!-- Empty State -->
       <UCard v-else-if="!hasProjects">
         <div class="text-center py-12">
-          <UIcon name="i-lucide-folder-plus" class="w-16 h-16 mx-auto mb-4 text-gray-400" />
+          <UIcon
+            name="i-lucide-folder-plus"
+            class="w-16 h-16 mx-auto mb-4 text-gray-400"
+          />
           <h3 class="text-lg font-semibold mb-2">
             No projects yet
           </h3>
@@ -211,7 +202,10 @@ useSeoMeta({
       </UCard>
 
       <!-- Projects Grid -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        v-else
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
         <ProjectCard
           v-for="project in projects.slice(0, 6)"
           :key="project.id"
@@ -223,17 +217,15 @@ useSeoMeta({
       </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Modals (real-time updates handle sync automatically) -->
     <ModalProjectCreateModal
       v-model:open="isCreateModalOpen"
-      @created="handleProjectCreated"
     />
 
     <ModalProjectEditModal
       v-if="selectedProject"
       v-model:open="isEditModalOpen"
       :project="selectedProject"
-      @updated="handleProjectUpdated"
     />
   </div>
 </template>

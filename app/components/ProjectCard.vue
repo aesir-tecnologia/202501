@@ -68,17 +68,29 @@ const cardClasses = computed(() => {
         <!-- Project details -->
         <div class="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-400 mb-3">
           <div class="flex items-center gap-1">
-            <UIcon name="i-lucide-target" class="w-4 h-4" />
+            <UIcon
+              name="i-lucide-target"
+              class="w-4 h-4"
+            />
             <span>{{ project.expected_daily_stints || 2 }} stints/day</span>
           </div>
-          <div v-if="project.custom_stint_duration" class="flex items-center gap-1">
-            <UIcon name="i-lucide-clock" class="w-4 h-4" />
+          <div
+            v-if="project.custom_stint_duration"
+            class="flex items-center gap-1"
+          >
+            <UIcon
+              name="i-lucide-clock"
+              class="w-4 h-4"
+            />
             <span>{{ project.custom_stint_duration }}min</span>
           </div>
         </div>
 
         <!-- Progress bar -->
-        <div v-if="showProgress" class="space-y-1">
+        <div
+          v-if="showProgress"
+          class="space-y-1"
+        >
           <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
             <span>Today's Progress</span>
             <span>{{ Math.round(progress) }}%</span>

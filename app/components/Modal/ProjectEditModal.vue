@@ -84,7 +84,10 @@ function handleClose() {
 </script>
 
 <template>
-  <UModal v-model="isOpen" :ui="{ width: 'sm:max-w-md' }">
+  <UModal
+    v-model="isOpen"
+    :ui="{ width: 'sm:max-w-md' }"
+  >
     <UCard>
       <template #header>
         <div class="flex items-center justify-between">
@@ -101,7 +104,10 @@ function handleClose() {
         </div>
       </template>
 
-      <form class="space-y-4" @submit.prevent="handleSubmit">
+      <form
+        class="space-y-4"
+        @submit.prevent="handleSubmit"
+      >
         <!-- Project Name -->
         <UFormGroup
           label="Project Name"

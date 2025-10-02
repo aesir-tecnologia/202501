@@ -20,10 +20,16 @@
             © {{ new Date().getFullYear() }} LifeStint. All rights reserved.
           </div>
           <div class="flex items-center gap-4">
-            <NuxtLink to="/privacy" class="hover:text-gray-900 dark:hover:text-gray-100">
+            <NuxtLink
+              to="/privacy"
+              class="hover:text-gray-900 dark:hover:text-gray-100"
+            >
               Privacy
             </NuxtLink>
-            <NuxtLink to="/terms" class="hover:text-gray-900 dark:hover:text-gray-100">
+            <NuxtLink
+              to="/terms"
+              class="hover:text-gray-900 dark:hover:text-gray-100"
+            >
               Terms
             </NuxtLink>
           </div>

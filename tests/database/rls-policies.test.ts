@@ -5,27 +5,31 @@ import type { Database } from '~/types/supabase'
 // Test configuration - requires test database
 const supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321'
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key'
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz'
 
 type TestClient = ReturnType<typeof createClient<Database>>
 
 describe('Row Level Security Policies', () => {
-  let supabase: TestClient
   let testUser1: { id: string, email: string } | null
   let testUser2: { id: string, email: string } | null
   let testUser1Client: TestClient
   let testUser2Client: TestClient
 
   beforeEach(async () => {
-    // Initialize admin client for setup
-    supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
-
-    // Create test users
     const testEmail1 = `test1-${Date.now()}@example.com`
     const testEmail2 = `test2-${Date.now()}@example.com`
     const testPassword = 'testPassword123!'
 
-    // Create first test user
-    const { data: userData1, error: userError1 } = await supabase.auth.signUp({
+    // Create and configure client for user 1
+    testUser1Client = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      }
+    })
+
+    // Sign up user 1 - triggers auto-creation of user_profiles
+    const { data: userData1, error: userError1 } = await testUser1Client.auth.signUp({
       email: testEmail1,
       password: testPassword,
     })
@@ -33,44 +37,22 @@ describe('Row Level Security Policies', () => {
     if (userError1) throw userError1
     testUser1 = userData1.user
 
-    // Create second test user
-    const { data: userData2, error: userError2 } = await supabase.auth.signUp({
+    // Create and configure client for user 2
+    testUser2Client = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      }
+    })
+
+    // Sign up user 2 - triggers auto-creation of user_profiles
+    const { data: userData2, error: userError2 } = await testUser2Client.auth.signUp({
       email: testEmail2,
       password: testPassword,
     })
 
     if (userError2) throw userError2
     testUser2 = userData2.user
-
-    // Create authenticated clients for each user
-    testUser1Client = createClient<Database>(supabaseUrl, supabaseAnonKey)
-    testUser2Client = createClient<Database>(supabaseUrl, supabaseAnonKey)
-
-    // Sign in both users
-    await testUser1Client.auth.signInWithPassword({
-      email: testEmail1,
-      password: testPassword,
-    })
-
-    await testUser2Client.auth.signInWithPassword({
-      email: testEmail2,
-      password: testPassword,
-    })
-
-    // Insert users into the user_profiles table (required for foreign key constraints)
-    if (testUser1) {
-      await testUser1Client.from('user_profiles').insert({
-        id: testUser1.id,
-        email: testUser1.email,
-      })
-    }
-
-    if (testUser2) {
-      await testUser2Client.from('user_profiles').insert({
-        id: testUser2.id,
-        email: testUser2.email,
-      })
-    }
   })
 
   afterEach(async () => {

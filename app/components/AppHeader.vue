@@ -53,8 +53,14 @@ const userMenuItems = computed(() => [
   <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
     <div class="container flex h-14 items-center">
       <div class="mr-4 flex">
-        <NuxtLink to="/" class="mr-6 flex items-center space-x-2">
-          <UIcon name="i-lucide-timer" class="h-6 w-6" />
+        <NuxtLink
+          to="/"
+          class="mr-6 flex items-center space-x-2"
+        >
+          <UIcon
+            name="i-lucide-timer"
+            class="h-6 w-6"
+          />
           <span class="font-bold">LifeStint</span>
         </NuxtLink>
 
@@ -84,10 +90,21 @@ const userMenuItems = computed(() => [
           >
             Stints
           </NuxtLink>
+          <NuxtLink
+            to="/analytics"
+            class="transition-colors hover:text-foreground/80"
+            active-class="text-foreground"
+            inactive-class="text-foreground/60"
+          >
+            Analytics
+          </NuxtLink>
         </nav>
       </div>
 
       <div class="flex flex-1 items-center justify-end space-x-2">
+        <!-- Connection Status -->
+        <ConnectionStatus />
+
         <!-- Theme Toggle -->
         <UButton
           :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'"
@@ -116,7 +133,10 @@ const userMenuItems = computed(() => [
 
           <template #account>
             <div class="text-left">
-              <p v-if="userProfile?.fullName" class="font-medium text-sm">
+              <p
+                v-if="userProfile?.fullName"
+                class="font-medium text-sm"
+              >
                 {{ userProfile.fullName }}
               </p>
               <p class="truncate text-xs text-gray-600 dark:text-gray-400">
