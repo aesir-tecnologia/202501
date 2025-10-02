@@ -11,11 +11,7 @@ import {
   stintCompletionSchema,
   type StintStartPayload,
 } from '~/schemas/stints'
-
-export interface OptimisticResult<T> {
-  data: T | null
-  error: Error | null
-}
+import type { OptimisticResult } from '~/types/optimistic'
 
 /**
  * Composable providing optimistic mutation helpers for stint lifecycle operations.

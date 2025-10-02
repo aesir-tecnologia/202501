@@ -50,8 +50,8 @@ const userMenuItems = computed(() => [
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-    <div class="container flex h-14 items-center">
+  <header class="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-950/60">
+    <UContainer class="flex h-14 items-center">
       <div class="mr-4 flex">
         <NuxtLink
           to="/"
@@ -68,33 +68,33 @@ const userMenuItems = computed(() => [
         <nav class="flex items-center space-x-6 text-sm font-medium">
           <NuxtLink
             to="/dashboard"
-            class="transition-colors hover:text-foreground/80"
-            active-class="text-foreground"
-            inactive-class="text-foreground/60"
+            class="transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+            active-class="text-gray-900 dark:text-gray-100"
+            inactive-class="text-gray-600 dark:text-gray-400"
           >
             Dashboard
           </NuxtLink>
           <NuxtLink
             to="/projects"
-            class="transition-colors hover:text-foreground/80"
-            active-class="text-foreground"
-            inactive-class="text-foreground/60"
+            class="transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+            active-class="text-gray-900 dark:text-gray-100"
+            inactive-class="text-gray-600 dark:text-gray-400"
           >
             Projects
           </NuxtLink>
           <NuxtLink
             to="/stints"
-            class="transition-colors hover:text-foreground/80"
-            active-class="text-foreground"
-            inactive-class="text-foreground/60"
+            class="transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+            active-class="text-gray-900 dark:text-gray-100"
+            inactive-class="text-gray-600 dark:text-gray-400"
           >
             Stints
           </NuxtLink>
           <NuxtLink
             to="/analytics"
-            class="transition-colors hover:text-foreground/80"
-            active-class="text-foreground"
-            inactive-class="text-foreground/60"
+            class="transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+            active-class="text-gray-900 dark:text-gray-100"
+            inactive-class="text-gray-600 dark:text-gray-400"
           >
             Analytics
           </NuxtLink>
@@ -156,32 +156,7 @@ const userMenuItems = computed(() => [
           Sign In
         </UButton>
       </div>
-    </div>
+    </UContainer>
   </header>
 </template>
 
-<style scoped>
-.container {
-  @apply max-w-screen-2xl mx-auto px-4;
-}
-
-.bg-background {
-  @apply bg-white dark:bg-gray-950;
-}
-
-.text-foreground {
-  @apply text-gray-900 dark:text-gray-100;
-}
-
-.text-foreground\/60 {
-  @apply text-gray-600 dark:text-gray-400;
-}
-
-.text-foreground\/80 {
-  @apply text-gray-700 dark:text-gray-300;
-}
-
-.border-b {
-  @apply border-gray-200 dark:border-gray-800;
-}
-</style>

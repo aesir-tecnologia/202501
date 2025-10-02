@@ -13,11 +13,7 @@ import {
   type ProjectCreatePayload,
   type ProjectUpdatePayload,
 } from '~/schemas/projects'
-
-export interface OptimisticResult<T> {
-  data: T | null
-  error: Error | null
-}
+import type { OptimisticResult } from '~/types/optimistic'
 
 /**
  * Transforms camelCase payload to snake_case for database operations
