@@ -28,6 +28,7 @@
           >FAQ</a>
         </nav>
         <div class="flex items-center gap-3">
+          <UColorModeButton />
           <template v-if="user">
             <a
               href="/dashboard"
