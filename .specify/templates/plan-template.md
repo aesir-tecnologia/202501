@@ -47,7 +47,58 @@
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+### Architecture Compliance
+- [ ] Follows three-layer pattern (Database → Schema → Composable)
+- [ ] Database layer uses TypedSupabaseClient and requireUserId()
+- [ ] Schema layer uses Zod with camelCase and exports SCHEMA_LIMITS
+- [ ] Composable layer implements optimistic updates with rollback
+
+### Testing Strategy
+- [ ] TDD approach planned (tests before implementation)
+- [ ] Unit tests identified for pure logic
+- [ ] Database tests planned for RLS policies
+- [ ] Component tests planned for Vue components
+- [ ] Test coverage target ≥80% per layer
+
+### Type Safety
+- [ ] Database types will be auto-generated via supabase:types
+- [ ] Zod schemas defined with TypeScript inference
+- [ ] camelCase ↔ snake_case transformation via toDbPayload()
+- [ ] No any types (or justified in complexity tracking)
+- [ ] All exported functions have explicit return types
+
+### UX Consistency
+- [ ] Uses Nuxt UI 4 components (no duplicates)
+- [ ] Icons from bundled Lucide/Heroicons only
+- [ ] Dark mode via Tailwind dark: variants
+- [ ] Loading states for all async operations
+- [ ] User-friendly, actionable error messages
+- [ ] Immediate validation feedback on forms
+
+### Performance Requirements
+- [ ] SSG build estimated <60s
+- [ ] FCP target <1.5s on 3G
+- [ ] TTI target <3s on 3G
+- [ ] Route transitions <200ms
+- [ ] Database queries use indexes, <100ms p95
+- [ ] Bundle size increase justified (max +50KB)
+
+### Security & Privacy
+- [ ] RLS policies tested in tests/database/
+- [ ] Only SUPABASE_ANON_KEY used (no service role)
+- [ ] Protected routes use auth.ts middleware
+- [ ] User data scoped via requireUserId()
+- [ ] Auth state validated before data ops
+- [ ] No sensitive data in client state/logs
+
+### Code Quality
+- [ ] ESLint configuration followed
+- [ ] All tests pass before commit
+- [ ] Functions >20 lines justified or refactored
+- [ ] No duplication (3+ occurrences extracted)
+- [ ] Naming follows conventions (camelCase/snake_case/PascalCase)
+
+**Constitution Reference**: v1.0.0 (see `.specify/memory/constitution.md`)
 
 ## Project Structure
 
@@ -216,4 +267,4 @@ directories captured above]
 - [ ] Complexity deviations documented
 
 ---
-*Based on Constitution v2.1.1 - See `/memory/constitution.md`*
+*Based on Constitution v1.0.0 - See `.specify/memory/constitution.md`*
