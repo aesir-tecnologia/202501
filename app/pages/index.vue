@@ -608,13 +608,13 @@ useSeoMeta({
 
 const user = useSupabaseUser()
 
-const runtimeConfig = useRuntimeConfig()
-const appConfig = useAppConfig()
-
-if (import.meta.dev) {
-  console.log('runtimeConfig', runtimeConfig)
-  console.log('appConfig', appConfig)
-}
+// const runtimeConfig = useRuntimeConfig()
+// const appConfig = useAppConfig()
+//
+// if (import.meta.dev) {
+//   console.log('runtimeConfig', runtimeConfig)
+//   console.log('appConfig', appConfig)
+// }
 </script>
 
 <style>
