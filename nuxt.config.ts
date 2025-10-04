@@ -1,27 +1,3 @@
-const LOCAL_SUPABASE_URL = 'http://127.0.0.1:54321'
-const LOCAL_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
-
-const PLACEHOLDER_URL = 'https://your-project-id.supabase.co'
-const PLACEHOLDER_ANON_KEY = 'your_supabase_anon_key_here'
-
-function resolveSupabaseSetting(value: string | undefined, placeholder: string, fallback: string) {
-  if (!value || value === placeholder) {
-    return fallback
-  }
-  return value
-}
-
-const supabaseUrl = resolveSupabaseSetting(
-  process.env.SUPABASE_URL || process.env.NUXT_PUBLIC_SUPABASE_URL,
-  PLACEHOLDER_URL,
-  LOCAL_SUPABASE_URL,
-)
-const supabaseAnonKey = resolveSupabaseSetting(
-  process.env.SUPABASE_ANON_KEY || process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY,
-  PLACEHOLDER_ANON_KEY,
-  LOCAL_SUPABASE_ANON_KEY,
-)
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
@@ -30,25 +6,25 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxtjs/supabase',
   ],
+  ssr: true,
   pages: true,
   devtools: { enabled: true },
-  // Content Security Policy
   app: {
     head: {
       meta: [
-        {
-          'http-equiv': 'Content-Security-Policy',
-          'content': `
-            default-src 'self';
-            script-src 'self' 'unsafe-inline' 'unsafe-eval';
-            style-src 'self' 'unsafe-inline';
-            img-src 'self' data: https:;
-            font-src 'self' data:;
-            connect-src 'self' http://127.0.0.1:54321 http://localhost:54321 https://*.supabase.co wss://*.supabase.co;
-            frame-ancestors 'none';
-            base-uri 'self';
-          `.replace(/\s+/g, ' ').trim(),
-        },
+        // {
+        //   'http-equiv': 'Content-Security-Policy',
+        //   'content': `
+        //     default-src 'self';
+        //     script-src 'self' 'unsafe-inline' 'unsafe-eval';
+        //     style-src 'self' 'unsafe-inline';
+        //     img-src 'self' data: https:;
+        //     font-src 'self' data:;
+        //     connect-src 'self' http://127.0.0.1:54321 http://localhost:54321 https://*.supabase.co wss://*.supabase.co;
+        //     frame-ancestors 'none';
+        //     base-uri 'self';
+        //   `.replace(/\s+/g, ' ').trim(),
+        // },
       ],
     },
   },
@@ -65,15 +41,30 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       supabase: {
-        url: supabaseUrl,
-        key: supabaseAnonKey,
+        url: process.env.SUPABASE_URL,
+        key: process.env.SUPABASE_ANON_KEY,
       },
     },
   },
   compatibilityDate: '2025-07-15',
-  // Security headers configuration
   nitro: {
+    preset: 'static',
+    prerender: {
+      crawlLinks: true,
+      routes: [
+        '/',
+        '/auth/login',
+        '/auth/register',
+        '/auth/forgot-password',
+        '/auth/reset-password',
+        '/auth/verify-email',
+        '/design-showcase',
+      ],
+      ignore: ['/dashboard', '/dashboard/**', '/auth/callback', '/api/**'],
+    },
     routeRules: {
+      '/dashboard/**': { ssr: false },
+      '/auth/callback': { ssr: false },
       '/**': {
         headers: {
           'X-Content-Type-Options': 'nosniff',
@@ -85,16 +76,28 @@ export default defineNuxtConfig({
       },
     },
   },
+  vite: {
+    build: {
+      sourcemap: false,
+    },
+  },
   eslint: {
     config: {
       stylistic: true,
     },
+  },
+  icon: {
+    serverBundle: {
+      collections: ['lucide', 'heroicons'],
+    },
+    fallbackToApi: false,
   },
   supabase: {
     redirectOptions: {
       login: '/auth/login',
       callback: '/auth/callback',
       exclude: ['/', '/auth/*'],
+      cookieRedirect: false,
     },
   },
 })

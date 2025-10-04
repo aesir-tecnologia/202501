@@ -9,6 +9,7 @@ const displayName = computed(() => {
 
 definePageMeta({
   title: 'Dashboard',
+  middleware: 'auth',
 })
 
 useSeoMeta({

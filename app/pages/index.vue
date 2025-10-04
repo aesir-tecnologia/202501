@@ -427,10 +427,14 @@
               </div>
             </div>
             <div class="flex gap-3">
-              <a
-                href="#"
-                class="rounded-lg bg-brand-500 hover:bg-brand-600 px-5 py-2.5 font-semibold shadow-focus"
-              >Create account</a>
+              <UButton
+                to="/auth/register"
+                color="primary"
+                size="lg"
+                class="shadow-focus"
+              >
+                Create account
+              </UButton>
               <a
                 href="#"
                 class="rounded-lg bg-white/10 hover:bg-white/20 px-5 py-2.5 font-medium"

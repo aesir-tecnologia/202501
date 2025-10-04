@@ -12,83 +12,122 @@
         </div>
 
         <UCard class="p-8 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-          <UForm
-            :schema="resetPasswordSchema"
-            :state="state"
-            class="space-y-6"
-            @submit="handleResetPassword"
+          <div
+            v-if="!sessionChecked"
+            class="space-y-4 text-center"
           >
-            <UFormField
-              label="New Password"
-              name="password"
-              required
-            >
-              <UInput
-                v-model="state.password"
-                type="password"
-                placeholder="Enter your new password"
-                autocomplete="new-password"
-                :disabled="loading"
-              />
-              <template #hint>
-                <div class="text-xs text-gray-500 mt-1 dark:text-gray-400">
-                  Password must be at least 8 characters with uppercase, lowercase, number, and special character
-                </div>
-              </template>
-            </UFormField>
-
-            <UFormField
-              label="Confirm New Password"
-              name="confirmPassword"
-              required
-            >
-              <UInput
-                v-model="state.confirmPassword"
-                type="password"
-                placeholder="Confirm your new password"
-                autocomplete="new-password"
-                :disabled="loading"
-              />
-            </UFormField>
-
-            <UButton
-              type="submit"
-              :loading="loading"
-              :disabled="loading"
-              class="w-full"
-              size="lg"
-            >
-              {{ loading ? 'Updating password...' : 'Update password' }}
-            </UButton>
-          </UForm>
-
-          <div class="text-center mt-6 text-gray-600 dark:text-gray-300">
-            <NuxtLink
-              to="/auth/login"
-              class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-            >
-              Back to sign in
-            </NuxtLink>
+            <UIcon
+              name="i-heroicons-arrow-path"
+              class="w-8 h-8 mx-auto text-primary-600 animate-spin dark:text-primary-400"
+            />
+            <p class="text-gray-600 dark:text-gray-300">
+              Verifying reset link...
+            </p>
           </div>
 
-          <UAlert
-            v-if="error"
-            icon="i-heroicons-exclamation-triangle"
-            color="red"
-            variant="soft"
-            :title="error"
-            class="mt-4"
-          />
+          <div
+            v-else-if="!hasValidSession"
+            class="space-y-4 text-center"
+          >
+            <UIcon
+              name="i-heroicons-exclamation-triangle"
+              class="w-8 h-8 mx-auto text-red-500 dark:text-red-400"
+            />
+            <UAlert
+              icon="i-heroicons-exclamation-triangle"
+              color="red"
+              variant="soft"
+              :title="error"
+            />
+            <div class="text-center mt-6">
+              <NuxtLink
+                to="/auth/forgot-password"
+                class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                Request a new password reset
+              </NuxtLink>
+            </div>
+          </div>
 
-          <UAlert
-            v-if="success"
-            icon="i-heroicons-check-circle"
-            color="green"
-            variant="soft"
-            :title="success"
-            :description="successDescription"
-            class="mt-4"
-          />
+          <template v-else>
+            <UForm
+              :schema="resetPasswordSchema"
+              :state="state"
+              class="space-y-6"
+              @submit="handleResetPassword"
+            >
+              <UFormField
+                label="New Password"
+                name="password"
+                required
+              >
+                <UInput
+                  v-model="state.password"
+                  type="password"
+                  placeholder="Enter your new password"
+                  autocomplete="new-password"
+                  :disabled="loading"
+                />
+                <template #hint>
+                  <div class="text-xs text-gray-500 mt-1 dark:text-gray-400">
+                    Password must be at least 8 characters with uppercase, lowercase, number, and special character
+                  </div>
+                </template>
+              </UFormField>
+
+              <UFormField
+                label="Confirm New Password"
+                name="confirmPassword"
+                required
+              >
+                <UInput
+                  v-model="state.confirmPassword"
+                  type="password"
+                  placeholder="Confirm your new password"
+                  autocomplete="new-password"
+                  :disabled="loading"
+                />
+              </UFormField>
+
+              <UButton
+                type="submit"
+                :loading="loading"
+                :disabled="loading"
+                class="w-full"
+                size="lg"
+              >
+                {{ loading ? 'Updating password...' : 'Update password' }}
+              </UButton>
+            </UForm>
+
+            <div class="text-center mt-6 text-gray-600 dark:text-gray-300">
+              <NuxtLink
+                to="/auth/login"
+                class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                Back to sign in
+              </NuxtLink>
+            </div>
+
+            <UAlert
+              v-if="error"
+              icon="i-heroicons-exclamation-triangle"
+              color="red"
+              variant="soft"
+              :title="error"
+              class="mt-4"
+            />
+
+            <UAlert
+              v-if="success"
+              icon="i-heroicons-check-circle"
+              color="green"
+              variant="soft"
+              :title="success"
+              :description="successDescription"
+              class="mt-4"
+            />
+          </template>
         </UCard>
       </div>
     </div>
@@ -144,17 +183,28 @@ const successDescription = ref('')
 // Supabase client
 const supabase = useSupabaseClient()
 
-// Check if user has valid session for password reset
-const { data: session } = await supabase.auth.getSession()
-const hasValidSession = computed(() => Boolean(session?.session))
+// Check if user has valid session for password reset (client-side only for SSG)
+const hasValidSession = ref(false)
+const sessionChecked = ref(false)
 
-// Redirect if no valid session
-if (!hasValidSession.value) {
-  throw createError({
-    statusCode: 401,
-    statusMessage: 'Invalid or expired reset link. Please request a new password reset.',
-  })
-}
+// Check session on client-side only
+onMounted(async () => {
+  try {
+    const { data: session } = await supabase.auth.getSession()
+    hasValidSession.value = Boolean(session?.session)
+
+    if (!hasValidSession.value) {
+      error.value = 'Invalid or expired reset link. Please request a new password reset.'
+    }
+  }
+  catch (err) {
+    console.error('Session check error:', err)
+    error.value = 'Unable to verify reset session. Please try again.'
+  }
+  finally {
+    sessionChecked.value = true
+  }
+})
 
 // Handle form submission
 async function handleResetPassword(event: FormSubmitEvent<ResetPasswordSchema>) {
