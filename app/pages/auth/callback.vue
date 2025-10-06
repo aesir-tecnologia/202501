@@ -35,7 +35,7 @@ async function handleAuthCallback() {
       const callbackCode = route.query.code
 
       // Handle email confirmation or password reset
-      if (callbackCode) {
+      if (callbackCode && typeof callbackCode === 'string') {
         const hashParams = new URLSearchParams(callbackCode.substring(1))
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')

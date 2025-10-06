@@ -140,7 +140,7 @@
           <UAlert
             v-if="error"
             icon="i-heroicons-exclamation-triangle"
-            color="red"
+            color="error"
             variant="soft"
             :title="error"
             class="mt-4"
@@ -149,7 +149,7 @@
           <UAlert
             v-if="success"
             icon="i-heroicons-check-circle"
-            color="green"
+            color="success"
             variant="soft"
             :title="success"
             :description="successDescription"
@@ -165,13 +165,11 @@
 import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
-// Page meta
 definePageMeta({
   layout: false,
   middleware: 'guest',
 })
 
-// SEO
 useSeoMeta({
   title: 'Sign Up - LifeStint',
   description: 'Create your LifeStint account to start tracking your focus sessions and boost your productivity.',
@@ -194,7 +192,7 @@ const registerSchema = z.object({
     .regex(passwordRegex, 'Password must contain uppercase, lowercase, number, and special character'),
   confirmPassword: z.string(),
   acceptTerms: z.boolean()
-    .refine(val => val === true, 'You must accept the terms and conditions'),
+    .refine(val => val, 'You must accept the terms and conditions'),
   emailNotifications: z.boolean().optional(),
 }).refine(
   data => data.password === data.confirmPassword,
@@ -229,7 +227,7 @@ const user = useSupabaseUser()
 // Redirect if already logged in
 watch(user, (newUser) => {
   if (newUser) {
-    navigateTo('/')
+    navigateTo('/dashboard')
   }
 })
 
@@ -264,7 +262,7 @@ async function handleRegister(event: FormSubmitEvent<RegisterSchema>) {
         successDescription.value = 'You are now signed in. Redirecting to dashboard...'
 
         setTimeout(() => {
-          navigateTo('/')
+          navigateTo('/dashboard')
         }, 2000)
       }
       else {
