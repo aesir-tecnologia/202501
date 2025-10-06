@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import type { Database } from '~/types/database.types'
 import { createProject } from '~/lib/supabase/projects'
 import { createTestUser } from '../../setup'
 

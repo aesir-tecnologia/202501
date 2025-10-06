@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { createClient } from '@supabase/supabase-js'
+import type { createClient } from '@supabase/supabase-js'
 import type { Database } from '~/types/database.types'
 import { createProject } from '~/lib/supabase/projects'
 import { createTestUser } from '../../setup'
@@ -16,15 +16,15 @@ import { createTestUser } from '../../setup'
  * This test documents the expected behavior.
  */
 
-const supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321'
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key'
+const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321'
+const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key'
 
 type TestClient = ReturnType<typeof createClient<Database>>
 
 // Placeholder function - will be implemented in Phase 3.3
 async function updateProjectSortOrder(
-  client: TestClient,
-  updates: Array<{ id: string, sortOrder: number }>,
+  _client: TestClient,
+  _updates: Array<{ id: string, sortOrder: number }>,
 ): Promise<{ data: null, error: Error | null }> {
   // TODO: Implement in Phase 3.3
   return { data: null, error: null }
@@ -58,7 +58,7 @@ describe('updateProjectSortOrder Contract', () => {
       { id: p1!.id, sortOrder: 2 },
     ]
 
-    const { error } = await updateProjectSortOrder(testUser1Client, updates)
+    const { error: _error } = await updateProjectSortOrder(testUser1Client, updates)
 
     // TODO: Uncomment when implemented
     // expect(error).toBeNull()
@@ -79,7 +79,7 @@ describe('updateProjectSortOrder Contract', () => {
   it('should throw error if any project not owned by user', async () => {
     const { data: user2Project } = await createProject(testUser2Client, { name: 'U2P' })
 
-    const updates = [
+    const _updates = [
       { id: user2Project!.id, sortOrder: 0 },
     ]
 

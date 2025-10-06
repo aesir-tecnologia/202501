@@ -26,7 +26,7 @@ describe('getProject Contract', () => {
   let testUser1Client: TestClient
   let testUser2Client: TestClient
   let testUser1: { id: string, email: string } | null
-  let testUser2: { id: string, email: string } | null
+  let _testUser2: { id: string, email: string } | null
 
   beforeEach(async () => {
     const testUser1Data = await createTestUser()
@@ -35,7 +35,7 @@ describe('getProject Contract', () => {
 
     const testUser2Data = await createTestUser()
     testUser2Client = testUser2Data.client
-    testUser2 = testUser2Data.user
+    _testUser2 = testUser2Data.user
   })
 
   afterEach(async () => {

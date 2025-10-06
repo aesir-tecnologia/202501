@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { createClient } from '@supabase/supabase-js'
+import type { createClient } from '@supabase/supabase-js'
 import type { Database } from '~/types/database.types'
 import { createProject, updateProject } from '~/lib/supabase/projects'
 import { createTestUser } from '../../setup'
@@ -14,20 +14,20 @@ import { createTestUser } from '../../setup'
  * - Allows updating to same name (not treated as duplicate)
  */
 
-const supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321'
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key'
+const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321'
+const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key'
 
 type TestClient = ReturnType<typeof createClient<Database>>
 
 describe('updateProject Contract', () => {
   let testUser1Client: TestClient
   let testUser2Client: TestClient
-  let testUser1: { id: string, email: string } | null
+  let _testUser1: { id: string, email: string } | null
 
   beforeEach(async () => {
     const testUser1Data = await createTestUser()
     testUser1Client = testUser1Data.client
-    testUser1 = testUser1Data.user
+    _testUser1 = testUser1Data.user
 
     const testUser2Data = await createTestUser()
     testUser2Client = testUser2Data.client
