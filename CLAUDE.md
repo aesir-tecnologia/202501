@@ -11,10 +11,8 @@ LifeStint is a Nuxt 4 SSG application with Supabase authentication and database.
 ### Development
 ```bash
 npm run dev              # Start dev server (localhost:3000)
-npm run build            # Build for production
 npm run generate         # Generate static site (SSG)
 npm run serve            # Preview generated static site locally
-npm run preview          # Preview built site
 ```
 
 ### Code Quality
