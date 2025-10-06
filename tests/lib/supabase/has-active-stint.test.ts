@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { createClient } from '@supabase/supabase-js'
+import type { createClient } from '@supabase/supabase-js'
 import type { Database } from '~/types/database.types'
 import { createProject, hasActiveStint } from '~/lib/supabase/projects'
 import { createTestUser } from '../../setup'
@@ -13,8 +13,8 @@ import { createTestUser } from '../../setup'
  * - Returns false if only completed stints exist
  */
 
-const supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321'
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key'
+const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321'
+const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key'
 
 type TestClient = ReturnType<typeof createClient<Database>>
 
