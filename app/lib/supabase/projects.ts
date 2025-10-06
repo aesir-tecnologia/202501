@@ -32,9 +32,6 @@ async function requireUserId(client: TypedSupabaseClient): Promise<Result<string
   return { data: data.user.id, error: null }
 }
 
-/**
- * T018: List all projects for the authenticated user, ordered by sort_order
- */
 export async function listProjects(client: TypedSupabaseClient): Promise<Result<ProjectRow[]>> {
   const userResult = await requireUserId(client)
   if (userResult.error) return { data: null, error: userResult.error }
@@ -42,17 +39,13 @@ export async function listProjects(client: TypedSupabaseClient): Promise<Result<
   const { data, error } = await client
     .from('projects')
     .select('*')
-    .eq('user_id', userResult.data)
+    .eq('user_id', userResult.data!)
     .order('sort_order', { ascending: true })
 
   if (error) return { data: null, error }
   return { data: data || [], error: null }
 }
 
-/**
- * T019: Get a single project by ID with RLS enforcement
- * @param projectId - Can be string (UUID) or number (bigint)
- */
 export async function getProject(
   client: TypedSupabaseClient,
   projectId: string | number,
@@ -63,8 +56,8 @@ export async function getProject(
   const { data, error } = await client
     .from('projects')
     .select('*')
-    .eq('user_id', userResult.data)
-    .eq('id', projectId)
+    .eq('user_id', userResult.data!)
+    .eq('id', String(projectId))
     .maybeSingle<ProjectRow>()
 
   if (error) return { data: null, error }
@@ -81,10 +74,6 @@ export async function getProjectById(
   return getProject(client, projectId)
 }
 
-/**
- * T020: Create a new project with duplicate name handling
- * sort_order is auto-assigned by database default
- */
 export async function createProject(
   client: TypedSupabaseClient,
   payload: CreateProjectPayload,
@@ -96,7 +85,7 @@ export async function createProject(
     .from('projects')
     .insert({
       ...payload,
-      user_id: userResult.data,
+      user_id: userResult.data!,
     })
     .select('*')
     .single<ProjectRow>()
@@ -112,9 +101,6 @@ export async function createProject(
   return { data, error: null }
 }
 
-/**
- * T021: Update a project with duplicate name handling
- */
 export async function updateProject(
   client: TypedSupabaseClient,
   projectId: string | number,
@@ -126,8 +112,8 @@ export async function updateProject(
   const { data, error } = await client
     .from('projects')
     .update(updates)
-    .eq('user_id', userResult.data)
-    .eq('id', projectId)
+    .eq('user_id', userResult.data!)
+    .eq('id', String(projectId))
     .select('*')
     .single<ProjectRow>()
 
@@ -142,10 +128,6 @@ export async function updateProject(
   return { data, error: null }
 }
 
-/**
- * T022: Delete a project with active stint check
- * Returns error if active stint exists or project not found/owned
- */
 export async function deleteProject(
   client: TypedSupabaseClient,
   projectId: string | number,
@@ -164,8 +146,8 @@ export async function deleteProject(
   const { data: activeStints } = await client
     .from('stints')
     .select('id')
-    .eq('project_id', projectId)
-    .eq('user_id', userResult.data)
+    .eq('project_id', String(projectId))
+    .eq('user_id', userResult.data!)
     .is('ended_at', null)
     .limit(1)
 
@@ -177,17 +159,13 @@ export async function deleteProject(
   const { error } = await client
     .from('projects')
     .delete()
-    .eq('user_id', userResult.data)
-    .eq('id', projectId)
+    .eq('user_id', userResult.data!)
+    .eq('id', String(projectId))
 
   if (error) return { data: null, error }
   return { data: null, error: null }
 }
 
-/**
- * T023: Batch update sort_order for multiple projects
- * Used for drag-and-drop reordering
- */
 export async function updateProjectSortOrder(
   client: TypedSupabaseClient,
   updates: Array<{ id: string | number, sortOrder: number }>,
@@ -200,8 +178,8 @@ export async function updateProjectSortOrder(
     client
       .from('projects')
       .update({ sort_order: sortOrder })
-      .eq('id', id)
-      .eq('user_id', userResult.data),
+      .eq('id', String(id))
+      .eq('user_id', userResult.data!),
   )
 
   const results = await Promise.all(promises)
@@ -215,10 +193,6 @@ export async function updateProjectSortOrder(
   return { data: null, error: null }
 }
 
-/**
- * T024: Check if a project has an active stint
- * Returns true if any stint has ended_at IS NULL
- */
 export async function hasActiveStint(
   client: TypedSupabaseClient,
   projectId: string | number,
@@ -229,8 +203,8 @@ export async function hasActiveStint(
   const { data, error } = await client
     .from('stints')
     .select('id')
-    .eq('project_id', projectId)
-    .eq('user_id', userResult.data)
+    .eq('project_id', String(projectId))
+    .eq('user_id', userResult.data!)
     .is('ended_at', null)
     .limit(1)
 
