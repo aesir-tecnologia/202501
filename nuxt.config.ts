@@ -9,6 +9,9 @@ export default defineNuxtConfig({
   ssr: true,
   pages: true,
   devtools: { enabled: true },
+  devServer: {
+    port: 3005,
+  },
   app: {
     head: {
       meta: [
