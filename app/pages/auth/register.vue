@@ -222,7 +222,7 @@ const successDescription = ref('')
 
 // Supabase client
 const supabase = useSupabaseClient()
-const user = useSupabaseUser()
+const user = useAuthUser()
 
 // Redirect if already logged in
 watch(user, (newUser) => {
@@ -256,7 +256,10 @@ async function handleRegister(event: FormSubmitEvent<RegisterSchema>) {
     }
 
     if (data.user) {
-      if (data.user.email_confirmed_at) {
+      // Check if email is confirmed by looking at the user state
+      // Note: Need to check Supabase user directly as useAuthUser transforms it
+      const supabaseUserDirect = useSupabaseUser()
+      if (supabaseUserDirect.value?.email_confirmed_at) {
         // Auto-confirmed (development mode)
         success.value = 'Account created successfully!'
         successDescription.value = 'You are now signed in. Redirecting to dashboard...'

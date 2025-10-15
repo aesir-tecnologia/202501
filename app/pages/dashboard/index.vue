@@ -13,11 +13,11 @@ useSeoMeta({
   description: 'Review your focus progress and personalized insights.',
 })
 
-const user = useSupabaseUser()
+const user = useAuthUser()
 const client = useSupabaseClient()
 
 const displayName = computed(() => {
-  return user.value?.user_metadata?.full_name || user.value?.email || 'there'
+  return user.value?.fullName || user.value?.email || 'there'
 })
 
 // Project management state
@@ -121,7 +121,7 @@ function openDeleteModal(project: ProjectRow) {
             </li>
             <li>
               <span class="font-medium text-gray-900 dark:text-gray-100">Full Name:</span>
-              {{ user?.user_metadata?.full_name || 'Not provided' }}
+              {{ user?.fullName || 'Not provided' }}
             </li>
           </ul>
         </div>
