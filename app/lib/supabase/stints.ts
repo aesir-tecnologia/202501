@@ -17,30 +17,37 @@ export type StintUpdate = Database['public']['Tables']['stints']['Update']
 export type CreateStintPayload = Omit<StintInsert, 'user_id'>
 export type UpdateStintPayload = Omit<StintUpdate, 'user_id' | 'id'>
 
+export type Result<T> = {
+  data: T | null
+  error: Error | null
+}
+
 interface ListStintsOptions {
   projectId?: string
   activeOnly?: boolean
 }
 
-async function requireUserId(client: TypedSupabaseClient): Promise<string> {
+async function requireUserId(client: TypedSupabaseClient): Promise<Result<string>> {
   const { data, error } = await client.auth.getUser()
 
   if (error || !data?.user) {
-    throw new Error('User must be authenticated to interact with stints')
+    return { data: null, error: new Error('User must be authenticated to interact with stints') }
   }
 
-  return data.user.id
+  return { data: data.user.id, error: null }
 }
 
 export async function listStints(
   client: TypedSupabaseClient,
   options: ListStintsOptions = {},
-) {
-  const userId = await requireUserId(client)
+): Promise<Result<StintRow[]>> {
+  const userResult = await requireUserId(client)
+  if (userResult.error) return { data: null, error: userResult.error }
+
   let query = client
     .from('stints')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', userResult.data!)
     .order('started_at', { ascending: false })
 
   if (options.projectId) {
@@ -51,75 +58,101 @@ export async function listStints(
     query = query.eq('is_completed', false).is('ended_at', null)
   }
 
-  return query
+  const { data, error } = await query
+
+  if (error) return { data: null, error }
+  return { data: data || [], error: null }
 }
 
 export async function getStintById(
   client: TypedSupabaseClient,
   stintId: string,
-) {
-  const userId = await requireUserId(client)
-  return client
+): Promise<Result<StintRow | null>> {
+  const userResult = await requireUserId(client)
+  if (userResult.error) return { data: null, error: userResult.error }
+
+  const { data, error } = await client
     .from('stints')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', userResult.data!)
     .eq('id', stintId)
     .maybeSingle<StintRow>()
+
+  if (error) return { data: null, error }
+  return { data, error: null }
 }
 
 export async function getActiveStint(
   client: TypedSupabaseClient,
-) {
-  const userId = await requireUserId(client)
-  return client
+): Promise<Result<StintRow | null>> {
+  const userResult = await requireUserId(client)
+  if (userResult.error) return { data: null, error: userResult.error }
+
+  const { data, error } = await client
     .from('stints')
     .select('*')
-    .eq('user_id', userId)
+    .eq('user_id', userResult.data!)
     .eq('is_completed', false)
     .is('ended_at', null)
     .maybeSingle<StintRow>()
+
+  if (error) return { data: null, error }
+  return { data, error: null }
 }
 
 export async function createStint(
   client: TypedSupabaseClient,
   payload: CreateStintPayload,
-) {
-  const userId = await requireUserId(client)
-  return client
+): Promise<Result<StintRow>> {
+  const userResult = await requireUserId(client)
+  if (userResult.error) return { data: null, error: userResult.error }
+
+  const { data, error } = await client
     .from('stints')
     .insert({
       ...payload,
-      user_id: userId,
+      user_id: userResult.data!,
     })
     .select('*')
     .single<StintRow>()
+
+  if (error) return { data: null, error }
+  return { data, error: null }
 }
 
 export async function updateStint(
   client: TypedSupabaseClient,
   stintId: string,
   updates: UpdateStintPayload,
-) {
-  const userId = await requireUserId(client)
-  return client
+): Promise<Result<StintRow>> {
+  const userResult = await requireUserId(client)
+  if (userResult.error) return { data: null, error: userResult.error }
+
+  const { data, error } = await client
     .from('stints')
     .update(updates)
-    .eq('user_id', userId)
+    .eq('user_id', userResult.data!)
     .eq('id', stintId)
     .select('*')
     .single<StintRow>()
+
+  if (error) return { data: null, error }
+  return { data, error: null }
 }
 
 export async function deleteStint(
   client: TypedSupabaseClient,
   stintId: string,
-) {
-  const userId = await requireUserId(client)
-  return client
+): Promise<Result<void>> {
+  const userResult = await requireUserId(client)
+  if (userResult.error) return { data: null, error: userResult.error }
+
+  const { error } = await client
     .from('stints')
     .delete()
-    .eq('user_id', userId)
+    .eq('user_id', userResult.data!)
     .eq('id', stintId)
-    .select('*')
-    .maybeSingle<StintRow>()
+
+  if (error) return { data: null, error }
+  return { data: null, error: null }
 }

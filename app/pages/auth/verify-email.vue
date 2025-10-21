@@ -59,7 +59,7 @@
             <UAlert
               v-if="resendError"
               icon="i-heroicons-exclamation-triangle"
-              color="red"
+              color="error"
               variant="soft"
               :title="resendError"
               class="mt-4"
@@ -68,7 +68,7 @@
             <UAlert
               v-if="resendSuccess"
               icon="i-heroicons-check-circle"
-              color="green"
+              color="success"
               variant="soft"
               :title="resendSuccess"
               class="mt-4"

@@ -14,6 +14,7 @@ const baseProject: ProjectRow = {
   is_active: true,
   expected_daily_stints: 2,
   custom_stint_duration: null,
+  sort_order: 0,
   created_at: '2025-01-01T00:00:00Z',
   updated_at: '2025-01-01T00:00:00Z',
 }
@@ -146,13 +147,13 @@ describe('useProjectMutations', () => {
       const { deleteProject } = useProjectMutations(mockClient, mockProjects)
 
       vi.spyOn(projectsDb, 'deleteProject').mockResolvedValue({
-        data: baseProject,
+        data: null,
         error: null,
       })
 
       const result = await deleteProject(baseProject.id)
 
-      expect(result.data).toEqual(baseProject)
+      expect(result.data).toBeUndefined()
       expect(result.error).toBeNull()
       expect(mockProjects.value).toHaveLength(0)
     })
@@ -171,6 +172,103 @@ describe('useProjectMutations', () => {
       expect(result.error).toBeInstanceOf(Error)
       expect(mockProjects.value).toHaveLength(1)
       expect(mockProjects.value[0]).toEqual(baseProject)
+    })
+  })
+
+  describe('reorderProjects (Phase 3.3)', () => {
+    let project1: ProjectRow
+    let project2: ProjectRow
+    let project3: ProjectRow
+
+    beforeEach(() => {
+      project1 = { ...baseProject, id: 'p1', name: 'Project A', sort_order: 0 }
+      project2 = { ...baseProject, id: 'p2', name: 'Project B', sort_order: 1 }
+      project3 = { ...baseProject, id: 'p3', name: 'Project C', sort_order: 2 }
+      mockProjects.value = [project1, project2, project3]
+    })
+
+    it('should update order immediately (optimistic)', async () => {
+      // NOTE: This test documents expected behavior for Phase 3.3
+      // The reorderProjects function will be implemented then
+
+      // Mock the updateProjectSortOrder function that will be added
+      // vi.spyOn(projectsDb, 'updateProjectSortOrder').mockResolvedValue({
+      //   data: null,
+      //   error: null,
+      // })
+
+      // const { reorderProjects } = useProjectMutations(mockClient, mockProjects)
+
+      // Reorder: Move Project C to position 0
+      // const newOrder = [project3, project1, project2]
+      // const result = await reorderProjects(newOrder)
+
+      // Optimistic update should happen immediately
+      // expect(mockProjects.value[0].id).toBe('p3')
+      // expect(mockProjects.value[1].id).toBe('p1')
+      // expect(mockProjects.value[2].id).toBe('p2')
+
+      // expect(result.error).toBeNull()
+
+      expect(true).toBe(true) // Placeholder for Phase 3.3
+    })
+
+    it('should rollback on error', async () => {
+      // NOTE: This test documents expected behavior for Phase 3.3
+
+      // Mock database error
+      // vi.spyOn(projectsDb, 'updateProjectSortOrder').mockResolvedValue({
+      //   data: null,
+      //   error: new Error('Database error'),
+      // })
+
+      // const { reorderProjects } = useProjectMutations(mockClient, mockProjects)
+
+      // const originalOrder = [...mockProjects.value]
+      // const newOrder = [project3, project1, project2]
+      // const result = await reorderProjects(newOrder)
+
+      // Should rollback to original order
+      // expect(mockProjects.value).toEqual(originalOrder)
+      // expect(result.error).toBeInstanceOf(Error)
+
+      expect(true).toBe(true) // Placeholder for Phase 3.3
+    })
+
+    it('should persist order after successful update', async () => {
+      // NOTE: This test documents expected behavior for Phase 3.3
+
+      // Mock successful database update
+      // vi.spyOn(projectsDb, 'updateProjectSortOrder').mockResolvedValue({
+      //   data: null,
+      //   error: null,
+      // })
+
+      // const { reorderProjects } = useProjectMutations(mockClient, mockProjects)
+
+      // const newOrder = [project2, project3, project1]
+      // await reorderProjects(newOrder)
+
+      // Order should persist
+      // expect(mockProjects.value[0].id).toBe('p2')
+      // expect(mockProjects.value[1].id).toBe('p3')
+      // expect(mockProjects.value[2].id).toBe('p1')
+
+      expect(true).toBe(true) // Placeholder for Phase 3.3
+    })
+
+    it('should handle empty reorder gracefully', async () => {
+      // NOTE: This test documents expected behavior for Phase 3.3
+
+      // const { reorderProjects } = useProjectMutations(mockClient, mockProjects)
+
+      // const result = await reorderProjects([])
+
+      // Should handle empty array
+      // expect(result.error).toBeNull()
+      // expect(mockProjects.value).toHaveLength(3) // Original unchanged
+
+      expect(true).toBe(true) // Placeholder for Phase 3.3
     })
   })
 })

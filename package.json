@@ -9,12 +9,13 @@
     "serve": "npx serve .output/public",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "type-check": "nuxt typecheck",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "supabase:types": "supabase gen app/types --lang=typescript --local > app/types/database.types.ts"
+    "supabase:types": "supabase gen types --local > app/types/database.types.ts"
   },
   "dependencies": {
     "@nuxt/eslint": "^1.9.0",
@@ -22,8 +23,11 @@
     "@nuxt/ui": "^4.0.0",
     "@nuxtjs/supabase": "^1.6.2",
     "@supabase/supabase-js": "^2.57.4",
+    "@vueuse/core": "^13.9.0",
+    "@vueuse/integrations": "^13.9.0",
     "eslint": "^9.36.0",
     "nuxt": "^4.1.2",
+    "sortablejs": "^1.15.6",
     "typescript": "^5.9.2",
     "vue": "^3.5.21",
     "vue-router": "^4.5.1"
@@ -32,6 +36,7 @@
     "@iconify-json/heroicons": "^1.2.3",
     "@iconify-json/lucide": "^1.2.68",
     "task-master-ai": "^0.27.3",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "vue-tsc": "^3.1.0"
   }
 }

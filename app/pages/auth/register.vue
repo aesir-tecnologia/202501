@@ -140,7 +140,7 @@
           <UAlert
             v-if="error"
             icon="i-heroicons-exclamation-triangle"
-            color="red"
+            color="error"
             variant="soft"
             :title="error"
             class="mt-4"
@@ -149,7 +149,7 @@
           <UAlert
             v-if="success"
             icon="i-heroicons-check-circle"
-            color="green"
+            color="success"
             variant="soft"
             :title="success"
             :description="successDescription"
@@ -165,13 +165,11 @@
 import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
-// Page meta
 definePageMeta({
   layout: false,
   middleware: 'guest',
 })
 
-// SEO
 useSeoMeta({
   title: 'Sign Up - LifeStint',
   description: 'Create your LifeStint account to start tracking your focus sessions and boost your productivity.',
@@ -194,7 +192,7 @@ const registerSchema = z.object({
     .regex(passwordRegex, 'Password must contain uppercase, lowercase, number, and special character'),
   confirmPassword: z.string(),
   acceptTerms: z.boolean()
-    .refine(val => val === true, 'You must accept the terms and conditions'),
+    .refine(val => val, 'You must accept the terms and conditions'),
   emailNotifications: z.boolean().optional(),
 }).refine(
   data => data.password === data.confirmPassword,
@@ -224,12 +222,12 @@ const successDescription = ref('')
 
 // Supabase client
 const supabase = useSupabaseClient()
-const user = useSupabaseUser()
+const user = useAuthUser()
 
 // Redirect if already logged in
 watch(user, (newUser) => {
   if (newUser) {
-    navigateTo('/')
+    navigateTo('/dashboard')
   }
 })
 
@@ -258,13 +256,16 @@ async function handleRegister(event: FormSubmitEvent<RegisterSchema>) {
     }
 
     if (data.user) {
-      if (data.user.email_confirmed_at) {
+      // Check if email is confirmed by looking at the user state
+      // Note: Need to check Supabase user directly as useAuthUser transforms it
+      const supabaseUserDirect = useSupabaseUser()
+      if (supabaseUserDirect.value?.email_confirmed_at) {
         // Auto-confirmed (development mode)
         success.value = 'Account created successfully!'
         successDescription.value = 'You are now signed in. Redirecting to dashboard...'
 
         setTimeout(() => {
-          navigateTo('/')
+          navigateTo('/dashboard')
         }, 2000)
       }
       else {

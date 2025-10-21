@@ -161,7 +161,7 @@ describe('stints data helpers', () => {
 
   it('deletes a stint scoped to the user', async () => {
     const builder = createQueryBuilder()
-    builder.maybeSingle.mockResolvedValue({ data: baseStint, error: null })
+    builder.then.mockImplementation(resolve => resolve({ data: null, error: null }))
 
     const { client } = createClient(builder)
     const { data, error } = await deleteStint(client, baseStint.id)
@@ -170,7 +170,7 @@ describe('stints data helpers', () => {
     expect(builder.eq).toHaveBeenNthCalledWith(1, 'user_id', userId)
     expect(builder.eq).toHaveBeenNthCalledWith(2, 'id', baseStint.id)
     expect(error).toBeNull()
-    expect(data).toEqual(baseStint)
+    expect(data).toBeNull()
   })
 
   it('returns an error response when no user session is present', async () => {
@@ -179,6 +179,10 @@ describe('stints data helpers', () => {
 
     const { client } = createClient(builder, { data: { user: null }, error: null })
 
-    await expect(listStints(client)).rejects.toThrow(/authenticated/i)
+    const { data, error } = await listStints(client)
+
+    expect(data).toBeNull()
+    expect(error).toBeInstanceOf(Error)
+    expect(error?.message).toMatch(/authenticated/i)
   })
 })

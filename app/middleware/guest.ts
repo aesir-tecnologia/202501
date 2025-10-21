@@ -9,7 +9,7 @@ export default defineNuxtRouteMiddleware(() => {
     return
   }
 
-  const user = useSupabaseUser()
+  const user = useAuthUser()
 
   // If user is already authenticated, redirect to home
   if (user.value) {
