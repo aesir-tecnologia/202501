@@ -11,4 +11,8 @@ export default withNuxt(
       }],
     },
   },
+  {
+    // Ignore auto-generated files
+    ignores: ['app/types/database.types.ts'],
+  },
 )

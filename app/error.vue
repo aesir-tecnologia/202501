@@ -6,7 +6,7 @@ defineProps({
   error: Object as () => NuxtError,
 })
 
-const user = useSupabaseUser()
+const user = useAuthUser()
 
 const clear: Partial<ButtonProps> = {
   size: 'lg',

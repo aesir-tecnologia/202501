@@ -606,7 +606,7 @@ useSeoMeta({
   description: 'Track your focus sessions and boost productivity with LifeStint.',
 })
 
-const user = useSupabaseUser()
+const user = useAuthUser()
 
 // const runtimeConfig = useRuntimeConfig()
 // const appConfig = useAppConfig()

@@ -176,7 +176,7 @@ watch(() => state.password, () => {
           <UAlert
             v-if="error"
             icon="i-heroicons-exclamation-triangle"
-            color="red"
+            color="error"
             variant="soft"
             :title="error"
             class="mt-4"
@@ -185,7 +185,7 @@ watch(() => state.password, () => {
           <UAlert
             v-if="success"
             icon="i-heroicons-check-circle"
-            color="green"
+            color="success"
             variant="soft"
             :title="success"
             class="mt-4"
