@@ -31,7 +31,7 @@ SUPABASE_ANON_KEY=your_supabase_anon_key_here
 npm run dev
 ```
 
-Runs on `http://localhost:3000`
+Runs on `http://localhost:3005`
 
 ## Production
 

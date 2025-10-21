@@ -14,7 +14,7 @@ npm run dev
 
 ### 3. Access Local Services
 
-- **Application**: http://localhost:3000
+- **Application**: http://localhost:3005
 - **Supabase Studio**: http://127.0.0.1:54323
 - **API**: http://127.0.0.1:54321
 - **Database**: postgresql://postgres:postgres@127.0.0.1:54322/postgres
