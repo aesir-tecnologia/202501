@@ -62,7 +62,7 @@ function handleCancel() {
     class="space-y-4"
     @submit.prevent="handleSubmit"
   >
-    <UFormGroup
+    <UFormField
       label="Project Name"
       :error="errors.name"
       required
@@ -72,9 +72,9 @@ function handleCancel() {
         placeholder="e.g., Client Alpha"
         @blur="validateForm"
       />
-    </UFormGroup>
+    </UFormField>
 
-    <UFormGroup
+    <UFormField
       label="Expected Daily Stints"
       :error="errors.expectedDailyStints"
       help="How many stints do you aim to complete per day?"
@@ -86,9 +86,9 @@ function handleCancel() {
         max="100"
         @blur="validateForm"
       />
-    </UFormGroup>
+    </UFormField>
 
-    <UFormGroup
+    <UFormField
       label="Custom Stint Duration (minutes)"
       :error="errors.customStintDuration"
       help="How long should each stint last?"
@@ -100,7 +100,7 @@ function handleCancel() {
         max="1440"
         @blur="validateForm"
       />
-    </UFormGroup>
+    </UFormField>
 
     <div class="flex justify-end gap-2 pt-4">
       <UButton
