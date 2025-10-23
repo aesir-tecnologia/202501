@@ -1,21 +1,14 @@
 <script setup lang="ts">
 import { useProjectMutations } from '~/composables/useProjectMutations'
 
-defineProps<{
-  open: boolean
-}>()
-
-const emit = defineEmits<{
-  'update:open': [value: boolean]
-}>()
-
 const toast = useToast()
 const { createProject } = useProjectMutations()
 
 const isSubmitting = ref(false)
+const isOpen = defineModel<boolean>('open')
 
 function closeModal() {
-  emit('update:open', false)
+  isOpen.value = false
 }
 
 async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number }) {
@@ -48,22 +41,22 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
 </script>
 
 <template>
-  <UModal
-    :model-value="open"
-    @update:model-value="emit('update:open', $event)"
-  >
-    <UCard>
-      <template #header>
-        <h3 class="text-lg font-semibold">
-          Create New Project
-        </h3>
-      </template>
+  <UModal v-model:open="isOpen">
+    <template #content>
+      <UCard>
+        <template #header>
+          <h3 class="text-lg font-semibold">
+            Create New Project
+          </h3>
+        </template>
 
-      <ProjectForm
-        mode="create"
-        @submit="handleSubmit"
-        @cancel="closeModal"
-      />
-    </UCard>
+        <ProjectForm
+          mode="create"
+          :loading="isSubmitting"
+          @submit="handleSubmit"
+          @cancel="closeModal"
+        />
+      </UCard>
+    </template>
   </UModal>
 </template>

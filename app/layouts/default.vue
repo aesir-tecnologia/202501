@@ -30,27 +30,25 @@ const signOut = async () => {
 </script>
 
 <template>
-  <UApp>
-    <UHeader to="/dashboard">
-      <template #title>
-        LifeStint
-      </template>
+  <UHeader to="/dashboard">
+    <template #title>
+      LifeStint
+    </template>
 
-      <UNavigationMenu :items="items" />
+    <UNavigationMenu :items="items" />
 
-      <template #right>
-        <UColorModeButton />
-        <UButton
-          icon="i-heroicons-arrow-right-start-on-rectangle"
-          variant="ghost"
-          color="neutral"
-          @click="signOut"
-        />
-      </template>
-    </UHeader>
+    <template #right>
+      <UColorModeButton />
+      <UButton
+        icon="i-heroicons-arrow-right-start-on-rectangle"
+        variant="ghost"
+        color="neutral"
+        @click="signOut"
+      />
+    </template>
+  </UHeader>
 
-    <UMain>
-      <slot />
-    </UMain>
-  </UApp>
+  <UMain>
+    <slot />
+  </UMain>
 </template>

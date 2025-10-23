@@ -3,21 +3,17 @@ import { useProjectMutations } from '~/composables/useProjectMutations'
 import type { ProjectRow } from '~/lib/supabase/projects'
 
 const props = defineProps<{
-  open: boolean
   project: ProjectRow
-}>()
-
-const emit = defineEmits<{
-  'update:open': [value: boolean]
 }>()
 
 const toast = useToast()
 const { updateProject } = useProjectMutations()
 
 const isSubmitting = ref(false)
+const isOpen = defineModel<boolean>('open')
 
 function closeModal() {
-  emit('update:open', false)
+  isOpen.value = false
 }
 
 async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number }) {
@@ -50,23 +46,23 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
 </script>
 
 <template>
-  <UModal
-    :model-value="open"
-    @update:model-value="emit('update:open', $event)"
-  >
-    <UCard>
-      <template #header>
-        <h3 class="text-lg font-semibold">
-          Edit Project
-        </h3>
-      </template>
+  <UModal v-model:open="isOpen">
+    <template #content>
+      <UCard>
+        <template #header>
+          <h3 class="text-lg font-semibold">
+            Edit Project
+          </h3>
+        </template>
 
-      <ProjectForm
-        :project="project"
-        mode="edit"
-        @submit="handleSubmit"
-        @cancel="closeModal"
-      />
-    </UCard>
+        <ProjectForm
+          :project="project"
+          mode="edit"
+          :loading="isSubmitting"
+          @submit="handleSubmit"
+          @cancel="closeModal"
+        />
+      </UCard>
+    </template>
   </UModal>
 </template>
