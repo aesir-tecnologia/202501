@@ -3,12 +3,6 @@ import type { TypedSupabaseClient } from '~/utils/supabase'
 
 /**
  * Data-access helpers for the Supabase `stints` table.
- *
- * Usage example:
- * ```ts
- * const client = useSupabaseClient<TypedSupabaseClient>()
- * const { data, error } = await listStints(client, { projectId })
- * ```
  */
 export type StintRow = Database['public']['Tables']['stints']['Row']
 export type StintInsert = Database['public']['Tables']['stints']['Insert']
@@ -66,7 +60,7 @@ export async function listStints(
 
 export async function getStintById(
   client: TypedSupabaseClient,
-  stintId: string,
+  stintId: string | number,
 ): Promise<Result<StintRow | null>> {
   const userResult = await requireUserId(client)
   if (userResult.error) return { data: null, error: userResult.error }
@@ -75,7 +69,7 @@ export async function getStintById(
     .from('stints')
     .select('*')
     .eq('user_id', userResult.data!)
-    .eq('id', stintId)
+    .eq('id', String(stintId))
     .maybeSingle<StintRow>()
 
   if (error) return { data: null, error }
@@ -122,7 +116,7 @@ export async function createStint(
 
 export async function updateStint(
   client: TypedSupabaseClient,
-  stintId: string,
+  stintId: string | number,
   updates: UpdateStintPayload,
 ): Promise<Result<StintRow>> {
   const userResult = await requireUserId(client)
@@ -132,7 +126,7 @@ export async function updateStint(
     .from('stints')
     .update(updates)
     .eq('user_id', userResult.data!)
-    .eq('id', stintId)
+    .eq('id', String(stintId))
     .select('*')
     .single<StintRow>()
 
@@ -142,16 +136,23 @@ export async function updateStint(
 
 export async function deleteStint(
   client: TypedSupabaseClient,
-  stintId: string,
+  stintId: string | number,
 ): Promise<Result<void>> {
   const userResult = await requireUserId(client)
   if (userResult.error) return { data: null, error: userResult.error }
+
+  // Verify stint exists and is owned by user
+  const stintResult = await getStintById(client, stintId)
+  if (stintResult.error) return { data: null, error: stintResult.error }
+  if (!stintResult.data) {
+    return { data: null, error: new Error('Stint not found or you do not have permission to delete it') }
+  }
 
   const { error } = await client
     .from('stints')
     .delete()
     .eq('user_id', userResult.data!)
-    .eq('id', stintId)
+    .eq('id', String(stintId))
 
   if (error) return { data: null, error }
   return { data: null, error: null }
