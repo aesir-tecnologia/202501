@@ -75,38 +75,42 @@ Zod schemas for validation and type inference. Use camelCase for API surface.
 - `app/schemas/stints.ts` - Stint validation rules
 
 #### 3. Composable Layer (`app/composables/`)
-Optimistic UI mutations with automatic rollback on failure. Bridges camelCase schemas to snake_case database.
+TanStack Query (Vue Query) hooks for data fetching and mutations. Provides automatic caching, optimistic updates, and automatic rollback on failure. Bridges camelCase schemas to snake_case database.
 
 **Pattern:**
-- Accept optional client/state overrides for testability
-- Validate with Zod schemas before mutations
-- Apply optimistic updates immediately to local state
-- Roll back on error, replace with server response on success
-- Return `OptimisticResult<T>` with data/error pattern
+- Query hooks (`useProjectsQuery`, `useProjectQuery`) for data fetching
+- Mutation hooks (`useCreateProject`, `useUpdateProject`, etc.) for mutations
+- Automatic validation with Zod schemas before mutations
+- Optimistic updates with automatic rollback on error
+- Built-in loading states and error handling via TanStack Query
 
 **Key Function:**
 - `toDbPayload()` - Transforms camelCase → snake_case for database operations
 
 **Files:**
-- `app/composables/useProjectMutations.ts` - Project mutations with optimistic updates
+- `app/composables/useProjects.ts` - Project queries and mutations
 
 **Usage Example:**
 ```ts
-// In a Vue component
-const client = useSupabaseClient<TypedSupabaseClient>()
-const { createProject, updateProject, deleteProject } = useProjectMutations()
+// In a Vue component - Queries
+const { data: projects, isLoading, error } = useProjectsQuery()
 
-// Optimistic create
-const { data, error } = await createProject({
+// Mutations
+const { mutateAsync: createProject, isPending } = useCreateProject()
+const { mutateAsync: updateProject } = useUpdateProject()
+const { mutateAsync: deleteProject } = useDeleteProject()
+
+// Create project
+await createProject({
   name: 'Client Project',
   expectedDailyStints: 3,
   customStintDuration: 45,
 })
 
-// Optimistic update
-await updateProject(projectId, { name: 'Updated Name' })
+// Update project
+await updateProject({ id: projectId, data: { name: 'Updated Name' } })
 
-// Optimistic delete
+// Delete project
 await deleteProject(projectId)
 ```
 

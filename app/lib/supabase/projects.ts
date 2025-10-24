@@ -3,12 +3,6 @@ import type { TypedSupabaseClient } from '~/utils/supabase'
 
 /**
  * Data-access helpers for the Supabase `projects` table.
- *
- * Example usage inside a composable or component:
- * ```ts
- * const client = useSupabaseClient<TypedSupabaseClient>()
- * const { data, error } = await listProjects(client)
- * ```
  */
 export type ProjectRow = Database['public']['Tables']['projects']['Row']
 export type ProjectInsert = Database['public']['Tables']['projects']['Insert']
@@ -62,16 +56,6 @@ export async function getProject(
 
   if (error) return { data: null, error }
   return { data, error: null }
-}
-
-/**
- * @deprecated Use getProject instead
- */
-export async function getProjectById(
-  client: TypedSupabaseClient,
-  projectId: string,
-) {
-  return getProject(client, projectId)
 }
 
 export async function createProject(

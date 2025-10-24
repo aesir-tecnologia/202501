@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { useProjectMutations } from '~/composables/useProjectMutations'
+import { useCreateProject } from '~/composables/useProjects'
 
 const toast = useToast()
-const { createProject } = useProjectMutations()
+const { mutateAsync: createProject, isPending } = useCreateProject()
 
-const isSubmitting = ref(false)
 const isOpen = defineModel<boolean>('open')
 
 function closeModal() {
@@ -12,19 +11,8 @@ function closeModal() {
 }
 
 async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number }) {
-  isSubmitting.value = true
-
   try {
-    const { error } = await createProject(data)
-
-    if (error) {
-      toast.add({
-        title: 'Failed to create project',
-        description: error.message,
-        color: 'error',
-      })
-      return
-    }
+    await createProject(data)
 
     toast.add({
       title: 'Project created',
@@ -34,8 +22,12 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
 
     closeModal()
   }
-  finally {
-    isSubmitting.value = false
+  catch (error) {
+    toast.add({
+      title: 'Failed to create project',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      color: 'error',
+    })
   }
 }
 </script>
@@ -52,7 +44,7 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
 
         <ProjectForm
           mode="create"
-          :loading="isSubmitting"
+          :loading="isPending"
           @submit="handleSubmit"
           @cancel="closeModal"
         />

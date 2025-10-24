@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useProjectMutations } from '~/composables/useProjectMutations'
+import { useUpdateProject } from '~/composables/useProjects'
 import type { ProjectRow } from '~/lib/supabase/projects'
 
 const props = defineProps<{
@@ -7,9 +7,8 @@ const props = defineProps<{
 }>()
 
 const toast = useToast()
-const { updateProject } = useProjectMutations()
+const { mutateAsync: updateProject, isPending } = useUpdateProject()
 
-const isSubmitting = ref(false)
 const isOpen = defineModel<boolean>('open')
 
 function closeModal() {
@@ -17,19 +16,8 @@ function closeModal() {
 }
 
 async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number }) {
-  isSubmitting.value = true
-
   try {
-    const { error } = await updateProject(props.project.id, data)
-
-    if (error) {
-      toast.add({
-        title: 'Failed to update project',
-        description: error.message,
-        color: 'error',
-      })
-      return
-    }
+    await updateProject({ id: props.project.id, data })
 
     toast.add({
       title: 'Project updated',
@@ -39,8 +27,12 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
 
     closeModal()
   }
-  finally {
-    isSubmitting.value = false
+  catch (error) {
+    toast.add({
+      title: 'Failed to update project',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      color: 'error',
+    })
   }
 }
 </script>
@@ -58,7 +50,7 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
         <ProjectForm
           :project="project"
           mode="edit"
-          :loading="isSubmitting"
+          :loading="isPending"
           @submit="handleSubmit"
           @cancel="closeModal"
         />

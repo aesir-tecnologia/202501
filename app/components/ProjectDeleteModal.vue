@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useProjectMutations } from '~/composables/useProjectMutations'
+import { useDeleteProject } from '~/composables/useProjects'
 import { hasActiveStint } from '~/lib/supabase/projects'
 import type { ProjectRow } from '~/lib/supabase/projects'
 
@@ -9,9 +9,8 @@ const props = defineProps<{
 
 const toast = useToast()
 const client = useSupabaseClient()
-const { deleteProject } = useProjectMutations()
+const { mutateAsync: deleteProject, isPending } = useDeleteProject()
 
-const isSubmitting = ref(false)
 const hasActive = ref(false)
 const isCheckingActive = ref(false)
 const isOpen = defineModel<boolean>('open')
@@ -54,19 +53,8 @@ async function handleDelete() {
     return
   }
 
-  isSubmitting.value = true
-
   try {
-    const { error } = await deleteProject(props.project.id)
-
-    if (error) {
-      toast.add({
-        title: 'Failed to delete project',
-        description: error.message,
-        color: 'error',
-      })
-      return
-    }
+    await deleteProject(props.project.id)
 
     toast.add({
       title: 'Project deleted',
@@ -76,8 +64,12 @@ async function handleDelete() {
 
     closeModal()
   }
-  finally {
-    isSubmitting.value = false
+  catch (error) {
+    toast.add({
+      title: 'Failed to delete project',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      color: 'error',
+    })
   }
 }
 </script>
@@ -155,7 +147,7 @@ async function handleDelete() {
             <UButton
               v-if="!hasActive"
               color="error"
-              :loading="isSubmitting"
+              :loading="isPending"
               :disabled="isCheckingActive"
               @click="handleDelete"
             >

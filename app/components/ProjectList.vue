@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSortable } from '@vueuse/integrations/useSortable'
 import type { ProjectRow } from '~/lib/supabase/projects'
-import { useProjectMutations } from '~/composables/useProjectMutations'
+import { useReorderProjects } from '~/composables/useProjects'
 
 const props = defineProps<{
   projects: ProjectRow[]
@@ -13,7 +13,7 @@ const emit = defineEmits<{
 }>()
 
 const toast = useToast()
-const { reorderProjects } = useProjectMutations()
+const { mutate: reorderProjects } = useReorderProjects()
 
 const listRef = ref<HTMLElement | null>(null)
 const localProjects = ref<ProjectRow[]>([...props.projects])
@@ -27,27 +27,9 @@ watch(() => props.projects, (newProjects) => {
 useSortable(listRef, localProjects, {
   animation: 150,
   handle: '.drag-handle',
-  onEnd: async () => {
-    // Reorder projects based on new order
-    try {
-      const { error } = await reorderProjects(localProjects.value)
-
-      if (error) {
-        toast.add({
-          title: 'Failed to reorder projects',
-          description: error.message,
-          color: 'error',
-        })
-      }
-    }
-    catch (error) {
-      console.error('Reorder error:', error)
-      toast.add({
-        title: 'Failed to reorder projects',
-        description: 'An unexpected error occurred',
-        color: 'error',
-      })
-    }
+  onEnd: () => {
+    // Reorder projects based on new order (debounced mutation handles errors internally)
+    reorderProjects(localProjects.value)
   },
 })
 
