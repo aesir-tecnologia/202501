@@ -1,3 +1,4 @@
+import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { UseQueryReturnType, UseMutationReturnType } from '@tanstack/vue-query'
 import { useDebounceFn } from '@vueuse/core'
@@ -109,13 +110,14 @@ function toDbPayload(payload: ProjectCreatePayload | ProjectUpdatePayload): DbCr
  * const { data: projects, isLoading, error, refetch } = useProjectsQuery()
  * ```
  */
-export function useProjectsQuery(filters?: ProjectListFilters) {
+export function useProjectsQuery(filters?: MaybeRefOrGetter<ProjectListFilters | undefined>) {
   const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
 
   return useQuery({
-    queryKey: projectKeys.list(filters),
+    queryKey: computed(() => projectKeys.list(toValue(filters))),
     queryFn: async () => {
-      const { data, error } = await listProjects(client)
+      const filterValue = toValue(filters)
+      const { data, error } = await listProjects(client, { includeInactive: filterValue?.includeInactive })
       if (error) throw error
       return data || []
     },
@@ -443,9 +445,18 @@ export function useToggleProjectActive() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Get current project state from cache
-      const projects = queryClient.getQueryData<ProjectRow[]>(projectKeys.list(undefined))
-      const project = projects?.find(p => p.id === id)
+      // Search across all list queries to find the project
+      const allListQueries = queryClient.getQueriesData<ProjectRow[]>({
+        queryKey: projectKeys.lists(),
+      })
+
+      let project: ProjectRow | undefined
+      for (const [, projects] of allListQueries) {
+        if (projects) {
+          project = projects.find(p => p.id === id)
+          if (project) break
+        }
+      }
 
       if (!project) {
         throw new Error('Project not found')

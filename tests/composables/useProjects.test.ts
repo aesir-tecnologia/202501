@@ -16,6 +16,7 @@ import {
   projectKeys,
 } from '~/composables/useProjects'
 import type { ProjectRow } from '~/lib/supabase/projects'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import * as projectsDb from '~/lib/supabase/projects'
 
 // Mock Nuxt composables
@@ -23,7 +24,7 @@ vi.mock('#app', () => ({
   useSupabaseClient: vi.fn(() => mockClient),
 }))
 
-const mockClient = {} as any
+const mockClient = {} as unknown as SupabaseClient
 
 // Mock project database functions
 vi.mock('~/lib/supabase/projects', async () => {
@@ -55,7 +56,7 @@ function createTestWrapper() {
 
   return {
     queryClient,
-    mount: (composable: () => any) => {
+    mount: <T>(composable: () => T) => {
       return mount(
         defineComponent({
           setup() {
@@ -236,7 +237,7 @@ describe('useProjects Composable', () => {
       await expect(
         wrapper.vm.result.mutateAsync({
           name: 'A', // Too short (min 2 characters)
-        } as any),
+        }),
       ).rejects.toThrow()
     })
 

@@ -38,7 +38,11 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
 </script>
 
 <template>
-  <UModal v-model:open="isOpen">
+  <UModal
+    v-model:open="isOpen"
+    title="Edit Project"
+    description="Update the project details below"
+  >
     <template #content>
       <UCard>
         <template #header>

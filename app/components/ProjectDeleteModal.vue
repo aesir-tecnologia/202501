@@ -75,7 +75,11 @@ async function handleDelete() {
 </script>
 
 <template>
-  <UModal v-model:open="isOpen">
+  <UModal
+    v-model:open="isOpen"
+    title="Delete Project"
+    description="Confirm deletion of the project and all associated data"
+  >
     <template #content>
       <UCard>
         <template #header>

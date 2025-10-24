@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSortable } from '@vueuse/integrations/useSortable'
 import type { ProjectRow } from '~/lib/supabase/projects'
-import { useReorderProjects } from '~/composables/useProjects'
+import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects'
 
 const props = defineProps<{
   projects: ProjectRow[]
@@ -14,6 +14,8 @@ const emit = defineEmits<{
 
 const toast = useToast()
 const { mutate: reorderProjects, isError, error } = useReorderProjects()
+const { mutateAsync: toggleActive } = useToggleProjectActive()
+const togglingProjectId = ref<string | null>(null)
 
 const listRef = ref<HTMLElement | null>(null)
 const localProjects = ref<ProjectRow[]>([...props.projects])
@@ -49,20 +51,22 @@ useSortable(listRef, localProjects, {
     if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
       const newOrder = [...localProjects.value]
       const [movedItem] = newOrder.splice(evt.oldIndex, 1)
-      
+
       if (movedItem) {
         newOrder.splice(evt.newIndex, 0, movedItem)
-        
+
         // Update the ref
         localProjects.value = newOrder
-        
+
         isDragging.value = false
         // Reorder projects based on new order (debounced mutation)
         reorderProjects(newOrder)
-      } else {
+      }
+      else {
         isDragging.value = false
       }
-    } else {
+    }
+    else {
       isDragging.value = false
     }
   },
@@ -74,6 +78,28 @@ function handleEdit(project: ProjectRow) {
 
 function handleDelete(project: ProjectRow) {
   emit('delete', project)
+}
+
+async function handleToggleActive(project: ProjectRow) {
+  togglingProjectId.value = project.id
+  try {
+    await toggleActive(project.id)
+    toast.add({
+      title: project.is_active ? 'Project deactivated' : 'Project activated',
+      description: `${project.name} is now ${project.is_active ? 'inactive' : 'active'}`,
+      color: 'success',
+    })
+  }
+  catch (error) {
+    toast.add({
+      title: 'Failed to toggle project status',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      color: 'error',
+    })
+  }
+  finally {
+    togglingProjectId.value = null
+  }
 }
 
 function formatDuration(minutes: number | null) {
@@ -110,7 +136,12 @@ function formatDuration(minutes: number | null) {
     <li
       v-for="project in localProjects"
       :key="project.id"
-      class="flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
+      :class="[
+        'flex items-center gap-3 p-4 rounded-lg border transition-colors',
+        project.is_active
+          ? 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700'
+          : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 opacity-60',
+      ]"
     >
       <!-- Drag handle -->
       <button
@@ -126,9 +157,19 @@ function formatDuration(minutes: number | null) {
 
       <!-- Project info -->
       <div class="flex-1 min-w-0">
-        <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
-          {{ project.name }}
-        </h3>
+        <div class="flex items-center gap-2">
+          <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
+            {{ project.name }}
+          </h3>
+          <UBadge
+            v-if="!project.is_active"
+            color="neutral"
+            variant="subtle"
+            size="sm"
+          >
+            Inactive
+          </UBadge>
+        </div>
         <div class="mt-1 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
           <span class="flex items-center gap-1">
             <Icon
@@ -147,24 +188,33 @@ function formatDuration(minutes: number | null) {
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="flex items-center gap-1">
-        <UButton
-          icon="lucide:pencil"
-          color="neutral"
-          variant="ghost"
-          size="sm"
-          aria-label="Edit project"
-          @click="handleEdit(project)"
+      <!-- Toggle and Actions -->
+      <div class="flex items-center gap-2">
+        <USwitch
+          :model-value="project.is_active"
+          :loading="togglingProjectId === project.id"
+          :disabled="togglingProjectId === project.id"
+          aria-label="Toggle project active status"
+          @update:model-value="handleToggleActive(project)"
         />
-        <UButton
-          icon="lucide:trash-2"
-          color="error"
-          variant="ghost"
-          size="sm"
-          aria-label="Delete project"
-          @click="handleDelete(project)"
-        />
+        <div class="flex items-center gap-1">
+          <UButton
+            icon="lucide:pencil"
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            aria-label="Edit project"
+            @click="handleEdit(project)"
+          />
+          <UButton
+            icon="lucide:trash-2"
+            color="error"
+            variant="ghost"
+            size="sm"
+            aria-label="Delete project"
+            @click="handleDelete(project)"
+          />
+        </div>
       </div>
     </li>
   </ul>

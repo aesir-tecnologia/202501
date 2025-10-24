@@ -137,4 +137,81 @@ describe('listProjects Contract', () => {
     expect(data).toBeNull()
     expect(error).toBeTruthy()
   })
+
+  it('should return only active projects by default', async () => {
+    // Create mix of active and inactive projects
+    await testUser1Client
+      .from('projects')
+      .insert([
+        { name: 'Active Project 1', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id },
+        { name: 'Inactive Project 1', is_active: false, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id },
+        { name: 'Active Project 2', is_active: true, sort_order: 2, expected_daily_stints: 3, user_id: testUser1!.id },
+        { name: 'Inactive Project 2', is_active: false, sort_order: 3, expected_daily_stints: 3, user_id: testUser1!.id },
+      ])
+
+    const { data, error } = await listProjects(testUser1Client)
+
+    expect(error).toBeNull()
+    expect(data).toHaveLength(2)
+    expect(data![0].name).toBe('Active Project 1')
+    expect(data![0].is_active).toBe(true)
+    expect(data![1].name).toBe('Active Project 2')
+    expect(data![1].is_active).toBe(true)
+  })
+
+  it('should return all projects when includeInactive is true', async () => {
+    // Create mix of active and inactive projects
+    await testUser1Client
+      .from('projects')
+      .insert([
+        { name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id },
+        { name: 'Inactive Project', is_active: false, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id },
+      ])
+
+    const { data, error } = await listProjects(testUser1Client, { includeInactive: true })
+
+    expect(error).toBeNull()
+    expect(data).toHaveLength(2)
+    expect(data![0].name).toBe('Active Project')
+    expect(data![0].is_active).toBe(true)
+    expect(data![1].name).toBe('Inactive Project')
+    expect(data![1].is_active).toBe(false)
+  })
+
+  it('should return only active projects when includeInactive is false', async () => {
+    // Create mix of active and inactive projects
+    await testUser1Client
+      .from('projects')
+      .insert([
+        { name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id },
+        { name: 'Inactive Project', is_active: false, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id },
+      ])
+
+    const { data, error } = await listProjects(testUser1Client, { includeInactive: false })
+
+    expect(error).toBeNull()
+    expect(data).toHaveLength(1)
+    expect(data![0].name).toBe('Active Project')
+    expect(data![0].is_active).toBe(true)
+  })
+
+  it('should maintain sort order when filtering by active status', async () => {
+    // Create projects with different sort orders and active status
+    await testUser1Client
+      .from('projects')
+      .insert([
+        { name: 'Active C', is_active: true, sort_order: 2, expected_daily_stints: 3, user_id: testUser1!.id },
+        { name: 'Inactive A', is_active: false, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id },
+        { name: 'Active A', is_active: true, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id },
+        { name: 'Active B', is_active: true, sort_order: 3, expected_daily_stints: 3, user_id: testUser1!.id },
+      ])
+
+    const { data, error } = await listProjects(testUser1Client)
+
+    expect(error).toBeNull()
+    expect(data).toHaveLength(3)
+    expect(data![0].name).toBe('Active A') // sort_order 1
+    expect(data![1].name).toBe('Active C') // sort_order 2
+    expect(data![2].name).toBe('Active B') // sort_order 3
+  })
 })

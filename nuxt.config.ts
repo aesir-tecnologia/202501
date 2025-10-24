@@ -9,9 +9,6 @@ export default defineNuxtConfig({
   ssr: true,
   pages: true,
   devtools: { enabled: true },
-  devServer: {
-    port: 3005,
-  },
   app: {
     head: {
       meta: [
@@ -48,6 +45,9 @@ export default defineNuxtConfig({
         key: process.env.SUPABASE_ANON_KEY,
       },
     },
+  },
+  devServer: {
+    port: 3005,
   },
   compatibilityDate: '2025-07-15',
   nitro: {

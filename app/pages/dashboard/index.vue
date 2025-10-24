@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useLocalStorage } from '@vueuse/core'
 import type { ProjectRow } from '~/lib/supabase/projects'
 import { useProjectsQuery } from '~/composables/useProjects'
 
@@ -19,9 +20,26 @@ const displayName = computed(() => {
   return user.value?.fullName || user.value?.email || 'there'
 })
 
-// Use Vue Query for projects
-const { data: projectsData, isLoading } = useProjectsQuery()
-const projects = computed(() => projectsData.value ?? [])
+// Filter state - persisted in localStorage
+const showInactive = useLocalStorage('lifestint-show-inactive-projects', false)
+
+// Always fetch all projects (including inactive ones)
+const { data: allProjectsData, isLoading } = useProjectsQuery({
+  includeInactive: true,
+})
+
+// Filter projects client-side based on toggle
+const projects = computed(() => {
+  const allProjects = allProjectsData.value ?? []
+  if (showInactive.value) {
+    return allProjects
+  }
+  return allProjects.filter(p => p.is_active)
+})
+
+// Count inactive projects for filter display
+const allProjects = computed(() => allProjectsData.value ?? [])
+const inactiveCount = computed(() => allProjects.value.filter(p => !p.is_active).length)
 
 // Modal state
 const showCreateModal = ref(false)
@@ -58,9 +76,22 @@ function openDeleteModal(project: ProjectRow) {
       <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
         <div class="space-y-4">
           <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold">
-              Your Projects
-            </h2>
+            <div class="flex items-center gap-4">
+              <h2 class="text-xl font-semibold">
+                Your Projects
+              </h2>
+              <div
+                v-if="!isLoading"
+                class="flex items-center gap-2"
+              >
+                <UCheckbox
+                  v-model="showInactive"
+                />
+                <span class="text-sm text-gray-600 dark:text-gray-400">
+                  Show inactive ({{ inactiveCount }})
+                </span>
+              </div>
+            </div>
             <UButton
               icon="lucide:plus"
               @click="openCreateModal"

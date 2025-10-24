@@ -26,15 +26,24 @@ async function requireUserId(client: TypedSupabaseClient): Promise<Result<string
   return { data: data.user.id, error: null }
 }
 
-export async function listProjects(client: TypedSupabaseClient): Promise<Result<ProjectRow[]>> {
+export async function listProjects(
+  client: TypedSupabaseClient,
+  options?: { includeInactive?: boolean },
+): Promise<Result<ProjectRow[]>> {
   const userResult = await requireUserId(client)
   if (userResult.error) return { data: null, error: userResult.error }
 
-  const { data, error } = await client
+  let query = client
     .from('projects')
     .select('*')
     .eq('user_id', userResult.data!)
-    .order('sort_order', { ascending: true })
+
+  // By default, only return active projects
+  if (!options?.includeInactive) {
+    query = query.eq('is_active', true)
+  }
+
+  const { data, error } = await query.order('sort_order', { ascending: true })
 
   if (error) return { data: null, error }
   return { data: data || [], error: null }
