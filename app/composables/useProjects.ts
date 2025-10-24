@@ -395,8 +395,12 @@ export function useReorderProjects() {
       // Snapshot previous value
       const previousProjects = queryClient.getQueryData<ProjectRow[]>(projectKeys.list(undefined))
 
-      // Optimistically update order
-      queryClient.setQueryData<ProjectRow[]>(projectKeys.list(undefined), newOrder)
+      // Optimistically update order with correct sort_order values
+      const updatedOrder = newOrder.map((project, index) => ({
+        ...project,
+        sort_order: index,
+      }))
+      queryClient.setQueryData<ProjectRow[]>(projectKeys.list(undefined), updatedOrder)
 
       return { previousProjects }
     },

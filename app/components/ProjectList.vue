@@ -13,23 +13,58 @@ const emit = defineEmits<{
 }>()
 
 const toast = useToast()
-const { mutate: reorderProjects } = useReorderProjects()
+const { mutate: reorderProjects, isError, error } = useReorderProjects()
 
 const listRef = ref<HTMLElement | null>(null)
 const localProjects = ref<ProjectRow[]>([...props.projects])
+const isDragging = ref(false)
 
-// Update local projects when props change
+// Update local projects when props change (but not during drag)
 watch(() => props.projects, (newProjects) => {
-  localProjects.value = [...newProjects]
+  if (!isDragging.value) {
+    localProjects.value = [...newProjects]
+  }
 }, { deep: true })
+
+// Show error toast when reorder fails
+watch(isError, (hasError) => {
+  if (hasError && error.value) {
+    toast.add({
+      title: 'Failed to reorder projects',
+      description: error.value.message || 'An unexpected error occurred',
+      color: 'error',
+    })
+  }
+})
 
 // Setup drag-and-drop
 useSortable(listRef, localProjects, {
   animation: 150,
   handle: '.drag-handle',
-  onEnd: () => {
-    // Reorder projects based on new order (debounced mutation handles errors internally)
-    reorderProjects(localProjects.value)
+  onStart: () => {
+    isDragging.value = true
+  },
+  onEnd: (evt: { oldIndex?: number, newIndex?: number }) => {
+    // Manually update the array based on the drag event
+    if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
+      const newOrder = [...localProjects.value]
+      const [movedItem] = newOrder.splice(evt.oldIndex, 1)
+      
+      if (movedItem) {
+        newOrder.splice(evt.newIndex, 0, movedItem)
+        
+        // Update the ref
+        localProjects.value = newOrder
+        
+        isDragging.value = false
+        // Reorder projects based on new order (debounced mutation)
+        reorderProjects(newOrder)
+      } else {
+        isDragging.value = false
+      }
+    } else {
+      isDragging.value = false
+    }
   },
 })
 

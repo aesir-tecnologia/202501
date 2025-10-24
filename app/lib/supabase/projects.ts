@@ -163,7 +163,8 @@ export async function updateProjectSortOrder(
       .from('projects')
       .update({ sort_order: sortOrder })
       .eq('id', String(id))
-      .eq('user_id', userResult.data!),
+      .eq('user_id', userResult.data!)
+      .select(),
   )
 
   const results = await Promise.all(promises)
@@ -171,7 +172,16 @@ export async function updateProjectSortOrder(
   // Check for any errors
   const errors = results.filter(r => r.error)
   if (errors.length > 0) {
-    return { data: null, error: new Error('Failed to update project order') }
+    const errorDetails = errors.map(r => r.error?.message).filter(Boolean).join(', ')
+    const errorMsg = errorDetails ? `Failed to update project order: ${errorDetails}` : 'Failed to update project order'
+    return { data: null, error: new Error(errorMsg) }
+  }
+
+  // Check if all updates affected rows
+  const noRowsUpdated = results.filter(r => !r.data || r.data.length === 0)
+  if (noRowsUpdated.length > 0) {
+    console.warn(`${noRowsUpdated.length} project(s) were not updated (possibly not owned by user)`)
+    return { data: null, error: new Error('Some projects could not be updated. They may not exist or you may not have permission.') }
   }
 
   return { data: null, error: null }
