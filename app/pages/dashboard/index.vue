@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { listProjects } from '~/lib/supabase/projects'
 import type { ProjectRow } from '~/lib/supabase/projects'
+import { useProjectsQuery } from '~/composables/useProjects'
 
 definePageMeta({
   title: 'Dashboard',
@@ -14,37 +14,20 @@ useSeoMeta({
 })
 
 const user = useAuthUser()
-const client = useSupabaseClient()
 
 const displayName = computed(() => {
   return user.value?.fullName || user.value?.email || 'there'
 })
 
-// Project management state
-const projects = ref<ProjectRow[]>([])
-const isLoading = ref(true)
+// Use Vue Query for projects
+const { data: projectsData, isLoading } = useProjectsQuery()
+const projects = computed(() => projectsData.value ?? [])
+
+// Modal state
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
 const selectedProject = ref<ProjectRow | null>(null)
-
-// Load projects on mount
-onMounted(async () => {
-  try {
-    const { data, error } = await listProjects(client)
-    if (error) {
-      console.error('Failed to load projects:', error)
-    } else {
-      projects.value = data ?? []
-    }
-  }
-  catch (error) {
-    console.error('Failed to load projects:', error)
-  }
-  finally {
-    isLoading.value = false
-  }
-})
 
 // Modal handlers
 function openCreateModal() {

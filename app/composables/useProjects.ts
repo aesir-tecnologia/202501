@@ -182,11 +182,11 @@ export function useCreateProject() {
       return data
     },
     onMutate: async (payload) => {
-      // Cancel outgoing refetches
+      // Cancel outgoing refetches for all list queries
       await queryClient.cancelQueries({ queryKey: projectKeys.lists() })
 
-      // Snapshot previous value
-      const previousProjects = queryClient.getQueryData<ProjectRow[]>(projectKeys.lists())
+      // Snapshot previous value (use list with undefined filters to match default query)
+      const previousProjects = queryClient.getQueryData<ProjectRow[]>(projectKeys.list(undefined))
 
       // Optimistically update to the new value
       if (previousProjects) {
@@ -203,7 +203,7 @@ export function useCreateProject() {
         }
 
         queryClient.setQueryData<ProjectRow[]>(
-          projectKeys.lists(),
+          projectKeys.list(undefined),
           [optimisticProject, ...previousProjects],
         )
       }
@@ -213,7 +213,7 @@ export function useCreateProject() {
     onError: (_err, _payload, context) => {
       // Rollback to previous value on error
       if (context?.previousProjects) {
-        queryClient.setQueryData(projectKeys.lists(), context.previousProjects)
+        queryClient.setQueryData(projectKeys.list(undefined), context.previousProjects)
       }
     },
     onSuccess: () => {
@@ -261,13 +261,13 @@ export function useUpdateProject() {
       await queryClient.cancelQueries({ queryKey: projectKeys.detail(id) })
 
       // Snapshot previous values
-      const previousProjects = queryClient.getQueryData<ProjectRow[]>(projectKeys.lists())
+      const previousProjects = queryClient.getQueryData<ProjectRow[]>(projectKeys.list(undefined))
       const previousProject = queryClient.getQueryData<ProjectRow>(projectKeys.detail(id))
 
       // Optimistically update list
       if (previousProjects) {
         queryClient.setQueryData<ProjectRow[]>(
-          projectKeys.lists(),
+          projectKeys.list(undefined),
           previousProjects.map(p =>
             p.id === id
               ? {
@@ -294,7 +294,7 @@ export function useUpdateProject() {
     onError: (_err, { id }, context) => {
       // Rollback on error
       if (context?.previousProjects) {
-        queryClient.setQueryData(projectKeys.lists(), context.previousProjects)
+        queryClient.setQueryData(projectKeys.list(undefined), context.previousProjects)
       }
       if (context?.previousProject) {
         queryClient.setQueryData(projectKeys.detail(id), context.previousProject)
@@ -335,12 +335,12 @@ export function useDeleteProject() {
       await queryClient.cancelQueries({ queryKey: projectKeys.lists() })
 
       // Snapshot previous value
-      const previousProjects = queryClient.getQueryData<ProjectRow[]>(projectKeys.lists())
+      const previousProjects = queryClient.getQueryData<ProjectRow[]>(projectKeys.list(undefined))
 
       // Optimistically remove from list
       if (previousProjects) {
         queryClient.setQueryData<ProjectRow[]>(
-          projectKeys.lists(),
+          projectKeys.list(undefined),
           previousProjects.filter(p => p.id !== id),
         )
       }
@@ -350,7 +350,7 @@ export function useDeleteProject() {
     onError: (_err, _id, context) => {
       // Rollback on error
       if (context?.previousProjects) {
-        queryClient.setQueryData(projectKeys.lists(), context.previousProjects)
+        queryClient.setQueryData(projectKeys.list(undefined), context.previousProjects)
       }
     },
     onSuccess: () => {
@@ -393,17 +393,17 @@ export function useReorderProjects() {
       await queryClient.cancelQueries({ queryKey: projectKeys.lists() })
 
       // Snapshot previous value
-      const previousProjects = queryClient.getQueryData<ProjectRow[]>(projectKeys.lists())
+      const previousProjects = queryClient.getQueryData<ProjectRow[]>(projectKeys.list(undefined))
 
       // Optimistically update order
-      queryClient.setQueryData<ProjectRow[]>(projectKeys.lists(), newOrder)
+      queryClient.setQueryData<ProjectRow[]>(projectKeys.list(undefined), newOrder)
 
       return { previousProjects }
     },
     onError: (_err, _newOrder, context) => {
       // Rollback on error
       if (context?.previousProjects) {
-        queryClient.setQueryData(projectKeys.lists(), context.previousProjects)
+        queryClient.setQueryData(projectKeys.list(undefined), context.previousProjects)
       }
     },
     onSuccess: () => {
@@ -440,7 +440,7 @@ export function useToggleProjectActive() {
   return useMutation({
     mutationFn: async (id: string) => {
       // Get current project state from cache
-      const projects = queryClient.getQueryData<ProjectRow[]>(projectKeys.lists())
+      const projects = queryClient.getQueryData<ProjectRow[]>(projectKeys.list(undefined))
       const project = projects?.find(p => p.id === id)
 
       if (!project) {
