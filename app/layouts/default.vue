@@ -9,14 +9,6 @@ const items = computed<NavigationMenuItem[]>(() => [{
   label: 'Dashboard',
   to: '/dashboard',
   active: route.path.startsWith('/dashboard'),
-}, {
-  label: 'Figma',
-  to: 'https://go.nuxt.com/figma-ui',
-  target: '_blank',
-}, {
-  label: 'Releases',
-  to: 'https://github.com/nuxt/ui/releases',
-  target: '_blank',
 }])
 
 const signOut = async () => {

@@ -90,25 +90,6 @@ function openDeleteModal(project: ProjectRow) {
           />
         </div>
       </UCard>
-
-      <!-- Account Overview Section -->
-      <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-        <div class="space-y-4">
-          <h2 class="text-xl font-semibold">
-            Account Overview
-          </h2>
-          <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-            <li>
-              <span class="font-medium text-gray-900 dark:text-gray-100">Email:</span>
-              {{ user?.email }}
-            </li>
-            <li>
-              <span class="font-medium text-gray-900 dark:text-gray-100">Full Name:</span>
-              {{ user?.fullName || 'Not provided' }}
-            </li>
-          </ul>
-        </div>
-      </UCard>
     </div>
 
     <!-- Modals -->
