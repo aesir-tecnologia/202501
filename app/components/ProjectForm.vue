@@ -69,6 +69,7 @@ function handleCancel() {
     >
       <UInput
         v-model="formData.name"
+        class="w-full"
         placeholder="e.g., Client Alpha"
         @blur="validateForm"
       />
