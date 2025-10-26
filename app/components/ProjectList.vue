@@ -9,7 +9,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   edit: [project: ProjectRow]
-  delete: [project: ProjectRow]
 }>()
 
 const toast = useToast()
@@ -17,9 +16,14 @@ const { mutate: reorderProjects, isError, error } = useReorderProjects()
 const { mutateAsync: toggleActive } = useToggleProjectActive()
 const togglingProjectId = ref<string | null>(null)
 
-const listRef = ref<HTMLElement | null>(null)
+const activeListRef = ref<HTMLElement | null>(null)
 const localProjects = ref<ProjectRow[]>([...props.projects])
 const isDragging = ref(false)
+const showInactiveProjects = ref(false)
+
+// Separate active and inactive projects
+const activeProjects = computed(() => localProjects.value.filter(p => p.is_active))
+const inactiveProjects = computed(() => localProjects.value.filter(p => !p.is_active))
 
 // Update local projects when props change (but not during drag)
 watch(() => props.projects, (newProjects) => {
@@ -39,8 +43,8 @@ watch(isError, (hasError) => {
   }
 })
 
-// Setup drag-and-drop
-useSortable(listRef, localProjects, {
+// Setup drag-and-drop for active projects only
+useSortable(activeListRef, activeProjects, {
   animation: 150,
   handle: '.drag-handle',
   onStart: () => {
@@ -49,18 +53,19 @@ useSortable(listRef, localProjects, {
   onEnd: (evt: { oldIndex?: number, newIndex?: number }) => {
     // Manually update the array based on the drag event
     if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
-      const newOrder = [...localProjects.value]
+      const newOrder = [...activeProjects.value]
       const [movedItem] = newOrder.splice(evt.oldIndex, 1)
 
       if (movedItem) {
         newOrder.splice(evt.newIndex, 0, movedItem)
 
-        // Update the ref
-        localProjects.value = newOrder
+        // Combine with inactive projects to maintain complete list
+        const completeOrder = [...newOrder, ...inactiveProjects.value]
+        localProjects.value = completeOrder
 
         isDragging.value = false
         // Reorder projects based on new order (debounced mutation)
-        reorderProjects(newOrder)
+        reorderProjects(completeOrder)
       }
       else {
         isDragging.value = false
@@ -74,10 +79,6 @@ useSortable(listRef, localProjects, {
 
 function handleEdit(project: ProjectRow) {
   emit('edit', project)
-}
-
-function handleDelete(project: ProjectRow) {
-  emit('delete', project)
 }
 
 async function handleToggleActive(project: ProjectRow) {
@@ -109,113 +110,232 @@ function formatDuration(minutes: number | null) {
   const mins = duration % 60
   return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
 }
+
+// Get border color class for project color tag
+function getColorBorderClass(colorTag: string | null) {
+  if (!colorTag) return ''
+
+  const colorMap: Record<string, string> = {
+    red: 'border-l-red-500',
+    orange: 'border-l-orange-500',
+    amber: 'border-l-amber-500',
+    green: 'border-l-green-500',
+    teal: 'border-l-teal-500',
+    blue: 'border-l-blue-500',
+    purple: 'border-l-purple-500',
+    pink: 'border-l-pink-500',
+  }
+
+  return colorMap[colorTag] || ''
+}
 </script>
 
 <template>
-  <div
-    v-if="projects.length === 0"
-    class="text-center py-12"
-  >
-    <Icon
-      name="lucide:folder-open"
-      class="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600"
-    />
-    <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
-      No projects yet
-    </h3>
-    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-      Get started by creating your first project
-    </p>
-  </div>
-
-  <ul
-    v-else
-    ref="listRef"
-    class="space-y-2"
-  >
-    <li
-      v-for="project in localProjects"
-      :key="project.id"
-      :class="[
-        'flex items-center gap-3 p-4 rounded-lg border transition-colors',
-        project.is_active
-          ? 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700'
-          : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 opacity-60',
-      ]"
+  <div>
+    <!-- Empty state -->
+    <div
+      v-if="projects.length === 0"
+      class="text-center py-12"
     >
-      <!-- Drag handle -->
-      <button
-        type="button"
-        class="drag-handle cursor-move p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
-        aria-label="Reorder project"
+      <Icon
+        name="lucide:folder-open"
+        class="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600"
+      />
+      <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+        No projects yet
+      </h3>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        Get started by creating your first project
+      </p>
+    </div>
+
+    <!-- Active Projects Section -->
+    <div v-else>
+      <h3
+        v-if="inactiveProjects.length > 0"
+        class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
       >
-        <Icon
-          name="lucide:grip-vertical"
-          class="h-5 w-5 text-gray-400"
-        />
-      </button>
+        Active Projects
+      </h3>
 
-      <!-- Project info -->
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2">
-          <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
-            {{ project.name }}
-          </h3>
-          <UBadge
-            v-if="!project.is_active"
-            color="neutral"
-            variant="subtle"
-            size="sm"
+      <ul
+        ref="activeListRef"
+        class="space-y-2"
+      >
+        <li
+          v-for="project in activeProjects"
+          :key="project.id"
+          :class="[
+            'flex items-center gap-3 p-4 rounded-lg border-2 transition-colors border-l-4',
+            'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700',
+            getColorBorderClass(project.color_tag),
+          ]"
+        >
+          <!-- Drag handle -->
+          <UTooltip text="Reorder project">
+            <button
+              type="button"
+              class="drag-handle cursor-move p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all duration-200"
+              aria-label="Reorder project"
+            >
+              <Icon
+                name="lucide:grip-vertical"
+                class="h-5 w-5 text-gray-400"
+              />
+            </button>
+          </UTooltip>
+
+          <!-- Project info -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
+                {{ project.name }}
+              </h3>
+            </div>
+            <div class="mt-1 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+              <span class="flex items-center gap-1">
+                <Icon
+                  name="lucide:target"
+                  class="h-4 w-4"
+                />
+                {{ project.expected_daily_stints }} stints/day
+              </span>
+              <span class="flex items-center gap-1">
+                <Icon
+                  name="lucide:timer"
+                  class="h-4 w-4"
+                />
+                {{ formatDuration(project.custom_stint_duration) }} per stint
+              </span>
+            </div>
+          </div>
+
+          <!-- Toggle and Actions -->
+          <div class="flex items-center gap-2">
+            <UTooltip :text="project.is_active ? 'Deactivate project' : 'Activate project'">
+              <span>
+                <USwitch
+                  :model-value="project.is_active ?? true"
+                  :loading="togglingProjectId === project.id"
+                  :disabled="togglingProjectId === project.id"
+                  aria-label="Toggle project active status"
+                  @update:model-value="handleToggleActive(project)"
+                />
+              </span>
+            </UTooltip>
+            <div class="flex items-center gap-1">
+              <UTooltip text="Edit project">
+                <span>
+                  <UButton
+                    icon="lucide:pencil"
+                    color="neutral"
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Edit project"
+                    class="transition-all duration-200 hover:scale-105"
+                    @click="handleEdit(project)"
+                  />
+                </span>
+              </UTooltip>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Inactive Projects Section -->
+      <div
+        v-if="inactiveProjects.length > 0"
+        class="mt-6"
+      >
+        <button
+          type="button"
+          class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 hover:text-gray-900 dark:hover:text-gray-100"
+          @click="showInactiveProjects = !showInactiveProjects"
+        >
+          <Icon
+            :name="showInactiveProjects ? 'lucide:chevron-down' : 'lucide:chevron-right'"
+            class="h-4 w-4"
+          />
+          Inactive Projects ({{ inactiveProjects.length }})
+        </button>
+
+        <ul
+          v-if="showInactiveProjects"
+          class="space-y-2"
+        >
+          <li
+            v-for="project in inactiveProjects"
+            :key="project.id"
+            :class="[
+              'flex items-center gap-3 p-4 rounded-lg border-2 transition-colors border-l-4',
+              'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 opacity-60',
+              getColorBorderClass(project.color_tag),
+            ]"
           >
-            Inactive
-          </UBadge>
-        </div>
-        <div class="mt-1 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-          <span class="flex items-center gap-1">
-            <Icon
-              name="lucide:target"
-              class="h-4 w-4"
-            />
-            {{ project.expected_daily_stints }} stints/day
-          </span>
-          <span class="flex items-center gap-1">
-            <Icon
-              name="lucide:timer"
-              class="h-4 w-4"
-            />
-            {{ formatDuration(project.custom_stint_duration) }} per stint
-          </span>
-        </div>
-      </div>
+            <!-- Project info -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
+                  {{ project.name }}
+                </h3>
+                <UBadge
+                  color="neutral"
+                  variant="subtle"
+                  size="sm"
+                >
+                  Inactive
+                </UBadge>
+              </div>
+              <div class="mt-1 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                <span class="flex items-center gap-1">
+                  <Icon
+                    name="lucide:target"
+                    class="h-4 w-4"
+                  />
+                  {{ project.expected_daily_stints }} stints/day
+                </span>
+                <span class="flex items-center gap-1">
+                  <Icon
+                    name="lucide:timer"
+                    class="h-4 w-4"
+                  />
+                  {{ formatDuration(project.custom_stint_duration) }} per stint
+                </span>
+              </div>
+            </div>
 
-      <!-- Toggle and Actions -->
-      <div class="flex items-center gap-2">
-        <USwitch
-          :model-value="project.is_active"
-          :loading="togglingProjectId === project.id"
-          :disabled="togglingProjectId === project.id"
-          aria-label="Toggle project active status"
-          @update:model-value="handleToggleActive(project)"
-        />
-        <div class="flex items-center gap-1">
-          <UButton
-            icon="lucide:pencil"
-            color="neutral"
-            variant="ghost"
-            size="sm"
-            aria-label="Edit project"
-            @click="handleEdit(project)"
-          />
-          <UButton
-            icon="lucide:trash-2"
-            color="error"
-            variant="ghost"
-            size="sm"
-            aria-label="Delete project"
-            @click="handleDelete(project)"
-          />
-        </div>
+            <!-- Toggle and Actions -->
+            <div class="flex items-center gap-2">
+              <UTooltip :text="project.is_active ? 'Deactivate project' : 'Activate project'">
+                <span>
+                  <USwitch
+                    :model-value="project.is_active ?? false"
+                    :loading="togglingProjectId === project.id"
+                    :disabled="togglingProjectId === project.id"
+                    aria-label="Toggle project active status"
+                    @update:model-value="handleToggleActive(project)"
+                  />
+                </span>
+              </UTooltip>
+              <div class="flex items-center gap-1">
+                <UTooltip text="Edit project">
+                  <span>
+                    <UButton
+                      icon="lucide:pencil"
+                      color="neutral"
+                      variant="ghost"
+                      size="sm"
+                      aria-label="Edit project"
+                      class="transition-all duration-200 hover:scale-105"
+                      @click="handleEdit(project)"
+                    />
+                  </span>
+                </UTooltip>
+              </div>
+            </div>
+          </li>
+        </ul>
       </div>
-    </li>
-  </ul>
+    </div>
+  </div>
 </template>

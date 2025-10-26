@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useLocalStorage } from '@vueuse/core'
 import type { ProjectRow } from '~/lib/supabase/projects'
 import { useProjectsQuery } from '~/composables/useProjects'
 
@@ -20,31 +19,18 @@ const displayName = computed(() => {
   return user.value?.fullName || user.value?.email || 'there'
 })
 
-// Filter state - persisted in localStorage
-const showInactive = useLocalStorage('lifestint-show-inactive-projects', false)
-
-// Always fetch all projects (including inactive ones)
-const { data: allProjectsData, isLoading } = useProjectsQuery({
+// Fetch all non-archived projects (including both active and inactive)
+const { data: projectsData, isLoading } = useProjectsQuery({
   includeInactive: true,
 })
 
-// Filter projects client-side based on toggle
-const projects = computed(() => {
-  const allProjects = allProjectsData.value ?? []
-  if (showInactive.value) {
-    return allProjects
-  }
-  return allProjects.filter(p => p.is_active)
-})
-
-// Count inactive projects for filter display
-const allProjects = computed(() => allProjectsData.value ?? [])
-const inactiveCount = computed(() => allProjects.value.filter(p => !p.is_active).length)
+const projects = computed(() => projectsData.value ?? [])
 
 // Modal state
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
-const showDeleteModal = ref(false)
+const showArchiveModal = ref(false)
+const showArchivedProjectsModal = ref(false)
 const selectedProject = ref<ProjectRow | null>(null)
 
 // Modal handlers
@@ -57,9 +43,13 @@ function openEditModal(project: ProjectRow) {
   showEditModal.value = true
 }
 
-function openDeleteModal(project: ProjectRow) {
+function openArchiveModal(project: ProjectRow) {
   selectedProject.value = project
-  showDeleteModal.value = true
+  showArchiveModal.value = true
+}
+
+function openArchivedProjectsModal() {
+  showArchivedProjectsModal.value = true
 }
 </script>
 
@@ -76,28 +66,35 @@ function openDeleteModal(project: ProjectRow) {
       <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
         <div class="space-y-4">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <h2 class="text-xl font-semibold">
-                Your Projects
-              </h2>
-              <div
-                v-if="!isLoading"
-                class="flex items-center gap-2"
-              >
-                <UCheckbox
-                  v-model="showInactive"
-                />
-                <span class="text-sm text-gray-600 dark:text-gray-400">
-                  Show inactive ({{ inactiveCount }})
+            <h2 class="text-xl font-semibold">
+              Your Projects
+            </h2>
+            <div class="flex items-center gap-2">
+              <UTooltip text="View archived projects">
+                <span>
+                  <UButton
+                    icon="lucide:archive"
+                    color="neutral"
+                    variant="ghost"
+                    class="transition-all duration-200"
+                    @click="openArchivedProjectsModal"
+                  >
+                    View Archived
+                  </UButton>
                 </span>
-              </div>
+              </UTooltip>
+              <UTooltip text="Create new project">
+                <span>
+                  <UButton
+                    icon="lucide:plus"
+                    class="transition-all duration-200"
+                    @click="openCreateModal"
+                  >
+                    Create Project
+                  </UButton>
+                </span>
+              </UTooltip>
             </div>
-            <UButton
-              icon="lucide:plus"
-              @click="openCreateModal"
-            >
-              Create Project
-            </UButton>
           </div>
 
           <div
@@ -117,7 +114,7 @@ function openDeleteModal(project: ProjectRow) {
             v-else
             :projects="projects"
             @edit="openEditModal"
-            @delete="openDeleteModal"
+            @archive="openArchiveModal"
           />
         </div>
       </UCard>
@@ -132,12 +129,17 @@ function openDeleteModal(project: ProjectRow) {
       v-if="selectedProject"
       v-model:open="showEditModal"
       :project="selectedProject"
+      @archive="openArchiveModal"
     />
 
-    <ProjectDeleteModal
+    <ProjectArchiveModal
       v-if="selectedProject"
-      v-model:open="showDeleteModal"
+      v-model:open="showArchiveModal"
       :project="selectedProject"
+    />
+
+    <ArchivedProjectsModal
+      v-model:open="showArchivedProjectsModal"
     />
   </UContainer>
 </template>

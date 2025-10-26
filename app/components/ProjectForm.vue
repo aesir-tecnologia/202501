@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { projectCreateSchema, projectUpdateSchema } from '~/schemas/projects'
+import { projectCreateSchema, projectUpdateSchema, PROJECT_COLORS, type ProjectColor } from '~/schemas/projects'
 import type { ProjectRow } from '~/lib/supabase/projects'
 
 const props = defineProps<{
@@ -8,7 +8,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  submit: [data: { name: string, expectedDailyStints: number, customStintDuration: number }]
+  submit: [data: { name: string, expectedDailyStints: number, customStintDuration: number, colorTag: ProjectColor | null }]
   cancel: []
 }>()
 
@@ -17,6 +17,7 @@ const formData = ref({
   name: props.project?.name ?? '',
   expectedDailyStints: props.project?.expected_daily_stints ?? 3,
   customStintDuration: props.project?.custom_stint_duration ?? 45,
+  colorTag: (props.project?.color_tag as ProjectColor | null) ?? null,
 })
 
 // Validation state
@@ -48,7 +49,28 @@ function handleSubmit() {
     name: formData.value.name.trim(),
     expectedDailyStints: formData.value.expectedDailyStints,
     customStintDuration: formData.value.customStintDuration,
+    colorTag: formData.value.colorTag,
   })
+}
+
+// Color selection helper
+function selectColor(color: ProjectColor | null) {
+  formData.value.colorTag = color
+}
+
+// Get TailwindCSS classes for each color
+function getColorClasses(color: ProjectColor) {
+  const colorMap: Record<ProjectColor, { bg: string, ring: string, border: string }> = {
+    red: { bg: 'bg-red-500', ring: 'ring-red-500', border: 'border-red-500' },
+    orange: { bg: 'bg-orange-500', ring: 'ring-orange-500', border: 'border-orange-500' },
+    amber: { bg: 'bg-amber-500', ring: 'ring-amber-500', border: 'border-amber-500' },
+    green: { bg: 'bg-green-500', ring: 'ring-green-500', border: 'border-green-500' },
+    teal: { bg: 'bg-teal-500', ring: 'ring-teal-500', border: 'border-teal-500' },
+    blue: { bg: 'bg-blue-500', ring: 'ring-blue-500', border: 'border-blue-500' },
+    purple: { bg: 'bg-purple-500', ring: 'ring-purple-500', border: 'border-purple-500' },
+    pink: { bg: 'bg-pink-500', ring: 'ring-pink-500', border: 'border-pink-500' },
+  }
+  return colorMap[color]
 }
 
 // Handle cancel
@@ -101,6 +123,47 @@ function handleCancel() {
         max="1440"
         @blur="validateForm"
       />
+    </UFormField>
+
+    <UFormField
+      label="Color Tag (optional)"
+      :error="errors.colorTag"
+      help="Choose a color to visually identify this project"
+    >
+      <div class="flex items-center gap-2">
+        <!-- None option -->
+        <button
+          type="button"
+          :class="[
+            'w-10 h-10 rounded-md border-2 transition-all flex items-center justify-center',
+            formData.colorTag === null
+              ? 'border-gray-900 dark:border-gray-100 ring-2 ring-gray-900 dark:ring-gray-100'
+              : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600',
+          ]"
+          @click="selectColor(null)"
+        >
+          <Icon
+            name="lucide:x"
+            class="h-5 w-5 text-gray-400"
+          />
+        </button>
+
+        <!-- Color options -->
+        <button
+          v-for="color in PROJECT_COLORS"
+          :key="color"
+          type="button"
+          :class="[
+            'w-10 h-10 rounded-md border-2 transition-all',
+            getColorClasses(color).bg,
+            formData.colorTag === color
+              ? `${getColorClasses(color).border} ring-2 ${getColorClasses(color).ring}`
+              : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600',
+          ]"
+          :aria-label="`Select ${color} color`"
+          @click="selectColor(color)"
+        />
+      </div>
     </UFormField>
 
     <div class="flex justify-end gap-2 pt-4">

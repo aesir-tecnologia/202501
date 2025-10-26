@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useCreateProject } from '~/composables/useProjects'
+import type { ProjectColor } from '~/schemas/projects'
 
 const toast = useToast()
 const { mutateAsync: createProject, isPending } = useCreateProject()
@@ -10,7 +11,7 @@ function closeModal() {
   isOpen.value = false
 }
 
-async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number }) {
+async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number, colorTag: ProjectColor | null }) {
   try {
     await createProject(data)
 
