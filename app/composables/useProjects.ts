@@ -5,10 +5,14 @@ import { useDebounceFn } from '@vueuse/core'
 import type { TypedSupabaseClient } from '~/utils/supabase'
 import {
   listProjects,
+  listArchivedProjects,
   getProject,
   createProject as createProjectDb,
   updateProject as updateProjectDb,
   deleteProject as deleteProjectDb,
+  archiveProject as archiveProjectDb,
+  unarchiveProject as unarchiveProjectDb,
+  permanentlyDeleteProject as permanentlyDeleteProjectDb,
   updateProjectSortOrder as updateProjectSortOrderDb,
   type ProjectRow,
   type CreateProjectPayload as DbCreateProjectPayload,
@@ -29,6 +33,7 @@ export const projectKeys = {
   all: ['projects'] as const,
   lists: () => [...projectKeys.all, 'list'] as const,
   list: (filters?: ProjectListFilters) => [...projectKeys.lists(), filters] as const,
+  archived: () => [...projectKeys.all, 'archived'] as const,
   details: () => [...projectKeys.all, 'detail'] as const,
   detail: (id: string) => [...projectKeys.details(), id] as const,
 }
@@ -65,6 +70,27 @@ export type DeleteProjectMutation = UseMutationReturnType<
   unknown
 >
 
+export type ArchiveProjectMutation = UseMutationReturnType<
+  ProjectRow,
+  Error,
+  string,
+  unknown
+>
+
+export type UnarchiveProjectMutation = UseMutationReturnType<
+  ProjectRow,
+  Error,
+  string,
+  unknown
+>
+
+export type PermanentlyDeleteProjectMutation = UseMutationReturnType<
+  void,
+  Error,
+  string,
+  unknown
+>
+
 export type ReorderProjectsMutation = UseMutationReturnType<
   void,
   Error,
@@ -93,6 +119,9 @@ function toDbPayload(payload: ProjectCreatePayload | ProjectUpdatePayload): DbCr
   }
   if ('customStintDuration' in payload && payload.customStintDuration !== undefined) {
     result.custom_stint_duration = payload.customStintDuration
+  }
+  if ('colorTag' in payload && payload.colorTag !== undefined) {
+    result.color_tag = payload.colorTag
   }
 
   return result as DbCreateProjectPayload | DbUpdateProjectPayload
@@ -144,6 +173,27 @@ export function useProjectQuery(id: MaybeRefOrGetter<string>) {
       return data
     },
     enabled: !!projectId,
+  })
+}
+
+/**
+ * Fetches all archived projects with automatic caching.
+ *
+ * @example
+ * ```ts
+ * const { data: archivedProjects, isLoading, error } = useArchivedProjectsQuery()
+ * ```
+ */
+export function useArchivedProjectsQuery() {
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
+
+  return useQuery({
+    queryKey: projectKeys.archived(),
+    queryFn: async () => {
+      const { data, error } = await listArchivedProjects(client)
+      if (error) throw error
+      return data || []
+    },
   })
 }
 
@@ -199,6 +249,8 @@ export function useCreateProject() {
           is_active: payload.isActive ?? true,
           expected_daily_stints: payload.expectedDailyStints ?? 2,
           custom_stint_duration: payload.customStintDuration ?? null,
+          color_tag: payload.colorTag ?? null,
+          archived_at: null,
           sort_order: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -467,6 +519,178 @@ export function useToggleProjectActive() {
         id,
         data: { isActive: !project.is_active },
       })
+    },
+  })
+}
+
+/**
+ * Archives a project with validation and optimistic updates.
+ * Auto-invalidates affected queries on success.
+ *
+ * @example
+ * ```ts
+ * const { mutateAsync } = useArchiveProject()
+ * await mutateAsync(projectId)
+ * ```
+ */
+export function useArchiveProject() {
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await archiveProjectDb(client, id)
+
+      if (error || !data) {
+        throw error || new Error('Failed to archive project')
+      }
+
+      return data
+    },
+    onMutate: async (id) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: projectKeys.lists() })
+      await queryClient.cancelQueries({ queryKey: projectKeys.archived() })
+
+      // Snapshot previous values
+      const previousProjects = queryClient.getQueryData<ProjectRow[]>(projectKeys.list(undefined))
+      const previousArchived = queryClient.getQueryData<ProjectRow[]>(projectKeys.archived())
+
+      // Optimistically remove from active list
+      if (previousProjects) {
+        queryClient.setQueryData<ProjectRow[]>(
+          projectKeys.list(undefined),
+          previousProjects.filter(p => p.id !== id),
+        )
+      }
+
+      return { previousProjects, previousArchived }
+    },
+    onError: (_err, _id, context) => {
+      // Rollback on error
+      if (context?.previousProjects) {
+        queryClient.setQueryData(projectKeys.list(undefined), context.previousProjects)
+      }
+      if (context?.previousArchived) {
+        queryClient.setQueryData(projectKeys.archived(), context.previousArchived)
+      }
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: projectKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: projectKeys.archived() })
+    },
+  })
+}
+
+/**
+ * Unarchives a project, restoring it to the main dashboard.
+ * Sets archived_at to NULL.
+ *
+ * @example
+ * ```ts
+ * const { mutateAsync } = useUnarchiveProject()
+ * await mutateAsync(projectId)
+ * ```
+ */
+export function useUnarchiveProject() {
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await unarchiveProjectDb(client, id)
+
+      if (error || !data) {
+        throw error || new Error('Failed to unarchive project')
+      }
+
+      return data
+    },
+    onMutate: async (id) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: projectKeys.archived() })
+      await queryClient.cancelQueries({ queryKey: projectKeys.lists() })
+
+      // Snapshot previous values
+      const previousArchived = queryClient.getQueryData<ProjectRow[]>(projectKeys.archived())
+      const previousProjects = queryClient.getQueryData<ProjectRow[]>(projectKeys.list(undefined))
+
+      // Optimistically remove from archived list
+      if (previousArchived) {
+        queryClient.setQueryData<ProjectRow[]>(
+          projectKeys.archived(),
+          previousArchived.filter(p => p.id !== id),
+        )
+      }
+
+      return { previousArchived, previousProjects }
+    },
+    onError: (_err, _id, context) => {
+      // Rollback on error
+      if (context?.previousArchived) {
+        queryClient.setQueryData(projectKeys.archived(), context.previousArchived)
+      }
+      if (context?.previousProjects) {
+        queryClient.setQueryData(projectKeys.list(undefined), context.previousProjects)
+      }
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: projectKeys.archived() })
+      queryClient.invalidateQueries({ queryKey: projectKeys.lists() })
+    },
+  })
+}
+
+/**
+ * Permanently deletes an archived project.
+ * Can only delete projects that are already archived.
+ *
+ * @example
+ * ```ts
+ * const { mutateAsync } = usePermanentlyDeleteProject()
+ * await mutateAsync(projectId)
+ * ```
+ */
+export function usePermanentlyDeleteProject() {
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await permanentlyDeleteProjectDb(client, id)
+
+      if (error) {
+        throw error
+      }
+    },
+    onMutate: async (id) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: projectKeys.archived() })
+
+      // Snapshot previous value
+      const previousArchived = queryClient.getQueryData<ProjectRow[]>(projectKeys.archived())
+
+      // Optimistically remove from archived list
+      if (previousArchived) {
+        queryClient.setQueryData<ProjectRow[]>(
+          projectKeys.archived(),
+          previousArchived.filter(p => p.id !== id),
+        )
+      }
+
+      return { previousArchived }
+    },
+    onError: (_err, _id, context) => {
+      // Rollback on error
+      if (context?.previousArchived) {
+        queryClient.setQueryData(projectKeys.archived(), context.previousArchived)
+      }
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: projectKeys.archived() })
     },
   })
 }

@@ -36,6 +36,8 @@ export type Database = {
     Tables: {
       projects: {
         Row: {
+          archived_at: string | null
+          color_tag: string | null
           created_at: string | null
           custom_stint_duration: number | null
           expected_daily_stints: number | null
@@ -47,6 +49,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
+          color_tag?: string | null
           created_at?: string | null
           custom_stint_duration?: number | null
           expected_daily_stints?: number | null
@@ -58,6 +62,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          archived_at?: string | null
+          color_tag?: string | null
           created_at?: string | null
           custom_stint_duration?: number | null
           expected_daily_stints?: number | null

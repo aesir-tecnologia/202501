@@ -37,6 +37,7 @@ export async function listProjects(
     .from('projects')
     .select('*')
     .eq('user_id', userResult.data!)
+    .is('archived_at', null) // Exclude archived projects
 
   // By default, only return active projects
   if (!options?.includeInactive) {
@@ -44,6 +45,23 @@ export async function listProjects(
   }
 
   const { data, error } = await query.order('sort_order', { ascending: true })
+
+  if (error) return { data: null, error }
+  return { data: data || [], error: null }
+}
+
+export async function listArchivedProjects(
+  client: TypedSupabaseClient,
+): Promise<Result<ProjectRow[]>> {
+  const userResult = await requireUserId(client)
+  if (userResult.error) return { data: null, error: userResult.error }
+
+  const { data, error } = await client
+    .from('projects')
+    .select('*')
+    .eq('user_id', userResult.data!)
+    .filter('archived_at', 'not.is', null)
+    .order('archived_at', { ascending: false })
 
   if (error) return { data: null, error }
   return { data: data || [], error: null }
@@ -213,4 +231,111 @@ export async function hasActiveStint(
 
   if (error) return { data: null, error }
   return { data: Boolean(data && data.length > 0), error: null }
+}
+
+export async function archiveProject(
+  client: TypedSupabaseClient,
+  projectId: string | number,
+): Promise<Result<ProjectRow>> {
+  const userResult = await requireUserId(client)
+  if (userResult.error) return { data: null, error: userResult.error }
+
+  // Verify project exists and is owned by user
+  const projectResult = await getProject(client, projectId)
+  if (projectResult.error) return { data: null, error: projectResult.error }
+  if (!projectResult.data) {
+    return { data: null, error: new Error('Project not found or you do not have permission to archive it') }
+  }
+
+  // Check if already archived
+  if (projectResult.data.archived_at) {
+    return { data: null, error: new Error('Project is already archived') }
+  }
+
+  // Check for active stints
+  const { data: activeStints } = await client
+    .from('stints')
+    .select('id')
+    .eq('project_id', String(projectId))
+    .eq('user_id', userResult.data!)
+    .is('ended_at', null)
+    .limit(1)
+
+  if (activeStints && activeStints.length > 0) {
+    return { data: null, error: new Error('Cannot archive project with active stint. Please stop the stint first.') }
+  }
+
+  // Archive the project
+  const { data, error } = await client
+    .from('projects')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('user_id', userResult.data!)
+    .eq('id', String(projectId))
+    .select('*')
+    .single<ProjectRow>()
+
+  if (error) return { data: null, error }
+  return { data, error: null }
+}
+
+export async function unarchiveProject(
+  client: TypedSupabaseClient,
+  projectId: string | number,
+): Promise<Result<ProjectRow>> {
+  const userResult = await requireUserId(client)
+  if (userResult.error) return { data: null, error: userResult.error }
+
+  // Verify project exists and is owned by user
+  const projectResult = await getProject(client, projectId)
+  if (projectResult.error) return { data: null, error: projectResult.error }
+  if (!projectResult.data) {
+    return { data: null, error: new Error('Project not found or you do not have permission to unarchive it') }
+  }
+
+  // Check if project is archived
+  if (!projectResult.data.archived_at) {
+    return { data: null, error: new Error('Project is not archived') }
+  }
+
+  // Unarchive the project by setting archived_at to NULL
+  const { data, error } = await client
+    .from('projects')
+    .update({ archived_at: null })
+    .eq('user_id', userResult.data!)
+    .eq('id', String(projectId))
+    .select('*')
+    .single<ProjectRow>()
+
+  if (error) return { data: null, error }
+  return { data, error: null }
+}
+
+export async function permanentlyDeleteProject(
+  client: TypedSupabaseClient,
+  projectId: string | number,
+): Promise<Result<void>> {
+  const userResult = await requireUserId(client)
+  if (userResult.error) return { data: null, error: userResult.error }
+
+  // Verify project exists and is owned by user
+  const projectResult = await getProject(client, projectId)
+  if (projectResult.error) return { data: null, error: projectResult.error }
+  if (!projectResult.data) {
+    return { data: null, error: new Error('Project not found or you do not have permission to delete it') }
+  }
+
+  // Ensure project is archived before allowing permanent deletion
+  if (!projectResult.data.archived_at) {
+    return { data: null, error: new Error('Only archived projects can be permanently deleted. Please archive the project first.') }
+  }
+
+  // Delete project (cascade deletes stints via FK constraint)
+  const { error } = await client
+    .from('projects')
+    .delete()
+    .eq('user_id', userResult.data!)
+    .eq('id', String(projectId))
+
+  if (error) return { data: null, error }
+  return { data: null, error: null }
 }

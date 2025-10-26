@@ -7,6 +7,10 @@ const DAILY_STINTS_MAX = 12
 const CUSTOM_DURATION_MIN_MINUTES = 5
 const CUSTOM_DURATION_MAX_MINUTES = 480
 
+// TailwindCSS color options for project tags
+export const PROJECT_COLORS = ['red', 'orange', 'amber', 'green', 'teal', 'blue', 'purple', 'pink'] as const
+export type ProjectColor = typeof PROJECT_COLORS[number]
+
 export const projectIdentifierSchema = z.object({
   id: z.string().uuid(),
 })
@@ -30,6 +34,10 @@ const projectBaseSchema = z.object({
     .max(CUSTOM_DURATION_MAX_MINUTES, 'Duration cannot exceed eight hours')
     .nullable()
     .optional(),
+  colorTag: z
+    .enum(PROJECT_COLORS, { errorMap: () => ({ message: 'Invalid color selection' }) })
+    .nullable()
+    .optional(),
   isActive: z.boolean().optional(),
 })
 
@@ -41,6 +49,7 @@ export const projectUpdateSchema = projectBaseSchema.partial({
   name: true,
   expectedDailyStints: true,
   customStintDuration: true,
+  colorTag: true,
   isActive: true,
 })
 
