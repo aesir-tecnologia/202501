@@ -93,105 +93,163 @@ watch(() => state.password, () => {
 
 <template>
   <UApp>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
-      <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
-        <div class="text-center space-y-3">
-          <h2 class="text-3xl font-bold">
+    <div class="min-h-screen flex items-center justify-center bg-[#0a0e1a] py-12 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-md w-full space-y-8">
+        <!-- Header Section -->
+        <div class="text-center space-y-4">
+          <h2 class="text-3xl font-bold text-white">
             Sign in to your account
           </h2>
-          <p class="text-sm text-gray-600 dark:text-gray-300">
+          <p class="text-sm text-gray-400">
             Don't have an account?
             <NuxtLink
               to="/auth/register"
-              class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+              class="font-medium text-[#15bf83] hover:text-[#2fd89a] transition-colors duration-200"
             >
               Sign up here
             </NuxtLink>
           </p>
         </div>
 
-        <UCard class="p-8 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+        <!-- Form Card -->
+        <div class="bg-[#131628] border border-[#1a1f35] rounded-xl p-8 shadow-2xl backdrop-blur-sm">
           <UForm
             :schema="loginSchema"
             :state="state"
             class="space-y-6"
             @submit="handleLogin"
           >
+            <!-- Email Field -->
             <UFormField
               label="Email address"
               name="email"
               required
             >
+              <template #label>
+                <span class="text-white text-sm font-medium">Email address *</span>
+              </template>
               <UInput
                 v-model="state.email"
                 type="email"
                 placeholder="Enter your email"
                 autocomplete="email"
                 :disabled="loading"
-                class="w-full"
+                class="w-full bg-[#0f1320] border-[#1a1f35] text-white placeholder:text-gray-500 focus:border-[#15bf83] focus:ring-[#15bf83]/20"
+                size="lg"
               />
             </UFormField>
 
+            <!-- Password Field -->
             <UFormField
               label="Password"
               name="password"
               required
             >
+              <template #label>
+                <span class="text-white text-sm font-medium">Password *</span>
+              </template>
               <UInput
                 v-model="state.password"
                 type="password"
                 placeholder="Enter your password"
                 autocomplete="current-password"
                 :disabled="loading"
-                class="w-full"
+                class="w-full bg-[#0f1320] border-[#1a1f35] text-white placeholder:text-gray-500 focus:border-[#15bf83] focus:ring-[#15bf83]/20"
+                size="lg"
               />
             </UFormField>
 
-            <div class="flex items-center justify-between text-gray-600 dark:text-gray-300">
+            <!-- Remember & Forgot -->
+            <div class="flex items-center justify-between">
               <UCheckbox
                 v-model="state.remember"
-                label="Remember me"
                 :disabled="loading"
-              />
+                class="text-white"
+              >
+                <template #label>
+                  <span class="text-white text-sm">Remember me</span>
+                </template>
+              </UCheckbox>
 
               <NuxtLink
                 to="/auth/forgot-password"
-                class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+                class="text-sm font-medium text-[#15bf83] hover:text-[#2fd89a] transition-colors duration-200"
               >
                 Forgot your password?
               </NuxtLink>
             </div>
 
+            <!-- Submit Button -->
             <UButton
               type="submit"
               :loading="loading"
               :disabled="loading"
-              class="w-full"
+              class="w-full bg-[#15bf83] hover:bg-[#2fd89a] text-white font-semibold rounded-lg shadow-lg hover:shadow-[#15bf83]/25 transition-all duration-200"
               size="lg"
             >
               {{ loading ? 'Signing in...' : 'Sign in' }}
             </UButton>
           </UForm>
 
+          <!-- Error Alert -->
           <UAlert
             v-if="error"
             icon="i-heroicons-exclamation-triangle"
             color="error"
             variant="soft"
             :title="error"
-            class="mt-4"
+            class="mt-6 bg-red-950/50 border-red-800/50 text-red-200"
           />
 
+          <!-- Success Alert -->
           <UAlert
             v-if="success"
             icon="i-heroicons-check-circle"
             color="success"
             variant="soft"
             :title="success"
-            class="mt-4"
+            class="mt-6 bg-green-950/50 border-green-800/50 text-green-200"
           />
-        </UCard>
+        </div>
       </div>
     </div>
   </UApp>
 </template>
+
+<style scoped>
+/* Ensure custom input styles override Nuxt UI defaults */
+:deep(.ui-input) {
+  background-color: #0f1320 !important;
+  border-color: #1a1f35 !important;
+  color: white !important;
+}
+
+:deep(.ui-input:focus) {
+  border-color: #15bf83 !important;
+  ring-color: rgba(21, 191, 131, 0.2) !important;
+}
+
+:deep(.ui-input::placeholder) {
+  color: #6b7280 !important;
+}
+
+/* Custom button styles */
+:deep(.ui-button) {
+  background-color: #15bf83 !important;
+  color: white !important;
+}
+
+:deep(.ui-button:hover:not(:disabled)) {
+  background-color: #2fd89a !important;
+}
+
+/* Checkbox styles */
+:deep(.ui-checkbox) {
+  color: white;
+}
+
+:deep(.ui-checkbox input:checked) {
+  background-color: #15bf83 !important;
+  border-color: #15bf83 !important;
+}
+</style>
