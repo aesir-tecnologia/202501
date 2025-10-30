@@ -1,34 +1,42 @@
 <template>
   <div class="bg-ink-900 text-white antialiased">
+    <!-- Skip to content link for accessibility -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-brand-500 focus:text-white focus:rounded-lg focus:shadow-lg"
+    >
+      Skip to main content
+    </a>
+
     <!-- Header -->
     <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-ink-900/70 border-b border-white/10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="h-8 w-8 rounded-lg bg-gradient-to-tr from-brand-500 to-mint-500 grid place-items-center font-extrabold">
+          <div class="h-8 w-8 rounded-lg bg-gradient-to-tr from-brand-500 to-mint-500 grid place-items-center font-extrabold" aria-hidden="true">
             L
           </div>
           <span class="font-semibold tracking-tight">LifeStint</span>
         </div>
-        <nav class="hidden md:flex items-center gap-7 text-sm text-ink-200">
+        <nav class="hidden md:flex items-center gap-7 text-sm text-ink-200" aria-label="Main navigation">
           <a
             href="#how"
-            class="hover:text-white"
+            class="hover:text-white transition-colors"
           >How it works</a>
           <a
             href="#analytics"
-            class="hover:text-white"
+            class="hover:text-white transition-colors"
           >Analytics</a>
           <a
             href="#pricing"
-            class="hover:text-white"
+            class="hover:text-white transition-colors"
           >Pricing</a>
           <a
             href="#faq"
-            class="hover:text-white"
+            class="hover:text-white transition-colors"
           >FAQ</a>
         </nav>
         <div class="flex items-center gap-3">
-          <UColorModeButton />
+          <UColorModeButton aria-label="Toggle color mode" />
           <template v-if="user">
             <a
               href="/dashboard"
@@ -50,8 +58,9 @@
     </header>
 
     <!-- Hero -->
-    <section class="hero noise relative overflow-hidden">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+    <main id="main-content">
+      <section class="hero noise relative overflow-hidden" aria-label="Hero section">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
         <div class="grid lg:grid-cols-12 gap-10 items-center">
           <div class="lg:col-span-6">
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 badge text-sm text-ink-200 fade-up stagger-1">
@@ -60,7 +69,7 @@
             <h1 class="mt-5 text-4xl sm:text-5xl xl:text-6xl font-semibold leading-tight fade-up stagger-2">
               One stint at a time.<br>Zero context switching.
             </h1>
-            <p class="mt-5 text-ink-200 text-lg max-w-2xl fade-up stagger-3">
+            <p class="mt-5 text-ink-100 text-lg max-w-2xl fade-up stagger-3">
               <strong class="text-white">Defend your premium rates with credible focus evidence.</strong> 
               LifeStint combines project-level tracking with professional reporting—no surveillance, 
               no administrative overhead, just demonstrable work quality.
@@ -225,15 +234,17 @@
         </div>
       </div>
     </section>
+    </main>
 
     <!-- How it works -->
     <section
       id="how"
       class="relative"
+      aria-labelledby="how-it-works-title"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div class="text-center max-w-3xl mx-auto mb-10">
-          <h2 class="text-3xl sm:text-4xl font-semibold">
+          <h2 id="how-it-works-title" class="text-3xl sm:text-4xl font-semibold">
             Run your day in stints
           </h2>
           <p class="mt-3 text-ink-200 text-lg">
@@ -871,7 +882,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
+
+// ============================================================================
+// Configuration Constants
+// ============================================================================
+
+const ANIMATION_CONFIG = {
+  // Intersection Observer settings
+  OBSERVER_THRESHOLD: 0.1, // Trigger when 10% of element is visible
+  OBSERVER_ROOT_MARGIN: '0px 0px -50px 0px', // Trigger 50px before entering viewport
+  
+  // Animation selectors
+  ANIMATED_SELECTORS: '.fade-up, .fade-in, .scale-in, .slide-in-left, .slide-in-right',
+  FLOATING_SELECTOR: '.floating',
+  TRIGGER_CLASS: 'animate-in',
+  FLOAT_CLASS: 'animate-float',
+} as const
+
+// ============================================================================
+// Page Configuration
+// ============================================================================
 
 definePageMeta({
   layout: false,
@@ -886,46 +917,82 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
 })
 
-const user = useAuthUser()
+// ============================================================================
+// State & Initialization
+// ============================================================================
+
+// Auth user with error handling
+let user = null
+try {
+  user = useAuthUser()
+} catch (error) {
+  console.error('Failed to initialize auth:', error)
+  // User remains null, auth-dependent features will handle gracefully
+}
 
 // Intersection Observer for scroll animations
-const isVisible = ref(false)
+let observer: IntersectionObserver | null = null
+
+// ============================================================================
+// Lifecycle Hooks
+// ============================================================================
 
 onMounted(() => {
-  // Add scroll animation observers
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
+  // Initialize scroll animation observer
+  const observerOptions: IntersectionObserverInit = {
+    threshold: ANIMATION_CONFIG.OBSERVER_THRESHOLD,
+    rootMargin: ANIMATION_CONFIG.OBSERVER_ROOT_MARGIN,
   }
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('animate-in')
+        entry.target.classList.add(ANIMATION_CONFIG.TRIGGER_CLASS)
+        // Optionally unobserve after animation triggers (performance optimization)
+        // observer?.unobserve(entry.target)
       }
     })
   }, observerOptions)
 
   // Observe all animated elements
-  document.querySelectorAll('.fade-up, .fade-in, .scale-in, .slide-in-left, .slide-in-right').forEach(el => {
-    observer.observe(el)
+  const animatedElements = document.querySelectorAll(ANIMATION_CONFIG.ANIMATED_SELECTORS)
+  animatedElements.forEach((el) => {
+    observer?.observe(el)
   })
 
-  // Floating animation for hero product mock
-  const floatingElements = document.querySelectorAll('.floating')
-  floatingElements.forEach(el => {
-    el.classList.add('animate-float')
+  // Initialize floating animations
+  const floatingElements = document.querySelectorAll(ANIMATION_CONFIG.FLOATING_SELECTOR)
+  floatingElements.forEach((el) => {
+    el.classList.add(ANIMATION_CONFIG.FLOAT_CLASS)
   })
+})
+
+onUnmounted(() => {
+  // Cleanup: Disconnect observer to prevent memory leaks
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
 })
 </script>
 
 <style>
+/* ============================================================================
+   Animation Configuration & Timing
+   ============================================================================
+   Standard durations for consistency:
+   - Fast: 0.3s (hover effects)
+   - Normal: 0.8s (scroll animations, standard)
+   - Slow: 3s (ambient loops like pulse/shimmer)
+   - Very Slow: 6s (floating, gradient shifts)
+   ============================================================================ */
+
 /* Hero background with animation */
 .hero {
     background: radial-gradient(1000px 340px at 20% -10%, rgba(43, 134, 255, .25), transparent 60%),
     radial-gradient(800px 280px at 80% -20%, rgba(21, 63, 143, .25), transparent 60%),
     linear-gradient(180deg, #0b1020 0%, #141b2f 100%);
-    animation: subtle-pulse 8s ease-in-out infinite;
+    animation: subtle-pulse 6s ease-in-out infinite;
 }
 
 @keyframes subtle-pulse {
@@ -1069,7 +1136,7 @@ onMounted(() => {
 /* Gradient animation */
 .animate-gradient {
     background-size: 200% 200%;
-    animation: gradient-shift 8s ease infinite;
+    animation: gradient-shift 6s ease infinite;
 }
 
 @keyframes gradient-shift {
@@ -1095,7 +1162,7 @@ onMounted(() => {
 
 /* Progress bar animation */
 .progress-animate {
-    animation: progress-fill 2s ease-out forwards;
+    animation: progress-fill 0.8s ease-out forwards;
 }
 
 @keyframes progress-fill {
@@ -1103,20 +1170,9 @@ onMounted(() => {
     to { width: var(--progress-width, 100%); }
 }
 
-/* Typing animation for text */
-@keyframes typing {
-    from { width: 0; }
-    to { width: 100%; }
-}
-
-@keyframes blink-caret {
-    from, to { border-color: transparent; }
-    50% { border-color: currentColor; }
-}
-
 /* Bounce attention animation */
 .bounce-subtle {
-    animation: bounce-subtle 2s infinite;
+    animation: bounce-subtle 3s infinite;
 }
 
 @keyframes bounce-subtle {
@@ -1135,25 +1191,29 @@ onMounted(() => {
                 0 0 40px rgba(43, 134, 255, 0.2);
 }
 
-/* Blur reveal animation */
-.blur-reveal {
-    filter: blur(10px);
-    opacity: 0;
-    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+/* ============================================================================
+   Utility: Screen reader only
+   ============================================================================ */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
 
-.blur-reveal.animate-in {
-    filter: blur(0);
-    opacity: 1;
-}
-
-/* Number counter animation */
-@keyframes number-roll {
-    0% { transform: translateY(100%); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
-}
-
-.number-roll {
-    animation: number-roll 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.sr-only.focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
 }
 </style>
