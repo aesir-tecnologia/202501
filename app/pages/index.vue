@@ -54,18 +54,19 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
         <div class="grid lg:grid-cols-12 gap-10 items-center">
           <div class="lg:col-span-6">
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 badge text-sm text-ink-200">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 badge text-sm text-ink-200 fade-up stagger-1">
               Built for freelancers, consultants, and independents
             </div>
-            <h1 class="mt-5 text-4xl sm:text-5xl xl:text-6xl font-semibold leading-tight">
-              One stint at a time. Zero context switching.
+            <h1 class="mt-5 text-4xl sm:text-5xl xl:text-6xl font-semibold leading-tight fade-up stagger-2">
+              One stint at a time.<br>Zero context switching.
             </h1>
-            <p class="mt-5 text-ink-200 text-lg max-w-2xl">
-              Commit to focused sessions with technical guardrails. LifeStint tracks your progress and
-              turns it into client‑ready evidence—without surveillance.
+            <p class="mt-5 text-ink-200 text-lg max-w-2xl fade-up stagger-3">
+              <strong class="text-white">Defend your premium rates with credible focus evidence.</strong> 
+              LifeStint combines project-level tracking with professional reporting—no surveillance, 
+              no administrative overhead, just demonstrable work quality.
             </p>
 
-            <div class="mt-8 flex flex-col sm:flex-row gap-3">
+            <div class="mt-8 flex flex-col sm:flex-row gap-3 fade-up stagger-4">
               <a
                 href="#cta"
                 class="inline-flex items-center justify-center rounded-xl bg-mint-500 hover:bg-mint-600 text-ink-900 font-semibold px-6 py-3"
@@ -93,24 +94,24 @@
             </div>
 
             <div class="mt-8 grid grid-cols-3 gap-4 text-sm text-ink-200">
-              <div class="rounded-lg bg-white/5 p-3 text-center">
-                <div class="text-2xl font-semibold text-white">
+              <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-5">
+                <div class="text-2xl font-semibold text-white number-roll">
                   1
                 </div>
                 <div class="mt-1">
                   Active session
                 </div>
               </div>
-              <div class="rounded-lg bg-white/5 p-3 text-center">
-                <div class="text-2xl font-semibold text-white">
+              <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-6">
+                <div class="text-2xl font-semibold text-white number-roll">
                   0
                 </div>
                 <div class="mt-1">
                   Admin overhead
                 </div>
               </div>
-              <div class="rounded-lg bg-white/5 p-3 text-center">
-                <div class="text-2xl font-semibold text-white">
+              <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-6">
+                <div class="text-2xl font-semibold text-white number-roll">
                   ∞
                 </div>
                 <div class="mt-1">
@@ -122,12 +123,12 @@
 
           <!-- Product mock stack -->
           <div class="lg:col-span-6">
-            <div class="relative">
+            <div class="relative floating">
               <div
-                class="absolute -inset-6 blur-3xl opacity-40"
+                class="absolute -inset-6 blur-3xl opacity-40 pulse-slow"
                 style="background: radial-gradient(400px 160px at 60% 40%, rgba(43,134,255,.35), transparent 60%);"
               />
-              <div class="relative rounded-2xl bg-ink-800/70 ring-1 ring-white/10 shadow-card p-4">
+              <div class="relative rounded-2xl bg-ink-800/70 ring-1 ring-white/10 shadow-card p-4 scale-in shimmer">
                 <div class="flex items-center justify-between">
                   <div class="text-sm text-ink-300">
                     Dashboard — Today
@@ -146,17 +147,17 @@
                       <span class="text-xs px-2 py-1 rounded-full bg-mint-500/15 text-mint-300">Active</span>
                     </div>
                     <div class="mt-3">
-                      <div class="w-full h-2 rounded-full bg-white/10">
+                      <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                         <div
-                          class="h-2 rounded-full bg-mint-400"
-                          style="width:72%"
+                          class="h-2 rounded-full bg-mint-400 progress-animate"
+                          style="--progress-width: 72%; width: 72%;"
                         />
                       </div>
                       <div class="mt-2 text-xs text-ink-300">
                         2 of 3 stints • 28:12 remaining
                       </div>
                     </div>
-                    <button class="mt-3 w-full rounded-lg bg-mint-500 hover:bg-mint-600 text-ink-900 font-semibold py-2">
+                    <button class="mt-3 w-full rounded-lg bg-mint-500 hover:bg-mint-600 text-ink-900 font-semibold py-2 glow-on-hover pulse-slow">
                       Resume
                     </button>
                   </div>
@@ -169,10 +170,10 @@
                       <span class="text-xs px-2 py-1 rounded-full bg-white/10">Idle</span>
                     </div>
                     <div class="mt-3">
-                      <div class="w-full h-2 rounded-full bg-white/10">
+                      <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                         <div
-                          class="h-2 rounded-full bg-brand-500"
-                          style="width:33%"
+                          class="h-2 rounded-full bg-brand-500 progress-animate"
+                          style="--progress-width: 33%; width: 33%;"
                         />
                       </div>
                       <div class="mt-2 text-xs text-ink-300">
@@ -231,84 +232,224 @@
       class="relative"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div class="grid lg:grid-cols-3 gap-6">
-          <div class="lg:col-span-1">
-            <h2 class="text-3xl font-semibold">
-              Run your day in stints
-            </h2>
-            <p class="mt-2 text-ink-200">
-              Single active focus, clear goals per project, and progress that resets daily to keep
-              momentum.
+        <div class="text-center max-w-3xl mx-auto mb-10">
+          <h2 class="text-3xl sm:text-4xl font-semibold">
+            Run your day in stints
+          </h2>
+          <p class="mt-3 text-ink-200 text-lg">
+            Predetermined focused work sessions that prevent multitasking and demonstrate consistent productivity to your clients.
+          </p>
+        </div>
+        
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-1 hover-lift">
+            <div class="h-10 w-10 rounded-lg bg-mint-500/10 ring-1 ring-mint-500/20 grid place-items-center text-mint-400 rotate-in">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="mt-4 font-semibold text-white">
+              Single Active Stint Enforcement
+            </div>
+            <p class="mt-2 text-sm text-ink-200">
+              Only one active stint at a time across all devices. No multitasking, no context switching—just focused work.
             </p>
           </div>
-          <div class="lg:col-span-2 grid sm:grid-cols-2 gap-5">
-            <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5">
-              <div class="text-mint-300 font-semibold">
-                Stint Management
-              </div>
-              <p class="mt-2 text-sm text-ink-200">
-                Start/stop with one click. Switching projects auto-stops the current stint. Set default
-                durations with 5‑minute warnings.
-              </p>
+          
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-2 hover-lift">
+            <div class="h-10 w-10 rounded-lg bg-brand-500/10 ring-1 ring-brand-500/20 grid place-items-center text-brand-400 rotate-in">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
             </div>
-            <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5">
-              <div class="text-brand-300 font-semibold">
-                Project Goals
-              </div>
-              <p class="mt-2 text-sm text-ink-200">
-                Create projects with “X of Y stints/day” targets and track progress live across devices.
-              </p>
+            <div class="mt-4 font-semibold text-white">
+              Project-Level Goals
             </div>
-            <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5">
-              <div class="text-amberx-300 font-semibold">
-                Professional Analytics
-              </div>
-              <p class="mt-2 text-sm text-ink-200">
-                GitHub‑style heatmaps, completion rates, and comparison charts for clear weekly reviews.
-              </p>
+            <p class="mt-2 text-sm text-ink-200">
+              Set expected daily stints (1-8 per day) for each project. Track "2 of 3 stints today" with visual progress bars.
+            </p>
+          </div>
+          
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-3 hover-lift">
+            <div class="h-10 w-10 rounded-lg bg-purple-500/10 ring-1 ring-purple-500/20 grid place-items-center text-purple-400 rotate-in">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
             </div>
-            <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-5">
-              <div class="text-ink-200 font-semibold">
-                Privacy & Security
-              </div>
-              <p class="mt-2 text-sm text-ink-200">
-                Supabase Auth with email verification, secure session persistence, and respectful data
-                handling.
-              </p>
+            <div class="mt-4 font-semibold text-white">
+              Real-Time Cross-Device Sync
             </div>
+            <p class="mt-2 text-sm text-ink-200">
+              Start on desktop, continue on mobile. Active stints sync instantly across all devices with conflict resolution.
+            </p>
+          </div>
+          
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-4 hover-lift">
+            <div class="h-10 w-10 rounded-lg bg-amberx-500/10 ring-1 ring-amberx-500/20 grid place-items-center text-amberx-400 rotate-in">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div class="mt-4 font-semibold text-white">
+              Professional Focus Ledger
+            </div>
+            <p class="mt-2 text-sm text-ink-200">
+              Export CSV reports showing focus consistency per project—client-ready evidence without surveillance metrics.
+            </p>
+          </div>
+          
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-5 hover-lift">
+            <div class="h-10 w-10 rounded-lg bg-red-500/10 ring-1 ring-red-500/20 grid place-items-center text-red-400 rotate-in">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+              </svg>
+            </div>
+            <div class="mt-4 font-semibold text-white">
+              Streak Tracking & Habit Building
+            </div>
+            <p class="mt-2 text-sm text-ink-200">
+              Maintain daily streaks with visual heatmaps. 1-day grace period keeps you motivated without harsh penalties.
+            </p>
+          </div>
+          
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-6 hover-lift">
+            <div class="h-10 w-10 rounded-lg bg-cyan-500/10 ring-1 ring-cyan-500/20 grid place-items-center text-cyan-400 rotate-in">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <div class="mt-4 font-semibold text-white">
+              Zero Administrative Overhead
+            </div>
+            <p class="mt-2 text-sm text-ink-200">
+              No categories, tags, or pre-work required. Start tracking in under 60 seconds with one-click project creation.
+            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Social proof strip -->
-    <section class="relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-2">
-        <div class="grid sm:grid-cols-3 gap-4">
-          <div class="rounded-xl bg-ink-800 ring-1 ring-white/10 p-5 text-center">
-            <div class="text-3xl font-semibold">
-              95%
-            </div>
-            <div class="text-sm text-ink-300 mt-1">
-              say it reduced context switching
-            </div>
-          </div>
-          <div class="rounded-xl bg-ink-800 ring-1 ring-white/10 p-5 text-center">
-            <div class="text-3xl font-semibold">
-              +38%
-            </div>
-            <div class="text-sm text-ink-300 mt-1">
-              avg. weekly completion rate
-            </div>
-          </div>
-          <div class="rounded-xl bg-ink-800 ring-1 ring-white/10 p-5 text-center">
-            <div class="text-3xl font-semibold">
-              4.9/5
-            </div>
-            <div class="text-sm text-ink-300 mt-1">
-              client confidence on reports
-            </div>
-          </div>
+    <!-- Competitive differentiation -->
+    <section class="relative bg-gradient-to-b from-transparent to-ink-800/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div class="text-center max-w-3xl mx-auto mb-10 fade-up">
+          <h2 class="text-3xl sm:text-4xl font-semibold">
+            Why not just use a time tracker?
+          </h2>
+          <p class="mt-3 text-ink-200 text-lg">
+            Traditional time trackers optimize for billing compliance. LifeStint optimizes for demonstrable focus quality.
+          </p>
+        </div>
+        
+        <div class="overflow-x-auto rounded-2xl bg-white/5 ring-1 ring-white/10 scale-in">
+          <table class="w-full text-sm border-collapse min-w-[600px]">
+            <thead>
+              <tr class="border-b border-white/10">
+                <th class="text-left p-4 font-medium text-ink-300 bg-ink-900/50">Feature</th>
+                <th class="p-4 text-center bg-ink-900/50">
+                  <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brand-500/10 ring-1 ring-brand-500/20">
+                    <span class="font-semibold text-brand-300">LifeStint</span>
+                  </div>
+                </th>
+                <th class="p-4 text-center font-medium text-ink-300 bg-ink-900/50">Toggl / Harvest</th>
+                <th class="p-4 text-center font-medium text-ink-300 bg-ink-900/50">Forest / Pomodoro</th>
+              </tr>
+            </thead>
+            <tbody class="text-ink-200">
+              <tr class="border-b border-white/10">
+                <td class="p-4 font-medium text-white">Single active session enforcement</td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </td>
+              </tr>
+              <tr class="border-b border-white/10">
+                <td class="p-4 font-medium text-white">Project-level focus tracking</td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </td>
+              </tr>
+              <tr class="border-b border-white/10">
+                <td class="p-4 font-medium text-white">Professional client reports</td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </td>
+                <td class="p-4 text-center text-xs">Timesheets</td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </td>
+              </tr>
+              <tr class="border-b border-white/10">
+                <td class="p-4 font-medium text-white">Zero administrative overhead</td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </td>
+                <td class="p-4 text-center text-xs">Categories required</td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </td>
+              </tr>
+              <tr class="border-b border-white/10">
+                <td class="p-4 font-medium text-white">No surveillance metrics</td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </td>
+                <td class="p-4 text-center text-xs">Productivity scores</td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </td>
+              </tr>
+              <tr>
+                <td class="p-4 font-medium text-white">Real-time cross-device sync</td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </td>
+                <td class="p-4 text-center">
+                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </td>
+                <td class="p-4 text-center text-xs">Mobile only</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -325,22 +466,35 @@
               <h3 class="text-3xl font-semibold">
                 Focus evidence clients respect
               </h3>
-              <p class="mt-3 text-ink-200">
-                The Focus Ledger summarizes your weekly stints per client with completion rates and
-                distribution—no screenshots, no keystroke logging.
+              <p class="mt-3 text-ink-200 text-lg">
+                Unlike traditional time trackers that feel like surveillance, LifeStint generates 
+                professional Focus Ledgers that demonstrate work quality and consistency—the credible 
+                evidence clients need without the Big Brother feeling.
               </p>
-              <ul class="mt-5 space-y-3 text-ink-200 text-sm">
+              <ul class="mt-6 space-y-3 text-ink-200">
                 <li class="flex gap-3">
-                  <span class="mt-1 h-2.5 w-2.5 rounded-full bg-mint-400" /> Export PDF or share a
-                  secure link
+                  <svg class="mt-0.5 h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>CSV export with stint history, dates, durations, and completion types</span>
                 </li>
                 <li class="flex gap-3">
-                  <span class="mt-1 h-2.5 w-2.5 rounded-full bg-brand-400" /> Consistency heatmap over
-                  selectable ranges
+                  <svg class="mt-0.5 h-5 w-5 text-brand-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Weekly summaries showing total stints, focus time, and project breakdown</span>
                 </li>
                 <li class="flex gap-3">
-                  <span class="mt-1 h-2.5 w-2.5 rounded-full bg-amberx-400" /> Project comparison
-                  charts and daily reset
+                  <svg class="mt-0.5 h-5 w-5 text-purple-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Streak tracking and completion rates to prove consistent work habits</span>
+                </li>
+                <li class="flex gap-3">
+                  <svg class="mt-0.5 h-5 w-5 text-amberx-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>No surveillance metrics—just focus sessions and work quality data</span>
                 </li>
               </ul>
             </div>
@@ -412,35 +566,75 @@
           </div>
         </div>
 
+        <!-- Use case examples -->
+        <div class="mt-14 grid md:grid-cols-2 gap-6">
+          <div class="rounded-2xl bg-gradient-to-br from-mint-500/10 to-brand-500/10 ring-1 ring-mint-500/20 p-6 slide-in-left hover-lift">
+            <div class="flex gap-4">
+              <div class="h-12 w-12 rounded-full bg-mint-500/20 ring-2 ring-mint-500/30 flex-shrink-0 grid place-items-center text-2xl bounce-subtle">
+                👩‍💻
+              </div>
+              <div>
+                <div class="font-semibold text-lg text-white">
+                  "I used to lose 2 hours daily to context switching"
+                </div>
+                <p class="mt-2 text-sm text-ink-200">
+                  "Now I complete 14 stints per week with 87% consistency. My clients see the ledger and trust I'm focused on their work—no questions asked."
+                </p>
+                <div class="mt-3 text-xs text-ink-300">
+                  — Sarah, Independent Software Consultant
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="rounded-2xl bg-gradient-to-br from-purple-500/10 to-brand-500/10 ring-1 ring-purple-500/20 p-6 slide-in-right hover-lift">
+            <div class="flex gap-4">
+              <div class="h-12 w-12 rounded-full bg-purple-500/20 ring-2 ring-purple-500/30 flex-shrink-0 grid place-items-center text-2xl bounce-subtle">
+                🎯
+              </div>
+              <div>
+                <div class="font-semibold text-lg text-white">
+                  "Finally, evidence that doesn't feel like surveillance"
+                </div>
+                <p class="mt-2 text-sm text-ink-200">
+                  "I send weekly Focus Ledgers to my retainer clients. They appreciate the transparency without feeling like I'm being monitored. It's helped me justify my rates."
+                </p>
+                <div class="mt-3 text-xs text-ink-300">
+                  — Marcus, Design Agency Remote Worker
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- CTA banner -->
         <div
           id="cta"
-          class="mt-8 rounded-2xl bg-brand-500/10 ring-1 ring-brand-400/20 p-6 sm:p-8"
+          class="mt-10 rounded-2xl bg-gradient-to-r from-brand-500 to-mint-500 p-8 sm:p-10 text-center scale-in animate-gradient glow-on-hover"
         >
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div class="text-xl font-semibold text-brand-200">
-                Hit your target: X of Y stints/day
-              </div>
-              <div class="text-ink-200 text-sm">
-                Set goals per project and watch your completion rate rise.
-              </div>
-            </div>
-            <div class="flex gap-3">
-              <UButton
-                to="/auth/register"
-                color="primary"
-                size="lg"
-                class="shadow-focus"
-              >
-                Create account
-              </UButton>
-              <a
-                href="#"
-                class="rounded-lg bg-white/10 hover:bg-white/20 px-5 py-2.5 font-medium"
-              >See report sample</a>
-            </div>
+          <h3 class="text-3xl font-bold text-white">
+            Start demonstrating your focus quality
+          </h3>
+          <p class="mt-3 text-white/90 text-lg max-w-2xl mx-auto">
+            Join consultants and freelancers who defend their premium rates with credible focus evidence—not surveillance.
+          </p>
+          <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href="/auth/register"
+              class="inline-flex items-center justify-center rounded-xl bg-white text-ink-900 hover:bg-white/90 font-semibold px-8 py-3.5 shadow-lg transition-all"
+            >
+              Start your first stint — Free
+            </a>
+            <a
+              href="#how"
+              class="inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium px-8 py-3.5 backdrop-blur-sm transition-all"
+            >
+              See how it works
+            </a>
           </div>
+          <p class="mt-4 text-sm text-white/70">
+            Free forever for 2 projects • No credit card required • Takes 60 seconds to start
+          </p>
         </div>
       </div>
     </section>
@@ -452,66 +646,128 @@
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div class="text-center">
-          <h3 class="text-3xl font-semibold">
+          <h3 class="text-3xl sm:text-4xl font-semibold">
             Simple pricing for serious focus
           </h3>
-          <p class="mt-2 text-ink-200">
-            Start for free. Upgrade when you’re ready to ship more deep work.
+          <p class="mt-3 text-ink-200 text-lg">
+            Generous free tier to get started. Upgrade when you need unlimited projects and professional exports.
           </p>
         </div>
 
-        <div class="mt-8 grid md:grid-cols-3 gap-5">
+        <div class="mt-10 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           <!-- Free -->
-          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6">
-            <div class="text-sm text-ink-300">
-              Starter
+          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-7 fade-up stagger-1 hover-lift">
+            <div class="text-sm font-medium text-ink-300 uppercase tracking-wide">
+              Free
             </div>
-            <div class="mt-2 text-3xl font-semibold">
-              $0
+            <div class="mt-3 flex items-baseline gap-2">
+              <span class="text-4xl font-bold">$0</span>
+              <span class="text-ink-300">forever</span>
             </div>
-            <ul class="mt-4 space-y-2 text-sm text-ink-200">
-              <li>• 2 projects</li>
-              <li>• Daily targets</li>
-              <li>• Sync across devices</li>
+            <p class="mt-3 text-sm text-ink-200">
+              Perfect for trying out LifeStint and managing a couple of key projects.
+            </p>
+            <ul class="mt-6 space-y-3 text-sm text-ink-200">
+              <li class="flex gap-3">
+                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong class="text-white">2 active projects</strong></span>
+              </li>
+              <li class="flex gap-3">
+                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Unlimited stints per day</span>
+              </li>
+              <li class="flex gap-3">
+                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Real-time sync across all devices</span>
+              </li>
+              <li class="flex gap-3">
+                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Basic analytics (90 days)</span>
+              </li>
+              <li class="flex gap-3">
+                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Streak tracking & heatmaps</span>
+              </li>
             </ul>
-            <button class="mt-5 w-full rounded-xl bg-white/90 text-ink-900 hover:bg-white py-2 font-semibold">
-              Get started
-            </button>
+            <a
+              href="/auth/register"
+              class="mt-6 block w-full text-center rounded-xl bg-white text-ink-900 hover:bg-white/90 py-3 font-semibold transition-colors"
+            >
+              Get started free
+            </a>
           </div>
           <!-- Pro -->
-          <div class="rounded-2xl bg-brand-500/10 ring-1 ring-brand-400/20 p-6 relative overflow-hidden">
-            <span class="absolute top-4 right-4 text-xs px-2 py-1 rounded bg-brand-500 text-white">Popular</span>
-            <div class="text-sm text-brand-300">
-              Professional
+          <div class="rounded-2xl bg-gradient-to-br from-brand-500/20 to-mint-500/20 ring-2 ring-brand-400/30 p-7 relative fade-up stagger-2 hover-lift shimmer">
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-brand-500 text-white text-xs font-semibold">
+              MOST POPULAR
             </div>
-            <div class="mt-2 text-3xl font-semibold text-white">
-              $12<span class="text-base font-normal text-ink-300">/mo</span>
+            <div class="text-sm font-medium text-brand-300 uppercase tracking-wide">
+              Pro
             </div>
-            <ul class="mt-4 space-y-2 text-sm text-ink-200">
-              <li>• Unlimited projects</li>
-              <li>• Focus Ledger exports</li>
-              <li>• Priority support</li>
+            <div class="mt-3 flex items-baseline gap-2">
+              <span class="text-4xl font-bold text-white">$12</span>
+              <span class="text-ink-300">/month</span>
+            </div>
+            <p class="mt-3 text-sm text-ink-200">
+              For consultants who need to manage multiple clients and demonstrate consistent work quality.
+            </p>
+            <ul class="mt-6 space-y-3 text-sm text-ink-200">
+              <li class="flex gap-3">
+                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong class="text-white">Unlimited active projects</strong></span>
+              </li>
+              <li class="flex gap-3">
+                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong class="text-white">Unlimited Focus Ledger CSV exports</strong></span>
+              </li>
+              <li class="flex gap-3">
+                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Unlimited analytics history</span>
+              </li>
+              <li class="flex gap-3">
+                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Advanced analytics & charts</span>
+              </li>
+              <li class="flex gap-3">
+                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Custom branding on exports</span>
+              </li>
+              <li class="flex gap-3">
+                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Priority email support</span>
+              </li>
             </ul>
-            <button class="mt-5 w-full rounded-xl bg-brand-500 hover:bg-brand-600 py-2 font-semibold shadow-focus">
-              Upgrade
-            </button>
-          </div>
-          <!-- Team -->
-          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6">
-            <div class="text-sm text-ink-300">
-              Team
-            </div>
-            <div class="mt-2 text-3xl font-semibold">
-              $29
-            </div>
-            <ul class="mt-4 space-y-2 text-sm text-ink-200">
-              <li>• Shared reports</li>
-              <li>• Roles & permissions</li>
-              <li>• SSO (coming soon)</li>
-            </ul>
-            <button class="mt-5 w-full rounded-xl bg-white/10 hover:bg-white/20 py-2 font-semibold">
-              Contact sales
-            </button>
+            <a
+              href="/auth/register"
+              class="mt-6 block w-full text-center rounded-xl bg-brand-500 hover:bg-brand-600 py-3 font-semibold shadow-focus transition-colors text-white"
+            >
+              Start Pro trial
+            </a>
+            <p class="mt-3 text-center text-xs text-ink-300">
+              14-day free trial • Cancel anytime
+            </p>
           </div>
         </div>
       </div>
@@ -523,43 +779,62 @@
       class="relative"
     >
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <h3 class="text-3xl font-semibold text-center">
-          Frequently asked
+        <h3 class="text-3xl sm:text-4xl font-semibold text-center">
+          Frequently asked questions
         </h3>
-        <div class="mt-8 grid md:grid-cols-2 gap-5">
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-5">
-            <div class="font-medium">
-              What makes LifeStint different from time trackers?
+        <div class="mt-10 grid md:grid-cols-2 gap-6">
+          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-1 hover-lift">
+            <div class="font-semibold text-lg text-white">
+              What makes LifeStint different from Toggl or Harvest?
             </div>
-            <p class="mt-2 text-sm text-ink-200">
-              Stints are proactive and enforced. You commit to a focused session; the app prevents
-              parallel timers and encourages intentional work.
+            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
+              Unlike traditional time trackers that require categories and tags, LifeStint focuses on <strong class="text-white">focus quality, not billing hours</strong>. 
+              We technically enforce single active sessions to prevent multitasking and provide professional reports that demonstrate work consistency—not surveillance data.
             </p>
           </div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-5">
-            <div class="font-medium">
+          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-2 hover-lift">
+            <div class="font-semibold text-lg text-white">
               Do clients see my screen or keystrokes?
             </div>
-            <p class="mt-2 text-sm text-ink-200">
-              No surveillance. Reports summarize focused sessions per project with optional notes only.
+            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
+              <strong class="text-white">Absolutely not.</strong> No surveillance, no screenshots, no keystroke logging. Focus Ledger exports show only stint dates, 
+              durations, project names, and optional notes—clean, professional evidence of consistent work habits.
             </p>
           </div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-5">
-            <div class="font-medium">
-              How do daily targets work?
+          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-3 hover-lift">
+            <div class="font-semibold text-lg text-white">
+              How does the single active stint enforcement work?
             </div>
-            <p class="mt-2 text-sm text-ink-200">
-              Set “X of Y stints/day” for each project. Progress resets at midnight to reinforce
-              consistent habits.
+            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
+              You can only have one active stint at a time across all your devices. Starting a new stint requires ending the current one. This <strong class="text-white">technical guardrail prevents context switching</strong> 
+              and ensures genuine focused work—something Pomodoro apps and time trackers don't enforce.
             </p>
           </div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-5">
-            <div class="font-medium">
-              Is my data secure?
+          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-4 hover-lift">
+            <div class="font-semibold text-lg text-white">
+              What happens if I need to pause or stop early?
             </div>
-            <p class="mt-2 text-sm text-ink-200">
-              Supabase Auth with email verification, password recovery, and session persistence. Data is
-              isolated per account.
+            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
+              Pause anytime for breaks—pause time is tracked separately. Stop manually if you finish early and optionally add notes. 
+              Auto-completion happens after 4 hours max (prevents accidental overnight runs). Interrupted stints are preserved for analytics but don't count toward daily goals.
+            </p>
+          </div>
+          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-5 hover-lift">
+            <div class="font-semibold text-lg text-white">
+              How do daily targets and streaks work?
+            </div>
+            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
+              Set expected daily stints (1-8) per project. Track "2 of 3 stints today" with visual progress. Progress resets at midnight in your timezone. 
+              <strong class="text-white">Streaks track consecutive days</strong> with at least one completed stint, with a 1-day grace period.
+            </p>
+          </div>
+          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-6 hover-lift">
+            <div class="font-semibold text-lg text-white">
+              Does it work offline and across devices?
+            </div>
+            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
+              Yes! Start on desktop, continue on mobile—real-time sync keeps everything in sync. Offline stint tracking works with smart conflict resolution. 
+              Timer runs in background tabs using Web Workers for accuracy, and server-side auto-completion ensures stints complete even if your browser closes.
             </p>
           </div>
         </div>
@@ -596,32 +871,66 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
 definePageMeta({
   layout: false,
 })
 
 // SEO
 useSeoMeta({
-  title: 'LifeStint - Focus Tracking Made Simple',
-  description: 'Track your focus sessions and boost productivity with LifeStint.',
+  title: 'LifeStint - One Stint at a Time. Zero Context Switching.',
+  description: 'Defend your premium rates with credible focus evidence. Project-level tracking with professional reporting—no surveillance, no administrative overhead, just demonstrable work quality for consultants and freelancers.',
+  ogTitle: 'LifeStint - Professional Focus Tracking for Consultants',
+  ogDescription: 'Single active stint enforcement prevents multitasking. Export professional Focus Ledgers that demonstrate work quality without surveillance metrics.',
+  twitterCard: 'summary_large_image',
 })
 
 const user = useAuthUser()
 
-// const runtimeConfig = useRuntimeConfig()
-// const appConfig = useAppConfig()
-//
-// if (import.meta.dev) {
-//   console.log('runtimeConfig', runtimeConfig)
-//   console.log('appConfig', appConfig)
-// }
+// Intersection Observer for scroll animations
+const isVisible = ref(false)
+
+onMounted(() => {
+  // Add scroll animation observers
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-in')
+      }
+    })
+  }, observerOptions)
+
+  // Observe all animated elements
+  document.querySelectorAll('.fade-up, .fade-in, .scale-in, .slide-in-left, .slide-in-right').forEach(el => {
+    observer.observe(el)
+  })
+
+  // Floating animation for hero product mock
+  const floatingElements = document.querySelectorAll('.floating')
+  floatingElements.forEach(el => {
+    el.classList.add('animate-float')
+  })
+})
 </script>
 
 <style>
+/* Hero background with animation */
 .hero {
     background: radial-gradient(1000px 340px at 20% -10%, rgba(43, 134, 255, .25), transparent 60%),
     radial-gradient(800px 280px at 80% -20%, rgba(21, 63, 143, .25), transparent 60%),
     linear-gradient(180deg, #0b1020 0%, #141b2f 100%);
+    animation: subtle-pulse 8s ease-in-out infinite;
+}
+
+@keyframes subtle-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.95; }
 }
 
 .noise::before {
@@ -637,5 +946,214 @@ const user = useAuthUser()
 
 .badge {
     border: 1px solid rgba(255, 255, 255, .14);
+    animation: badge-glow 3s ease-in-out infinite;
+}
+
+@keyframes badge-glow {
+    0%, 100% { box-shadow: 0 0 0 rgba(43, 134, 255, 0); }
+    50% { box-shadow: 0 0 20px rgba(43, 134, 255, 0.3); }
+}
+
+/* Scroll-triggered animations */
+.fade-up, .fade-in, .scale-in, .slide-in-left, .slide-in-right {
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-up {
+    transform: translateY(30px);
+}
+
+.fade-up.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fade-in.animate-in {
+    opacity: 1;
+}
+
+.scale-in {
+    transform: scale(0.95);
+}
+
+.scale-in.animate-in {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.slide-in-left {
+    transform: translateX(-30px);
+}
+
+.slide-in-left.animate-in {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.slide-in-right {
+    transform: translateX(30px);
+}
+
+.slide-in-right.animate-in {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Stagger animation delays */
+.stagger-1 { transition-delay: 0.1s; }
+.stagger-2 { transition-delay: 0.2s; }
+.stagger-3 { transition-delay: 0.3s; }
+.stagger-4 { transition-delay: 0.4s; }
+.stagger-5 { transition-delay: 0.5s; }
+.stagger-6 { transition-delay: 0.6s; }
+
+/* Floating animation */
+.floating {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Pulse animation for active elements */
+.pulse-slow {
+    animation: pulse-glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .7; }
+}
+
+/* Shimmer effect */
+.shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Hover effects with smooth transitions */
+.hover-lift {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Gradient animation */
+.animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
+}
+
+@keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Rotate animation for icons */
+.rotate-in {
+    animation: rotate-scale 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes rotate-scale {
+    0% {
+        transform: rotate(-180deg) scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: rotate(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Progress bar animation */
+.progress-animate {
+    animation: progress-fill 2s ease-out forwards;
+}
+
+@keyframes progress-fill {
+    from { width: 0; }
+    to { width: var(--progress-width, 100%); }
+}
+
+/* Typing animation for text */
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: currentColor; }
+}
+
+/* Bounce attention animation */
+.bounce-subtle {
+    animation: bounce-subtle 2s infinite;
+}
+
+@keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* Glow effect on hover */
+.glow-on-hover {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.glow-on-hover:hover {
+    box-shadow: 0 0 20px rgba(43, 134, 255, 0.4),
+                0 0 40px rgba(43, 134, 255, 0.2);
+}
+
+/* Blur reveal animation */
+.blur-reveal {
+    filter: blur(10px);
+    opacity: 0;
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.blur-reveal.animate-in {
+    filter: blur(0);
+    opacity: 1;
+}
+
+/* Number counter animation */
+@keyframes number-roll {
+    0% { transform: translateY(100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+.number-roll {
+    animation: number-roll 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 </style>
