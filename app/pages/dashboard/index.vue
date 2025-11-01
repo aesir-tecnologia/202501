@@ -13,12 +13,6 @@ useSeoMeta({
   description: 'Review your focus progress and personalized insights.',
 })
 
-const user = useAuthUser()
-
-const displayName = computed(() => {
-  return user.value?.fullName || user.value?.email || 'there'
-})
-
 // Fetch all non-archived projects (including both active and inactive)
 const { data: projectsData, isLoading } = useProjectsQuery({
   includeInactive: true,
@@ -55,12 +49,6 @@ function openArchivedProjectsModal() {
 
 <template>
   <UContainer>
-    <UPageHeader
-      headline="Dashboard"
-      :title="`Welcome back, ${displayName}`"
-      description="This is your starting point for tracking focus sessions and productivity insights."
-    />
-
     <div class="space-y-6">
       <!-- Projects Section -->
       <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">

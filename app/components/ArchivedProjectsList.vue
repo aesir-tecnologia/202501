@@ -2,7 +2,7 @@
 import type { ProjectRow } from '~/lib/supabase/projects'
 import { usePermanentlyDeleteProject, useUnarchiveProject } from '~/composables/useProjects'
 
-const props = defineProps<{
+defineProps<{
   projects: ProjectRow[]
 }>()
 
@@ -59,7 +59,7 @@ async function handlePermanentDelete() {
   if (!projectToDelete.value) return
 
   deletingProjectId.value = projectToDelete.value.id
-  
+
   try {
     await permanentlyDeleteProject(projectToDelete.value.id)
 
@@ -219,4 +219,3 @@ async function handlePermanentDelete() {
     </UModal>
   </div>
 </template>
-
