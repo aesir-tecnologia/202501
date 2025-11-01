@@ -19,6 +19,22 @@ export const stintStartSchema = z.object({
     .or(z.literal('').transform(() => undefined)),
 })
 
+export const stintStartEnhancedSchema = z.object({
+  projectId: z.string().uuid('A valid project id is required'),
+  plannedDurationMinutes: z
+    .number()
+    .int()
+    .min(STINT_DURATION_MIN_MINUTES, `Stint duration must be at least ${STINT_DURATION_MIN_MINUTES} minutes`)
+    .max(STINT_DURATION_MAX_MINUTES, `Stint duration must be at most ${STINT_DURATION_MAX_MINUTES} minutes`)
+    .optional(),
+  notes: z
+    .string()
+    .trim()
+    .max(STINT_NOTES_MAX_LENGTH, 'Notes must be 500 characters or fewer')
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
+})
+
 export const stintUpdateSchema = z.object({
   notes: z
     .string()
@@ -55,6 +71,7 @@ export const stintInterruptSchema = z.object({
 })
 
 export type StintStartPayload = z.infer<typeof stintStartSchema>
+export type StintStartEnhancedPayload = z.infer<typeof stintStartEnhancedSchema>
 export type StintUpdatePayload = z.infer<typeof stintUpdateSchema>
 export type StintPausePayload = z.infer<typeof stintPauseSchema>
 export type StintResumePayload = z.infer<typeof stintResumeSchema>
