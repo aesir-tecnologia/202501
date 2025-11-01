@@ -34,7 +34,7 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!
-    
+
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     })
@@ -94,7 +94,8 @@ serve(async (req) => {
       const elapsedBeforePause = Math.floor((pausedAt.getTime() - startedAt.getTime()) / 1000)
       const remainingBeforePause = (stint.planned_duration || 0) * 60 - elapsedBeforePause
       serverRemaining = Math.max(0, remainingBeforePause)
-    } else if (stint.status === 'active') {
+    }
+    else if (stint.status === 'active') {
       // For active stints, calculate based on started_at + planned_duration - now
       const startedAt = new Date(stint.started_at)
       const now = new Date()
@@ -127,4 +128,3 @@ serve(async (req) => {
     )
   }
 })
-

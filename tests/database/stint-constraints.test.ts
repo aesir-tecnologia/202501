@@ -360,4 +360,3 @@ describe('Stint Database Constraints', () => {
     })
   })
 })
-

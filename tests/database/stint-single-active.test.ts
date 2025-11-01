@@ -301,4 +301,3 @@ describe('Single Active Stint Enforcement', () => {
     })
   })
 })
-

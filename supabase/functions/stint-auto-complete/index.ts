@@ -1,7 +1,7 @@
 // Edge Function: stint-auto-complete
 // Purpose: Auto-complete active stints that have reached their planned end time
 // Runs: Every 30 seconds via Supabase cron
-// 
+//
 // This function:
 // 1. Finds all active stints where started_at + planned_duration <= now()
 // 2. Calls complete_stint() PostgreSQL function for each
@@ -25,7 +25,7 @@ serve(async (req) => {
     // Get service role client (bypasses RLS)
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Find all active stints that should be completed
@@ -69,7 +69,7 @@ serve(async (req) => {
       if (plannedEndTime <= now) {
         try {
           // Call complete_stint PostgreSQL function
-          const { data, error: completeError } = await supabase.rpc('complete_stint', {
+          const { error: completeError } = await supabase.rpc('complete_stint', {
             p_stint_id: stint.id,
             p_completion_type: 'auto',
             p_notes: null,
@@ -78,7 +78,8 @@ serve(async (req) => {
           if (completeError) {
             console.error(`Error completing stint ${stint.id}:`, completeError)
             errors.push({ stintId: stint.id, error: completeError.message })
-          } else {
+          }
+          else {
             completedStints.push(stint.id)
             console.log(`Auto-completed stint ${stint.id} for user ${stint.user_id}`)
           }
@@ -112,4 +113,3 @@ serve(async (req) => {
     )
   }
 })
-
