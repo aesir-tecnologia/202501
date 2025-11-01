@@ -23,6 +23,8 @@
     "@nuxt/ui": "^4.0.0",
     "@nuxtjs/supabase": "^1.6.2",
     "@supabase/supabase-js": "^2.57.4",
+    "@tanstack/vue-query": "^5.90.6",
+    "@tanstack/vue-query-devtools": "^5.91.0",
     "@vueuse/core": "^13.9.0",
     "@vueuse/integrations": "^13.9.0",
     "eslint": "^9.36.0",
@@ -35,6 +37,7 @@
   "devDependencies": {
     "@iconify-json/heroicons": "^1.2.3",
     "@iconify-json/lucide": "^1.2.68",
+    "dotenv": "^17.2.3",
     "task-master-ai": "^0.27.3",
     "vitest": "^2.1.8",
     "vue-tsc": "^3.1.0"
