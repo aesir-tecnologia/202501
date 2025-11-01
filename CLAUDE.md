@@ -30,9 +30,12 @@ npm run test:run         # Run tests once (CI mode)
 
 ### Database
 ```bash
-npm run supabase:types   # Generate TypeScript types from Supabase schema
+npm run supabase:types   # Generate TypeScript types from remote Supabase schema
                          # Outputs to app/types/database.types.ts
+                         # Connects to linked remote database (not local)
 ```
+
+**Note:** This project uses a remote Supabase database. All database operations (migrations, type generation, etc.) are performed against the remote linked instance.
 
 ## Architecture
 
@@ -227,8 +230,8 @@ See `DEPLOYMENT.md` for detailed instructions.
 
 1. **Database Changes:**
    - Create migration in `supabase/migrations/`
-   - Apply locally or push to Supabase
-   - Regenerate types: `npm run supabase:types`
+   - Apply to remote database via Supabase CLI or dashboard
+   - Regenerate types from remote: `npm run supabase:types`
 
 2. **Adding Features:**
    - Update database layer (`app/lib/supabase/`)
