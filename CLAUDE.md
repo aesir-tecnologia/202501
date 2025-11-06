@@ -93,54 +93,88 @@ TanStack Query (Vue Query) hooks for data fetching and mutations. Provides autom
 **Files:**
 - `app/composables/useProjects.ts` - Project queries and mutations
 
-**Usage Example:**
+**Usage:**
 ```ts
-// In a Vue component - Queries
-const { data: projects, isLoading, error } = useProjectsQuery()
+const { data: projects, isLoading } = useProjectsQuery()
+const { mutateAsync: createProject } = useCreateProject()
+await createProject({ name: 'Client Project', expectedDailyStints: 3 })
+```
 
-// Mutations
-const { mutateAsync: createProject, isPending } = useCreateProject()
-const { mutateAsync: updateProject } = useUpdateProject()
-const { mutateAsync: deleteProject } = useDeleteProject()
+### Error Handling & User Feedback
 
-// Create project
-await createProject({
-  name: 'Client Project',
-  expectedDailyStints: 3,
-  customStintDuration: 45,
+**Three-Layer Error Propagation:**
+
+1. **Database Layer** (`app/lib/supabase/`): Returns `Result<T> = { data, error }` with custom error messages
+   - Translates PostgreSQL errors to user-friendly messages
+   - Example: `23505` duplicate key → "A project with this name already exists"
+   - Business validation errors (e.g., can't delete project with active stint)
+
+2. **Composable Layer** (`app/composables/`): Validates with Zod, throws errors for TanStack Query
+   ```ts
+   const validation = schema.safeParse(payload)
+   if (!validation.success) {
+     throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+   }
+   ```
+
+3. **Component Layer**: Try-catch with toast notifications
+   ```ts
+   try {
+     await createProject({ name: 'New Project' })
+     toast.add({ title: 'Success', color: 'success' })
+   } catch (error) {
+     toast.add({
+       title: 'Operation failed',
+       description: error instanceof Error ? error.message : 'Unexpected error',
+       color: 'error',
+     })
+   }
+   ```
+
+**Toast Notification Pattern:**
+```ts
+toast.add({
+  title: string,          // Short summary
+  description?: string,   // Detailed message or error
+  color: 'success' | 'error' | 'warning' | 'info' | 'neutral',
+  icon?: string,          // Lucide icon (e.g., 'i-lucide-check-circle')
 })
-
-// Update project
-await updateProject({ id: projectId, data: { name: 'Updated Name' } })
-
-// Delete project
-await deleteProject(projectId)
 ```
 
-### File Organization
+**Automatic Rollback:**
+All mutations implement optimistic updates with automatic cache rollback on error:
+- `onMutate`: Snapshots current cache state, applies optimistic update
+- `onError`: Restores snapshot if mutation fails
+- `onSuccess`: Invalidates affected queries for refetch
 
+**Conflict Detection:**
+`startStint()` detects concurrent operations and returns `ConflictError` type with existing stint data. Components display conflict resolution modal for user action.
+
+### State Management
+
+**Architecture:** Pure TanStack Query - no Pinia/Vuex stores. All server state managed through TanStack Query cache.
+
+**Query Key Factory Pattern:**
+Centralized cache organization via key factories:
+```ts
+export const projectKeys = {
+  all: ['projects'] as const,
+  lists: () => [...projectKeys.all, 'list'] as const,
+  list: (filters?: ProjectListFilters) => [...projectKeys.lists(), filters] as const,
+  detail: (id: string) => [...projectKeys.all, 'detail', id] as const,
+}
 ```
-app/
-├── components/          # Vue components
-├── composables/         # Vue composables (mutations layer)
-├── layouts/            # Layout components
-├── lib/
-│   └── supabase/       # Database access layer
-├── middleware/         # Route middleware (auth, guest)
-├── pages/              # File-based routing
-├── schemas/            # Zod validation schemas
-├── types/              # TypeScript types
-│   └── database.types.ts  # Generated from Supabase
-└── utils/              # Utility functions
 
-supabase/
-└── migrations/         # SQL migration files
+**Cache Invalidation Strategies:**
+- **Broad:** `invalidateQueries({ queryKey: projectKeys.all })` after create/delete
+- **Targeted:** `invalidateQueries({ queryKey: projectKeys.detail(id) })` after specific updates
+- **Multiple:** Update both list and detail caches simultaneously when needed
 
-tests/
-├── composables/        # Composable unit tests
-├── database/           # RLS policy tests
-└── lib/supabase/       # Database layer tests
-```
+**Real-time Sync:**
+`useStintRealtime()` subscribes to Supabase real-time changes and directly updates TanStack Query cache via `setQueryData()` for cross-device synchronization.
+
+**Timer Singleton:**
+`useStintTimer()` maintains a global singleton Web Worker for accurate time tracking, shared across all component instances.
 
 ### Type Safety
 
@@ -151,15 +185,8 @@ tests/
 
 ### Middleware
 
-- `auth.ts` - Protects authenticated routes, client-side only
+- `auth.ts` - Protects authenticated routes (client-side only, skips on server)
 - `guest.ts` - Redirects authenticated users away from auth pages
-
-Apply in page `definePageMeta()`:
-```ts
-definePageMeta({
-  middleware: 'auth',  // or 'guest'
-})
-```
 
 ### Styling
 
@@ -168,25 +195,12 @@ definePageMeta({
 - **Dark Mode:** Via Tailwind `dark:` variants, theme toggle uses `UColorModeButton`
 - **Config:** `colorMode` settings in `nuxt.config.ts` and `app.config.ts`
 
-## Testing Guidelines
+## Testing
 
-### Running Tests
-
-- Run during development: `npm test` (watch mode)
-- Run once: `npm run test:run` (for CI)
-- Visual UI: `npm run test:ui`
-
-### Test Categories
-
+**Test Categories:**
 1. **Unit Tests** (`tests/lib/`, `tests/composables/`) - Pure logic, no DOM
 2. **Database Tests** (`tests/database/`) - RLS policies, migrations
 3. **Component Tests** - Use `@nuxt/test-utils` for Vue component testing
-
-### Test Setup
-
-- Configuration: `vitest.config.ts`
-- Global setup: `tests/setup.ts`
-- Path aliases match Nuxt's `~` and `@` conventions
 
 ## Environment Variables
 
@@ -209,17 +223,6 @@ SUPABASE_ANON_KEY=your_supabase_anon_key_here
 See `DEPLOYMENT.md` for detailed instructions.
 
 ## Important Conventions
-
-### Naming
-- Database columns: `snake_case` (enforced by Supabase/PostgreSQL)
-- TypeScript/Vue: `camelCase` for API surface (schemas, composables)
-- Components: `PascalCase` (Vue standard)
-- Composables: `use*` prefix (Vue standard)
-
-### Import Aliases
-- `~/` - Resolves to `app/` directory
-- `@/` - Resolves to project root
-- Configured in `nuxt.config.ts` and `vitest.config.ts`
 
 ### Code Style
 - **ESLint:** Configured via `@nuxt/eslint` with stylistic rules
