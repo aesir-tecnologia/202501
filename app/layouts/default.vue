@@ -19,6 +19,16 @@ const signOut = async () => {
 
   navigateTo(appConfig.auth.home)
 }
+
+// Initialize real-time subscriptions for authenticated users
+const { showConflictModal, conflictData, dismissConflict } = useStintRealtime()
+
+// Initialize stint timer (singleton, auto-manages based on active stint)
+useStintTimer()
+
+function handleConflictResolved() {
+  dismissConflict()
+}
 </script>
 
 <template>
@@ -44,5 +54,15 @@ const signOut = async () => {
     <UMain>
       <slot />
     </UMain>
+
+    <!-- Stint Conflict Resolution Modal -->
+    <StintConflictModal
+      v-if="showConflictModal && conflictData"
+      v-model:open="showConflictModal"
+      :current-stint="conflictData.currentStint"
+      :new-stint="conflictData.newStint"
+      @dismiss="dismissConflict"
+      @resolved="handleConflictResolved"
+    />
   </div>
 </template>

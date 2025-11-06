@@ -78,3 +78,4 @@ COMMENT ON FUNCTION calculate_streak(UUID) IS
   'Calculates current streak for a user. Simplified version using UTC timezone. Will be enhanced when timezone column is added to user_profiles table.';
 
 
+

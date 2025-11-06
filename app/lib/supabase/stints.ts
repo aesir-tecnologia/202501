@@ -266,7 +266,7 @@ export async function completeStint(
     .rpc('complete_stint', {
       p_stint_id: stintId,
       p_completion_type: completionType,
-      p_notes: notes || null,
+      p_notes: notes ?? undefined,
     })
     .single<StintRow>()
 

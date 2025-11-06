@@ -273,6 +273,12 @@ export function useCreateStint() {
           started_at: payload.startedAt?.toISOString() || new Date().toISOString(),
           ended_at: null,
           duration_minutes: null,
+          actual_duration: null,
+          completion_type: null,
+          planned_duration: null,
+          status: 'active' as const,
+          paused_at: null,
+          paused_duration: 0,
           is_completed: false,
           notes: payload.notes || null,
           created_at: new Date().toISOString(),
@@ -733,7 +739,6 @@ export function useResumeStint() {
               ? {
                   ...s,
                   status: 'active' as const,
-                  resumed_at: new Date().toISOString(),
                   updated_at: new Date().toISOString(),
                 }
               : s,
@@ -746,7 +751,6 @@ export function useResumeStint() {
         queryClient.setQueryData<StintRow>(stintKeys.detail(stintId), {
           ...previousStint,
           status: 'active' as const,
-          resumed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
       }
@@ -756,7 +760,6 @@ export function useResumeStint() {
         queryClient.setQueryData<StintRow | null>(stintKeys.active(), {
           ...previousActiveStint,
           status: 'active' as const,
-          resumed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
       }
@@ -823,10 +826,10 @@ export function useStartStint() {
       )
 
       // Check for conflict
-      if ('conflict' in result && result.conflict) {
+      if (result.error && 'code' in result.error && result.error.code === 'CONFLICT') {
         // Throw error with conflict details for UI to handle
         const error = new Error('Another stint is already active') as Error & { conflict: StintRow | null }
-        error.conflict = result.activeStint
+        error.conflict = result.error.existingStint
         throw error
       }
 
@@ -855,11 +858,12 @@ export function useStartStint() {
           started_at: new Date().toISOString(),
           ended_at: null,
           duration_minutes: null,
+          actual_duration: null,
+          completion_type: null,
           planned_duration: payload.plannedDurationMinutes || 50,
           status: 'active' as const,
           paused_at: null,
-          resumed_at: null,
-          total_pause_duration: 0,
+          paused_duration: 0,
           notes: payload.notes || null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
