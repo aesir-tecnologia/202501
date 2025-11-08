@@ -73,7 +73,8 @@ export function useStintRealtime() {
     // Check for conflict: if local device has active stint and new stint is also active
     const localActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
 
-    if (localActiveStint && newStint.status === 'active') {
+    // Conflict only if both active AND different stints
+    if (localActiveStint && newStint.status === 'active' && newStint.id !== localActiveStint.id) {
       // Conflict detected! Show modal
       conflictData.value = {
         currentStint: localActiveStint,
@@ -234,12 +235,15 @@ export function useStintRealtime() {
       }
       channel = null
     }
+
+    // Reset initialization flag after cleanup
+    isInitializing = false
   }
 
   /**
    * Cleanup subscription permanently (on unmount)
    */
-  function cleanup() {
+  function _cleanup() {
     isCleanedUp = true
     cleanupSubscription()
   }
@@ -280,7 +284,7 @@ export function useStintRealtime() {
    */
   function initialize() {
     // Prevent duplicate initialization
-    if (isInitializing || isCleanedUp) {
+    if (isInitializing || isCleanedUp || channel) {
       return
     }
 
@@ -289,16 +293,8 @@ export function useStintRealtime() {
       return
     }
 
-    // Clean up existing channel if any
-    if (channel) {
-      try {
-        client.removeChannel(channel)
-      }
-      catch (error) {
-        console.warn('[useStintRealtime] Error removing existing channel:', error)
-      }
-      channel = null
-    }
+    // Cancel any pending reconnection attempts
+    cancelReconnect()
 
     isInitializing = true
 
@@ -352,7 +348,6 @@ export function useStintRealtime() {
           }
           else if (status === 'CHANNEL_ERROR') {
             console.error('[useStintRealtime] Channel error - subscription failed')
-            isInitializing = false
 
             // Only show toast on first error, not on every reconnection attempt
             if (reconnectAttempts === 0) {
@@ -364,22 +359,24 @@ export function useStintRealtime() {
               })
             }
 
-            // Attempt reconnection
+            // Cleanup before attempting reconnection
+            cleanupSubscription()
             attemptReconnect()
           }
           else if (status === 'CLOSED') {
             console.log('[useStintRealtime] Channel closed')
-            isInitializing = false
 
-            // Only attempt reconnect if not intentionally closed
+            // Cleanup and attempt reconnect if not intentionally closed
+            cleanupSubscription()
             if (!isCleanedUp && user.value) {
               attemptReconnect()
             }
           }
           else if (status === 'TIMED_OUT') {
             console.warn('[useStintRealtime] Channel timed out')
-            isInitializing = false
 
+            // Cleanup and attempt reconnection
+            cleanupSubscription()
             if (!isCleanedUp && user.value) {
               attemptReconnect()
             }
@@ -388,8 +385,9 @@ export function useStintRealtime() {
     }
     catch (error) {
       console.error('[useStintRealtime] Error initializing subscription:', error)
-      isInitializing = false
 
+      // Cleanup before attempting reconnection
+      cleanupSubscription()
       if (!isCleanedUp && user.value) {
         attemptReconnect()
       }
@@ -417,7 +415,7 @@ export function useStintRealtime() {
 
   // Cleanup on unmount
   onUnmounted(() => {
-    cleanup()
+    _cleanup()
   })
 
   return {

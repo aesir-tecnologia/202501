@@ -7,7 +7,7 @@
 
 import type { Database } from '~/types/database.types'
 import { useQueryClient } from '@tanstack/vue-query'
-import { useActiveStintQuery, stintKeys } from './useStints'
+import { useActiveStintQuery } from './useStints'
 
 type StintRow = Database['public']['Tables']['stints']['Row']
 
@@ -36,6 +36,8 @@ const globalTimerState = {
   isInitialized: false,
   queryClient: null as ReturnType<typeof useQueryClient> | null,
   activeStintRef: null as Ref<StintRow | null | undefined> | null,
+  stopWatch: null as (() => void) | null,
+  toast: null as ReturnType<typeof useToast> | null,
 }
 
 /**
@@ -46,29 +48,33 @@ export function useStintTimer() {
   // Call vue-query hooks at composable level (required for proper injection context)
   const { data: activeStint } = useActiveStintQuery()
   const queryClient = useQueryClient()
+  const toast = useToast()
 
   // Store references in global state for use in non-composable functions
   globalTimerState.queryClient = queryClient
   globalTimerState.activeStintRef = activeStint
+  globalTimerState.toast = toast
 
   // Only initialize once and only on client
   if (!globalTimerState.isInitialized && import.meta.client) {
     initializeTimer()
+
+    // Set up watcher only once
+    globalTimerState.stopWatch = watch(
+      activeStint,
+      (newStint, oldStint) => {
+        handleStintChange(newStint, oldStint)
+      },
+      { immediate: true },
+    )
+
     globalTimerState.isInitialized = true
   }
 
-  // Watch active stint for auto-start/pause/stop (set up at composable level)
-  watch(
-    activeStint,
-    (newStint, oldStint) => {
-      handleStintChange(newStint, oldStint)
-    },
-    { immediate: true },
-  )
-
-  // Cleanup on unmount
+  // Cleanup on unmount - Note: cleanup() handles singleton properly
   onUnmounted(() => {
-    cleanup()
+    // Don't cleanup singleton resources on component unmount
+    // Singleton persists across component lifecycle
   })
 
   return {
@@ -107,7 +113,7 @@ function createWorker(): void {
   }
   catch (error) {
     console.error('Failed to create timer worker:', error)
-    useToast().add({
+    globalTimerState.toast?.add({
       title: 'Timer Error',
       description: 'Failed to initialize timer. Please refresh the page.',
       color: 'red',
@@ -144,7 +150,7 @@ function handleWorkerMessage(event: MessageEvent<WorkerIncomingMessage>): void {
  */
 function handleWorkerError(error: ErrorEvent): void {
   console.error('Timer worker error:', error.message)
-  useToast().add({
+  globalTimerState.toast?.add({
     title: 'Timer Error',
     description: 'Timer encountered an error. Please refresh if the timer stops working.',
     color: 'red',
@@ -286,8 +292,12 @@ function initializePausedState(stint: StintRow): void {
   const startedAt = new Date(stint.started_at!).getTime()
   const pausedAt = stint.paused_at ? new Date(stint.paused_at).getTime() : Date.now()
   const plannedDurationMs = (stint.planned_duration || 50) * 60 * 1000
+  const pausedDurationMs = (stint.paused_duration || 0) * 1000
+
+  // Calculate active duration (elapsed time minus paused time)
   const elapsedMs = pausedAt - startedAt
-  const remainingMs = Math.max(0, plannedDurationMs - elapsedMs)
+  const activeDurationMs = elapsedMs - pausedDurationMs
+  const remainingMs = Math.max(0, plannedDurationMs - activeDurationMs)
 
   globalTimerState.secondsRemaining.value = Math.floor(remainingMs / 1000)
 }
@@ -365,7 +375,7 @@ async function syncWithServer(stintId: string): Promise<void> {
 async function handleTimerComplete(): Promise<void> {
   // Get active stint from stored ref (set up at composable level)
   const activeStint = globalTimerState.activeStintRef?.value
-  
+
   if (!activeStint) return
 
   // Fetch project details for notification
@@ -382,7 +392,7 @@ async function handleTimerComplete(): Promise<void> {
   showNotification(projectName)
 
   // Show toast notification as fallback
-  useToast().add({
+  globalTimerState.toast?.add({
     title: 'Stint Completed!',
     description: `Your stint for ${projectName} has ended.`,
     color: 'green',
@@ -442,21 +452,29 @@ function showNotification(projectName: string): void {
 
 /**
  * Cleanup timer resources
+ * Called on component unmount to properly cleanup singleton
  */
-function cleanup(): void {
+function _cleanup(): void {
+  // Stop sync interval first (before terminating worker)
+  stopServerSync()
+
+  // Clean up watcher
+  if (globalTimerState.stopWatch) {
+    globalTimerState.stopWatch()
+    globalTimerState.stopWatch = null
+  }
+
   // Stop worker
   if (globalTimerState.worker) {
     globalTimerState.worker.terminate()
     globalTimerState.worker = null
   }
 
-  // Clear sync interval
-  stopServerSync()
-
   // Reset state
   globalTimerState.currentStintId = null
   globalTimerState.secondsRemaining.value = 0
   globalTimerState.isPaused.value = false
   globalTimerState.isCompleted.value = false
+  globalTimerState.toast = null
   globalTimerState.isInitialized = false
 }

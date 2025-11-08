@@ -100,6 +100,20 @@ serve(async (req) => {
     // Determine planned duration: use provided, project custom, or default 50
     const plannedDuration = plannedDurationMinutes ?? project.custom_stint_duration ?? 50
 
+    // Validate planned duration bounds (5-720 minutes)
+    const MIN_DURATION = 5
+    const MAX_DURATION = 720
+
+    if (plannedDuration < MIN_DURATION || plannedDuration > MAX_DURATION) {
+      return new Response(
+        JSON.stringify({
+          error: 'Invalid planned duration',
+          message: `Planned duration must be between ${MIN_DURATION} and ${MAX_DURATION} minutes`,
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      )
+    }
+
     // Validate stint start using database function
     const { data: validation, error: validationError } = await supabase
       .rpc('validate_stint_start', {
@@ -108,10 +122,10 @@ serve(async (req) => {
         p_version: userProfile.version,
       })
       .single<{
-        can_start: boolean
-        existing_stint_id: string | null
-        conflict_message: string | null
-      }>()
+      can_start: boolean
+      existing_stint_id: string | null
+      conflict_message: string | null
+    }>()
 
     if (validationError) {
       console.error('Validation error:', validationError)
@@ -212,4 +226,3 @@ serve(async (req) => {
     )
   }
 })
-

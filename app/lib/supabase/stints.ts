@@ -331,7 +331,7 @@ export async function startStint(
     // Edge Functions return error with status code - check error context for response body
     const errorContext = (error as any).context || {}
     const errorData = errorContext.body || (error as any).data || error
-    
+
     // Check if error response indicates conflict (status 409 or error field is 'CONFLICT')
     if (errorContext.status === 409 || errorData?.error === 'CONFLICT' || (error as any).status === 409) {
       return {
