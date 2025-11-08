@@ -19,6 +19,22 @@ export const stintStartSchema = z.object({
     .or(z.literal('').transform(() => undefined)),
 })
 
+export const stintStartEnhancedSchema = z.object({
+  projectId: z.string().uuid('A valid project id is required'),
+  plannedDurationMinutes: z
+    .number()
+    .int()
+    .min(STINT_DURATION_MIN_MINUTES, `Stint duration must be at least ${STINT_DURATION_MIN_MINUTES} minutes`)
+    .max(STINT_DURATION_MAX_MINUTES, `Stint duration must be at most ${STINT_DURATION_MAX_MINUTES} minutes`)
+    .optional(),
+  notes: z
+    .string()
+    .trim()
+    .max(STINT_NOTES_MAX_LENGTH, 'Notes must be 500 characters or fewer')
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
+})
+
 export const stintUpdateSchema = z.object({
   notes: z
     .string()
@@ -28,21 +44,39 @@ export const stintUpdateSchema = z.object({
     .or(z.literal('').transform(() => undefined)),
 })
 
+export const stintPauseSchema = z.object({
+  stintId: z.string().uuid('A valid stint id is required'),
+})
+
+export const stintResumeSchema = z.object({
+  stintId: z.string().uuid('A valid stint id is required'),
+})
+
 export const stintCompletionSchema = z.object({
   stintId: z.string().uuid('A valid stint id is required'),
-  endedAt: z.date().optional(),
-  durationMinutes: z
-    .number({ invalid_type_error: 'Duration must be a number' })
-    .int('Duration must be a whole number')
-    .min(STINT_DURATION_MIN_MINUTES, 'Duration must be at least five minutes')
-    .max(STINT_DURATION_MAX_MINUTES, 'Duration cannot exceed twelve hours'),
+  completionType: z.enum(['manual', 'auto', 'interrupted'], {
+    errorMap: () => ({ message: 'Completion type must be manual, auto, or interrupted' }),
+  }),
   notes: stintUpdateSchema.shape.notes,
-  completed: z.boolean().default(true),
+})
+
+export const stintInterruptSchema = z.object({
+  stintId: z.string().uuid('A valid stint id is required'),
+  reason: z
+    .string()
+    .trim()
+    .max(STINT_NOTES_MAX_LENGTH, 'Reason must be 500 characters or fewer')
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
 })
 
 export type StintStartPayload = z.infer<typeof stintStartSchema>
+export type StintStartEnhancedPayload = z.infer<typeof stintStartEnhancedSchema>
 export type StintUpdatePayload = z.infer<typeof stintUpdateSchema>
+export type StintPausePayload = z.infer<typeof stintPauseSchema>
+export type StintResumePayload = z.infer<typeof stintResumeSchema>
 export type StintCompletionPayload = z.infer<typeof stintCompletionSchema>
+export type StintInterruptPayload = z.infer<typeof stintInterruptSchema>
 export type StintIdentifier = z.infer<typeof stintIdentifierSchema>
 
 export const STINT_SCHEMA_LIMITS = {

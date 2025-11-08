@@ -25,7 +25,7 @@ function closeModal() {
               Archived Projects
             </h3>
             <UButton
-              icon="lucide:x"
+              icon="i-lucide-x"
               color="neutral"
               variant="ghost"
               size="sm"
@@ -39,7 +39,7 @@ function closeModal() {
           class="text-center py-8"
         >
           <Icon
-            name="lucide:loader-2"
+            name="i-lucide-loader-2"
             class="h-8 w-8 mx-auto animate-spin text-gray-400"
           />
           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -55,4 +55,3 @@ function closeModal() {
     </template>
   </UModal>
 </template>
-

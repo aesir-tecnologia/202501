@@ -15,7 +15,7 @@
           <div class="space-y-6">
             <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40">
               <UIcon
-                name="i-heroicons-envelope"
+                name="i-lucide-mail"
                 class="h-6 w-6 text-green-600 dark:text-green-400"
               />
             </div>
@@ -58,7 +58,7 @@
 
             <UAlert
               v-if="resendError"
-              icon="i-heroicons-exclamation-triangle"
+              icon="i-lucide-triangle-alert"
               color="error"
               variant="soft"
               :title="resendError"
@@ -67,7 +67,7 @@
 
             <UAlert
               v-if="resendSuccess"
-              icon="i-heroicons-check-circle"
+              icon="i-lucide-circle-check"
               color="success"
               variant="soft"
               :title="resendSuccess"

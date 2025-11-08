@@ -76,7 +76,7 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
                 <UButton
                   color="neutral"
                   variant="ghost"
-                  icon="lucide:archive"
+                  icon="i-lucide-archive"
                   class="transition-all duration-200"
                   @click="handleArchiveClick"
                 >

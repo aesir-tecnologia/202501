@@ -100,7 +100,7 @@ async function handleArchive() {
             <div class="flex items-start">
               <div class="flex-shrink-0">
                 <Icon
-                  name="lucide:alert-triangle"
+                  name="i-lucide-alert-triangle"
                   class="h-5 w-5 text-red-400"
                 />
               </div>
@@ -124,7 +124,7 @@ async function handleArchive() {
               <div class="flex items-start">
                 <div class="flex-shrink-0">
                   <Icon
-                    name="lucide:info"
+                    name="i-lucide-info"
                     class="h-5 w-5 text-blue-400"
                   />
                 </div>
@@ -163,4 +163,3 @@ async function handleArchive() {
     </template>
   </UModal>
 </template>
-

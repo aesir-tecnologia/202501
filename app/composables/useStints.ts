@@ -8,6 +8,10 @@ import {
   createStint as createStintDb,
   updateStint as updateStintDb,
   deleteStint as deleteStintDb,
+  pauseStint as pauseStintDb,
+  resumeStint as resumeStintDb,
+  completeStint as completeStintDb,
+  startStint as startStintDb,
   type StintRow,
   type CreateStintPayload as DbCreateStintPayload,
   type UpdateStintPayload as DbUpdateStintPayload,
@@ -16,9 +20,15 @@ import {
   stintStartSchema,
   stintUpdateSchema,
   stintCompletionSchema,
+  stintPauseSchema,
+  stintResumeSchema,
+  stintStartEnhancedSchema,
+  stintInterruptSchema,
   type StintStartPayload,
   type StintUpdatePayload,
   type StintCompletionPayload,
+  type StintStartEnhancedPayload,
+  type StintInterruptPayload,
 } from '~/schemas/stints'
 
 // ============================================================================
@@ -75,6 +85,34 @@ export type DeleteStintMutation = UseMutationReturnType<
   unknown
 >
 
+export type PauseStintMutation = UseMutationReturnType<
+  StintRow,
+  Error,
+  string,
+  unknown
+>
+
+export type ResumeStintMutation = UseMutationReturnType<
+  StintRow,
+  Error,
+  string,
+  unknown
+>
+
+export type StartStintMutation = UseMutationReturnType<
+  StintRow,
+  Error,
+  StintStartEnhancedPayload,
+  unknown
+>
+
+export type InterruptStintMutation = UseMutationReturnType<
+  StintRow,
+  Error,
+  StintInterruptPayload,
+  unknown
+>
+
 // ============================================================================
 // Helper Functions
 // ============================================================================
@@ -103,25 +141,6 @@ function toDbCreatePayload(payload: StintStartPayload): DbCreateStintPayload {
 function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
   const result: Record<string, unknown> = {}
 
-  if (payload.notes !== undefined) {
-    result.notes = payload.notes
-  }
-
-  return result as DbUpdateStintPayload
-}
-
-/**
- * Transforms completion payload to database update format
- */
-function toDbCompletionPayload(payload: StintCompletionPayload): DbUpdateStintPayload {
-  const result: Record<string, unknown> = {
-    is_completed: payload.completed,
-    duration_minutes: payload.durationMinutes,
-  }
-
-  if (payload.endedAt !== undefined) {
-    result.ended_at = payload.endedAt.toISOString()
-  }
   if (payload.notes !== undefined) {
     result.notes = payload.notes
   }
@@ -254,6 +273,12 @@ export function useCreateStint() {
           started_at: payload.startedAt?.toISOString() || new Date().toISOString(),
           ended_at: null,
           duration_minutes: null,
+          actual_duration: null,
+          completion_type: null,
+          planned_duration: null,
+          status: 'active' as const,
+          paused_at: null,
+          paused_duration: 0,
           is_completed: false,
           notes: payload.notes || null,
           created_at: new Date().toISOString(),
@@ -409,9 +434,13 @@ export function useCompleteStint() {
         throw new Error(validation.error.issues[0]?.message || 'Validation failed')
       }
 
-      // Call database
-      const dbPayload = toDbCompletionPayload(validation.data)
-      const { data, error } = await updateStintDb(client, payload.stintId, dbPayload)
+      // Call database with completeStint RPC function
+      const { data, error } = await completeStintDb(
+        client,
+        payload.stintId,
+        payload.completionType,
+        payload.notes,
+      )
 
       if (error || !data) {
         throw error || new Error('Failed to complete stint')
@@ -438,9 +467,12 @@ export function useCompleteStint() {
             s.id === payload.stintId
               ? {
                   ...s,
-                  ended_at: payload.endedAt?.toISOString() || new Date().toISOString(),
-                  duration_minutes: payload.durationMinutes,
-                  is_completed: payload.completed,
+                  status: payload.completionType === 'manual'
+                    ? ('completed' as const)
+                    : payload.completionType === 'auto'
+                      ? ('completed' as const)
+                      : ('interrupted' as const),
+                  ended_at: new Date().toISOString(),
                   notes: payload.notes !== undefined ? payload.notes : s.notes,
                   updated_at: new Date().toISOString(),
                 }
@@ -453,9 +485,12 @@ export function useCompleteStint() {
       if (previousStint) {
         queryClient.setQueryData<StintRow>(stintKeys.detail(payload.stintId), {
           ...previousStint,
-          ended_at: payload.endedAt?.toISOString() || new Date().toISOString(),
-          duration_minutes: payload.durationMinutes,
-          is_completed: payload.completed,
+          status: payload.completionType === 'manual'
+            ? ('completed' as const)
+            : payload.completionType === 'auto'
+              ? ('completed' as const)
+              : ('interrupted' as const),
+          ended_at: new Date().toISOString(),
           notes: payload.notes !== undefined ? payload.notes : previousStint.notes,
           updated_at: new Date().toISOString(),
         })
@@ -547,6 +582,422 @@ export function useDeleteStint() {
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: stintKeys.all })
+    },
+  })
+}
+
+/**
+ * Pauses an active stint with Zod validation and optimistic updates.
+ * Auto-invalidates stint queries on success.
+ *
+ * @example
+ * ```ts
+ * const { mutateAsync, isPending } = usePauseStint()
+ * await mutateAsync(stintId)
+ * ```
+ */
+export function usePauseStint() {
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (stintId: string) => {
+      // Validate input
+      const validation = stintPauseSchema.safeParse({ stintId })
+      if (!validation.success) {
+        throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+      }
+
+      // Call database
+      const { data, error } = await pauseStintDb(client, stintId)
+
+      if (error || !data) {
+        throw error || new Error('Failed to pause stint')
+      }
+
+      return data
+    },
+    onMutate: async (stintId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.detail(stintId) })
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+
+      // Snapshot previous values
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
+      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(stintId))
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+
+      // Optimistically update list
+      if (previousStints) {
+        queryClient.setQueryData<StintRow[]>(
+          stintKeys.list(undefined),
+          previousStints.map(s =>
+            s.id === stintId
+              ? {
+                  ...s,
+                  status: 'paused' as const,
+                  paused_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                }
+              : s,
+          ),
+        )
+      }
+
+      // Optimistically update detail
+      if (previousStint) {
+        queryClient.setQueryData<StintRow>(stintKeys.detail(stintId), {
+          ...previousStint,
+          status: 'paused' as const,
+          paused_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+      }
+
+      // Optimistically update active stint (keep it, just mark as paused)
+      if (previousActiveStint && previousActiveStint.id === stintId) {
+        queryClient.setQueryData<StintRow | null>(stintKeys.active(), {
+          ...previousActiveStint,
+          status: 'paused' as const,
+          paused_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+      }
+
+      return { previousStints, previousStint, previousActiveStint }
+    },
+    onError: (_err, stintId, context) => {
+      // Rollback on error
+      if (context?.previousStints) {
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+      }
+      if (context?.previousStint) {
+        queryClient.setQueryData(stintKeys.detail(stintId), context.previousStint)
+      }
+      if (context?.previousActiveStint !== undefined) {
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+      }
+    },
+    onSuccess: (_data, stintId) => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: stintKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: stintKeys.detail(stintId) })
+      queryClient.invalidateQueries({ queryKey: stintKeys.active() })
+    },
+  })
+}
+
+/**
+ * Resumes a paused stint with Zod validation and optimistic updates.
+ * Auto-invalidates stint queries on success.
+ *
+ * @example
+ * ```ts
+ * const { mutateAsync, isPending } = useResumeStint()
+ * await mutateAsync(stintId)
+ * ```
+ */
+export function useResumeStint() {
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (stintId: string) => {
+      // Validate input
+      const validation = stintResumeSchema.safeParse({ stintId })
+      if (!validation.success) {
+        throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+      }
+
+      // Call database
+      const { data, error } = await resumeStintDb(client, stintId)
+
+      if (error || !data) {
+        throw error || new Error('Failed to resume stint')
+      }
+
+      return data
+    },
+    onMutate: async (stintId) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.detail(stintId) })
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+
+      // Snapshot previous values
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
+      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(stintId))
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+
+      // Optimistically update list
+      if (previousStints) {
+        queryClient.setQueryData<StintRow[]>(
+          stintKeys.list(undefined),
+          previousStints.map(s =>
+            s.id === stintId
+              ? {
+                  ...s,
+                  status: 'active' as const,
+                  updated_at: new Date().toISOString(),
+                }
+              : s,
+          ),
+        )
+      }
+
+      // Optimistically update detail
+      if (previousStint) {
+        queryClient.setQueryData<StintRow>(stintKeys.detail(stintId), {
+          ...previousStint,
+          status: 'active' as const,
+          updated_at: new Date().toISOString(),
+        })
+      }
+
+      // Optimistically update active stint
+      if (previousActiveStint && previousActiveStint.id === stintId) {
+        queryClient.setQueryData<StintRow | null>(stintKeys.active(), {
+          ...previousActiveStint,
+          status: 'active' as const,
+          updated_at: new Date().toISOString(),
+        })
+      }
+
+      return { previousStints, previousStint, previousActiveStint }
+    },
+    onError: (_err, stintId, context) => {
+      // Rollback on error
+      if (context?.previousStints) {
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+      }
+      if (context?.previousStint) {
+        queryClient.setQueryData(stintKeys.detail(stintId), context.previousStint)
+      }
+      if (context?.previousActiveStint !== undefined) {
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+      }
+    },
+    onSuccess: (_data, stintId) => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: stintKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: stintKeys.detail(stintId) })
+      queryClient.invalidateQueries({ queryKey: stintKeys.active() })
+    },
+  })
+}
+
+/**
+ * Starts a new stint with enhanced validation, conflict detection, and optimistic updates.
+ * Handles conflicts when another stint is already active.
+ * Auto-invalidates stint queries on success.
+ *
+ * @example
+ * ```ts
+ * const { mutateAsync, isPending, error } = useStartStint()
+ * try {
+ *   await mutateAsync({ projectId: '123', plannedDurationMinutes: 50, notes: 'Starting work' })
+ * } catch (err) {
+ *   // Handle conflict or other errors
+ *   if (err.message.includes('already active')) {
+ *     // Show conflict resolution modal
+ *   }
+ * }
+ * ```
+ */
+export function useStartStint() {
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (payload: StintStartEnhancedPayload) => {
+      // Validate input
+      const validation = stintStartEnhancedSchema.safeParse(payload)
+      if (!validation.success) {
+        throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+      }
+
+      // Call database with enhanced start function (handles validation and conflicts)
+      const result = await startStintDb(
+        client,
+        payload.projectId,
+        payload.plannedDurationMinutes,
+        payload.notes,
+      )
+
+      // Check for conflict
+      if (result.error && 'code' in result.error && result.error.code === 'CONFLICT') {
+        // Throw error with conflict details for UI to handle
+        const error = new Error('Another stint is already active') as Error & { conflict: StintRow | null }
+        error.conflict = result.error.existingStint
+        throw error
+      }
+
+      const { data, error } = result
+      if (error || !data) {
+        throw error || new Error('Failed to start stint')
+      }
+
+      return data
+    },
+    onMutate: async (payload) => {
+      // Cancel outgoing refetches for all list queries
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+
+      // Snapshot previous value (use list with undefined filters to match default query)
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+
+      // Optimistically update to the new value
+      if (previousStints) {
+        const optimisticStint: StintRow = {
+          id: crypto.randomUUID(),
+          project_id: payload.projectId,
+          user_id: '',
+          started_at: new Date().toISOString(),
+          ended_at: null,
+          duration_minutes: null,
+          actual_duration: null,
+          completion_type: null,
+          planned_duration: payload.plannedDurationMinutes || 50,
+          status: 'active' as const,
+          paused_at: null,
+          paused_duration: 0,
+          notes: payload.notes || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_completed: false,
+        }
+
+        queryClient.setQueryData<StintRow[]>(
+          stintKeys.list(undefined),
+          [optimisticStint, ...previousStints],
+        )
+
+        // Set as active stint
+        queryClient.setQueryData<StintRow | null>(stintKeys.active(), optimisticStint)
+      }
+
+      return { previousStints, previousActiveStint }
+    },
+    onError: (_err, _payload, context) => {
+      // Rollback to previous value on error (including conflicts)
+      if (context?.previousStints) {
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+      }
+      if (context?.previousActiveStint !== undefined) {
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+      }
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: stintKeys.all })
+    },
+  })
+}
+
+/**
+ * Interrupts an active stint with validation and optimistic updates.
+ * Marks the stint as interrupted with an optional reason.
+ * Auto-invalidates stint queries on success.
+ *
+ * @example
+ * ```ts
+ * const { mutateAsync, isPending } = useInterruptStint()
+ * await mutateAsync({ stintId: '123', reason: 'Unexpected meeting' })
+ * ```
+ */
+export function useInterruptStint() {
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (payload: StintInterruptPayload) => {
+      // Validate input
+      const validation = stintInterruptSchema.safeParse(payload)
+      if (!validation.success) {
+        throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+      }
+
+      // Call database with completeStint using 'interrupted' type
+      const { data, error } = await completeStintDb(
+        client,
+        payload.stintId,
+        'interrupted',
+        payload.reason,
+      )
+
+      if (error || !data) {
+        throw error || new Error('Failed to interrupt stint')
+      }
+
+      return data
+    },
+    onMutate: async (payload) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.detail(payload.stintId) })
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+
+      // Snapshot previous values
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
+      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(payload.stintId))
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+
+      // Optimistically update list
+      if (previousStints) {
+        queryClient.setQueryData<StintRow[]>(
+          stintKeys.list(undefined),
+          previousStints.map(s =>
+            s.id === payload.stintId
+              ? {
+                  ...s,
+                  status: 'interrupted' as const,
+                  ended_at: new Date().toISOString(),
+                  notes: payload.reason || s.notes,
+                  updated_at: new Date().toISOString(),
+                }
+              : s,
+          ),
+        )
+      }
+
+      // Optimistically update detail
+      if (previousStint) {
+        queryClient.setQueryData<StintRow>(stintKeys.detail(payload.stintId), {
+          ...previousStint,
+          status: 'interrupted' as const,
+          ended_at: new Date().toISOString(),
+          notes: payload.reason || previousStint.notes,
+          updated_at: new Date().toISOString(),
+        })
+      }
+
+      // Clear active stint (since it's being interrupted)
+      if (previousActiveStint && previousActiveStint.id === payload.stintId) {
+        queryClient.setQueryData<StintRow | null>(stintKeys.active(), null)
+      }
+
+      return { previousStints, previousStint, previousActiveStint }
+    },
+    onError: (_err, payload, context) => {
+      // Rollback on error
+      if (context?.previousStints) {
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+      }
+      if (context?.previousStint) {
+        queryClient.setQueryData(stintKeys.detail(payload.stintId), context.previousStint)
+      }
+      if (context?.previousActiveStint !== undefined) {
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+      }
+    },
+    onSuccess: (_data, payload) => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: stintKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: stintKeys.detail(payload.stintId) })
+      queryClient.invalidateQueries({ queryKey: stintKeys.active() })
     },
   })
 }

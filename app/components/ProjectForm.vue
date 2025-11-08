@@ -143,7 +143,7 @@ function handleCancel() {
           @click="selectColor(null)"
         >
           <Icon
-            name="lucide:x"
+            name="i-lucide-x"
             class="h-5 w-5 text-gray-400"
           />
         </button>

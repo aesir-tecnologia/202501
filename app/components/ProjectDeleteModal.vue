@@ -100,7 +100,7 @@ async function handleDelete() {
             <div class="flex items-start">
               <div class="flex-shrink-0">
                 <Icon
-                  name="lucide:alert-triangle"
+                  name="i-lucide-alert-triangle"
                   class="h-5 w-5 text-red-400"
                 />
               </div>
@@ -124,7 +124,7 @@ async function handleDelete() {
               <div class="flex items-start">
                 <div class="flex-shrink-0">
                   <Icon
-                    name="lucide:alert-triangle"
+                    name="i-lucide-alert-triangle"
                     class="h-5 w-5 text-yellow-400"
                   />
                 </div>

@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -86,38 +91,60 @@ export type Database = {
       }
       stints: {
         Row: {
+          actual_duration: number | null
+          completion_type: Database["public"]["Enums"]["completion_type"] | null
           created_at: string | null
           duration_minutes: number | null
           ended_at: string | null
           id: string
           is_completed: boolean | null
           notes: string | null
+          paused_at: string | null
+          paused_duration: number
+          planned_duration: number | null
           project_id: string
           started_at: string | null
+          status: Database["public"]["Enums"]["stint_status"]
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          actual_duration?: number | null
+          completion_type?:
+            | Database["public"]["Enums"]["completion_type"]
+            | null
           created_at?: string | null
           duration_minutes?: number | null
           ended_at?: string | null
           id?: string
           is_completed?: boolean | null
           notes?: string | null
+          paused_at?: string | null
+          paused_duration?: number
+          planned_duration?: number | null
           project_id: string
           started_at?: string | null
+          status?: Database["public"]["Enums"]["stint_status"]
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          actual_duration?: number | null
+          completion_type?:
+            | Database["public"]["Enums"]["completion_type"]
+            | null
           created_at?: string | null
           duration_minutes?: number | null
           ended_at?: string | null
           id?: string
           is_completed?: boolean | null
           notes?: string | null
+          paused_at?: string | null
+          paused_duration?: number
+          planned_duration?: number | null
           project_id?: string
           started_at?: string | null
+          status?: Database["public"]["Enums"]["stint_status"]
           updated_at?: string | null
           user_id?: string
         }
@@ -144,30 +171,195 @@ export type Database = {
           email: string
           id: string
           updated_at: string | null
+          version: number
         }
         Insert: {
           created_at?: string | null
           email: string
           id: string
           updated_at?: string | null
+          version?: number
         }
         Update: {
           created_at?: string | null
           email?: string
           id?: string
           updated_at?: string | null
+          version?: number
         }
         Relationships: []
+      }
+      user_streaks: {
+        Row: {
+          current_streak: number
+          last_stint_date: string | null
+          longest_streak: number
+          streak_updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          last_stint_date?: string | null
+          longest_streak?: number
+          streak_updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          last_stint_date?: string | null
+          longest_streak?: number
+          streak_updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_streaks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_actual_duration: {
+        Args: {
+          p_ended_at: string
+          p_paused_duration: number
+          p_started_at: string
+        }
+        Returns: number
+      }
+      calculate_streak: { Args: { p_user_id: string }; Returns: number }
+      complete_stint: {
+        Args: {
+          p_completion_type: Database["public"]["Enums"]["completion_type"]
+          p_notes?: string
+          p_stint_id: string
+        }
+        Returns: {
+          actual_duration: number | null
+          completion_type: Database["public"]["Enums"]["completion_type"] | null
+          created_at: string | null
+          duration_minutes: number | null
+          ended_at: string | null
+          id: string
+          is_completed: boolean | null
+          notes: string | null
+          paused_at: string | null
+          paused_duration: number
+          planned_duration: number | null
+          project_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["stint_status"]
+          updated_at: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stints"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_active_stint: {
+        Args: { p_user_id: string }
+        Returns: {
+          actual_duration: number | null
+          completion_type: Database["public"]["Enums"]["completion_type"] | null
+          created_at: string | null
+          duration_minutes: number | null
+          ended_at: string | null
+          id: string
+          is_completed: boolean | null
+          notes: string | null
+          paused_at: string | null
+          paused_duration: number
+          planned_duration: number | null
+          project_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["stint_status"]
+          updated_at: string | null
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "stints"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      increment_user_version: { Args: { p_user_id: string }; Returns: number }
+      pause_stint: {
+        Args: { p_stint_id: string }
+        Returns: {
+          actual_duration: number | null
+          completion_type: Database["public"]["Enums"]["completion_type"] | null
+          created_at: string | null
+          duration_minutes: number | null
+          ended_at: string | null
+          id: string
+          is_completed: boolean | null
+          notes: string | null
+          paused_at: string | null
+          paused_duration: number
+          planned_duration: number | null
+          project_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["stint_status"]
+          updated_at: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stints"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      resume_stint: {
+        Args: { p_stint_id: string }
+        Returns: {
+          actual_duration: number | null
+          completion_type: Database["public"]["Enums"]["completion_type"] | null
+          created_at: string | null
+          duration_minutes: number | null
+          ended_at: string | null
+          id: string
+          is_completed: boolean | null
+          notes: string | null
+          paused_at: string | null
+          paused_duration: number
+          planned_duration: number | null
+          project_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["stint_status"]
+          updated_at: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "stints"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      validate_stint_start: {
+        Args: { p_project_id: string; p_user_id: string; p_version: number }
+        Returns: {
+          can_start: boolean
+          conflict_message: string
+          existing_stint_id: string
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      completion_type: "manual" | "auto" | "interrupted"
+      stint_status: "active" | "paused" | "completed" | "interrupted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -297,7 +489,9 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      completion_type: ["manual", "auto", "interrupted"],
+      stint_status: ["active", "paused", "completed", "interrupted"],
+    },
   },
 } as const
-

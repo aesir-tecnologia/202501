@@ -1,0 +1,346 @@
+# LifeStint - Technical Architecture
+
+**Product Name:** LifeStint  
+**Document Version:** 3.0  
+**Date:** October 24, 2025
+
+---
+
+## System Overview
+
+```
+┌─────────────────────────────────────────────────────┐
+│                    Client Layer                      │
+│  ┌──────────────┐  ┌──────────────┐  ┌───────────┐ │
+│  │ Vue 3 + Nuxt │  │   Pinia      │  │ Tailwind  │ │
+│  │  Components  │  │  (State)     │  │    CSS    │ │
+│  └──────────────┘  └──────────────┘  └───────────┘ │
+│  ┌──────────────────────────────────────────────┐  │
+│  │        Supabase Client (JS SDK)               │  │
+│  │   Auth • Realtime • Database • Storage       │  │
+│  └──────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────┘
+                          │
+                  HTTPS / WebSocket
+                          │
+┌─────────────────────────────────────────────────────┐
+│                   Supabase Layer                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌───────────┐ │
+│  │  PostgreSQL  │  │   Realtime   │  │  Storage  │ │
+│  │  + RLS       │  │   Server     │  │           │ │
+│  └──────────────┘  └──────────────┘  └───────────┘ │
+│  ┌──────────────────────────────────────────────┐  │
+│  │         Edge Functions (Server Logic)        │  │
+│  │  • Stint Completion Cron                     │  │
+│  │  • Daily Reset Scheduler                     │  │
+│  │  • CSV Export Generator                      │  │
+│  └──────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────┘
+                          │
+                   External Services
+                          │
+┌─────────────────────────────────────────────────────┐
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
+│  │  Sentry  │  │ Mixpanel │  │   Email Service  │  │
+│  │  (Errors)│  │(Analytics)│  │   (Supabase)    │  │
+│  └──────────┘  └──────────┘  └──────────────────┘  │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## Frontend Stack
+
+### Framework
+
+- **Vue 3** (Composition API)
+  - Reactive state management
+  - Component-based architecture
+  - TypeScript support
+- **Nuxt 3** (Vue meta-framework)
+  - File-based routing
+  - SSR/SSG capabilities (for marketing pages)
+  - Auto-imports for components
+  - Built-in optimization
+
+### UI Framework
+
+- **Nuxt UI 4**
+  - Pre-built accessible components
+  - Dark mode support out of box
+  - Tailwind CSS integration
+  - Minimal custom CSS needed
+
+### State Management
+
+- **Pinia**
+  - User store (auth, preferences)
+  - Projects store (CRUD operations)
+  - Stints store (active stint tracking)
+  - Analytics store (cached stats)
+- **Composition API + Composables**
+  - useTimer (Web Worker wrapper)
+  - useRealtime (Supabase subscription wrapper)
+  - useAuth (Auth state management)
+
+### Styling
+
+- **Tailwind CSS 3** (via Nuxt UI)
+  - Utility-first styling
+  - Responsive design system
+  - Dark mode variants
+  - Custom color palette (brand colors)
+
+### Charts (Post-MVP)
+
+- **Chart.js**
+  - Bar charts for daily/weekly summaries
+  - Line charts for trend analysis
+  - Lightweight, tree-shakeable
+
+### Real-Time
+
+- **Supabase Realtime Client**
+  - WebSocket connections
+  - Automatic reconnection
+  - Subscription management
+  - Broadcast events for stint updates
+
+### Background Processing
+
+- **Web Workers**
+  - Timer accuracy in background tabs
+  - CSV generation (offload from main thread)
+  - Notification scheduling
+
+### Build & Dev
+
+- **Vite** (bundler)
+- **TypeScript** (type safety)
+- **ESLint + Prettier** (code quality)
+
+---
+
+## Backend Stack
+
+### Database
+
+- **Supabase PostgreSQL**
+  - Version: PostgreSQL 15
+  - Hosting: Managed by Supabase (AWS)
+  - Row Level Security (RLS) for multi-tenancy
+  - Full-text search capabilities
+  - JSON/JSONB for flexible data
+
+### Authentication
+
+- **Supabase Auth**
+  - JWT tokens with refresh rotation
+  - Email verification workflow
+  - Password reset with secure tokens
+  - Session management across devices
+  - OAuth providers (future: Google, Microsoft)
+
+### Real-Time Sync
+
+- **Supabase Realtime**
+  - PostgreSQL replication to WebSockets
+  - Row-level broadcasts
+  - Channel-based subscriptions
+  - User-specific channels for privacy
+
+### Storage
+
+- **Supabase Storage**
+  - CSV export temporary files
+  - User-uploaded files (future: stint attachments)
+  - Auto-cleanup of temp files (24-hour retention)
+
+### Server-Side Logic
+
+- **Supabase Edge Functions** (Deno runtime)
+  - `stint-completion-cron`: Auto-completes stints at planned end time (runs every 30 sec)
+  - `daily-reset-scheduler`: Resets daily progress at user's midnight (runs hourly)
+  - `csv-export-generator`: Generates Focus Ledger on demand
+  - `webhook-handlers`: Stripe payment webhooks (future)
+
+### Database Functions
+
+- **PostgreSQL Functions** (PL/pgSQL)
+  - `calculate_streak`: Computes current streak for user
+  - `aggregate_daily_stats`: Pre-calculates daily summaries (runs at midnight)
+  - `validate_stint_start`: Server-side validation for race conditions
+  - `resolve_stint_conflict`: Conflict resolution algorithm
+
+### Scheduled Jobs
+
+- **pg_cron** (PostgreSQL extension)
+  - Daily aggregation: `0 1 * * *` (1 AM UTC)
+  - Cleanup old sessions: `0 2 * * *` (2 AM UTC)
+  - Email digests: `0 8 * * 1` (8 AM UTC every Monday)
+
+---
+
+## Real-Time Sync Strategy
+
+### Architecture
+
+- **Supabase Realtime** provides WebSocket connections
+- PostgreSQL changes trigger real-time events
+- Frontend subscribes to user-specific channels
+- Events broadcast to all user's connected devices
+
+### Event Types
+
+- **Stint Started:** Broadcasts to all devices when stint begins
+- **Stint Paused:** Updates pause state across devices
+- **Stint Resumed:** Resumes countdown on all devices
+- **Stint Completed:** Triggers celebration and progress updates
+- **Daily Reset:** Broadcasts midnight reset events
+
+### Conflict Prevention
+
+- Optimistic locking via `users.version` field
+- Server-authoritative timestamps
+- Real-time events prevent stale state
+- See [06-implementation-guide.md](./06-implementation-guide.md) for detailed conflict resolution
+
+---
+
+## Monitoring & Observability
+
+### Error Tracking
+
+- **Sentry**
+  - Frontend errors (uncaught exceptions)
+  - Backend errors (Edge Function failures)
+  - Performance monitoring
+  - User feedback widget
+  - Alert rules: >10 errors in 5 min → Slack notification
+
+### Analytics (Post-MVP)
+
+- **Mixpanel**
+  - User events: stint_started, stint_completed, project_created
+  - Funnel analysis: Registration → First stint → 7-day retention
+  - Cohort analysis: Free vs Pro retention
+  - A/B test tracking
+
+### Performance
+
+- **Core Web Vitals** (native browser APIs)
+  - LCP (Largest Contentful Paint): <2.5s
+  - FID (First Input Delay): <100ms
+  - CLS (Cumulative Layout Shift): <0.1
+- **Custom Metrics**:
+  - Dashboard load time
+  - Real-time sync latency
+  - Timer drift measurement
+
+### Uptime Monitoring
+
+- **BetterUptime** (future)
+  - HTTP checks every 30 seconds
+  - WebSocket connection health
+  - Database query performance
+  - Alert via PagerDuty for downtime
+
+### Logging
+
+- **Supabase Logs** (built-in)
+  - Database query logs
+  - Edge Function logs
+  - Auth event logs
+  - Retention: 7 days free tier, 30 days Pro
+
+---
+
+## Infrastructure
+
+### Hosting
+
+- **Supabase Cloud**
+  - Database: AWS us-east-1 (primary), multi-AZ
+  - Edge Functions: Cloudflare Workers (global)
+  - Storage: AWS S3
+  - CDN: Cloudflare
+
+### Domains & SSL
+
+- **Primary:** lifestint.com (frontend)
+- **API:** api.lifestint.com (Supabase proxy)
+- **SSL:** Cloudflare Universal SSL (automatic)
+
+### Environments
+
+- **Production:** lifestint.com (Supabase Production project)
+- **Staging:** staging.lifestint.com (Supabase Staging project)
+- **Development:** localhost:3005 (Remote Supabase development project)
+
+### CI/CD
+
+- **GitHub Actions**
+  - On push to `main`: Deploy to Staging
+  - On release tag: Deploy to Production
+  - Automated tests: Unit, integration, E2E (Playwright)
+  - Lint checks: ESLint, TypeScript
+  - Build time: <5 minutes
+
+### Backups
+
+- **Supabase Automated Backups**
+  - Daily full backups (retained 7 days)
+  - Point-in-time recovery (last 7 days)
+  - Manual backup before major migrations
+
+---
+
+## Security Architecture
+
+### Network Security
+
+- HTTPS enforced (HSTS enabled)
+- CSP headers: Restrict inline scripts
+- CORS: Whitelist frontend domains only
+- Rate limiting: Cloudflare + Supabase built-in
+
+### Data Security
+
+- Encryption at rest: AWS KMS (Supabase default)
+- Encryption in transit: TLS 1.3
+- Database backups encrypted
+- No PII in logs
+
+### Authentication Security
+
+- Password hashing: bcrypt (cost factor 12)
+- JWT signing: RS256 (asymmetric keys)
+- Refresh token rotation on use
+- Session invalidation on logout
+
+### Authorization
+
+- Row Level Security (RLS) on all tables
+- User can only access own data
+- API keys scoped per environment
+- Service role key only in Edge Functions
+
+### Compliance
+
+- **GDPR:**
+  - Data export API
+  - Account deletion with cascade
+  - Cookie consent banner
+  - Privacy policy
+- **CCPA:**
+  - Do Not Sell opt-out
+  - Data access requests
+- **SOC 2:** (future, via Supabase certification)
+
+---
+
+**Related Documents:**
+- [05-database-schema.md](./05-database-schema.md) - Complete database structure
+- [06-implementation-guide.md](./06-implementation-guide.md) - Implementation details for complex features
+- [09-operations-compliance.md](./09-operations-compliance.md) - Operations and security details
+

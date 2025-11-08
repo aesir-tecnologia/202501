@@ -12,12 +12,18 @@
     <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-ink-900/70 border-b border-white/10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="h-8 w-8 rounded-lg bg-gradient-to-tr from-brand-500 to-mint-500 grid place-items-center font-extrabold" aria-hidden="true">
+          <div
+            class="h-8 w-8 rounded-lg bg-gradient-to-tr from-brand-500 to-mint-500 grid place-items-center font-extrabold"
+            aria-hidden="true"
+          >
             L
           </div>
           <span class="font-semibold tracking-tight">LifeStint</span>
         </div>
-        <nav class="hidden md:flex items-center gap-7 text-sm text-ink-200" aria-label="Main navigation">
+        <nav
+          class="hidden md:flex items-center gap-7 text-sm text-ink-200"
+          aria-label="Main navigation"
+        >
           <a
             href="#how"
             class="hover:text-white transition-colors"
@@ -59,181 +65,184 @@
 
     <!-- Hero -->
     <main id="main-content">
-      <section class="hero noise relative overflow-hidden" aria-label="Hero section">
+      <section
+        class="hero noise relative overflow-hidden"
+        aria-label="Hero section"
+      >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
-        <div class="grid lg:grid-cols-12 gap-10 items-center">
-          <div class="lg:col-span-6">
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 badge text-sm text-ink-200 fade-up stagger-1">
-              Built for freelancers, consultants, and independents
-            </div>
-            <h1 class="mt-5 text-4xl sm:text-5xl xl:text-6xl font-semibold leading-tight fade-up stagger-2">
-              One stint at a time.<br>Zero context switching.
-            </h1>
-            <p class="mt-5 text-ink-100 text-lg max-w-2xl fade-up stagger-3">
-              <strong class="text-white">Defend your premium rates with credible focus evidence.</strong> 
-              LifeStint combines project-level tracking with professional reporting—no surveillance, 
-              no administrative overhead, just demonstrable work quality.
-            </p>
-
-            <div class="mt-8 flex flex-col sm:flex-row gap-3 fade-up stagger-4">
-              <a
-                href="#cta"
-                class="inline-flex items-center justify-center rounded-xl bg-mint-500 hover:bg-mint-600 text-ink-900 font-semibold px-6 py-3"
-              >
-                Start your first stint
-                <svg
-                  class="ml-2 h-5 w-5"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M17 8l4 4-4 4M3 12h18"
-                  />
-                </svg>
-              </a>
-              <a
-                href="#how"
-                class="inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 px-6 py-3 font-medium"
-              >
-                Watch the 30s tour
-              </a>
-            </div>
-
-            <div class="mt-8 grid grid-cols-3 gap-4 text-sm text-ink-200">
-              <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-5">
-                <div class="text-2xl font-semibold text-white number-roll">
-                  1
-                </div>
-                <div class="mt-1">
-                  Active session
-                </div>
+          <div class="grid lg:grid-cols-12 gap-10 items-center">
+            <div class="lg:col-span-6">
+              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 badge text-sm text-ink-200 fade-up stagger-1">
+                Built for freelancers, consultants, and independents
               </div>
-              <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-6">
-                <div class="text-2xl font-semibold text-white number-roll">
-                  0
-                </div>
-                <div class="mt-1">
-                  Admin overhead
-                </div>
-              </div>
-              <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-6">
-                <div class="text-2xl font-semibold text-white number-roll">
-                  ∞
-                </div>
-                <div class="mt-1">
-                  Client credibility
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Product mock stack -->
-          <div class="lg:col-span-6">
-            <div class="relative floating">
-              <div
-                class="absolute -inset-6 blur-3xl opacity-40 pulse-slow"
-                style="background: radial-gradient(400px 160px at 60% 40%, rgba(43,134,255,.35), transparent 60%);"
-              />
-              <div class="relative rounded-2xl bg-ink-800/70 ring-1 ring-white/10 shadow-card p-4 scale-in shimmer">
-                <div class="flex items-center justify-between">
-                  <div class="text-sm text-ink-300">
-                    Dashboard — Today
-                  </div>
-                  <div class="text-xs text-ink-300">
-                    Synced
-                  </div>
-                </div>
-                <div class="mt-4 grid sm:grid-cols-2 gap-4">
-                  <!-- Card 1 -->
-                  <div class="rounded-xl bg-white/5 p-4 ring-1 ring-white/10">
-                    <div class="flex items-center justify-between">
-                      <div class="font-medium">
-                        Client Atlas
-                      </div>
-                      <span class="text-xs px-2 py-1 rounded-full bg-mint-500/15 text-mint-300">Active</span>
-                    </div>
-                    <div class="mt-3">
-                      <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
-                        <div
-                          class="h-2 rounded-full bg-mint-400 progress-animate"
-                          style="--progress-width: 72%; width: 72%;"
-                        />
-                      </div>
-                      <div class="mt-2 text-xs text-ink-300">
-                        2 of 3 stints • 28:12 remaining
-                      </div>
-                    </div>
-                    <button class="mt-3 w-full rounded-lg bg-mint-500 hover:bg-mint-600 text-ink-900 font-semibold py-2 glow-on-hover pulse-slow">
-                      Resume
-                    </button>
-                  </div>
-                  <!-- Card 2 -->
-                  <div class="rounded-xl bg-white/5 p-4 ring-1 ring-white/10">
-                    <div class="flex items-center justify-between">
-                      <div class="font-medium">
-                        Orion Migrations
-                      </div>
-                      <span class="text-xs px-2 py-1 rounded-full bg-white/10">Idle</span>
-                    </div>
-                    <div class="mt-3">
-                      <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
-                        <div
-                          class="h-2 rounded-full bg-brand-500 progress-animate"
-                          style="--progress-width: 33%; width: 33%;"
-                        />
-                      </div>
-                      <div class="mt-2 text-xs text-ink-300">
-                        1 of 3 stints
-                      </div>
-                    </div>
-                    <button class="mt-3 w-full rounded-lg bg-brand-500 hover:bg-brand-600 text-white font-medium py-2">
-                      Start stint
-                    </button>
-                  </div>
-                  <!-- Heatmap -->
-                  <div class="sm:col-span-2 rounded-xl bg-white/5 p-4 ring-1 ring-white/10">
-                    <div class="flex items-center justify-between">
-                      <div class="font-medium">
-                        Consistency heatmap
-                      </div>
-                      <div class="text-xs text-ink-300">
-                        Last 10 weeks
-                      </div>
-                    </div>
-                    <div class="mt-3 grid grid-cols-14 gap-1">
-                      <!-- simple faux map -->
-                      <div class="h-3 w-3 rounded bg-ink-700" />
-                      <div class="h-3 w-3 rounded bg-brand-900" />
-                      <div class="h-3 w-3 rounded bg-brand-700" />
-                      <div class="h-3 w-3 rounded bg-brand-600" />
-                      <div class="h-3 w-3 rounded bg-brand-500" />
-                      <div class="h-3 w-3 rounded bg-brand-700" />
-                      <div class="h-3 w-3 rounded bg-brand-800" />
-                      <div class="h-3 w-3 rounded bg-ink-700" />
-                      <div class="h-3 w-3 rounded bg-brand-600" />
-                      <div class="h-3 w-3 rounded bg-brand-500" />
-                      <div class="h-3 w-3 rounded bg-brand-700" />
-                      <div class="h-3 w-3 rounded bg-brand-900" />
-                      <div class="h-3 w-3 rounded bg-ink-700" />
-                      <div class="h-3 w-3 rounded bg-brand-700" />
-                    </div>
-                    <div class="mt-3 text-xs text-ink-300">
-                      Streak 14 days • Completion 90%
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <p class="mt-3 text-center text-xs text-ink-300">
-                Mock preview — not actual UI
+              <h1 class="mt-5 text-4xl sm:text-5xl xl:text-6xl font-semibold leading-tight fade-up stagger-2">
+                One stint at a time.<br>Zero context switching.
+              </h1>
+              <p class="mt-5 text-ink-100 text-lg max-w-2xl fade-up stagger-3">
+                <strong class="text-white">Defend your premium rates with credible focus evidence.</strong>
+                LifeStint combines project-level tracking with professional reporting—no surveillance,
+                no administrative overhead, just demonstrable work quality.
               </p>
+
+              <div class="mt-8 flex flex-col sm:flex-row gap-3 fade-up stagger-4">
+                <a
+                  href="#cta"
+                  class="inline-flex items-center justify-center rounded-xl bg-mint-500 hover:bg-mint-600 text-ink-900 font-semibold px-6 py-3"
+                >
+                  Start your first stint
+                  <svg
+                    class="ml-2 h-5 w-5"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M17 8l4 4-4 4M3 12h18"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="#how"
+                  class="inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 px-6 py-3 font-medium"
+                >
+                  Watch the 30s tour
+                </a>
+              </div>
+
+              <div class="mt-8 grid grid-cols-3 gap-4 text-sm text-ink-200">
+                <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-5">
+                  <div class="text-2xl font-semibold text-white number-roll">
+                    1
+                  </div>
+                  <div class="mt-1">
+                    Active session
+                  </div>
+                </div>
+                <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-6">
+                  <div class="text-2xl font-semibold text-white number-roll">
+                    0
+                  </div>
+                  <div class="mt-1">
+                    Admin overhead
+                  </div>
+                </div>
+                <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-6">
+                  <div class="text-2xl font-semibold text-white number-roll">
+                    ∞
+                  </div>
+                  <div class="mt-1">
+                    Client credibility
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product mock stack -->
+            <div class="lg:col-span-6">
+              <div class="relative floating">
+                <div
+                  class="absolute -inset-6 blur-3xl opacity-40 pulse-slow"
+                  style="background: radial-gradient(400px 160px at 60% 40%, rgba(43,134,255,.35), transparent 60%);"
+                />
+                <div class="relative rounded-2xl bg-ink-800/70 ring-1 ring-white/10 shadow-card p-4 scale-in shimmer">
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm text-ink-300">
+                      Dashboard — Today
+                    </div>
+                    <div class="text-xs text-ink-300">
+                      Synced
+                    </div>
+                  </div>
+                  <div class="mt-4 grid sm:grid-cols-2 gap-4">
+                    <!-- Card 1 -->
+                    <div class="rounded-xl bg-white/5 p-4 ring-1 ring-white/10">
+                      <div class="flex items-center justify-between">
+                        <div class="font-medium">
+                          Client Atlas
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full bg-mint-500/15 text-mint-300">Active</span>
+                      </div>
+                      <div class="mt-3">
+                        <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                          <div
+                            class="h-2 rounded-full bg-mint-400 progress-animate"
+                            style="--progress-width: 72%; width: 72%;"
+                          />
+                        </div>
+                        <div class="mt-2 text-xs text-ink-300">
+                          2 of 3 stints • 28:12 remaining
+                        </div>
+                      </div>
+                      <button class="mt-3 w-full rounded-lg bg-mint-500 hover:bg-mint-600 text-ink-900 font-semibold py-2 glow-on-hover pulse-slow">
+                        Resume
+                      </button>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="rounded-xl bg-white/5 p-4 ring-1 ring-white/10">
+                      <div class="flex items-center justify-between">
+                        <div class="font-medium">
+                          Orion Migrations
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full bg-white/10">Idle</span>
+                      </div>
+                      <div class="mt-3">
+                        <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                          <div
+                            class="h-2 rounded-full bg-brand-500 progress-animate"
+                            style="--progress-width: 33%; width: 33%;"
+                          />
+                        </div>
+                        <div class="mt-2 text-xs text-ink-300">
+                          1 of 3 stints
+                        </div>
+                      </div>
+                      <button class="mt-3 w-full rounded-lg bg-brand-500 hover:bg-brand-600 text-white font-medium py-2">
+                        Start stint
+                      </button>
+                    </div>
+                    <!-- Heatmap -->
+                    <div class="sm:col-span-2 rounded-xl bg-white/5 p-4 ring-1 ring-white/10">
+                      <div class="flex items-center justify-between">
+                        <div class="font-medium">
+                          Consistency heatmap
+                        </div>
+                        <div class="text-xs text-ink-300">
+                          Last 10 weeks
+                        </div>
+                      </div>
+                      <div class="mt-3 grid grid-cols-14 gap-1">
+                        <!-- simple faux map -->
+                        <div class="h-3 w-3 rounded bg-ink-700" />
+                        <div class="h-3 w-3 rounded bg-brand-900" />
+                        <div class="h-3 w-3 rounded bg-brand-700" />
+                        <div class="h-3 w-3 rounded bg-brand-600" />
+                        <div class="h-3 w-3 rounded bg-brand-500" />
+                        <div class="h-3 w-3 rounded bg-brand-700" />
+                        <div class="h-3 w-3 rounded bg-brand-800" />
+                        <div class="h-3 w-3 rounded bg-ink-700" />
+                        <div class="h-3 w-3 rounded bg-brand-600" />
+                        <div class="h-3 w-3 rounded bg-brand-500" />
+                        <div class="h-3 w-3 rounded bg-brand-700" />
+                        <div class="h-3 w-3 rounded bg-brand-900" />
+                        <div class="h-3 w-3 rounded bg-ink-700" />
+                        <div class="h-3 w-3 rounded bg-brand-700" />
+                      </div>
+                      <div class="mt-3 text-xs text-ink-300">
+                        Streak 14 days • Completion 90%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 text-center text-xs text-ink-300">
+                  Mock preview — not actual UI
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
     </main>
 
     <!-- How it works -->
@@ -244,19 +253,32 @@
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div class="text-center max-w-3xl mx-auto mb-10">
-          <h2 id="how-it-works-title" class="text-3xl sm:text-4xl font-semibold">
+          <h2
+            id="how-it-works-title"
+            class="text-3xl sm:text-4xl font-semibold"
+          >
             Run your day in stints
           </h2>
           <p class="mt-3 text-ink-200 text-lg">
             Predetermined focused work sessions that prevent multitasking and demonstrate consistent productivity to your clients.
           </p>
         </div>
-        
+
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-1 hover-lift">
             <div class="h-10 w-10 rounded-lg bg-mint-500/10 ring-1 ring-mint-500/20 grid place-items-center text-mint-400 rotate-in">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div class="mt-4 font-semibold text-white">
@@ -266,11 +288,21 @@
               Only one active stint at a time across all devices. No multitasking, no context switching—just focused work.
             </p>
           </div>
-          
+
           <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-2 hover-lift">
             <div class="h-10 w-10 rounded-lg bg-brand-500/10 ring-1 ring-brand-500/20 grid place-items-center text-brand-400 rotate-in">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                />
               </svg>
             </div>
             <div class="mt-4 font-semibold text-white">
@@ -280,11 +312,21 @@
               Set expected daily stints (1-8 per day) for each project. Track "2 of 3 stints today" with visual progress bars.
             </p>
           </div>
-          
+
           <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-3 hover-lift">
             <div class="h-10 w-10 rounded-lg bg-purple-500/10 ring-1 ring-purple-500/20 grid place-items-center text-purple-400 rotate-in">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
               </svg>
             </div>
             <div class="mt-4 font-semibold text-white">
@@ -294,11 +336,21 @@
               Start on desktop, continue on mobile. Active stints sync instantly across all devices with conflict resolution.
             </p>
           </div>
-          
+
           <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-4 hover-lift">
             <div class="h-10 w-10 rounded-lg bg-amberx-500/10 ring-1 ring-amberx-500/20 grid place-items-center text-amberx-400 rotate-in">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
               </svg>
             </div>
             <div class="mt-4 font-semibold text-white">
@@ -308,11 +360,21 @@
               Export CSV reports showing focus consistency per project—client-ready evidence without surveillance metrics.
             </p>
           </div>
-          
+
           <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-5 hover-lift">
             <div class="h-10 w-10 rounded-lg bg-red-500/10 ring-1 ring-red-500/20 grid place-items-center text-red-400 rotate-in">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+                />
               </svg>
             </div>
             <div class="mt-4 font-semibold text-white">
@@ -322,11 +384,21 @@
               Maintain daily streaks with visual heatmaps. 1-day grace period keeps you motivated without harsh penalties.
             </p>
           </div>
-          
+
           <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-6 hover-lift">
             <div class="h-10 w-10 rounded-lg bg-cyan-500/10 ring-1 ring-cyan-500/20 grid place-items-center text-cyan-400 rotate-in">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
               </svg>
             </div>
             <div class="mt-4 font-semibold text-white">
@@ -351,113 +423,279 @@
             Traditional time trackers optimize for billing compliance. LifeStint optimizes for demonstrable focus quality.
           </p>
         </div>
-        
+
         <div class="overflow-x-auto rounded-2xl bg-white/5 ring-1 ring-white/10 scale-in">
           <table class="w-full text-sm border-collapse min-w-[600px]">
             <thead>
               <tr class="border-b border-white/10">
-                <th class="text-left p-4 font-medium text-ink-300 bg-ink-900/50">Feature</th>
+                <th class="text-left p-4 font-medium text-ink-300 bg-ink-900/50">
+                  Feature
+                </th>
                 <th class="p-4 text-center bg-ink-900/50">
                   <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brand-500/10 ring-1 ring-brand-500/20">
                     <span class="font-semibold text-brand-300">LifeStint</span>
                   </div>
                 </th>
-                <th class="p-4 text-center font-medium text-ink-300 bg-ink-900/50">Toggl / Harvest</th>
-                <th class="p-4 text-center font-medium text-ink-300 bg-ink-900/50">Forest / Pomodoro</th>
+                <th class="p-4 text-center font-medium text-ink-300 bg-ink-900/50">
+                  Toggl / Harvest
+                </th>
+                <th class="p-4 text-center font-medium text-ink-300 bg-ink-900/50">
+                  Forest / Pomodoro
+                </th>
               </tr>
             </thead>
             <tbody class="text-ink-200">
               <tr class="border-b border-white/10">
-                <td class="p-4 font-medium text-white">Single active session enforcement</td>
+                <td class="p-4 font-medium text-white">
+                  Single active session enforcement
+                </td>
                 <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  <svg
+                    class="h-5 w-5 text-mint-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </td>
                 <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    class="h-5 w-5 text-red-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </td>
                 <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </td>
-              </tr>
-              <tr class="border-b border-white/10">
-                <td class="p-4 font-medium text-white">Project-level focus tracking</td>
-                <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </td>
-                <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </td>
-                <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </td>
-              </tr>
-              <tr class="border-b border-white/10">
-                <td class="p-4 font-medium text-white">Professional client reports</td>
-                <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </td>
-                <td class="p-4 text-center text-xs">Timesheets</td>
-                <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </td>
-              </tr>
-              <tr class="border-b border-white/10">
-                <td class="p-4 font-medium text-white">Zero administrative overhead</td>
-                <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </td>
-                <td class="p-4 text-center text-xs">Categories required</td>
-                <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  <svg
+                    class="h-5 w-5 text-red-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </td>
               </tr>
               <tr class="border-b border-white/10">
-                <td class="p-4 font-medium text-white">No surveillance metrics</td>
+                <td class="p-4 font-medium text-white">
+                  Project-level focus tracking
+                </td>
                 <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  <svg
+                    class="h-5 w-5 text-mint-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </td>
-                <td class="p-4 text-center text-xs">Productivity scores</td>
                 <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  <svg
+                    class="h-5 w-5 text-red-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </td>
+                <td class="p-4 text-center">
+                  <svg
+                    class="h-5 w-5 text-red-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </td>
+              </tr>
+              <tr class="border-b border-white/10">
+                <td class="p-4 font-medium text-white">
+                  Professional client reports
+                </td>
+                <td class="p-4 text-center">
+                  <svg
+                    class="h-5 w-5 text-mint-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </td>
+                <td class="p-4 text-center text-xs">
+                  Timesheets
+                </td>
+                <td class="p-4 text-center">
+                  <svg
+                    class="h-5 w-5 text-red-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </td>
+              </tr>
+              <tr class="border-b border-white/10">
+                <td class="p-4 font-medium text-white">
+                  Zero administrative overhead
+                </td>
+                <td class="p-4 text-center">
+                  <svg
+                    class="h-5 w-5 text-mint-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </td>
+                <td class="p-4 text-center text-xs">
+                  Categories required
+                </td>
+                <td class="p-4 text-center">
+                  <svg
+                    class="h-5 w-5 text-mint-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </td>
+              </tr>
+              <tr class="border-b border-white/10">
+                <td class="p-4 font-medium text-white">
+                  No surveillance metrics
+                </td>
+                <td class="p-4 text-center">
+                  <svg
+                    class="h-5 w-5 text-mint-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </td>
+                <td class="p-4 text-center text-xs">
+                  Productivity scores
+                </td>
+                <td class="p-4 text-center">
+                  <svg
+                    class="h-5 w-5 text-mint-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </td>
               </tr>
               <tr>
-                <td class="p-4 font-medium text-white">Real-time cross-device sync</td>
+                <td class="p-4 font-medium text-white">
+                  Real-time cross-device sync
+                </td>
                 <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  <svg
+                    class="h-5 w-5 text-mint-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </td>
                 <td class="p-4 text-center">
-                  <svg class="h-5 w-5 text-mint-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  <svg
+                    class="h-5 w-5 text-mint-400 mx-auto"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </td>
-                <td class="p-4 text-center text-xs">Mobile only</td>
+                <td class="p-4 text-center text-xs">
+                  Mobile only
+                </td>
               </tr>
             </tbody>
           </table>
@@ -478,32 +716,72 @@
                 Focus evidence clients respect
               </h3>
               <p class="mt-3 text-ink-200 text-lg">
-                Unlike traditional time trackers that feel like surveillance, LifeStint generates 
-                professional Focus Ledgers that demonstrate work quality and consistency—the credible 
+                Unlike traditional time trackers that feel like surveillance, LifeStint generates
+                professional Focus Ledgers that demonstrate work quality and consistency—the credible
                 evidence clients need without the Big Brother feeling.
               </p>
               <ul class="mt-6 space-y-3 text-ink-200">
                 <li class="flex gap-3">
-                  <svg class="mt-0.5 h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    class="mt-0.5 h-5 w-5 text-mint-400 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   <span>CSV export with stint history, dates, durations, and completion types</span>
                 </li>
                 <li class="flex gap-3">
-                  <svg class="mt-0.5 h-5 w-5 text-brand-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    class="mt-0.5 h-5 w-5 text-brand-400 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   <span>Weekly summaries showing total stints, focus time, and project breakdown</span>
                 </li>
                 <li class="flex gap-3">
-                  <svg class="mt-0.5 h-5 w-5 text-purple-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    class="mt-0.5 h-5 w-5 text-purple-400 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   <span>Streak tracking and completion rates to prove consistent work habits</span>
                 </li>
                 <li class="flex gap-3">
-                  <svg class="mt-0.5 h-5 w-5 text-amberx-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    class="mt-0.5 h-5 w-5 text-amberx-400 flex-shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   <span>No surveillance metrics—just focus sessions and work quality data</span>
                 </li>
@@ -597,7 +875,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="rounded-2xl bg-gradient-to-br from-purple-500/10 to-brand-500/10 ring-1 ring-purple-500/20 p-6 slide-in-right hover-lift">
             <div class="flex gap-4">
               <div class="h-12 w-12 rounded-full bg-purple-500/20 ring-2 ring-purple-500/30 flex-shrink-0 grid place-items-center text-2xl bounce-subtle">
@@ -680,32 +958,82 @@
             </p>
             <ul class="mt-6 space-y-3 text-sm text-ink-200">
               <li class="flex gap-3">
-                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  class="h-5 w-5 text-mint-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span><strong class="text-white">2 active projects</strong></span>
               </li>
               <li class="flex gap-3">
-                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  class="h-5 w-5 text-mint-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Unlimited stints per day</span>
               </li>
               <li class="flex gap-3">
-                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  class="h-5 w-5 text-mint-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Real-time sync across all devices</span>
               </li>
               <li class="flex gap-3">
-                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  class="h-5 w-5 text-mint-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Basic analytics (90 days)</span>
               </li>
               <li class="flex gap-3">
-                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  class="h-5 w-5 text-mint-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Streak tracking & heatmaps</span>
               </li>
@@ -734,38 +1062,98 @@
             </p>
             <ul class="mt-6 space-y-3 text-sm text-ink-200">
               <li class="flex gap-3">
-                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  class="h-5 w-5 text-mint-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span><strong class="text-white">Unlimited active projects</strong></span>
               </li>
               <li class="flex gap-3">
-                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  class="h-5 w-5 text-mint-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span><strong class="text-white">Unlimited Focus Ledger CSV exports</strong></span>
               </li>
               <li class="flex gap-3">
-                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  class="h-5 w-5 text-mint-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Unlimited analytics history</span>
               </li>
               <li class="flex gap-3">
-                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  class="h-5 w-5 text-mint-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Advanced analytics & charts</span>
               </li>
               <li class="flex gap-3">
-                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  class="h-5 w-5 text-mint-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Custom branding on exports</span>
               </li>
               <li class="flex gap-3">
-                <svg class="h-5 w-5 text-mint-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                <svg
+                  class="h-5 w-5 text-mint-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 <span>Priority email support</span>
               </li>
@@ -799,7 +1187,7 @@
               What makes LifeStint different from Toggl or Harvest?
             </div>
             <p class="mt-3 text-sm text-ink-200 leading-relaxed">
-              Unlike traditional time trackers that require categories and tags, LifeStint focuses on <strong class="text-white">focus quality, not billing hours</strong>. 
+              Unlike traditional time trackers that require categories and tags, LifeStint focuses on <strong class="text-white">focus quality, not billing hours</strong>.
               We technically enforce single active sessions to prevent multitasking and provide professional reports that demonstrate work consistency—not surveillance data.
             </p>
           </div>
@@ -808,7 +1196,7 @@
               Do clients see my screen or keystrokes?
             </div>
             <p class="mt-3 text-sm text-ink-200 leading-relaxed">
-              <strong class="text-white">Absolutely not.</strong> No surveillance, no screenshots, no keystroke logging. Focus Ledger exports show only stint dates, 
+              <strong class="text-white">Absolutely not.</strong> No surveillance, no screenshots, no keystroke logging. Focus Ledger exports show only stint dates,
               durations, project names, and optional notes—clean, professional evidence of consistent work habits.
             </p>
           </div>
@@ -817,7 +1205,7 @@
               How does the single active stint enforcement work?
             </div>
             <p class="mt-3 text-sm text-ink-200 leading-relaxed">
-              You can only have one active stint at a time across all your devices. Starting a new stint requires ending the current one. This <strong class="text-white">technical guardrail prevents context switching</strong> 
+              You can only have one active stint at a time across all your devices. Starting a new stint requires ending the current one. This <strong class="text-white">technical guardrail prevents context switching</strong>
               and ensures genuine focused work—something Pomodoro apps and time trackers don't enforce.
             </p>
           </div>
@@ -826,7 +1214,7 @@
               What happens if I need to pause or stop early?
             </div>
             <p class="mt-3 text-sm text-ink-200 leading-relaxed">
-              Pause anytime for breaks—pause time is tracked separately. Stop manually if you finish early and optionally add notes. 
+              Pause anytime for breaks—pause time is tracked separately. Stop manually if you finish early and optionally add notes.
               Auto-completion happens after 4 hours max (prevents accidental overnight runs). Interrupted stints are preserved for analytics but don't count toward daily goals.
             </p>
           </div>
@@ -835,7 +1223,7 @@
               How do daily targets and streaks work?
             </div>
             <p class="mt-3 text-sm text-ink-200 leading-relaxed">
-              Set expected daily stints (1-8) per project. Track "2 of 3 stints today" with visual progress. Progress resets at midnight in your timezone. 
+              Set expected daily stints (1-8) per project. Track "2 of 3 stints today" with visual progress. Progress resets at midnight in your timezone.
               <strong class="text-white">Streaks track consecutive days</strong> with at least one completed stint, with a 1-day grace period.
             </p>
           </div>
@@ -844,7 +1232,7 @@
               Does it work offline and across devices?
             </div>
             <p class="mt-3 text-sm text-ink-200 leading-relaxed">
-              Yes! Start on desktop, continue on mobile—real-time sync keeps everything in sync. Offline stint tracking works with smart conflict resolution. 
+              Yes! Start on desktop, continue on mobile—real-time sync keeps everything in sync. Offline stint tracking works with smart conflict resolution.
               Timer runs in background tabs using Web Workers for accuracy, and server-side auto-completion ensures stints complete even if your browser closes.
             </p>
           </div>
@@ -892,7 +1280,7 @@ const ANIMATION_CONFIG = {
   // Intersection Observer settings
   OBSERVER_THRESHOLD: 0.1, // Trigger when 10% of element is visible
   OBSERVER_ROOT_MARGIN: '0px 0px -50px 0px', // Trigger 50px before entering viewport
-  
+
   // Animation selectors
   ANIMATED_SELECTORS: '.fade-up, .fade-in, .scale-in, .slide-in-left, .slide-in-right',
   FLOATING_SELECTOR: '.floating',
@@ -925,7 +1313,8 @@ useSeoMeta({
 let user = null
 try {
   user = useAuthUser()
-} catch (error) {
+}
+catch (error) {
   console.error('Failed to initialize auth:', error)
   // User remains null, auth-dependent features will handle gracefully
 }
@@ -1124,7 +1513,7 @@ onUnmounted(() => {
 
 /* Hover effects with smooth transitions */
 .hover-lift {
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
                 box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

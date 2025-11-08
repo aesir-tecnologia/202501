@@ -13,12 +13,6 @@ useSeoMeta({
   description: 'Review your focus progress and personalized insights.',
 })
 
-const user = useAuthUser()
-
-const displayName = computed(() => {
-  return user.value?.fullName || user.value?.email || 'there'
-})
-
 // Fetch all non-archived projects (including both active and inactive)
 const { data: projectsData, isLoading } = useProjectsQuery({
   includeInactive: true,
@@ -55,12 +49,6 @@ function openArchivedProjectsModal() {
 
 <template>
   <UContainer>
-    <UPageHeader
-      headline="Dashboard"
-      :title="`Welcome back, ${displayName}`"
-      description="This is your starting point for tracking focus sessions and productivity insights."
-    />
-
     <div class="space-y-6">
       <!-- Projects Section -->
       <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
@@ -73,7 +61,7 @@ function openArchivedProjectsModal() {
               <UTooltip text="View archived projects">
                 <span>
                   <UButton
-                    icon="lucide:archive"
+                    icon="i-lucide-archive"
                     color="neutral"
                     variant="ghost"
                     class="transition-all duration-200"
@@ -86,7 +74,7 @@ function openArchivedProjectsModal() {
               <UTooltip text="Create new project">
                 <span>
                   <UButton
-                    icon="lucide:plus"
+                    icon="i-lucide-plus"
                     class="transition-all duration-200"
                     @click="openCreateModal"
                   >
@@ -102,7 +90,7 @@ function openArchivedProjectsModal() {
             class="text-center py-8"
           >
             <Icon
-              name="lucide:loader-2"
+              name="i-lucide-loader-2"
               class="h-8 w-8 mx-auto animate-spin text-gray-400"
             />
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
