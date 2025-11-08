@@ -168,7 +168,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
       title: 'Stint Started',
       description: `Started working on ${project.name}`,
       color: 'green',
-      icon: 'lucide:play-circle',
+      icon: 'i-lucide-play-circle',
     })
   }
   catch (error) {
@@ -193,7 +193,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
         title: 'Failed to Start Stint',
         description: error instanceof Error ? error.message : 'Could not start stint. Please try again.',
         color: 'red',
-        icon: 'lucide:alert-circle',
+        icon: 'i-lucide-alert-circle',
       })
     }
   }
@@ -217,7 +217,7 @@ async function handleConflictResolution(): Promise<void> {
         title: 'Switched to New Stint',
         description: `Now working on ${project.name}`,
         color: 'success',
-        icon: 'lucide:check-circle',
+        icon: 'i-lucide-check-circle',
       })
     }
 
@@ -229,7 +229,7 @@ async function handleConflictResolution(): Promise<void> {
       title: 'Failed to Start New Stint',
       description: error instanceof Error ? error.message : 'An unexpected error occurred',
       color: 'error',
-      icon: 'lucide:alert-circle',
+      icon: 'i-lucide-alert-circle',
     })
   }
 }
@@ -249,7 +249,7 @@ function handleConflictDismiss(): void {
       class="text-center py-12"
     >
       <Icon
-        name="lucide:folder-open"
+        name="i-lucide-folder-open"
         class="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600"
       />
       <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -294,7 +294,7 @@ function handleConflictDismiss(): void {
                 aria-label="Reorder project"
               >
                 <Icon
-                  name="lucide:grip-vertical"
+                  name="i-lucide-grip-vertical"
                   class="h-5 w-5 text-gray-400"
                 />
               </button>
@@ -309,14 +309,14 @@ function handleConflictDismiss(): void {
               <div class="mt-1 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                 <span class="flex items-center gap-1">
                   <Icon
-                    name="lucide:target"
+                    name="i-lucide-target"
                     class="h-4 w-4"
                   />
                   {{ project.expected_daily_stints }} stints/day
                 </span>
                 <span class="flex items-center gap-1">
                   <Icon
-                    name="lucide:timer"
+                    name="i-lucide-timer"
                     class="h-4 w-4"
                   />
                   {{ formatDuration(project.custom_stint_duration) }} per stint
@@ -341,7 +341,7 @@ function handleConflictDismiss(): void {
                 <UTooltip text="Edit project">
                   <span>
                     <UButton
-                      icon="lucide:pencil"
+                      icon="i-lucide-pencil"
                       color="neutral"
                       variant="ghost"
                       size="sm"
@@ -375,7 +375,7 @@ function handleConflictDismiss(): void {
             <UButton
               v-if="!activeStint"
               color="green"
-              icon="lucide:play"
+              icon="i-lucide-play"
               :loading="isStarting"
               :disabled="isStarting"
               @click="handleStartStint(project)"
@@ -390,7 +390,7 @@ function handleConflictDismiss(): void {
                 <UButton
                   color="gray"
                   variant="soft"
-                  icon="lucide:play"
+                  icon="i-lucide-play"
                   disabled
                 >
                   Start Stint
@@ -412,7 +412,7 @@ function handleConflictDismiss(): void {
           @click="showInactiveProjects = !showInactiveProjects"
         >
           <Icon
-            :name="showInactiveProjects ? 'lucide:chevron-down' : 'lucide:chevron-right'"
+            :name="showInactiveProjects ? 'i-lucide-chevron-down' : 'i-lucide-chevron-right'"
             class="h-4 w-4"
           />
           Inactive Projects ({{ inactiveProjects.length }})
@@ -448,14 +448,14 @@ function handleConflictDismiss(): void {
               <div class="mt-1 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                 <span class="flex items-center gap-1">
                   <Icon
-                    name="lucide:target"
+                    name="i-lucide-target"
                     class="h-4 w-4"
                   />
                   {{ project.expected_daily_stints }} stints/day
                 </span>
                 <span class="flex items-center gap-1">
                   <Icon
-                    name="lucide:timer"
+                    name="i-lucide-timer"
                     class="h-4 w-4"
                   />
                   {{ formatDuration(project.custom_stint_duration) }} per stint
@@ -480,7 +480,7 @@ function handleConflictDismiss(): void {
                 <UTooltip text="Edit project">
                   <span>
                     <UButton
-                      icon="lucide:pencil"
+                      icon="i-lucide-pencil"
                       color="neutral"
                       variant="ghost"
                       size="sm"

@@ -24,6 +24,13 @@ type WorkerOutgoingMessage
     | { type: 'stop' }
     | { type: 'sync', serverSecondsRemaining: number }
 
+// Timer configuration constants
+const TIMER_DRIFT_THRESHOLD_SECONDS = 5
+const TIMER_SYNC_INTERVAL_MS = 60000
+const DEFAULT_PLANNED_DURATION_MINUTES = 50
+const WORKER_RETRY_BASE_DELAY_MS = 1000
+const NOTIFICATION_TIMEOUT_MS = 10000
+
 // Global singleton state
 const globalTimerState = {
   worker: null as Worker | null,
@@ -130,7 +137,7 @@ function createWorker(): void {
 
     if (workerCreationAttempts < maxWorkerCreationAttempts) {
       // Retry after delay with exponential backoff
-      const delayMs = 1000 * workerCreationAttempts
+      const delayMs = WORKER_RETRY_BASE_DELAY_MS * workerCreationAttempts
       console.log(`Retrying worker creation in ${delayMs}ms (attempt ${workerCreationAttempts + 1}/${maxWorkerCreationAttempts})`)
 
       setTimeout(() => {
@@ -239,7 +246,7 @@ function startTimer(stint: StintRow): void {
 
   // Calculate end time
   const startedAt = new Date(stint.started_at!).getTime()
-  const plannedDurationMs = (stint.planned_duration || 50) * 60 * 1000
+  const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000
   const endTime = startedAt + plannedDurationMs
 
   // Send start message to worker
@@ -291,7 +298,7 @@ function resumeTimer(stint: StintRow): void {
 
   // Calculate new end time accounting for paused duration
   const startedAt = new Date(stint.started_at!).getTime()
-  const plannedDurationMs = (stint.planned_duration || 50) * 60 * 1000
+  const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000
   const pausedDurationMs = (stint.paused_duration || 0) * 1000
   const endTime = startedAt + plannedDurationMs + pausedDurationMs
 
@@ -338,7 +345,7 @@ function initializePausedState(stint: StintRow): void {
   // Calculate remaining time for display
   const startedAt = new Date(stint.started_at!).getTime()
   const pausedAt = stint.paused_at ? new Date(stint.paused_at).getTime() : Date.now()
-  const plannedDurationMs = (stint.planned_duration || 50) * 60 * 1000
+  const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000
   const pausedDurationMs = (stint.paused_duration || 0) * 1000
 
   // Calculate active duration (elapsed time minus paused time)
@@ -359,7 +366,7 @@ function startServerSync(stintId: string): void {
   // Sync every 60 seconds
   globalTimerState.syncIntervalId = setInterval(() => {
     syncWithServer(stintId)
-  }, 60000)
+  }, TIMER_SYNC_INTERVAL_MS)
 }
 
 /**
@@ -399,8 +406,8 @@ async function syncWithServer(stintId: string): Promise<void> {
     const serverRemaining = data.secondsRemaining
     const drift = Math.abs(serverRemaining - clientRemaining)
 
-    // Correct if drift > 5 seconds
-    if (drift > 5) {
+    // Correct if drift > threshold
+    if (drift > TIMER_DRIFT_THRESHOLD_SECONDS) {
       console.log(`Timer drift detected: ${drift}s, correcting...`)
 
       const message: WorkerOutgoingMessage = {
@@ -443,7 +450,7 @@ async function handleTimerComplete(): Promise<void> {
     title: 'Stint Completed!',
     description: `Your stint for ${projectName} has ended.`,
     color: 'green',
-    timeout: 10000,
+    timeout: NOTIFICATION_TIMEOUT_MS,
   })
 }
 
@@ -487,10 +494,10 @@ function showNotification(projectName: string): void {
       notification.close()
     }
 
-    // Auto-close after 10 seconds
+    // Auto-close after timeout
     setTimeout(() => {
       notification.close()
-    }, 10000)
+    }, NOTIFICATION_TIMEOUT_MS)
   }
   catch (error) {
     console.error('Failed to show notification:', error)

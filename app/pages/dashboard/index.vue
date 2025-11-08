@@ -61,7 +61,7 @@ function openArchivedProjectsModal() {
               <UTooltip text="View archived projects">
                 <span>
                   <UButton
-                    icon="lucide:archive"
+                    icon="i-lucide-archive"
                     color="neutral"
                     variant="ghost"
                     class="transition-all duration-200"
@@ -74,7 +74,7 @@ function openArchivedProjectsModal() {
               <UTooltip text="Create new project">
                 <span>
                   <UButton
-                    icon="lucide:plus"
+                    icon="i-lucide-plus"
                     class="transition-all duration-200"
                     @click="openCreateModal"
                   >
@@ -90,7 +90,7 @@ function openArchivedProjectsModal() {
             class="text-center py-8"
           >
             <Icon
-              name="lucide:loader-2"
+              name="i-lucide-loader-2"
               class="h-8 w-8 mx-auto animate-spin text-gray-400"
             />
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">

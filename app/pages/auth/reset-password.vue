@@ -17,7 +17,7 @@
             class="space-y-4 text-center"
           >
             <UIcon
-              name="lucide:loader-2"
+              name="i-lucide-loader-2"
               class="w-8 h-8 mx-auto text-primary-600 animate-spin dark:text-primary-400"
             />
             <p class="text-gray-600 dark:text-gray-300">
@@ -30,11 +30,11 @@
             class="space-y-4 text-center"
           >
             <UIcon
-              name="lucide:triangle-alert"
+              name="i-lucide-triangle-alert"
               class="w-8 h-8 mx-auto text-red-500 dark:text-red-400"
             />
             <UAlert
-              icon="lucide:triangle-alert"
+              icon="i-lucide-triangle-alert"
               color="error"
               variant="soft"
               :title="error"
@@ -111,7 +111,7 @@
 
             <UAlert
               v-if="error"
-              icon="lucide:triangle-alert"
+              icon="i-lucide-triangle-alert"
               color="error"
               variant="soft"
               :title="error"
@@ -120,7 +120,7 @@
 
             <UAlert
               v-if="success"
-              icon="lucide:circle-check"
+              icon="i-lucide-circle-check"
               color="success"
               variant="soft"
               :title="success"

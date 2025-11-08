@@ -27,7 +27,7 @@ async function handlePause(): Promise<void> {
       title: 'Stint Paused',
       description: 'Take a break! Resume when ready.',
       color: 'gray',
-      icon: 'lucide:pause-circle',
+      icon: 'i-lucide-pause-circle',
     })
   }
   catch (error) {
@@ -37,7 +37,7 @@ async function handlePause(): Promise<void> {
       title: 'Pause Failed',
       description: error instanceof Error ? error.message : 'Could not pause stint. Please try again.',
       color: 'red',
-      icon: 'lucide:alert-circle',
+      icon: 'i-lucide-alert-circle',
     })
   }
 }
@@ -53,7 +53,7 @@ async function handleResume(): Promise<void> {
       title: 'Stint Resumed',
       description: 'Back to work! Keep going.',
       color: 'green',
-      icon: 'lucide:play-circle',
+      icon: 'i-lucide-play-circle',
     })
   }
   catch (error) {
@@ -63,7 +63,7 @@ async function handleResume(): Promise<void> {
       title: 'Resume Failed',
       description: error instanceof Error ? error.message : 'Could not resume stint. Please try again.',
       color: 'red',
-      icon: 'lucide:alert-circle',
+      icon: 'i-lucide-alert-circle',
     })
   }
 }
@@ -92,7 +92,7 @@ async function handleStopConfirm(): Promise<void> {
       title: 'Stint Completed!',
       description: 'Great work! Your progress has been saved.',
       color: 'green',
-      icon: 'lucide:circle-check',
+      icon: 'i-lucide-circle-check',
       timeout: 5000,
     })
 
@@ -107,7 +107,7 @@ async function handleStopConfirm(): Promise<void> {
       title: 'Stop Failed',
       description: error instanceof Error ? error.message : 'Could not complete stint. Please try again.',
       color: 'red',
-      icon: 'lucide:alert-circle',
+      icon: 'i-lucide-alert-circle',
     })
   }
 }
@@ -123,7 +123,7 @@ const isAnyPending = computed(() => isPausing.value || isResuming.value || isCom
       v-if="stint.status === 'active'"
       color="orange"
       variant="soft"
-      icon="lucide:pause"
+      icon="i-lucide-pause"
       :loading="isPausing"
       :disabled="isAnyPending"
       @click="handlePause"
@@ -136,7 +136,7 @@ const isAnyPending = computed(() => isPausing.value || isResuming.value || isCom
       v-if="stint.status === 'paused'"
       color="green"
       variant="soft"
-      icon="lucide:play"
+      icon="i-lucide-play"
       :loading="isResuming"
       :disabled="isAnyPending"
       @click="handleResume"
@@ -149,7 +149,7 @@ const isAnyPending = computed(() => isPausing.value || isResuming.value || isCom
       v-if="stint.status === 'active' || stint.status === 'paused'"
       color="red"
       variant="soft"
-      icon="lucide:square"
+      icon="i-lucide-square"
       :loading="isCompleting"
       :disabled="isAnyPending"
       @click="handleStopClick"

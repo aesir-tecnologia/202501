@@ -23,7 +23,7 @@ interface ListStintsOptions {
 
 export type ConflictError = {
   code: 'CONFLICT'
-  existingStint: StintRow
+  existingStint: StintRow | null
   message: string
 }
 
@@ -61,6 +61,20 @@ async function requireUserId(client: TypedSupabaseClient): Promise<Result<string
   }
 
   return { data: data.user.id, error: null }
+}
+
+/**
+ * Validate that an object has the required fields of a StintRow
+ */
+function isValidStintRow(obj: unknown): obj is StintRow {
+  if (!obj || typeof obj !== 'object') return false
+  const stint = obj as Record<string, unknown>
+  return (
+    typeof stint.id === 'string'
+    && typeof stint.user_id === 'string'
+    && typeof stint.project_id === 'string'
+    && typeof stint.status === 'string'
+  )
 }
 
 export async function listStints(
@@ -350,10 +364,14 @@ export async function startStint(
     const errorData = errorContext.body || functionError.data || functionError
 
     if (errorContext.status === 409 || errorData?.error === 'CONFLICT' || functionError.status === 409) {
+      const existingStint = errorData.existingStint && isValidStintRow(errorData.existingStint)
+        ? errorData.existingStint
+        : null
+
       return {
         error: {
           code: 'CONFLICT',
-          existingStint: errorData.existingStint || ({} as StintRow),
+          existingStint,
           message: errorData.message || 'An active stint already exists',
         },
         data: null,

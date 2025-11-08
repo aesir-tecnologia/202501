@@ -5,11 +5,16 @@
 // This function:
 // 1. Receives current client-side timer remaining time
 // 2. Calculates server-side remaining time based on started_at + planned_duration
-// 3. Returns the correct remaining time if drift > 5 seconds
+// 3. Returns the correct remaining time if drift exceeds threshold
 // 4. Also handles paused stints correctly
+//
+// NOTE: Drift threshold must match TIMER_DRIFT_THRESHOLD_SECONDS in app/composables/useStintTimer.ts
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+// Must match TIMER_DRIFT_THRESHOLD_SECONDS in app/composables/useStintTimer.ts
+const TIMER_DRIFT_THRESHOLD_SECONDS = 5
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -115,7 +120,7 @@ serve(async (req) => {
         secondsRemaining: serverRemaining,
         clientRemaining,
         drift,
-        needsCorrection: drift > 5, // Correct if drift > 5 seconds
+        needsCorrection: drift > TIMER_DRIFT_THRESHOLD_SECONDS,
         status: stint.status,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },

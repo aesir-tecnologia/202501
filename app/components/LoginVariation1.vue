@@ -18,7 +18,7 @@
               <div class="mb-6">
                 <div class="w-16 h-16 bg-[#F97316] rounded-2xl mx-auto flex items-center justify-center mb-4">
                   <Icon
-                    name="lucide:target"
+                    name="i-lucide-target"
                     class="w-8 h-8 text-[#0B0C14]"
                   />
                 </div>

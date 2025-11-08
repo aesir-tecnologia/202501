@@ -25,7 +25,7 @@
                   <!-- Inner core -->
                   <div class="absolute inset-4 rounded-full bg-gradient-to-br from-[#A855F7]/20 to-[#34D399]/20 backdrop-blur flex items-center justify-center">
                     <Icon
-                      name="lucide:brain"
+                      name="i-lucide-brain"
                       class="w-8 h-8 text-[#A855F7]"
                     />
                   </div>
@@ -88,12 +88,12 @@
                 <div class="bg-[#11131B]/50 backdrop-blur border border-white/10 rounded-2xl p-4">
                   <div class="flex items-center justify-center gap-3 mb-3">
                     <Icon
-                      name="lucide:moon"
+                      name="i-lucide-moon"
                       class="w-4 h-4 text-[#6C738A]"
                     />
                     <span class="text-[#B6BDCF] text-sm font-light">Focus Mode</span>
                     <Icon
-                      name="lucide:sun"
+                      name="i-lucide-sun"
                       class="w-4 h-4 text-[#A855F7]"
                     />
                   </div>
@@ -136,7 +136,7 @@
               <div class="flex justify-center items-center gap-2 mb-3">
                 <div class="w-8 h-px bg-gradient-to-r from-transparent to-[#6C738A]" />
                 <Icon
-                  name="lucide:heart"
+                  name="i-lucide-heart"
                   class="w-3 h-3 text-[#F472B6] animate-pulse"
                 />
                 <div class="w-8 h-px bg-gradient-to-l from-transparent to-[#6C738A]" />

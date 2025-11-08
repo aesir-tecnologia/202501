@@ -194,7 +194,7 @@ watch(() => state.password, () => {
           <!-- Error Alert -->
           <UAlert
             v-if="error"
-            icon="lucide:triangle-alert"
+            icon="i-lucide-triangle-alert"
             color="error"
             variant="soft"
             :title="error"
@@ -204,7 +204,7 @@ watch(() => state.password, () => {
           <!-- Success Alert -->
           <UAlert
             v-if="success"
-            icon="lucide:circle-check"
+            icon="i-lucide-circle-check"
             color="success"
             variant="soft"
             :title="success"

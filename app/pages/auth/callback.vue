@@ -114,7 +114,7 @@ onMounted(() => {
             class="space-y-4"
           >
             <UIcon
-              name="lucide:loader-2"
+              name="i-lucide-loader-2"
               class="w-8 h-8 mx-auto text-primary-600 animate-spin dark:text-primary-400"
             />
             <h2 class="text-xl font-semibold">
@@ -130,7 +130,7 @@ onMounted(() => {
             class="space-y-4"
           >
             <UIcon
-              name="lucide:triangle-alert"
+              name="i-lucide-triangle-alert"
               class="w-8 h-8 mx-auto text-red-500 dark:text-red-400"
             />
             <h2 class="text-xl font-semibold">
@@ -162,7 +162,7 @@ onMounted(() => {
             class="space-y-4"
           >
             <UIcon
-              name="lucide:circle-check"
+              name="i-lucide-circle-check"
               class="w-8 h-8 mx-auto text-green-500 dark:text-green-400"
             />
             <h2 class="text-xl font-semibold">

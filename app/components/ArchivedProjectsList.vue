@@ -91,7 +91,7 @@ async function handlePermanentDelete() {
       class="text-center py-12"
     >
       <Icon
-        name="lucide:archive"
+        name="i-lucide-archive"
         class="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600"
       />
       <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -128,7 +128,7 @@ async function handlePermanentDelete() {
           <UTooltip text="Restore to dashboard">
             <span>
               <UButton
-                icon="lucide:archive-restore"
+                icon="i-lucide-archive-restore"
                 color="primary"
                 variant="ghost"
                 size="sm"
@@ -143,7 +143,7 @@ async function handlePermanentDelete() {
           <UTooltip text="Permanently delete">
             <span>
               <UButton
-                icon="lucide:trash-2"
+                icon="i-lucide-trash-2"
                 color="error"
                 variant="ghost"
                 size="sm"
@@ -182,7 +182,7 @@ async function handlePermanentDelete() {
               <div class="flex items-start">
                 <div class="flex-shrink-0">
                   <Icon
-                    name="lucide:alert-triangle"
+                    name="i-lucide-alert-triangle"
                     class="h-5 w-5 text-red-400"
                   />
                 </div>

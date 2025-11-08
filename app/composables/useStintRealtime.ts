@@ -55,6 +55,7 @@ export function useStintRealtime() {
   const baseReconnectDelay = 1000 // 1 second
   let isInitializing = false
   let isCleanedUp = false
+  let isCleaningUp = false
 
   /**
    * Get project name for a given project ID from cache
@@ -223,6 +224,13 @@ export function useStintRealtime() {
    * Cleanup subscription (without marking as permanently cleaned up)
    */
   function cleanupSubscription() {
+    // Prevent concurrent cleanup operations
+    if (isCleaningUp) {
+      console.log('[useStintRealtime] Cleanup already in progress, skipping')
+      return
+    }
+
+    isCleaningUp = true
     cancelReconnect()
 
     if (channel) {
@@ -238,6 +246,7 @@ export function useStintRealtime() {
 
     // Reset initialization flag after cleanup
     isInitializing = false
+    isCleaningUp = false
   }
 
   /**
@@ -246,6 +255,7 @@ export function useStintRealtime() {
   function _cleanup() {
     isCleanedUp = true
     cleanupSubscription()
+    isCleaningUp = false // Ensure flag is reset even if cleanup throws
   }
 
   /**
@@ -290,19 +300,25 @@ export function useStintRealtime() {
 
     // Check if channel exists and validate its state
     if (channel) {
-      const state = channel.state
+      try {
+        const state = channel.state
 
-      // Channel is healthy - don't reinitialize
-      if (state === 'joined' || state === 'joining') {
-        console.log('[useStintRealtime] Channel already initialized and healthy:', state)
-        return
+        // Channel is healthy - don't reinitialize
+        if (state === 'joined' || state === 'joining') {
+          console.log('[useStintRealtime] Channel already initialized and healthy:', state)
+          return
+        }
+
+        // Channel is unhealthy - clean up before reinitializing
+        if (state === 'errored' || state === 'closed' || state === 'leaving') {
+          console.warn('[useStintRealtime] Channel in unhealthy state:', state, '- cleaning up')
+          cleanupSubscription()
+          // Continue with initialization after cleanup
+        }
       }
-
-      // Channel is unhealthy - clean up before reinitializing
-      if (state === 'errored' || state === 'closed' || state === 'leaving') {
-        console.warn('[useStintRealtime] Channel in unhealthy state:', state, '- cleaning up')
+      catch (error) {
+        console.warn('[useStintRealtime] Error checking channel state (possible concurrent cleanup):', error)
         cleanupSubscription()
-        // Continue with initialization after cleanup
       }
     }
 

@@ -139,7 +139,7 @@
 
           <UAlert
             v-if="error"
-            icon="lucide:triangle-alert"
+            icon="i-lucide-triangle-alert"
             color="error"
             variant="soft"
             :title="error"
@@ -148,7 +148,7 @@
 
           <UAlert
             v-if="success"
-            icon="lucide:circle-check"
+            icon="i-lucide-circle-check"
             color="success"
             variant="soft"
             :title="success"

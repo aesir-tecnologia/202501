@@ -80,7 +80,7 @@
                 <!-- Email Input with Icon -->
                 <div class="relative">
                   <Icon
-                    name="lucide:mail"
+                    name="i-lucide-mail"
                     class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#6C738A]"
                   />
                   <input
@@ -93,7 +93,7 @@
                 <!-- Password Input with Icon -->
                 <div class="relative">
                   <Icon
-                    name="lucide:lock"
+                    name="i-lucide-lock"
                     class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#6C738A]"
                   />
                   <input
@@ -102,7 +102,7 @@
                     class="w-full pl-10 pr-4 py-3 bg-[#121420] border border-[#1F2230] rounded-lg text-[#F5F7FA] placeholder-[#6C738A] focus:border-[#38BDF8] focus:ring-4 focus:ring-sky-400/25 transition-colors"
                   >
                   <Icon
-                    name="lucide:eye-off"
+                    name="i-lucide-eye-off"
                     class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#6C738A] cursor-pointer hover:text-[#B6BDCF]"
                   />
                 </div>
@@ -128,7 +128,7 @@
               <button class="w-full bg-gradient-to-r from-[#38BDF8] to-[#0EA5E9] hover:from-[#0EA5E9] hover:to-[#0284C7] text-[#0B0C14] font-semibold py-3 px-6 rounded-lg transition-all shadow-lg">
                 <div class="flex items-center justify-center gap-2">
                   <Icon
-                    name="lucide:trending-up"
+                    name="i-lucide-trending-up"
                     class="w-4 h-4"
                   />
                   <span>Access Dashboard</span>
