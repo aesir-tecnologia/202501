@@ -2,7 +2,7 @@
 import { useSortable } from '@vueuse/integrations/useSortable'
 import type { ProjectRow } from '~/lib/supabase/projects'
 import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects'
-import { useActiveStintQuery, useStartStint, useCompleteStint } from '~/composables/useStints'
+import { useActiveStintQuery, useStartStint } from '~/composables/useStints'
 import type { StintRow } from '~/lib/supabase/stints'
 import StintTimer from './StintTimer.vue'
 import StintControls from './StintControls.vue'
@@ -29,7 +29,6 @@ const showInactiveProjects = ref(false)
 // Stint management
 const { data: activeStint } = useActiveStintQuery()
 const { mutateAsync: startStint, isPending: isStarting } = useStartStint()
-const { mutateAsync: completeStint } = useCompleteStint()
 const showConflictModal = ref(false)
 const conflictData = ref<{
   currentStint: StintRow

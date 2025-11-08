@@ -75,10 +75,10 @@ export function useStintTimer() {
     globalTimerState.isInitialized = true
   }
 
-  // Cleanup on unmount - Note: cleanup() handles singleton properly
+  // Don't cleanup on component unmount - singleton persists across navigation
+  // Cleanup only happens on beforeunload (when user leaves the app entirely)
   onUnmounted(() => {
-    // Don't cleanup singleton resources on component unmount
-    // Singleton persists across component lifecycle
+    // Intentionally empty - singleton resources persist
   })
 
   return {
@@ -98,6 +98,11 @@ function initializeTimer(): void {
 
   // Request notification permission on first load
   requestNotificationPermission()
+
+  // Cleanup singleton resources when user navigates away from app
+  if (import.meta.client) {
+    window.addEventListener('beforeunload', _cleanup)
+  }
 }
 
 /**

@@ -27,6 +27,24 @@ export type ConflictError = {
   message: string
 }
 
+interface SupabaseFunctionsError {
+  context?: {
+    status?: number
+    body?: {
+      error?: string
+      message?: string
+      existingStint?: StintRow
+    }
+  }
+  status?: number
+  data?: {
+    error?: string
+    message?: string
+    existingStint?: StintRow
+  }
+  message?: string
+}
+
 export type StintConflictResult = {
   error: ConflictError
   data: null
@@ -327,13 +345,11 @@ export async function startStint(
   })
 
   if (error) {
-    // Check if it's a conflict error (409 status)
-    // Edge Functions return error with status code - check error context for response body
-    const errorContext = (error as any).context || {}
-    const errorData = errorContext.body || (error as any).data || error
+    const functionError = error as SupabaseFunctionsError
+    const errorContext = functionError.context || {}
+    const errorData = errorContext.body || functionError.data || functionError
 
-    // Check if error response indicates conflict (status 409 or error field is 'CONFLICT')
-    if (errorContext.status === 409 || errorData?.error === 'CONFLICT' || (error as any).status === 409) {
+    if (errorContext.status === 409 || errorData?.error === 'CONFLICT' || functionError.status === 409) {
       return {
         error: {
           code: 'CONFLICT',
@@ -344,8 +360,7 @@ export async function startStint(
       }
     }
 
-    // Map other Edge Function errors
-    const errorMessage = errorData.message || error.message || 'Failed to start stint'
+    const errorMessage = errorData.message || functionError.message || 'Failed to start stint'
     return { data: null, error: new Error(errorMessage) }
   }
 
