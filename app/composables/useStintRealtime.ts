@@ -284,8 +284,26 @@ export function useStintRealtime() {
    */
   function initialize() {
     // Prevent duplicate initialization
-    if (isInitializing || isCleanedUp || channel) {
+    if (isInitializing || isCleanedUp) {
       return
+    }
+
+    // Check if channel exists and validate its state
+    if (channel) {
+      const state = channel.state
+
+      // Channel is healthy - don't reinitialize
+      if (state === 'joined' || state === 'joining') {
+        console.log('[useStintRealtime] Channel already initialized and healthy:', state)
+        return
+      }
+
+      // Channel is unhealthy - clean up before reinitializing
+      if (state === 'errored' || state === 'closed' || state === 'leaving') {
+        console.warn('[useStintRealtime] Channel in unhealthy state:', state, '- cleaning up')
+        cleanupSubscription()
+        // Continue with initialization after cleanup
+      }
     }
 
     if (!user.value) {

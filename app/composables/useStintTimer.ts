@@ -40,6 +40,10 @@ const globalTimerState = {
   toast: null as ReturnType<typeof useToast> | null,
 }
 
+// Worker creation retry state
+let workerCreationAttempts = 0
+const maxWorkerCreationAttempts = 3
+
 /**
  * Main composable - returns singleton timer state
  * Automatically manages timer based on active stint
@@ -110,14 +114,34 @@ function createWorker(): void {
 
     globalTimerState.worker.onmessage = handleWorkerMessage
     globalTimerState.worker.onerror = handleWorkerError
+
+    // Reset attempts on success
+    workerCreationAttempts = 0
   }
   catch (error) {
     console.error('Failed to create timer worker:', error)
-    globalTimerState.toast?.add({
-      title: 'Timer Error',
-      description: 'Failed to initialize timer. Please refresh the page.',
-      color: 'red',
-    })
+
+    workerCreationAttempts++
+
+    if (workerCreationAttempts < maxWorkerCreationAttempts) {
+      // Retry after delay with exponential backoff
+      const delayMs = 1000 * workerCreationAttempts
+      console.log(`Retrying worker creation in ${delayMs}ms (attempt ${workerCreationAttempts + 1}/${maxWorkerCreationAttempts})`)
+
+      setTimeout(() => {
+        createWorker()
+      }, delayMs)
+    }
+    else {
+      // Max attempts reached - show error to user
+      console.error('Max worker creation attempts reached')
+      globalTimerState.toast?.add({
+        title: 'Timer Error',
+        description: 'Failed to initialize timer. Please refresh the page.',
+        color: 'error',
+        icon: 'i-lucide-alert-circle',
+      })
+    }
   }
 }
 
@@ -197,7 +221,16 @@ function handleStintChange(newStint: StintRow | null | undefined, _oldStint: Sti
  * Start the timer for a new stint
  */
 function startTimer(stint: StintRow): void {
-  if (!globalTimerState.worker) return
+  if (!globalTimerState.worker) {
+    console.error('Cannot start timer: worker not initialized')
+    globalTimerState.toast?.add({
+      title: 'Timer Error',
+      description: 'Timer not initialized. Please refresh the page.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
+    return
+  }
 
   // Calculate end time
   const startedAt = new Date(stint.started_at!).getTime()
@@ -240,7 +273,16 @@ function pauseTimer(): void {
  * Resume the timer from pause
  */
 function resumeTimer(stint: StintRow): void {
-  if (!globalTimerState.worker) return
+  if (!globalTimerState.worker) {
+    console.error('Cannot resume timer: worker not initialized')
+    globalTimerState.toast?.add({
+      title: 'Timer Error',
+      description: 'Timer not initialized. Please refresh the page.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
+    return
+  }
 
   // Calculate new end time accounting for paused duration
   const startedAt = new Date(stint.started_at!).getTime()
