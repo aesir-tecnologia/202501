@@ -18,12 +18,14 @@ Install dependencies:
 npm install
 ```
 
-Create `.env` with your Supabase credentials:
+Create `.env` with your remote Supabase development project credentials:
 
 ```env
-SUPABASE_URL=https://your-project-id.supabase.co
-SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_URL=https://your-dev-project-id.supabase.co
+SUPABASE_ANON_KEY=your_dev_supabase_anon_key_here
 ```
+
+**Note:** This project uses a remote Supabase instance for development. Make sure your Supabase project is set up and accessible before starting the development server.
 
 ## Development
 

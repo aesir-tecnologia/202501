@@ -191,7 +191,7 @@ export const projectKeys = {
 ### Styling
 
 - **Nuxt UI 4** component library with Tailwind CSS
-- **Icons:** Lucide and Heroicons bundled locally (no CDN)
+- **Icons:** Lucide icons bundled locally (no CDN)
 - **Dark Mode:** Via Tailwind `dark:` variants, theme toggle uses `UColorModeButton`
 - **Config:** `colorMode` settings in `nuxt.config.ts` and `app.config.ts`
 

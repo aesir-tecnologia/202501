@@ -194,7 +194,7 @@ watch(() => state.password, () => {
           <!-- Error Alert -->
           <UAlert
             v-if="error"
-            icon="i-heroicons-exclamation-triangle"
+            icon="lucide:triangle-alert"
             color="error"
             variant="soft"
             :title="error"
@@ -204,7 +204,7 @@ watch(() => state.password, () => {
           <!-- Success Alert -->
           <UAlert
             v-if="success"
-            icon="i-heroicons-check-circle"
+            icon="lucide:circle-check"
             color="success"
             variant="soft"
             :title="success"

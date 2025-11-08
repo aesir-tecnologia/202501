@@ -1,0 +1,384 @@
+# LifeStint - Technical Implementation Guide
+
+**Product Name:** LifeStint  
+**Document Version:** 3.0  
+**Date:** October 24, 2025
+
+---
+
+## Timezone Handling
+
+### User Timezone Storage
+
+- Captured during registration (browser timezone detected via Intl.DateTimeFormat)
+- Stored in `users.timezone` as IANA timezone string (e.g., "America/New_York")
+- User can change in settings (dropdown of common timezones)
+
+### Daily Reset Logic
+
+- Scheduled task runs every hour at :00
+- Queries users whose local midnight occurred in the last hour: 
+  ```sql
+  SELECT * FROM users 
+  WHERE EXTRACT(HOUR FROM now() AT TIME ZONE timezone) = 0 
+    AND EXTRACT(MINUTE FROM now() AT TIME ZONE timezone) < 10
+  ```
+- Resets daily progress counters for matched users
+- Triggers daily summary aggregation for previous day
+
+### CSV Export Timestamps
+
+- All timestamps converted to user's timezone
+- Format: `YYYY-MM-DD HH:MM:SS` with timezone label in header
+- Example: "2025-10-24 09:30:00 (America/New_York)"
+
+### Streak Calculation
+
+- Uses user's timezone to determine "today" and "yesterday"
+- Query: `DATE(started_at AT TIME ZONE v_timezone)`
+- Grace period: 1 day (can miss 1 day without breaking streak)
+
+### Edge Cases
+
+- **Timezone change:** Daily reset recalculates based on new timezone immediately
+- **DST transitions:** PostgreSQL handles automatically with AT TIME ZONE
+- **Traveling users:** Timezone can be manually changed in settings
+
+---
+
+## Offline Sync Strategy
+
+### Offline Capabilities
+
+- Start/pause/resume/stop stints (queued locally)
+- View cached dashboard data
+- Timer continues in Web Worker using local system clock
+
+### Offline Storage
+
+- IndexedDB for queued operations (via Dexie.js)
+- LocalStorage for last known dashboard state
+- Service Worker for app shell caching (PWA)
+
+### Online Reconciliation
+
+**1. Detecting Offline State:**
+- `navigator.onLine` event listener
+- Heartbeat API call every 30 seconds
+- WebSocket disconnect triggers offline mode
+
+**2. Queuing Operations:**
+```javascript
+// Offline queue structure
+{
+  id: 'uuid',
+  operation: 'start_stint' | 'stop_stint' | 'pause_stint' | 'resume_stint',
+  payload: { project_id, started_at, ... },
+  timestamp: Date.now(),
+  retries: 0
+}
+```
+
+**3. Sync on Reconnect:**
+- Prioritize: Active stint sync first (prevents conflicts)
+- Process queue in chronological order
+- Server validates each operation:
+  - Check for conflicts (another stint started)
+  - Validate timestamps (no future dates)
+  - Ensure operation is still valid (project not archived)
+
+**4. Conflict Resolution:**
+
+**Scenario: User starts stint offline on Device A, comes online on Device B, starts different stint**
+- Device B syncs, sees Device A has pending start operation
+- Server detects conflict: Two start operations without stop
+- Resolution strategy: Server-authoritative timestamp
+  - Earlier timestamp wins
+  - Later operation rejected with 409 Conflict
+  - Frontend on Device A shows modal: "Another stint was started while offline. Mark this stint as interrupted?"
+
+**Scenario: User stops stint offline, server already auto-completed it**
+- Server compares timestamps
+- If manual stop is within 5 minutes of auto-complete time: Accept manual stop (more accurate)
+- If manual stop is >5 minutes after auto-complete: Reject with message "Stint already completed"
+
+**Data Loss Prevention:**
+- All queued operations persisted in IndexedDB (survives browser close)
+- Failed sync operations retried with exponential backoff (max 3 retries)
+- After 3 failures: Show "Sync failed" with manual retry button
+
+**Limitations:**
+- Cannot create/edit/archive projects offline (requires network)
+- Analytics and exports require network
+- Real-time sync disabled offline (obviously)
+
+---
+
+## Real-Time Conflict Resolution
+
+### Conflict Scenarios
+
+**1. Simultaneous Stint Start (Race Condition):**
+- User clicks "Start" on Device A
+- Before response, user clicks "Start" on Device B
+- Both requests reach server
+
+**Resolution:**
+- Server uses optimistic locking on `users.version` field
+- First request increments version, succeeds
+- Second request fails with 409 Conflict (version mismatch)
+- Device B shows: "You already started a stint on another device. View it?"
+- Button opens current active stint
+
+**2. Pause/Resume Conflicts:**
+- User pauses on Device A
+- Before real-time event propagates, user resumes on Device B
+
+**Resolution:**
+- Each pause/resume increments stint's `version` field
+- Server rejects stale operation with 409 Conflict
+- Frontend refetches latest stint state
+- UI updates to show current state
+
+**3. Stop Conflicts:**
+- User stops stint on Device A (network slow)
+- Timer reaches 0 on Device B, auto-completes
+- Device A's manual stop request arrives after
+
+**Resolution:**
+- Server checks if stint already completed
+- If completed <5 minutes ago: Accept manual stop notes (merge)
+- If completed >5 minutes ago: Reject with "Already completed"
+
+**4. Offline Divergence:**
+- Device A offline: Starts Stint X, works for 30 min
+- Device B online: Starts Stint Y, completes it
+- Device A comes online, tries to sync Stint X
+
+**Resolution:**
+- Server sees Device B completed stint after Device A started (based on timestamps)
+- Server rejects Device A's stint start
+- Frontend shows: "Another stint was started while offline"
+- Options:
+  - Mark local stint as "interrupted" (preserves data)
+  - Discard local stint
+- If "interrupted": Local stint saved with `status: 'interrupted'`, doesn't count toward progress
+
+### Implementation
+
+```sql
+-- Optimistic locking check before stint start
+CREATE FUNCTION start_stint(p_user_id UUID, p_project_id UUID, p_version INTEGER) 
+RETURNS SETOF stints AS $$
+BEGIN
+  -- Check version matches (no concurrent operations)
+  IF (SELECT version FROM users WHERE id = p_user_id) != p_version THEN
+    RAISE EXCEPTION 'Conflict: User version mismatch';
+  END IF;
+  
+  -- Check no active stints
+  IF EXISTS (SELECT 1 FROM stints WHERE user_id = p_user_id AND status IN ('active', 'paused')) THEN
+    RAISE EXCEPTION 'Conflict: Active stint exists';
+  END IF;
+  
+  -- Increment version
+  UPDATE users SET version = version + 1 WHERE id = p_user_id;
+  
+  -- Create stint
+  RETURN QUERY INSERT INTO stints (...) VALUES (...) RETURNING *;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+---
+
+## Timer Accuracy & Background Tabs
+
+### Problem
+
+- Browser throttles timers in background tabs (1-second resolution becomes 1-minute+)
+- User switches tabs or minimizes browser, timer appears to "freeze"
+
+### Solution: Web Worker Timer
+
+**Architecture:**
+```
+Main Thread (UI)          Web Worker
+─────────────────         ────────────
+startStint()    ────────> startTimer(duration)
+                          ↓
+updateUI()      <──────── postMessage({ secondsRemaining })
+                          (every 1 second)
+                          ↓
+stintComplete() <──────── postMessage({ completed: true })
+```
+
+**Implementation:**
+```javascript
+// worker.js
+let intervalId;
+let endTime;
+
+self.onmessage = (e) => {
+  if (e.data.action === 'start') {
+    endTime = Date.now() + e.data.duration * 1000;
+    intervalId = setInterval(() => {
+      const remaining = Math.max(0, endTime - Date.now());
+      self.postMessage({ secondsRemaining: Math.floor(remaining / 1000) });
+      if (remaining <= 0) {
+        clearInterval(intervalId);
+        self.postMessage({ completed: true });
+      }
+    }, 1000);
+  } else if (e.data.action === 'stop') {
+    clearInterval(intervalId);
+  }
+};
+```
+
+### Server-Side Validation
+
+- Every 60 seconds, frontend syncs with server: `GET /api/stints/active`
+- Server returns actual remaining time based on `started_at`
+- Frontend corrects timer if drift >5 seconds
+- Prevents manipulation (user can't hack local timer)
+
+### Auto-Completion Fallback
+
+- Edge Function runs every 30 seconds
+- Queries stints where `status = 'active' AND started_at + planned_duration <= now()`
+- Auto-completes matched stints
+- If browser closed during stint, server still completes on time
+
+### Notification Handling
+
+- Timer worker sends `postMessage({ completed: true })` at completion
+- Main thread requests notification permission (if not granted)
+- Shows browser notification: "Stint completed for [Project Name]! 🎉"
+- Clicking notification focuses LifeStint tab (if open) or opens new tab
+
+---
+
+## Data Validation & Constraints
+
+### Client-Side Validation (Immediate Feedback)
+
+```javascript
+// Project name validation
+const projectNameSchema = z.string()
+  .min(1, "Name required")
+  .max(100, "Name too long")
+  .refine(name => !existingProjects.includes(name), "Name already exists");
+
+// Stint duration validation
+const stintDurationSchema = z.number()
+  .int()
+  .min(10, "Minimum 10 minutes")
+  .max(120, "Maximum 120 minutes");
+
+// Expected daily stints validation
+const dailyStintsSchema = z.number()
+  .int()
+  .min(1, "At least 1 stint")
+  .max(8, "Maximum 8 stints");
+```
+
+### Server-Side Validation (Authoritative)
+
+- All PostgreSQL constraints enforced (see [05-database-schema.md](./05-database-schema.md))
+- Edge Functions validate before database insert:
+  - Project name uniqueness (case-insensitive)
+  - Numeric ranges
+  - Foreign key existence
+  - Business rules (e.g., no active stint exists)
+
+### Rate Limiting
+
+```javascript
+// Cloudflare rate limits (per user IP)
+{
+  '/api/stints/start': '60 per hour',    // Prevent stint spam
+  '/api/projects': '100 per hour',        // CRUD operations
+  '/api/auth/login': '10 per 15 min',    // Brute force protection
+  '/api/auth/register': '5 per hour',    // Signup spam
+  '/api/export/csv': '20 per hour'       // Export abuse
+}
+
+// Additional Supabase-level rate limits
+{
+  'read_operations': '1000 per minute',
+  'write_operations': '200 per minute',
+  'realtime_connections': '10 per user'
+}
+```
+
+### Input Sanitization
+
+- All text inputs sanitized with DOMPurify before rendering
+- Markdown/HTML not supported (plain text only)
+- SQL injection prevented by Supabase parameterized queries
+
+---
+
+## CSV Export Format
+
+### File Naming
+
+- Format: `LifeStint-Focus-Ledger-YYYY-MM-DD-to-YYYY-MM-DD.csv`
+- Example: `LifeStint-Focus-Ledger-2025-10-17-to-2025-10-23.csv`
+
+### CSV Structure
+
+```csv
+LifeStint Focus Ledger
+User: Sarah Johnson (sarah@example.com)
+Timezone: America/New_York
+Export Date: 2025-10-24 14:30:00
+Date Range: 2025-10-17 to 2025-10-23
+
+Date,Project Name,Started At,Ended At,Planned Duration (min),Actual Duration (min),Pause Duration (min),Completion Type,Notes
+2025-10-23,Client Website Redesign,2025-10-23 09:15:00,2025-10-23 10:05:00,50,50,0,auto,
+2025-10-23,API Integration Project,2025-10-23 11:00:00,2025-10-23 11:45:00,50,45,5,manual,"Finished task early, documented API endpoints"
+2025-10-23,Personal Learning,2025-10-23 14:30:00,2025-10-23 15:20:00,50,50,0,auto,
+2025-10-22,Client Website Redesign,2025-10-22 09:00:00,2025-10-22 09:50:00,50,50,0,auto,
+...
+
+Summary
+Total Stints: 14
+Total Focus Time: 11 hours 30 minutes
+Total Pause Time: 25 minutes
+Completion Rate: 85.7% (12 completed, 2 interrupted)
+Projects Worked On: 3
+```
+
+### Field Descriptions
+
+- Timestamps in user's timezone (converted from UTC)
+- Duration columns in minutes for readability
+- Notes column includes user-entered text (escaped for CSV safety)
+- Summary section at bottom for quick insights
+
+### Generation Process
+
+1. User clicks "Export CSV" button
+2. Frontend sends request to Edge Function: `POST /api/export/csv`
+3. Edge Function queries stints in date range
+4. Converts timestamps to user's timezone
+5. Generates CSV string in memory
+6. Returns CSV as downloadable file (no server storage)
+7. Frontend triggers browser download
+
+### Professional Formatting
+
+- Clean, readable layout
+- Header with user context
+- Summary statistics at bottom
+- Client-ready (no internal IDs or technical jargon)
+
+---
+
+**Related Documents:**
+- [04-technical-architecture.md](./04-technical-architecture.md) - Architecture context
+- [05-database-schema.md](./05-database-schema.md) - Database schema reference
+- [03-feature-requirements.md](./03-feature-requirements.md) - Feature requirements
+

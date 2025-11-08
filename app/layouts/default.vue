@@ -43,7 +43,7 @@ function handleConflictResolved() {
       <template #right>
         <UColorModeButton />
         <UButton
-          icon="i-heroicons-arrow-right-start-on-rectangle"
+          icon="lucide:log-out"
           variant="ghost"
           color="neutral"
           @click="signOut"

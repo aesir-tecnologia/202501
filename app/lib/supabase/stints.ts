@@ -96,16 +96,18 @@ export async function getActiveStint(
   const userResult = await requireUserId(client)
   if (userResult.error) return { data: null, error: userResult.error }
 
-  // Use status-based filtering instead of is_completed
-  const { data, error } = await client
-    .from('stints')
-    .select('*')
-    .eq('user_id', userResult.data!)
-    .in('status', ['active', 'paused'])
-    .maybeSingle<StintRow>()
+  // Call the stints-active Edge Function
+  const { data, error } = await client.functions.invoke('stints-active', {
+    body: {},
+  })
 
-  if (error) return { data: null, error }
-  return { data, error: null }
+  if (error) {
+    // Map Edge Function errors
+    return { data: null, error: new Error(error.message || 'Failed to get active stint') }
+  }
+
+  // Edge Function returns null if no active stint, or the stint object
+  return { data: (data as StintRow | null) || null, error: null }
 }
 
 export async function createStint(
@@ -201,23 +203,22 @@ export async function pauseStint(
   const userResult = await requireUserId(client)
   if (userResult.error) return { data: null, error: userResult.error }
 
-  // Call the pause_stint RPC function
-  const { data, error } = await client
-    .rpc('pause_stint', { p_stint_id: stintId })
-    .single<StintRow>()
+  // Call the stints-pause Edge Function
+  const { data, error } = await client.functions.invoke('stints-pause', {
+    body: { stintId },
+  })
 
   if (error) {
-    // Map database errors to user-friendly messages
-    if (error.message?.includes('not active')) {
-      return { data: null, error: new Error('Stint is not active and cannot be paused') }
-    }
-    if (error.message?.includes('not found')) {
-      return { data: null, error: new Error('Stint not found') }
-    }
-    return { data: null, error }
+    // Map Edge Function errors to user-friendly messages
+    const errorMessage = error.message || 'Failed to pause stint'
+    return { data: null, error: new Error(errorMessage) }
   }
 
-  return { data, error: null }
+  if (!data) {
+    return { data: null, error: new Error('No data returned from pause stint') }
+  }
+
+  return { data: data as StintRow, error: null }
 }
 
 /**
@@ -230,23 +231,22 @@ export async function resumeStint(
   const userResult = await requireUserId(client)
   if (userResult.error) return { data: null, error: userResult.error }
 
-  // Call the resume_stint RPC function
-  const { data, error } = await client
-    .rpc('resume_stint', { p_stint_id: stintId })
-    .single<StintRow>()
+  // Call the stints-resume Edge Function
+  const { data, error } = await client.functions.invoke('stints-resume', {
+    body: { stintId },
+  })
 
   if (error) {
-    // Map database errors to user-friendly messages
-    if (error.message?.includes('not paused')) {
-      return { data: null, error: new Error('Stint is not paused and cannot be resumed') }
-    }
-    if (error.message?.includes('not found')) {
-      return { data: null, error: new Error('Stint not found') }
-    }
-    return { data: null, error }
+    // Map Edge Function errors to user-friendly messages
+    const errorMessage = error.message || 'Failed to resume stint'
+    return { data: null, error: new Error(errorMessage) }
   }
 
-  return { data, error: null }
+  if (!data) {
+    return { data: null, error: new Error('No data returned from resume stint') }
+  }
+
+  return { data: data as StintRow, error: null }
 }
 
 /**
@@ -261,7 +261,28 @@ export async function completeStint(
   const userResult = await requireUserId(client)
   if (userResult.error) return { data: null, error: userResult.error }
 
-  // Call the complete_stint RPC function
+  // For manual completion, use the stints-stop Edge Function
+  // For auto/interrupted, we still need to use RPC directly since Edge Function only handles manual
+  if (completionType === 'manual') {
+    const { data, error } = await client.functions.invoke('stints-stop', {
+      body: { stintId, notes: notes || null },
+    })
+
+    if (error) {
+      // Map Edge Function errors to user-friendly messages
+      const errorMessage = error.message || 'Failed to complete stint'
+      return { data: null, error: new Error(errorMessage) }
+    }
+
+    if (!data) {
+      return { data: null, error: new Error('No data returned from complete stint') }
+    }
+
+    return { data: data as StintRow, error: null }
+  }
+
+  // For auto/interrupted completion, use RPC directly
+  // (Edge Function stints-stop only handles manual completion)
   const { data, error } = await client
     .rpc('complete_stint', {
       p_stint_id: stintId,
@@ -296,104 +317,41 @@ export async function startStint(
   const userResult = await requireUserId(client)
   if (userResult.error) return { data: null, error: userResult.error }
 
-  const userId = userResult.data!
+  // Call the stints-start Edge Function
+  const { data, error } = await client.functions.invoke('stints-start', {
+    body: {
+      projectId,
+      plannedDurationMinutes,
+      notes: notes || null,
+    },
+  })
 
-  // Get user version for optimistic locking
-  const versionResult = await getUserVersion(client)
-  if (versionResult.error) return { data: null, error: versionResult.error }
-
-  const userVersion = versionResult.data!
-
-  // Get project to determine planned duration
-  const { data: project, error: projectError } = await client
-    .from('projects')
-    .select('custom_stint_duration')
-    .eq('id', projectId)
-    .eq('user_id', userId)
-    .is('archived_at', null)
-    .single<{ custom_stint_duration: number | null }>()
-
-  if (projectError || !project) {
-    return { data: null, error: new Error('Project not found or archived') }
-  }
-
-  // Determine planned duration: use provided, project custom, or default 50
-  const plannedDuration = plannedDurationMinutes ?? project.custom_stint_duration ?? 50
-
-  // Validate stint start using database function
-  const { data: validation, error: validationError } = await client
-    .rpc('validate_stint_start', {
-      p_user_id: userId,
-      p_project_id: projectId,
-      p_version: userVersion,
-    })
-    .single<{
-    can_start: boolean
-    existing_stint_id: string | null
-    conflict_message: string | null
-  }>()
-
-  if (validationError) {
-    return { data: null, error: validationError }
-  }
-
-  // If validation fails, return conflict error
-  if (!validation.can_start) {
-    // Fetch the existing stint details
-    const existingStintResult = await getStintById(client, validation.existing_stint_id!)
-    if (existingStintResult.error || !existingStintResult.data) {
+  if (error) {
+    // Check if it's a conflict error (409 status)
+    // Edge Functions return error with status code - check error context for response body
+    const errorContext = (error as any).context || {}
+    const errorData = errorContext.body || (error as any).data || error
+    
+    // Check if error response indicates conflict (status 409 or error field is 'CONFLICT')
+    if (errorContext.status === 409 || errorData?.error === 'CONFLICT' || (error as any).status === 409) {
       return {
         error: {
           code: 'CONFLICT',
-          existingStint: {} as StintRow,
-          message: validation.conflict_message || 'Cannot start stint: conflict detected',
+          existingStint: errorData.existingStint || ({} as StintRow),
+          message: errorData.message || 'An active stint already exists',
         },
         data: null,
       }
     }
 
-    return {
-      error: {
-        code: 'CONFLICT',
-        existingStint: existingStintResult.data,
-        message: validation.conflict_message || 'An active stint already exists',
-      },
-      data: null,
-    }
+    // Map other Edge Function errors
+    const errorMessage = errorData.message || error.message || 'Failed to start stint'
+    return { data: null, error: new Error(errorMessage) }
   }
 
-  // Validation passed, create the stint
-  const { data, error } = await client
-    .from('stints')
-    .insert({
-      project_id: projectId,
-      user_id: userId,
-      status: 'active',
-      planned_duration: plannedDuration,
-      started_at: new Date().toISOString(),
-      notes: notes || null,
-    })
-    .select('*')
-    .single<StintRow>()
-
-  if (error) {
-    // Check if conflict occurred (race condition)
-    if (error.code === '23505') {
-      // Unique constraint violation - another stint was started concurrently
-      const activeStintResult = await getActiveStint(client)
-      if (activeStintResult.data) {
-        return {
-          error: {
-            code: 'CONFLICT',
-            existingStint: activeStintResult.data,
-            message: 'Another stint was started concurrently',
-          },
-          data: null,
-        }
-      }
-    }
-    return { data: null, error }
+  if (!data) {
+    return { data: null, error: new Error('No data returned from start stint') }
   }
 
-  return { data, error: null }
+  return { data: data as StintRow, error: null }
 }

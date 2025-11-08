@@ -6,6 +6,8 @@
  */
 
 import type { Database } from '~/types/database.types'
+import { useQueryClient } from '@tanstack/vue-query'
+import { useActiveStintQuery, stintKeys } from './useStints'
 
 type StintRow = Database['public']['Tables']['stints']['Row']
 
@@ -32,6 +34,8 @@ const globalTimerState = {
   syncIntervalId: null as ReturnType<typeof setInterval> | null,
   notificationPermission: ref<NotificationPermission>('default'),
   isInitialized: false,
+  queryClient: null as ReturnType<typeof useQueryClient> | null,
+  activeStintRef: null as Ref<StintRow | null | undefined> | null,
 }
 
 /**
@@ -39,11 +43,33 @@ const globalTimerState = {
  * Automatically manages timer based on active stint
  */
 export function useStintTimer() {
+  // Call vue-query hooks at composable level (required for proper injection context)
+  const { data: activeStint } = useActiveStintQuery()
+  const queryClient = useQueryClient()
+
+  // Store references in global state for use in non-composable functions
+  globalTimerState.queryClient = queryClient
+  globalTimerState.activeStintRef = activeStint
+
   // Only initialize once and only on client
   if (!globalTimerState.isInitialized && import.meta.client) {
     initializeTimer()
     globalTimerState.isInitialized = true
   }
+
+  // Watch active stint for auto-start/pause/stop (set up at composable level)
+  watch(
+    activeStint,
+    (newStint, oldStint) => {
+      handleStintChange(newStint, oldStint)
+    },
+    { immediate: true },
+  )
+
+  // Cleanup on unmount
+  onUnmounted(() => {
+    cleanup()
+  })
 
   return {
     secondsRemaining: readonly(globalTimerState.secondsRemaining),
@@ -54,32 +80,14 @@ export function useStintTimer() {
 
 /**
  * Initialize the timer system
- * Sets up worker, watches active stint, and configures sync
+ * Sets up worker and configures sync
  */
 function initializeTimer(): void {
   // Create worker
   createWorker()
 
-  // Watch active stint for auto-start/pause/stop
-  const { data: activeStint } = useActiveStintQuery()
-
-  watch(
-    activeStint,
-    (newStint, oldStint) => {
-      handleStintChange(newStint, oldStint)
-    },
-    { immediate: true },
-  )
-
   // Request notification permission on first load
   requestNotificationPermission()
-
-  // Cleanup on unmount
-  if (getCurrentScope()) {
-    onUnmounted(() => {
-      cleanup()
-    })
-  }
 }
 
 /**
@@ -355,18 +363,17 @@ async function syncWithServer(stintId: string): Promise<void> {
  * Handle timer completion
  */
 async function handleTimerComplete(): Promise<void> {
-  // Get active stint to show project name in notification
-  const { data: activeStint } = useActiveStintQuery()
-  const stint = activeStint.value
-
-  if (!stint) return
+  // Get active stint from stored ref (set up at composable level)
+  const activeStint = globalTimerState.activeStintRef?.value
+  
+  if (!activeStint) return
 
   // Fetch project details for notification
   const client = useSupabaseClient()
   const { data: project } = await client
     .from('projects')
     .select('name')
-    .eq('id', stint.project_id)
+    .eq('id', activeStint.project_id)
     .single()
 
   const projectName = project?.name || 'Project'

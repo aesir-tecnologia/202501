@@ -1,10 +1,13 @@
-# Local Development Setup
+# Development Setup
 
 ## 🚀 Quick Start
 
-### 1. Start Supabase Local Development
+### 1. Configure Environment Variables
+Create a `.env` file with your remote Supabase development project credentials:
+
 ```bash
-supabase start
+SUPABASE_URL="https://your-dev-project-id.supabase.co"
+SUPABASE_ANON_KEY="your_dev_supabase_anon_key_here"
 ```
 
 ### 2. Start Nuxt Development Server
@@ -12,29 +15,27 @@ supabase start
 npm run dev
 ```
 
-### 3. Access Local Services
+### 3. Access Development Services
 
 - **Application**: http://localhost:3005
-- **Supabase Studio**: http://127.0.0.1:54323
-- **API**: http://127.0.0.1:54321
-- **Database**: postgresql://postgres:postgres@127.0.0.1:54322/postgres
-- **Email Testing (Inbucket)**: http://127.0.0.1:54324
+- **Supabase Dashboard**: https://supabase.com/dashboard/project/your-project-id
+- **API**: Your Supabase project API URL
 
 ## 📝 Environment Configuration
 
-### Local Environment Variables
-The project uses `.env.local` for local development which overrides `.env`:
+### Development Environment Variables
+The project uses `.env` for development with remote Supabase:
 
 ```bash
-SUPABASE_URL="http://127.0.0.1:54321"
-SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+SUPABASE_URL="https://your-dev-project-id.supabase.co"
+SUPABASE_ANON_KEY="your_dev_supabase_anon_key_here"
 ```
 
 ### Production Environment
-For production, use the actual Supabase project credentials in `.env`:
+For production, use the production Supabase project credentials in your deployment platform (e.g., Vercel):
 
 ```bash
-SUPABASE_URL="https://your-project-id.supabase.co"
+SUPABASE_URL="https://your-production-project-id.supabase.co"
 SUPABASE_ANON_KEY="your_production_anon_key_here"
 ```
 
@@ -45,16 +46,16 @@ SUPABASE_ANON_KEY="your_production_anon_key_here"
 # Create new migration
 supabase migration new migration_name
 
-# Apply all migrations
-supabase db reset
+# Apply migrations to remote development database
+supabase db push
 
-# Generate types from current schema
-supabase gen types typescript --local > types/supabase.ts
+# Generate types from remote schema
+npm run supabase:types
 ```
 
 ### View Database
-- Use Supabase Studio: http://127.0.0.1:54323
-- Or connect directly: `psql postgresql://postgres:postgres@127.0.0.1:54322/postgres`
+- Use Supabase Dashboard: https://supabase.com/dashboard/project/your-project-id
+- Navigate to the SQL Editor or Table Editor to inspect your database
 
 ### Current Schema
 - **users**: User profiles linked to auth.users
@@ -64,43 +65,45 @@ supabase gen types typescript --local > types/supabase.ts
 ## 🔐 Authentication Testing
 
 ### Email Testing
-- All emails go to Inbucket: http://127.0.0.1:54324
-- No external email service needed for development
-- Test registration/password reset flows locally
+- Configure email templates in Supabase Dashboard under Authentication > Email Templates
+- Use Supabase's built-in email service or configure SMTP for development
+- Test registration/password reset flows with real email addresses
 
 ### User Management
-- Create test users through the app
-- View/manage users in Supabase Studio
-- RLS policies ensure data isolation
+- Create test users through the app registration flow
+- View/manage users in Supabase Dashboard under Authentication > Users
+- RLS policies ensure data isolation between users
 
 ## 🛠️ Development Workflow
 
 ### 1. Schema Changes
 1. Edit `supabase/migrations/` files
-2. Run `supabase db reset` to apply
-3. Update TypeScript types if needed
+2. Apply migrations to remote development database: `supabase db push`
+3. Update TypeScript types: `npm run supabase:types`
 
 ### 2. Feature Development
-1. Ensure Supabase is running: `supabase start`
+1. Ensure `.env` file is configured with remote Supabase credentials
 2. Start Nuxt dev server: `npm run dev`
-3. Use Supabase Studio for database inspection
+3. Use Supabase Dashboard for database inspection and testing
 
 ### 3. Production Deployment
-1. Apply migrations to production: `supabase db push`
-2. Generate production types: `supabase gen types typescript --project-id=YOUR_PROJECT_ID`
-3. Deploy with production environment variables
+1. Apply migrations to production: `supabase db push --linked` (with production project linked)
+2. Generate production types: `supabase gen types typescript --project-id=YOUR_PRODUCTION_PROJECT_ID > app/types/database.types.ts`
+3. Deploy with production environment variables configured in your hosting platform
 
 ## 🚫 Common Issues
 
-### "Connection refused" errors
-- Ensure Supabase is running: `supabase start`
-- Check Docker is running
-- Restart if needed: `supabase stop && supabase start`
+### "Connection refused" or authentication errors
+- Verify `.env` file contains correct `SUPABASE_URL` and `SUPABASE_ANON_KEY`
+- Check that your Supabase project is active and accessible
+- Ensure you're using the correct project credentials (development vs production)
 
 ### Schema out of sync
-- Reset local database: `supabase db reset`
-- This applies all migrations from scratch
+- Apply pending migrations: `supabase db push`
+- Check migration status in Supabase Dashboard under Database > Migrations
+- Verify all migration files are present in `supabase/migrations/`
 
 ### Type errors after schema changes
-- Regenerate types: `supabase gen types typescript --local > types/supabase.ts`
+- Regenerate types: `npm run supabase:types`
 - Restart your IDE/TypeScript server
+- Ensure your Supabase project is linked: `supabase link --project-ref your-project-ref`

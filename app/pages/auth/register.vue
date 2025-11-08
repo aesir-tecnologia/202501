@@ -139,7 +139,7 @@
 
           <UAlert
             v-if="error"
-            icon="i-heroicons-exclamation-triangle"
+            icon="lucide:triangle-alert"
             color="error"
             variant="soft"
             :title="error"
@@ -148,7 +148,7 @@
 
           <UAlert
             v-if="success"
-            icon="i-heroicons-check-circle"
+            icon="lucide:circle-check"
             color="success"
             variant="soft"
             :title="success"

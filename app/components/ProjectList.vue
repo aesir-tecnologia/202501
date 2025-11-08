@@ -2,6 +2,11 @@
 import { useSortable } from '@vueuse/integrations/useSortable'
 import type { ProjectRow } from '~/lib/supabase/projects'
 import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects'
+import { useActiveStintQuery, useStartStint, useCompleteStint } from '~/composables/useStints'
+import type { StintRow } from '~/lib/supabase/stints'
+import StintTimer from './StintTimer.vue'
+import StintControls from './StintControls.vue'
+import StintConflictModal from './StintConflictModal.vue'
 
 const props = defineProps<{
   projects: ProjectRow[]
@@ -20,6 +25,16 @@ const activeListRef = ref<HTMLElement | null>(null)
 const localProjects = ref<ProjectRow[]>([...props.projects])
 const isDragging = ref(false)
 const showInactiveProjects = ref(false)
+
+// Stint management
+const { data: activeStint } = useActiveStintQuery()
+const { mutateAsync: startStint, isPending: isStarting } = useStartStint()
+const { mutateAsync: completeStint } = useCompleteStint()
+const showConflictModal = ref(false)
+const conflictData = ref<{
+  currentStint: StintRow
+  newStint: StintRow | null
+} | null>(null)
 
 // Separate active and inactive projects
 const activeProjects = computed(() => localProjects.value.filter(p => p.is_active))
@@ -128,6 +143,103 @@ function getColorBorderClass(colorTag: string | null) {
 
   return colorMap[colorTag] || ''
 }
+
+// Check if a project has an active stint
+function isProjectActive(projectId: string): boolean {
+  return activeStint.value?.project_id === projectId
+}
+
+// Get the active stint for a specific project
+function projectActiveStint(projectId: string): StintRow | null {
+  if (activeStint.value?.project_id === projectId) {
+    return activeStint.value
+  }
+  return null
+}
+
+// Handle starting a stint
+async function handleStartStint(project: ProjectRow): Promise<void> {
+  try {
+    await startStint({
+      projectId: project.id,
+      plannedDurationMinutes: project.custom_stint_duration ?? undefined,
+    })
+
+    toast.add({
+      title: 'Stint Started',
+      description: `Started working on ${project.name}`,
+      color: 'green',
+      icon: 'lucide:play-circle',
+    })
+  }
+  catch (error) {
+    // Check if it's a conflict error
+    if (error && typeof error === 'object' && 'conflict' in error && activeStint.value) {
+      // Create a mock new stint for the conflict modal (it expects both stints)
+      const newStint: StintRow = {
+        ...activeStint.value,
+        project_id: project.id,
+        id: 'pending',
+      } as StintRow
+
+      // Show conflict modal
+      conflictData.value = {
+        currentStint: activeStint.value,
+        newStint,
+      }
+      showConflictModal.value = true
+    }
+    else {
+      toast.add({
+        title: 'Failed to Start Stint',
+        description: error instanceof Error ? error.message : 'Could not start stint. Please try again.',
+        color: 'red',
+        icon: 'lucide:alert-circle',
+      })
+    }
+  }
+}
+
+// Handle conflict resolution - switch to new stint
+// Note: The modal already completes the current stint, so we just need to start the new one
+async function handleConflictResolution(): Promise<void> {
+  if (!conflictData.value) return
+
+  try {
+    // The modal already completed the current stint, so we just need to start the new one
+    const project = localProjects.value.find(p => p.id === conflictData.value!.newStint?.project_id)
+    if (project) {
+      await startStint({
+        projectId: project.id,
+        plannedDurationMinutes: project.custom_stint_duration ?? undefined,
+      })
+
+      toast.add({
+        title: 'Switched to New Stint',
+        description: `Now working on ${project.name}`,
+        color: 'success',
+        icon: 'lucide:check-circle',
+      })
+    }
+
+    showConflictModal.value = false
+    conflictData.value = null
+  }
+  catch (error) {
+    toast.add({
+      title: 'Failed to Start New Stint',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      color: 'error',
+      icon: 'lucide:alert-circle',
+    })
+  }
+}
+
+// Handle conflict modal dismiss
+function handleConflictDismiss(): void {
+  showConflictModal.value = false
+  conflictData.value = null
+}
 </script>
 
 <template>
@@ -166,78 +278,126 @@ function getColorBorderClass(colorTag: string | null) {
           v-for="project in activeProjects"
           :key="project.id"
           :class="[
-            'flex items-center gap-3 p-4 rounded-lg border-2 transition-colors border-l-4',
-            'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700',
+            'flex flex-col gap-3 p-4 rounded-lg border-2 transition-all border-l-4',
+            isProjectActive(project.id)
+              ? 'border-green-500 ring-2 ring-green-500/50 pulsing-active bg-green-50/50 dark:bg-green-950/20'
+              : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700',
             getColorBorderClass(project.color_tag),
           ]"
         >
-          <!-- Drag handle -->
-          <UTooltip text="Reorder project">
-            <button
-              type="button"
-              class="drag-handle cursor-move p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all duration-200"
-              aria-label="Reorder project"
-            >
-              <Icon
-                name="lucide:grip-vertical"
-                class="h-5 w-5 text-gray-400"
-              />
-            </button>
-          </UTooltip>
-
-          <!-- Project info -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
-                {{ project.name }}
-              </h3>
-            </div>
-            <div class="mt-1 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-              <span class="flex items-center gap-1">
+          <!-- Project Header Row -->
+          <div class="flex items-center gap-3 w-full">
+            <!-- Drag handle -->
+            <UTooltip text="Reorder project">
+              <button
+                type="button"
+                class="drag-handle cursor-move p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all duration-200"
+                aria-label="Reorder project"
+              >
                 <Icon
-                  name="lucide:target"
-                  class="h-4 w-4"
+                  name="lucide:grip-vertical"
+                  class="h-5 w-5 text-gray-400"
                 />
-                {{ project.expected_daily_stints }} stints/day
-              </span>
-              <span class="flex items-center gap-1">
-                <Icon
-                  name="lucide:timer"
-                  class="h-4 w-4"
-                />
-                {{ formatDuration(project.custom_stint_duration) }} per stint
-              </span>
-            </div>
-          </div>
-
-          <!-- Toggle and Actions -->
-          <div class="flex items-center gap-2">
-            <UTooltip :text="project.is_active ? 'Deactivate project' : 'Activate project'">
-              <span>
-                <USwitch
-                  :model-value="project.is_active ?? true"
-                  :loading="togglingProjectId === project.id"
-                  :disabled="togglingProjectId === project.id"
-                  aria-label="Toggle project active status"
-                  @update:model-value="handleToggleActive(project)"
-                />
-              </span>
+              </button>
             </UTooltip>
-            <div class="flex items-center gap-1">
-              <UTooltip text="Edit project">
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
+                  {{ project.name }}
+                </h3>
+              </div>
+              <div class="mt-1 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                <span class="flex items-center gap-1">
+                  <Icon
+                    name="lucide:target"
+                    class="h-4 w-4"
+                  />
+                  {{ project.expected_daily_stints }} stints/day
+                </span>
+                <span class="flex items-center gap-1">
+                  <Icon
+                    name="lucide:timer"
+                    class="h-4 w-4"
+                  />
+                  {{ formatDuration(project.custom_stint_duration) }} per stint
+                </span>
+              </div>
+            </div>
+
+            <!-- Toggle and Actions -->
+            <div class="flex items-center gap-2">
+              <UTooltip :text="project.is_active ? 'Deactivate project' : 'Activate project'">
                 <span>
-                  <UButton
-                    icon="lucide:pencil"
-                    color="neutral"
-                    variant="ghost"
-                    size="sm"
-                    aria-label="Edit project"
-                    class="transition-all duration-200 hover:scale-105"
-                    @click="handleEdit(project)"
+                  <USwitch
+                    :model-value="project.is_active ?? true"
+                    :loading="togglingProjectId === project.id"
+                    :disabled="togglingProjectId === project.id"
+                    aria-label="Toggle project active status"
+                    @update:model-value="handleToggleActive(project)"
                   />
                 </span>
               </UTooltip>
+              <div class="flex items-center gap-1">
+                <UTooltip text="Edit project">
+                  <span>
+                    <UButton
+                      icon="lucide:pencil"
+                      color="neutral"
+                      variant="ghost"
+                      size="sm"
+                      aria-label="Edit project"
+                      class="transition-all duration-200 hover:scale-105"
+                      @click="handleEdit(project)"
+                    />
+                  </span>
+                </UTooltip>
+              </div>
             </div>
+          </div>
+
+          <!-- Active Stint Section (expanded when project has active stint) -->
+          <div
+            v-if="isProjectActive(project.id)"
+            class="flex flex-col items-center gap-4 pt-4 border-t border-green-200 dark:border-green-800"
+          >
+            <!-- Timer Display -->
+            <StintTimer :stint="projectActiveStint(project.id)" />
+
+            <!-- Controls -->
+            <StintControls :stint="projectActiveStint(project.id)!" />
+          </div>
+
+          <!-- Start Button Section (when no active stint or different project active) -->
+          <div
+            v-else
+            class="flex items-center justify-center gap-2 pt-2"
+          >
+            <UButton
+              v-if="!activeStint"
+              color="green"
+              icon="lucide:play"
+              :loading="isStarting"
+              :disabled="isStarting"
+              @click="handleStartStint(project)"
+            >
+              Start Stint
+            </UButton>
+            <UTooltip
+              v-else
+              text="Stop current stint to start new one"
+            >
+              <span>
+                <UButton
+                  color="gray"
+                  variant="soft"
+                  icon="lucide:play"
+                  disabled
+                >
+                  Start Stint
+                </UButton>
+              </span>
+            </UTooltip>
           </div>
         </li>
       </ul>
@@ -337,5 +497,32 @@ function getColorBorderClass(colorTag: string | null) {
         </ul>
       </div>
     </div>
+
+    <!-- Conflict Modal -->
+    <StintConflictModal
+      v-if="conflictData"
+      v-model:open="showConflictModal"
+      :current-stint="conflictData.currentStint"
+      :new-stint="conflictData.newStint!"
+      @dismiss="handleConflictDismiss"
+      @resolved="handleConflictResolution"
+    />
   </div>
 </template>
+
+<style scoped>
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: rgb(34 197 94);
+    box-shadow: 0 0 0 0 rgb(34 197 94 / 0.4);
+  }
+  50% {
+    border-color: rgb(74 222 128);
+    box-shadow: 0 0 0 4px rgb(74 222 128 / 0.2);
+  }
+}
+
+.pulsing-active {
+  animation: pulse-border 2s ease-in-out infinite;
+}
+</style>
