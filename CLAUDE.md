@@ -6,6 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 LifeStint is a Nuxt 4 SSG application with Supabase authentication and database. It tracks focused work sessions (stints) for independent professionals across multiple client projects.
 
+## Documentation
+
+Project documentation is available in the `docs/` folder, including:
+- Product overview and strategy
+- User personas and flows
+- Feature requirements
+- Technical architecture
+- Database schema
+- Implementation guide
+- Development roadmap
+- Success metrics
+- Operations and compliance
+
 ## Key Commands
 
 ### Development

@@ -1,4 +1,4 @@
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, watchEffect } from 'vue'
 import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { useQueryClient } from '@tanstack/vue-query'
 import type { TypedSupabaseClient } from '~/utils/supabase'
@@ -18,6 +18,7 @@ import { projectKeys } from './useProjects'
  * - Detects conflicts when new stint starts while local device has active stint
  * - Shows toast notifications for remote stint events
  * - Provides conflict details for modal display
+ * - Automatic reconnection with exponential backoff on errors
  *
  * @example
  * ```ts
@@ -46,7 +47,14 @@ export function useStintRealtime() {
     newStint: StintRow
   } | null>(null)
 
+  // Subscription state
   let channel: RealtimeChannel | null = null
+  let reconnectTimeoutId: ReturnType<typeof setTimeout> | null = null
+  let reconnectAttempts = 0
+  const maxReconnectAttempts = 5
+  const baseReconnectDelay = 1000 // 1 second
+  let isInitializing = false
+  let isCleanedUp = false
 
   /**
    * Get project name for a given project ID from cache
@@ -201,86 +209,216 @@ export function useStintRealtime() {
   }
 
   /**
+   * Cancel any pending reconnection attempts
+   */
+  function cancelReconnect() {
+    if (reconnectTimeoutId) {
+      clearTimeout(reconnectTimeoutId)
+      reconnectTimeoutId = null
+    }
+  }
+
+  /**
+   * Cleanup subscription (without marking as permanently cleaned up)
+   */
+  function cleanupSubscription() {
+    cancelReconnect()
+
+    if (channel) {
+      console.log('[useStintRealtime] Cleaning up subscription')
+      try {
+        client.removeChannel(channel)
+      }
+      catch (error) {
+        console.warn('[useStintRealtime] Error removing channel:', error)
+      }
+      channel = null
+    }
+  }
+
+  /**
+   * Cleanup subscription permanently (on unmount)
+   */
+  function cleanup() {
+    isCleanedUp = true
+    cleanupSubscription()
+  }
+
+  /**
+   * Attempt to reconnect with exponential backoff
+   */
+  function attemptReconnect() {
+    if (isCleanedUp || !user.value) {
+      return
+    }
+
+    if (reconnectAttempts >= maxReconnectAttempts) {
+      console.error('[useStintRealtime] Max reconnection attempts reached')
+      toast.add({
+        title: 'Real-time sync unavailable',
+        description: 'Unable to reconnect. Please refresh the page.',
+        color: 'error',
+        icon: 'i-lucide-wifi-off',
+      })
+      return
+    }
+
+    reconnectAttempts++
+    const delay = baseReconnectDelay * Math.pow(2, reconnectAttempts - 1)
+    console.log(`[useStintRealtime] Reconnecting in ${delay}ms (attempt ${reconnectAttempts}/${maxReconnectAttempts})`)
+
+    reconnectTimeoutId = setTimeout(() => {
+      reconnectTimeoutId = null
+      if (!isCleanedUp && user.value) {
+        initialize()
+      }
+    }, delay)
+  }
+
+  /**
    * Initialize real-time subscription (only for authenticated users)
    */
   function initialize() {
+    // Prevent duplicate initialization
+    if (isInitializing || isCleanedUp) {
+      return
+    }
+
     if (!user.value) {
       console.warn('[useStintRealtime] No authenticated user - skipping subscription')
       return
     }
 
-    // Create channel for user-specific stint changes
-    channel = client
-      .channel('user-stints')
-      .on<StintRow>(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'stints',
-          filter: `user_id=eq.${user.value.id}`,
-        },
-        (payload) => {
-          console.log('[useStintRealtime] Received event:', payload.eventType, payload)
+    // Clean up existing channel if any
+    if (channel) {
+      try {
+        client.removeChannel(channel)
+      }
+      catch (error) {
+        console.warn('[useStintRealtime] Error removing existing channel:', error)
+      }
+      channel = null
+    }
 
-          try {
-            switch (payload.eventType) {
-              case 'INSERT':
-                handleInsert(payload)
-                break
-              case 'UPDATE':
-                handleUpdate(payload)
-                break
-              case 'DELETE':
-                handleDelete(payload)
-                break
+    isInitializing = true
+
+    try {
+      // Create channel for user-specific stint changes
+      channel = client
+        .channel(`user-stints-${user.value.id}`)
+        .on<StintRow>(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'stints',
+            filter: `user_id=eq.${user.value.id}`,
+          },
+          (payload) => {
+            console.log('[useStintRealtime] Received event:', payload.eventType, payload)
+
+            try {
+              switch (payload.eventType) {
+                case 'INSERT':
+                  handleInsert(payload)
+                  break
+                case 'UPDATE':
+                  handleUpdate(payload)
+                  break
+                case 'DELETE':
+                  handleDelete(payload)
+                  break
+              }
+            }
+            catch (error) {
+              console.error('[useStintRealtime] Error handling event:', error)
+              toast.add({
+                title: 'Real-time sync error',
+                description: 'Failed to process real-time update',
+                color: 'error',
+                icon: 'i-lucide-alert-circle',
+              })
+            }
+          },
+        )
+        .subscribe((status) => {
+          console.log('[useStintRealtime] Subscription status:', status)
+
+          if (status === 'SUBSCRIBED') {
+            console.log('[useStintRealtime] Successfully subscribed to stint changes')
+            isInitializing = false
+            reconnectAttempts = 0 // Reset on successful connection
+            cancelReconnect()
+          }
+          else if (status === 'CHANNEL_ERROR') {
+            console.error('[useStintRealtime] Channel error - subscription failed')
+            isInitializing = false
+
+            // Only show toast on first error, not on every reconnection attempt
+            if (reconnectAttempts === 0) {
+              toast.add({
+                title: 'Real-time sync unavailable',
+                description: 'Attempting to reconnect...',
+                color: 'warning',
+                icon: 'i-lucide-wifi-off',
+              })
+            }
+
+            // Attempt reconnection
+            attemptReconnect()
+          }
+          else if (status === 'CLOSED') {
+            console.log('[useStintRealtime] Channel closed')
+            isInitializing = false
+
+            // Only attempt reconnect if not intentionally closed
+            if (!isCleanedUp && user.value) {
+              attemptReconnect()
             }
           }
-          catch (error) {
-            console.error('[useStintRealtime] Error handling event:', error)
-            toast.add({
-              title: 'Real-time sync error',
-              description: 'Failed to process real-time update',
-              color: 'error',
-              icon: 'i-lucide-alert-circle',
-            })
+          else if (status === 'TIMED_OUT') {
+            console.warn('[useStintRealtime] Channel timed out')
+            isInitializing = false
+
+            if (!isCleanedUp && user.value) {
+              attemptReconnect()
+            }
           }
-        },
-      )
-      .subscribe((status) => {
-        console.log('[useStintRealtime] Subscription status:', status)
+        })
+    }
+    catch (error) {
+      console.error('[useStintRealtime] Error initializing subscription:', error)
+      isInitializing = false
 
-        if (status === 'SUBSCRIBED') {
-          console.log('[useStintRealtime] Successfully subscribed to stint changes')
-        }
-        else if (status === 'CHANNEL_ERROR') {
-          console.error('[useStintRealtime] Channel error - subscription failed')
-          toast.add({
-            title: 'Real-time sync unavailable',
-            description: 'Unable to connect to real-time updates',
-            color: 'error',
-            icon: 'i-lucide-wifi-off',
-          })
-        }
-      })
-  }
-
-  /**
-   * Cleanup subscription on unmount
-   */
-  function cleanup() {
-    if (channel) {
-      console.log('[useStintRealtime] Cleaning up subscription')
-      client.removeChannel(channel)
-      channel = null
+      if (!isCleanedUp && user.value) {
+        attemptReconnect()
+      }
     }
   }
 
-  // Initialize subscription
-  initialize()
+  // Watch for user changes and initialize/cleanup accordingly
+  watchEffect(() => {
+    if (isCleanedUp) {
+      return
+    }
+
+    if (user.value) {
+      // User is authenticated - initialize subscription if not already active
+      if (!channel) {
+        initialize()
+      }
+    }
+    else {
+      // User is not authenticated - cleanup subscription (but allow re-initialization)
+      cleanupSubscription()
+      reconnectAttempts = 0 // Reset attempts when user logs out
+    }
+  })
 
   // Cleanup on unmount
-  onUnmounted(cleanup)
+  onUnmounted(() => {
+    cleanup()
+  })
 
   return {
     showConflictModal,
