@@ -214,4 +214,100 @@ describe('listProjects Contract', () => {
     expect(data![1].name).toBe('Active C') // sort_order 2
     expect(data![2].name).toBe('Active B') // sort_order 3
   })
+
+  it('should return only non-archived projects by default', async () => {
+    const now = new Date().toISOString()
+
+    await testUser1Client
+      .from('projects')
+      .insert([
+        { name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: null },
+        { name: 'Archived Project', is_active: true, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+      ])
+
+    const { data, error } = await listProjects(testUser1Client)
+
+    expect(error).toBeNull()
+    expect(data).toHaveLength(1)
+    expect(data![0].name).toBe('Active Project')
+    expect(data![0].archived_at).toBeNull()
+  })
+
+  it('should return only archived projects when archived is true', async () => {
+    const now = new Date().toISOString()
+
+    await testUser1Client
+      .from('projects')
+      .insert([
+        { name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: null },
+        { name: 'Archived Project 1', is_active: true, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+        { name: 'Archived Project 2', is_active: false, sort_order: 2, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+      ])
+
+    const { data, error } = await listProjects(testUser1Client, { archived: true })
+
+    expect(error).toBeNull()
+    expect(data).toHaveLength(2)
+    expect(data![0].name).toBe('Archived Project 1')
+    expect(data![1].name).toBe('Archived Project 2')
+    expect(data![0].archived_at).not.toBeNull()
+    expect(data![1].archived_at).not.toBeNull()
+  })
+
+  it('should return empty array when no archived projects exist', async () => {
+    await testUser1Client
+      .from('projects')
+      .insert([
+        { name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: null },
+      ])
+
+    const { data, error } = await listProjects(testUser1Client, { archived: true })
+
+    expect(error).toBeNull()
+    expect(data).toEqual([])
+  })
+
+  it('should sort archived projects by sort_order ascending', async () => {
+    const now = new Date().toISOString()
+
+    await testUser1Client
+      .from('projects')
+      .insert([
+        { name: 'Archived C', is_active: true, sort_order: 2, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+        { name: 'Archived A', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+        { name: 'Archived B', is_active: true, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+      ])
+
+    const { data, error } = await listProjects(testUser1Client, { archived: true })
+
+    expect(error).toBeNull()
+    expect(data).toHaveLength(3)
+    expect(data![0].name).toBe('Archived A')
+    expect(data![0].sort_order).toBe(0)
+    expect(data![1].name).toBe('Archived B')
+    expect(data![1].sort_order).toBe(1)
+    expect(data![2].name).toBe('Archived C')
+    expect(data![2].sort_order).toBe(2)
+  })
+
+  it('should include both active and inactive projects when archived is true', async () => {
+    const now = new Date().toISOString()
+
+    await testUser1Client
+      .from('projects')
+      .insert([
+        { name: 'Active Non-Archived', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: null },
+        { name: 'Active Archived', is_active: true, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+        { name: 'Inactive Archived', is_active: false, sort_order: 2, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+      ])
+
+    const { data, error } = await listProjects(testUser1Client, { archived: true })
+
+    expect(error).toBeNull()
+    expect(data).toHaveLength(2)
+    expect(data![0].name).toBe('Active Archived')
+    expect(data![0].is_active).toBe(true)
+    expect(data![1].name).toBe('Inactive Archived')
+    expect(data![1].is_active).toBe(false)
+  })
 })
