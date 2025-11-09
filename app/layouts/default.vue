@@ -1,33 +1,38 @@
 <script setup lang="ts">
-import type { NavigationMenuItem } from '#ui/components/NavigationMenu.vue'
+import type { NavigationMenuItem } from '#ui/components/NavigationMenu.vue';
 
-const appConfig = useAppConfig()
-const route = useRoute()
-const supabase = useSupabaseClient()
+const appConfig = useAppConfig();
+const route = useRoute();
+const supabase = useSupabaseClient();
+const toast = useToast();
 
 const items = computed<NavigationMenuItem[]>(() => [{
   label: 'Dashboard',
   to: '/dashboard',
   active: route.path.startsWith('/dashboard'),
-}])
+}]);
 
 const signOut = async () => {
-  const { error } = await supabase.auth.signOut()
+  const { error } = await supabase.auth.signOut();
   if (error) {
-    alert(error.message)
+    toast.add({
+      title: 'Sign out failed',
+      description: error.message,
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    });
+    return;
   }
 
-  navigateTo(appConfig.auth.home)
-}
+  navigateTo(appConfig.auth.home);
+};
 
-// Initialize real-time subscriptions for authenticated users
-const { showConflictModal, conflictData, dismissConflict } = useStintRealtime()
+const { showConflictModal, conflictData, dismissConflict } = useStintRealtime();
 
-// Initialize stint timer (singleton, auto-manages based on active stint)
-useStintTimer()
+useStintTimer();
 
 function handleConflictResolved() {
-  dismissConflict()
+  dismissConflict();
 }
 </script>
 
@@ -55,7 +60,6 @@ function handleConflictResolved() {
       <slot />
     </UMain>
 
-    <!-- Stint Conflict Resolution Modal -->
     <StintConflictModal
       v-if="showConflictModal && conflictData"
       v-model:open="showConflictModal"
