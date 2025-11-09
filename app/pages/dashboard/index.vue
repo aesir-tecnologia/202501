@@ -1,49 +1,47 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { ProjectRow } from '~/lib/supabase/projects'
-import { useProjectsQuery } from '~/composables/useProjects'
+import type { ProjectRow } from '~/lib/supabase/projects';
+import { useProjectsQuery } from '~/composables/useProjects';
 
 definePageMeta({
   title: 'Dashboard',
   middleware: 'auth',
-})
+});
 
 useSeoMeta({
   title: 'Dashboard - LifeStint',
   description: 'Review your focus progress and personalized insights.',
-})
+});
 
-// Fetch all non-archived projects (including both active and inactive)
 const { data: projectsData, isLoading } = useProjectsQuery({
   includeInactive: true,
-})
+});
 
-const projects = computed(() => projectsData.value ?? [])
+const projects = computed(() => projectsData.value ?? []);
 
 // Modal state
-const showCreateModal = ref(false)
-const showEditModal = ref(false)
-const showArchiveModal = ref(false)
-const showArchivedProjectsModal = ref(false)
-const selectedProject = ref<ProjectRow | null>(null)
+const showCreateModal = ref(false);
+const showEditModal = ref(false);
+const showArchiveModal = ref(false);
+const showArchivedProjectsModal = ref(false);
+const selectedProject = ref<ProjectRow | null>(null);
 
 // Modal handlers
 function openCreateModal() {
-  showCreateModal.value = true
+  showCreateModal.value = true;
 }
 
 function openEditModal(project: ProjectRow) {
-  selectedProject.value = project
-  showEditModal.value = true
+  selectedProject.value = project;
+  showEditModal.value = true;
 }
 
 function openArchiveModal(project: ProjectRow) {
-  selectedProject.value = project
-  showArchiveModal.value = true
+  selectedProject.value = project;
+  showArchiveModal.value = true;
 }
 
 function openArchivedProjectsModal() {
-  showArchivedProjectsModal.value = true
+  showArchivedProjectsModal.value = true;
 }
 </script>
 
