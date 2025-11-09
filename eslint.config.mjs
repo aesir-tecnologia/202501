@@ -9,6 +9,8 @@ export default withNuxt(
       'vue/multi-word-component-names': ['error', {
         ignores: ['login', 'register', 'callback', 'index', 'test', 'error', 'default'],
       }],
+      // Require semicolons at the end of statements
+      '@stylistic/semi': ['error', 'always'],
     },
   },
   {
