@@ -6,11 +6,28 @@ const route = useRoute();
 const supabase = useSupabaseClient();
 const toast = useToast();
 
-const items = computed<NavigationMenuItem[]>(() => [{
-  label: 'Dashboard',
-  to: '/dashboard',
-  active: route.path.startsWith('/dashboard'),
-}]);
+const items = computed<NavigationMenuItem[]>(() => [
+  {
+    label: 'Dashboard',
+    to: '/',
+    active: route.path === '/' || route.path === '',
+  },
+  {
+    label: 'Analytics',
+    to: '/analytics',
+    active: route.path === '/analytics',
+  },
+  {
+    label: 'Reports',
+    to: '/reports',
+    active: route.path === '/reports',
+  },
+  {
+    label: 'Settings',
+    to: '/settings',
+    active: route.path === '/settings',
+  },
+]);
 
 const signOut = async () => {
   const { error } = await supabase.auth.signOut();
@@ -27,18 +44,12 @@ const signOut = async () => {
   navigateTo(appConfig.auth.home);
 };
 
-const { showConflictModal, conflictData, dismissConflict } = useStintRealtime();
-
 useStintTimer();
-
-function handleConflictResolved() {
-  dismissConflict();
-}
 </script>
 
 <template>
   <div>
-    <UHeader to="/dashboard">
+    <UHeader to="/">
       <template #title>
         LifeStint
       </template>
@@ -56,17 +67,8 @@ function handleConflictResolved() {
       </template>
     </UHeader>
 
-    <UMain>
+    <UMain class="pt-6">
       <slot />
     </UMain>
-
-    <StintConflictModal
-      v-if="showConflictModal && conflictData"
-      v-model:open="showConflictModal"
-      :current-stint="conflictData.currentStint"
-      :new-stint="conflictData.newStint"
-      @dismiss="dismissConflict"
-      @resolved="handleConflictResolved"
-    />
   </div>
 </template>

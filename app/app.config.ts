@@ -1,7 +1,7 @@
 export default defineAppConfig({
   auth: {
     home: '/',
-    redirectUrl: '/dashboard',
+    redirectUrl: '/',
   },
   ui: {
     icons: {

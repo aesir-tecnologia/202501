@@ -90,10 +90,10 @@ vercel --prod
 
 After deploying, test:
 
-1. Landing page loads (`/`)
+1. Landing page loads (`/home`)
 2. Auth flows work (`/auth/login`, `/auth/register`)
-3. Protected routes redirect (`/dashboard` → `/auth/login`)
-4. Dashboard loads after login
+3. Protected routes redirect (`/` → `/auth/login` if not authenticated)
+4. Dashboard loads after login at `/`
 5. Theme toggle works
 
 #### Troubleshooting

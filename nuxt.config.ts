@@ -55,7 +55,7 @@ export default defineNuxtConfig({
     prerender: {
       crawlLinks: true,
       routes: [
-        '/',
+        '/home',
         '/auth/login',
         '/auth/register',
         '/auth/forgot-password',
@@ -63,10 +63,13 @@ export default defineNuxtConfig({
         '/auth/verify-email',
         '/design-showcase',
       ],
-      ignore: ['/dashboard', '/dashboard/**', '/auth/callback', '/api/**'],
+      ignore: ['/', '/analytics', '/reports', '/settings', '/auth/callback', '/api/**'],
     },
     routeRules: {
-      '/dashboard/**': { ssr: false },
+      '/': { ssr: false },
+      '/analytics': { ssr: false },
+      '/reports': { ssr: false },
+      '/settings': { ssr: false },
       '/auth/callback': { ssr: false },
       '/**': {
         headers: {

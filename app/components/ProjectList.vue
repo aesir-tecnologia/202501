@@ -6,7 +6,6 @@ import { useActiveStintQuery, useStartStint } from '~/composables/useStints'
 import type { StintRow } from '~/lib/supabase/stints'
 import StintTimer from './StintTimer.vue'
 import StintControls from './StintControls.vue'
-import StintConflictModal from './StintConflictModal.vue'
 
 const props = defineProps<{
   projects: ProjectRow[]
@@ -29,11 +28,6 @@ const showInactiveProjects = ref(false)
 // Stint management
 const { data: activeStint } = useActiveStintQuery()
 const { mutateAsync: startStint, isPending: isStarting } = useStartStint()
-const showConflictModal = ref(false)
-const conflictData = ref<{
-  currentStint: StintRow
-  newStint: StintRow | null
-} | null>(null)
 
 // Separate active and inactive projects
 const activeProjects = computed(() => localProjects.value.filter(p => p.is_active))
@@ -172,72 +166,13 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
     })
   }
   catch (error) {
-    // Check if it's a conflict error
-    if (error && typeof error === 'object' && 'conflict' in error && activeStint.value) {
-      // Create a mock new stint for the conflict modal (it expects both stints)
-      const newStint: StintRow = {
-        ...activeStint.value,
-        project_id: project.id,
-        id: 'pending',
-      } as StintRow
-
-      // Show conflict modal
-      conflictData.value = {
-        currentStint: activeStint.value,
-        newStint,
-      }
-      showConflictModal.value = true
-    }
-    else {
-      toast.add({
-        title: 'Failed to Start Stint',
-        description: error instanceof Error ? error.message : 'Could not start stint. Please try again.',
-        color: 'red',
-        icon: 'i-lucide-alert-circle',
-      })
-    }
-  }
-}
-
-// Handle conflict resolution - switch to new stint
-// Note: The modal already completes the current stint, so we just need to start the new one
-async function handleConflictResolution(): Promise<void> {
-  if (!conflictData.value) return
-
-  try {
-    // The modal already completed the current stint, so we just need to start the new one
-    const project = localProjects.value.find(p => p.id === conflictData.value!.newStint?.project_id)
-    if (project) {
-      await startStint({
-        projectId: project.id,
-        plannedDurationMinutes: project.custom_stint_duration ?? undefined,
-      })
-
-      toast.add({
-        title: 'Switched to New Stint',
-        description: `Now working on ${project.name}`,
-        color: 'success',
-        icon: 'i-lucide-check-circle',
-      })
-    }
-
-    showConflictModal.value = false
-    conflictData.value = null
-  }
-  catch (error) {
     toast.add({
-      title: 'Failed to Start New Stint',
-      description: error instanceof Error ? error.message : 'An unexpected error occurred',
-      color: 'error',
+      title: 'Failed to Start Stint',
+      description: error instanceof Error ? error.message : 'Could not start stint. Please try again.',
+      color: 'red',
       icon: 'i-lucide-alert-circle',
     })
   }
-}
-
-// Handle conflict modal dismiss
-function handleConflictDismiss(): void {
-  showConflictModal.value = false
-  conflictData.value = null
 }
 </script>
 
@@ -496,16 +431,6 @@ function handleConflictDismiss(): void {
         </ul>
       </div>
     </div>
-
-    <!-- Conflict Modal -->
-    <StintConflictModal
-      v-if="conflictData"
-      v-model:open="showConflictModal"
-      :current-stint="conflictData.currentStint"
-      :new-stint="conflictData.newStint!"
-      @dismiss="handleConflictDismiss"
-      @resolved="handleConflictResolution"
-    />
   </div>
 </template>
 

@@ -227,7 +227,7 @@ const user = useAuthUser()
 // Redirect if already logged in
 watch(user, (newUser) => {
   if (newUser) {
-    navigateTo('/dashboard')
+    navigateTo('/')
   }
 })
 
@@ -265,7 +265,7 @@ async function handleRegister(event: FormSubmitEvent<RegisterSchema>) {
         successDescription.value = 'You are now signed in. Redirecting to dashboard...'
 
         setTimeout(() => {
-          navigateTo('/dashboard')
+          navigateTo('/')
         }, 2000)
       }
       else {

@@ -15,7 +15,7 @@ const clear: Partial<ButtonProps> = {
   label: user.value ? 'Back to Dashboard' : 'Back to home',
 }
 
-const redirect = user.value ? '/dashboard' : '/'
+const redirect = '/'
 </script>
 
 <template>

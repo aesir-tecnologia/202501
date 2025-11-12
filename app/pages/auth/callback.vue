@@ -173,7 +173,7 @@ onMounted(() => {
             </p>
             <div class="flex justify-center">
               <UButton
-                to="/dashboard"
+                to="/"
                 variant="solid"
                 color="primary"
               >
