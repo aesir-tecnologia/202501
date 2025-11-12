@@ -14,6 +14,29 @@ LifeStint uses a modern, component-based design system built on **Nuxt UI v4** w
 - **Build Tool**: Nuxt 4.1.2
 - **Styling Approach**: Utility-first CSS with custom CSS variables
 
+### Tailwind CSS v4 Configuration
+
+This project uses **Tailwind CSS v4**, which introduces a new configuration approach:
+
+- **No `tailwind.config.ts` file** - Tailwind v4 eliminates the traditional config file
+- **Inline `@theme` directive** - All customization is done directly in CSS using `@theme` blocks
+- **Location:** All design tokens and theme customization are in `app/assets/css/main.css`
+- **CSS-first approach** - CSS variables and `@theme` blocks replace JavaScript configuration
+
+**Example from `main.css`:**
+```css
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Public Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-brand-500: #2b86ff;
+  /* ... all design tokens defined here */
+}
+```
+
+This modern approach provides better type safety, improved performance, and tighter integration with CSS tooling.
+
 ---
 
 ## Color System
@@ -168,7 +191,7 @@ The system uses Tailwind's default typography scale:
 - `lg` - Large
 
 **Common Props:**
-- `icon` - Icon name (e.g., `"lucide:plus"`, `"lucide:pause"`)
+- `icon` - Icon name (e.g., `"i-lucide-plus"`, `"i-lucide-pause"`)
 - `loading` - Shows loading spinner
 - `disabled` - Disables interaction
 - `block` - Full width button
@@ -176,7 +199,7 @@ The system uses Tailwind's default typography scale:
 **Example:**
 ```vue
 <UButton
-  icon="lucide:plus"
+  icon="i-lucide-plus"
   color="primary"
   variant="solid"
   size="lg"
@@ -321,7 +344,7 @@ Hover tooltips for additional context.
 **Example:**
 ```vue
 <UTooltip text="Edit project">
-  <UButton icon="lucide:pencil" />
+  <UButton icon="i-lucide-pencil" />
 </UTooltip>
 ```
 
@@ -338,7 +361,7 @@ Notification banners for messages.
 **Example:**
 ```vue
 <UAlert
-  icon="lucide:triangle-alert"
+  icon="i-lucide-triangle-alert"
   color="error"
   variant="soft"
   title="Error message"
@@ -411,8 +434,9 @@ Uses Tailwind's default spacing scale (4px base unit):
 ### Icon Libraries
 
 **Lucide Icons**
-   - Usage: `icon="lucide:icon-name"`
-   - Examples: `lucide:plus`, `lucide:pencil`, `lucide:archive`
+   - Usage: `icon="i-lucide-icon-name"` or `name="i-lucide-icon-name"`
+   - Examples: `i-lucide-plus`, `i-lucide-pencil`, `i-lucide-archive`
+   - Note: The `i-` prefix is required by Nuxt UI's icon system
 
 ### Icon Sizes
 
@@ -426,12 +450,12 @@ Uses Tailwind's default spacing scale (4px base unit):
 
 **With Buttons:**
 ```vue
-<UButton icon="lucide:plus">Add</UButton>
+<UButton icon="i-lucide-plus">Add</UButton>
 ```
 
 **Standalone:**
 ```vue
-<Icon name="lucide:target" class="h-4 w-4" />
+<Icon name="i-lucide-target" class="h-4 w-4" />
 ```
 
 **With UIcon Component:**
@@ -507,7 +531,7 @@ Uses `UColorModeButton` component:
 ```vue
 <div class="text-center py-12">
   <Icon
-    name="lucide:folder-open"
+    name="i-lucide-folder-open"
     class="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600"
   />
   <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -524,7 +548,7 @@ Uses `UColorModeButton` component:
 ```vue
 <div class="text-center py-8">
   <Icon
-    name="lucide:loader-2"
+    name="i-lucide-loader-2"
     class="h-8 w-8 mx-auto animate-spin text-gray-400"
   />
   <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
