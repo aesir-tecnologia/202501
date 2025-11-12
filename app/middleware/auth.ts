@@ -6,13 +6,13 @@
 export default defineNuxtRouteMiddleware(() => {
   // Only run on client-side for SSG compatibility
   if (import.meta.server) {
-    return
+    return;
   }
 
-  const user = useAuthUser()
+  const user = useAuthUser();
 
   // If user is not authenticated, redirect to login
   if (!user.value) {
-    return navigateTo('/auth/login')
+    return navigateTo('/auth/login');
   }
-})
+});

@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { projectCreateSchema, projectUpdateSchema, PROJECT_COLORS, type ProjectColor } from '~/schemas/projects'
-import type { ProjectRow } from '~/lib/supabase/projects'
+import { projectCreateSchema, projectUpdateSchema, PROJECT_COLORS, type ProjectColor } from '~/schemas/projects';
+import type { ProjectRow } from '~/lib/supabase/projects';
 
 const props = defineProps<{
   project?: ProjectRow
   mode: 'create' | 'edit'
-}>()
+}>();
 
 const emit = defineEmits<{
   submit: [data: { name: string, expectedDailyStints: number, customStintDuration: number, colorTag: ProjectColor | null }]
   cancel: []
-}>()
+}>();
 
 // Form state
 const formData = ref({
@@ -18,44 +18,44 @@ const formData = ref({
   expectedDailyStints: props.project?.expected_daily_stints ?? 3,
   customStintDuration: props.project?.custom_stint_duration ?? 45,
   colorTag: (props.project?.color_tag as ProjectColor | null) ?? null,
-})
+});
 
 // Validation state
-const errors = ref<Record<string, string>>({})
+const errors = ref<Record<string, string>>({});
 
 // Validate form
 function validateForm() {
-  errors.value = {}
+  errors.value = {};
 
-  const schema = props.mode === 'create' ? projectCreateSchema : projectUpdateSchema
-  const result = schema.safeParse(formData.value)
+  const schema = props.mode === 'create' ? projectCreateSchema : projectUpdateSchema;
+  const result = schema.safeParse(formData.value);
 
   if (!result.success) {
     result.error.issues.forEach((issue) => {
-      const field = issue.path[0] as string
-      errors.value[field] = issue.message
-    })
-    return false
+      const field = issue.path[0] as string;
+      errors.value[field] = issue.message;
+    });
+    return false;
   }
 
-  return true
+  return true;
 }
 
 // Handle submit
 function handleSubmit() {
-  if (!validateForm()) return
+  if (!validateForm()) return;
 
   emit('submit', {
     name: formData.value.name.trim(),
     expectedDailyStints: formData.value.expectedDailyStints,
     customStintDuration: formData.value.customStintDuration,
     colorTag: formData.value.colorTag,
-  })
+  });
 }
 
 // Color selection helper
 function selectColor(color: ProjectColor | null) {
-  formData.value.colorTag = color
+  formData.value.colorTag = color;
 }
 
 // Get TailwindCSS classes for each color
@@ -69,13 +69,13 @@ function getColorClasses(color: ProjectColor) {
     blue: { bg: 'bg-blue-500', ring: 'ring-blue-500', border: 'border-blue-500' },
     purple: { bg: 'bg-purple-500', ring: 'ring-purple-500', border: 'border-purple-500' },
     pink: { bg: 'bg-pink-500', ring: 'ring-pink-500', border: 'border-pink-500' },
-  }
-  return colorMap[color]
+  };
+  return colorMap[color];
 }
 
 // Handle cancel
 function handleCancel() {
-  emit('cancel')
+  emit('cancel');
 }
 </script>
 

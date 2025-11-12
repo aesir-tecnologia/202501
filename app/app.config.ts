@@ -9,4 +9,4 @@ export default defineAppConfig({
       dark: 'i-lucide-moon',
     },
   },
-})
+});

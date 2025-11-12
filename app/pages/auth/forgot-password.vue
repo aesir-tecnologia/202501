@@ -77,48 +77,48 @@
 </template>
 
 <script setup lang="ts">
-import { z } from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
+import { z } from 'zod';
+import type { FormSubmitEvent } from '@nuxt/ui';
 
 // Page meta
 definePageMeta({
   layout: false,
   middleware: 'guest',
-})
+});
 
 // SEO
 useSeoMeta({
   title: 'Forgot Password - LifeStint',
   description: 'Reset your LifeStint account password.',
-})
+});
 
 // Form validation schema
 const forgotPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-})
+});
 
-type ForgotPasswordSchema = z.output<typeof forgotPasswordSchema>
+type ForgotPasswordSchema = z.output<typeof forgotPasswordSchema>;
 
 // Form state
 const state = reactive<ForgotPasswordSchema>({
   email: '',
-})
+});
 
 // UI state
-const loading = ref(false)
-const error = ref('')
-const success = ref('')
-const successDescription = ref('')
+const loading = ref(false);
+const error = ref('');
+const success = ref('');
+const successDescription = ref('');
 
 // Supabase client
-const supabase = useSupabaseClient()
+const supabase = useSupabaseClient();
 
 // Handle form submission
 async function handleForgotPassword(event: FormSubmitEvent<ForgotPasswordSchema>) {
-  loading.value = true
-  error.value = ''
-  success.value = ''
-  successDescription.value = ''
+  loading.value = true;
+  error.value = '';
+  success.value = '';
+  successDescription.value = '';
 
   try {
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
@@ -126,45 +126,45 @@ async function handleForgotPassword(event: FormSubmitEvent<ForgotPasswordSchema>
       {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
-    )
+    );
 
     if (resetError) {
-      throw resetError
+      throw resetError;
     }
 
-    success.value = 'Password reset link sent!'
-    successDescription.value = `We've sent a password reset link to ${event.data.email}. Please check your inbox and click the link to reset your password.`
+    success.value = 'Password reset link sent!';
+    successDescription.value = `We've sent a password reset link to ${event.data.email}. Please check your inbox and click the link to reset your password.`;
 
     // Clear the form
-    state.email = ''
+    state.email = '';
   }
   catch (err: unknown) {
-    console.error('Forgot password error:', err)
+    console.error('Forgot password error:', err);
 
     // Handle specific error types
-    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorMessage = err instanceof Error ? err.message : String(err);
     switch (errorMessage) {
       case 'Invalid email':
-        error.value = 'Please enter a valid email address.'
-        break
+        error.value = 'Please enter a valid email address.';
+        break;
       case 'Email not found':
-        error.value = 'No account found with this email address.'
-        break
+        error.value = 'No account found with this email address.';
+        break;
       case 'Email rate limit exceeded':
-        error.value = 'Too many password reset requests. Please wait a moment and try again.'
-        break
+        error.value = 'Too many password reset requests. Please wait a moment and try again.';
+        break;
       default:
-        error.value = errorMessage || 'An error occurred while sending the reset link. Please try again.'
+        error.value = errorMessage || 'An error occurred while sending the reset link. Please try again.';
     }
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 // Clear messages when user starts typing
 watch(() => state.email, () => {
-  error.value = ''
-  success.value = ''
-})
+  error.value = '';
+  success.value = '';
+});
 </script>

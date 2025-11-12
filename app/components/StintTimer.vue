@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import type { StintRow } from '~/lib/supabase/stints'
+import type { StintRow } from '~/lib/supabase/stints';
 
 const props = defineProps<{
   stint: StintRow | null
-}>()
+}>();
 
 // Get timer state from singleton composable
-const { secondsRemaining, isPaused, isCompleted } = useStintTimer()
+const { secondsRemaining, isPaused, isCompleted } = useStintTimer();
 
 // Format time as MM:SS
 const formattedTime = computed(() => {
-  const mins = Math.floor(secondsRemaining.value / 60)
-  const secs = secondsRemaining.value % 60
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-})
+  const mins = Math.floor(secondsRemaining.value / 60);
+  const secs = secondsRemaining.value % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+});
 
 // Calculate pause duration (live updating)
-const pausedDuration = ref<string>('')
-let pausedIntervalId: ReturnType<typeof setInterval> | null = null
+const pausedDuration = ref<string>('');
+let pausedIntervalId: ReturnType<typeof setInterval> | null = null;
 
 // Update paused duration every second
 watch(
@@ -25,59 +25,59 @@ watch(
   (pausedAt) => {
     // Clear existing interval
     if (pausedIntervalId) {
-      clearInterval(pausedIntervalId)
-      pausedIntervalId = null
+      clearInterval(pausedIntervalId);
+      pausedIntervalId = null;
     }
 
     if (pausedAt && isPaused.value) {
       // Update immediately
-      updatePausedDuration(pausedAt)
+      updatePausedDuration(pausedAt);
 
       // Then update every second
       pausedIntervalId = setInterval(() => {
-        updatePausedDuration(pausedAt)
-      }, 1000)
+        updatePausedDuration(pausedAt);
+      }, 1000);
     }
     else {
-      pausedDuration.value = ''
+      pausedDuration.value = '';
     }
   },
   { immediate: true },
-)
+);
 
 function updatePausedDuration(pausedAt: string): void {
-  const pausedMs = new Date(pausedAt).getTime()
-  const elapsedMs = Date.now() - pausedMs
-  const mins = Math.floor(elapsedMs / 60000)
-  const secs = Math.floor((elapsedMs % 60000) / 1000)
+  const pausedMs = new Date(pausedAt).getTime();
+  const elapsedMs = Date.now() - pausedMs;
+  const mins = Math.floor(elapsedMs / 60000);
+  const secs = Math.floor((elapsedMs % 60000) / 1000);
 
   if (mins > 0) {
-    pausedDuration.value = `${mins}m ${secs}s`
+    pausedDuration.value = `${mins}m ${secs}s`;
   }
   else {
-    pausedDuration.value = `${secs}s`
+    pausedDuration.value = `${secs}s`;
   }
 }
 
 // Cleanup interval on unmount
 onUnmounted(() => {
   if (pausedIntervalId) {
-    clearInterval(pausedIntervalId)
+    clearInterval(pausedIntervalId);
   }
-})
+});
 
 // Animation state
-const showCompletionAnimation = ref(false)
+const showCompletionAnimation = ref(false);
 
 watch(isCompleted, (completed) => {
   if (completed) {
-    showCompletionAnimation.value = true
+    showCompletionAnimation.value = true;
     // Hide animation after 3 seconds
     setTimeout(() => {
-      showCompletionAnimation.value = false
-    }, 3000)
+      showCompletionAnimation.value = false;
+    }, 3000);
   }
-})
+});
 </script>
 
 <template>

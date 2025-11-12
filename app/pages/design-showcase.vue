@@ -24,11 +24,11 @@
 // Page meta
 definePageMeta({
   layout: false,
-})
+});
 
 // SEO
 useSeoMeta({
   title: 'Design Showcase - LifeStint Login Variations',
   description: 'Three unique login page designs for LifeStint',
-})
+});
 </script>

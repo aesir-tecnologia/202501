@@ -103,77 +103,77 @@
 definePageMeta({
   layout: false,
   middleware: 'guest',
-})
+});
 
 // SEO
 useSeoMeta({
   title: 'Verify Email - LifeStint',
   description: 'Verify your email address to complete your LifeStint account registration.',
-})
+});
 
 // Get email from query params
-const route = useRoute()
-const email = ref(route.query.email as string || '')
+const route = useRoute();
+const email = ref(route.query.email as string || '');
 
 // State
-const resending = ref(false)
-const resendError = ref('')
-const resendSuccess = ref('')
-const cooldownActive = ref(false)
-const cooldownSeconds = ref(0)
+const resending = ref(false);
+const resendError = ref('');
+const resendSuccess = ref('');
+const cooldownActive = ref(false);
+const cooldownSeconds = ref(0);
 
 // Computed
 const resendButtonText = computed(() => {
-  if (resending.value) return 'Sending...'
-  if (cooldownActive.value) return `Resend in ${cooldownSeconds.value}s`
-  return 'Resend verification email'
-})
+  if (resending.value) return 'Sending...';
+  if (cooldownActive.value) return `Resend in ${cooldownSeconds.value}s`;
+  return 'Resend verification email';
+});
 
 // Supabase client
-const supabase = useSupabaseClient()
+const supabase = useSupabaseClient();
 
 // Cooldown timer
-const COOLDOWN_DURATION = 60 // 60 seconds
-let cooldownInterval: NodeJS.Timeout | null = null
+const COOLDOWN_DURATION = 60; // 60 seconds
+let cooldownInterval: NodeJS.Timeout | null = null;
 
 function startCooldown() {
-  cooldownActive.value = true
-  cooldownSeconds.value = COOLDOWN_DURATION
+  cooldownActive.value = true;
+  cooldownSeconds.value = COOLDOWN_DURATION;
 
   cooldownInterval = setInterval(() => {
-    cooldownSeconds.value--
+    cooldownSeconds.value--;
 
     if (cooldownSeconds.value <= 0) {
-      cooldownActive.value = false
+      cooldownActive.value = false;
       if (cooldownInterval) {
-        clearInterval(cooldownInterval)
-        cooldownInterval = null
+        clearInterval(cooldownInterval);
+        cooldownInterval = null;
       }
     }
-  }, 1000)
+  }, 1000);
 }
 
 // Cleanup interval on unmount
 onUnmounted(() => {
   if (cooldownInterval) {
-    clearInterval(cooldownInterval)
+    clearInterval(cooldownInterval);
   }
-})
+});
 
 // Resend verification email
 async function resendVerification() {
   if (!email.value) {
-    resendError.value = 'Email address is required to resend verification'
-    return
+    resendError.value = 'Email address is required to resend verification';
+    return;
   }
 
   if (cooldownActive.value) {
-    return
+    return;
   }
 
-  resending.value = true
-  resendError.value = ''
-  resendSuccess.value = ''
+  resending.value = true;
+  resendError.value = '';
+  resendSuccess.value = '';
 
   try {
     const { error } = await supabase.auth.resend({
@@ -182,33 +182,33 @@ async function resendVerification() {
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
-    })
+    });
 
     if (error) {
-      throw error
+      throw error;
     }
 
-    resendSuccess.value = 'Verification email sent successfully!'
-    startCooldown()
+    resendSuccess.value = 'Verification email sent successfully!';
+    startCooldown();
   }
   catch (err: unknown) {
-    console.error('Resend verification error:', err)
+    console.error('Resend verification error:', err);
 
-    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorMessage = err instanceof Error ? err.message : String(err);
     switch (errorMessage) {
       case 'Email rate limit exceeded':
-        resendError.value = 'Too many requests. Please wait before requesting another email.'
-        startCooldown()
-        break
+        resendError.value = 'Too many requests. Please wait before requesting another email.';
+        startCooldown();
+        break;
       case 'User not found':
-        resendError.value = 'No account found with this email address.'
-        break
+        resendError.value = 'No account found with this email address.';
+        break;
       default:
-        resendError.value = errorMessage || 'Failed to resend verification email. Please try again.'
+        resendError.value = errorMessage || 'Failed to resend verification email. Please try again.';
     }
   }
   finally {
-    resending.value = false
+    resending.value = false;
   }
 }
 
@@ -216,16 +216,16 @@ async function resendVerification() {
 watch(resendSuccess, (newValue) => {
   if (newValue) {
     setTimeout(() => {
-      resendSuccess.value = ''
-    }, 5000)
+      resendSuccess.value = '';
+    }, 5000);
   }
-})
+});
 
 watch(resendError, (newValue) => {
   if (newValue && !newValue.includes('rate limit') && !newValue.includes('Too many requests')) {
     setTimeout(() => {
-      resendError.value = ''
-    }, 5000)
+      resendError.value = '';
+    }, 5000);
   }
-})
+});
 </script>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useArchivedProjectsQuery } from '~/composables/useProjects'
+import { useArchivedProjectsQuery } from '~/composables/useProjects';
 
-const isOpen = defineModel<boolean>('open')
+const isOpen = defineModel<boolean>('open');
 
-const { data: archivedProjects, isLoading } = useArchivedProjectsQuery()
+const { data: archivedProjects, isLoading } = useArchivedProjectsQuery();
 
 function closeModal() {
-  isOpen.value = false
+  isOpen.value = false;
 }
 </script>
 

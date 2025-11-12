@@ -1,46 +1,46 @@
 <script setup lang="ts">
-import { useDeleteProject } from '~/composables/useProjects'
-import { hasActiveStint } from '~/lib/supabase/projects'
-import type { ProjectRow } from '~/lib/supabase/projects'
+import { useDeleteProject } from '~/composables/useProjects';
+import { hasActiveStint } from '~/lib/supabase/projects';
+import type { ProjectRow } from '~/lib/supabase/projects';
 
 const props = defineProps<{
   project: ProjectRow
-}>()
+}>();
 
-const toast = useToast()
-const client = useSupabaseClient()
-const { mutateAsync: deleteProject, isPending } = useDeleteProject()
+const toast = useToast();
+const client = useSupabaseClient();
+const { mutateAsync: deleteProject, isPending } = useDeleteProject();
 
-const hasActive = ref(false)
-const isCheckingActive = ref(false)
-const isOpen = defineModel<boolean>('open')
+const hasActive = ref(false);
+const isCheckingActive = ref(false);
+const isOpen = defineModel<boolean>('open');
 
 // Check for active stint when modal opens
 watch(isOpen, async (open) => {
   if (open) {
-    isCheckingActive.value = true
+    isCheckingActive.value = true;
     try {
-      const { data, error } = await hasActiveStint(client, props.project.id)
+      const { data, error } = await hasActiveStint(client, props.project.id);
       if (error) {
-        console.error('Failed to check active stint:', error)
-        hasActive.value = false
+        console.error('Failed to check active stint:', error);
+        hasActive.value = false;
       }
       else {
-        hasActive.value = data ?? false
+        hasActive.value = data ?? false;
       }
     }
     catch (error) {
-      console.error('Failed to check active stint:', error)
-      hasActive.value = false
+      console.error('Failed to check active stint:', error);
+      hasActive.value = false;
     }
     finally {
-      isCheckingActive.value = false
+      isCheckingActive.value = false;
     }
   }
-}, { immediate: true })
+}, { immediate: true });
 
 function closeModal() {
-  isOpen.value = false
+  isOpen.value = false;
 }
 
 async function handleDelete() {
@@ -49,27 +49,27 @@ async function handleDelete() {
       title: 'Cannot delete project',
       description: 'Please stop the active stint before deleting this project',
       color: 'error',
-    })
-    return
+    });
+    return;
   }
 
   try {
-    await deleteProject(props.project.id)
+    await deleteProject(props.project.id);
 
     toast.add({
       title: 'Project deleted',
       description: `${props.project.name} and all associated stints have been deleted`,
       color: 'success',
-    })
+    });
 
-    closeModal()
+    closeModal();
   }
   catch (error) {
     toast.add({
       title: 'Failed to delete project',
       description: error instanceof Error ? error.message : 'An unexpected error occurred',
       color: 'error',
-    })
+    });
   }
 }
 </script>

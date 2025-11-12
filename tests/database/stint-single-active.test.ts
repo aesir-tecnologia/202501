@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import type { createClient } from '@supabase/supabase-js'
-import type { Database } from '~/types/database.types'
-import { createTestUser } from '../setup'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import type { createClient } from '@supabase/supabase-js';
+import type { Database } from '~/types/database.types';
+import { createTestUser } from '../setup';
 
 /**
  * Database Tests for Single Active Stint Enforcement
@@ -13,21 +13,21 @@ import { createTestUser } from '../setup'
  * - Partial unique index: idx_stints_single_active_per_user
  */
 
-const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321'
-const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key'
+const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
+const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key';
 
-type TestClient = ReturnType<typeof createClient<Database>>
+type TestClient = ReturnType<typeof createClient<Database>>;
 
 describe('Single Active Stint Enforcement', () => {
-  let testUserClient: TestClient
-  let testProject1Id: string
-  let testProject2Id: string
-  let _testUser: { id: string, email: string } | null
+  let testUserClient: TestClient;
+  let testProject1Id: string;
+  let testProject2Id: string;
+  let _testUser: { id: string, email: string } | null;
 
   beforeEach(async () => {
-    const testUserData = await createTestUser()
-    testUserClient = testUserData.client
-    _testUser = testUserData.user
+    const testUserData = await createTestUser();
+    testUserClient = testUserData.client;
+    _testUser = testUserData.user;
 
     // Create two test projects
     const { data: project1, error: error1 } = await testUserClient
@@ -37,13 +37,13 @@ describe('Single Active Stint Enforcement', () => {
         expected_daily_stints: 2,
       })
       .select()
-      .single()
+      .single();
 
     if (error1 || !project1) {
-      throw new Error(`Failed to create test project 1: ${error1?.message}`)
+      throw new Error(`Failed to create test project 1: ${error1?.message}`);
     }
 
-    testProject1Id = project1.id
+    testProject1Id = project1.id;
 
     const { data: project2, error: error2 } = await testUserClient
       .from('projects')
@@ -52,20 +52,20 @@ describe('Single Active Stint Enforcement', () => {
         expected_daily_stints: 2,
       })
       .select()
-      .single()
+      .single();
 
     if (error2 || !project2) {
-      throw new Error(`Failed to create test project 2: ${error2?.message}`)
+      throw new Error(`Failed to create test project 2: ${error2?.message}`);
     }
 
-    testProject2Id = project2.id
-  })
+    testProject2Id = project2.id;
+  });
 
   afterEach(async () => {
     if (testUserClient) {
-      await testUserClient.auth.signOut()
+      await testUserClient.auth.signOut();
     }
-  })
+  });
 
   describe('Partial unique index enforcement', () => {
     it('should allow only one active stint per user', async () => {
@@ -78,11 +78,11 @@ describe('Single Active Stint Enforcement', () => {
           status: 'active',
         })
         .select()
-        .single()
+        .single();
 
-      expect(error1).toBeNull()
-      expect(stint1).toBeTruthy()
-      expect(stint1!.status).toBe('active')
+      expect(error1).toBeNull();
+      expect(stint1).toBeTruthy();
+      expect(stint1!.status).toBe('active');
 
       // Attempt to create second active stint (should fail)
       const { data: stint2, error: error2 } = await testUserClient
@@ -93,12 +93,12 @@ describe('Single Active Stint Enforcement', () => {
           status: 'active',
         })
         .select()
-        .single()
+        .single();
 
-      expect(error2).toBeTruthy()
-      expect(error2?.code).toBe('23505') // Unique constraint violation
-      expect(stint2).toBeNull()
-    })
+      expect(error2).toBeTruthy();
+      expect(error2?.code).toBe('23505'); // Unique constraint violation
+      expect(stint2).toBeNull();
+    });
 
     it('should allow only one paused stint per user', async () => {
       // Create first paused stint
@@ -110,11 +110,11 @@ describe('Single Active Stint Enforcement', () => {
           status: 'paused',
         })
         .select()
-        .single()
+        .single();
 
-      expect(error1).toBeNull()
-      expect(stint1).toBeTruthy()
-      expect(stint1!.status).toBe('paused')
+      expect(error1).toBeNull();
+      expect(stint1).toBeTruthy();
+      expect(stint1!.status).toBe('paused');
 
       // Attempt to create second paused stint (should fail)
       const { data: stint2, error: error2 } = await testUserClient
@@ -125,12 +125,12 @@ describe('Single Active Stint Enforcement', () => {
           status: 'paused',
         })
         .select()
-        .single()
+        .single();
 
-      expect(error2).toBeTruthy()
-      expect(error2?.code).toBe('23505')
-      expect(stint2).toBeNull()
-    })
+      expect(error2).toBeTruthy();
+      expect(error2?.code).toBe('23505');
+      expect(stint2).toBeNull();
+    });
 
     it('should not allow active and paused stints simultaneously', async () => {
       // Create active stint
@@ -142,10 +142,10 @@ describe('Single Active Stint Enforcement', () => {
           status: 'active',
         })
         .select()
-        .single()
+        .single();
 
-      expect(error1).toBeNull()
-      expect(stint1).toBeTruthy()
+      expect(error1).toBeNull();
+      expect(stint1).toBeTruthy();
 
       // Attempt to create paused stint (should fail)
       const { data: stint2, error: error2 } = await testUserClient
@@ -156,16 +156,16 @@ describe('Single Active Stint Enforcement', () => {
           status: 'paused',
         })
         .select()
-        .single()
+        .single();
 
-      expect(error2).toBeTruthy()
-      expect(error2?.code).toBe('23505')
-      expect(stint2).toBeNull()
-    })
+      expect(error2).toBeTruthy();
+      expect(error2?.code).toBe('23505');
+      expect(stint2).toBeNull();
+    });
 
     it('should allow multiple completed stints', async () => {
-      const now = new Date()
-      const later = new Date(now.getTime() + 3600000)
+      const now = new Date();
+      const later = new Date(now.getTime() + 3600000);
 
       // Create first completed stint
       const { data: stint1, error: error1 } = await testUserClient
@@ -178,10 +178,10 @@ describe('Single Active Stint Enforcement', () => {
           ended_at: later.toISOString(),
         })
         .select()
-        .single()
+        .single();
 
-      expect(error1).toBeNull()
-      expect(stint1).toBeTruthy()
+      expect(error1).toBeNull();
+      expect(stint1).toBeTruthy();
 
       // Create second completed stint (should succeed)
       const { data: stint2, error: error2 } = await testUserClient
@@ -194,11 +194,11 @@ describe('Single Active Stint Enforcement', () => {
           ended_at: later.toISOString(),
         })
         .select()
-        .single()
+        .single();
 
-      expect(error2).toBeNull()
-      expect(stint2).toBeTruthy()
-    })
+      expect(error2).toBeNull();
+      expect(stint2).toBeTruthy();
+    });
 
     it('should allow multiple interrupted stints', async () => {
       // Create first interrupted stint
@@ -211,10 +211,10 @@ describe('Single Active Stint Enforcement', () => {
           ended_at: new Date().toISOString(),
         })
         .select()
-        .single()
+        .single();
 
-      expect(error1).toBeNull()
-      expect(stint1).toBeTruthy()
+      expect(error1).toBeNull();
+      expect(stint1).toBeTruthy();
 
       // Create second interrupted stint (should succeed)
       const { data: stint2, error: error2 } = await testUserClient
@@ -226,15 +226,15 @@ describe('Single Active Stint Enforcement', () => {
           ended_at: new Date().toISOString(),
         })
         .select()
-        .single()
+        .single();
 
-      expect(error2).toBeNull()
-      expect(stint2).toBeTruthy()
-    })
+      expect(error2).toBeNull();
+      expect(stint2).toBeTruthy();
+    });
 
     it('should allow new active stint after completing previous one', async () => {
-      const now = new Date()
-      const later = new Date(now.getTime() + 3600000)
+      const now = new Date();
+      const later = new Date(now.getTime() + 3600000);
 
       // Create and complete first stint
       const { data: stint1, error: error1 } = await testUserClient
@@ -247,10 +247,10 @@ describe('Single Active Stint Enforcement', () => {
           ended_at: later.toISOString(),
         })
         .select()
-        .single()
+        .single();
 
-      expect(error1).toBeNull()
-      expect(stint1).toBeTruthy()
+      expect(error1).toBeNull();
+      expect(stint1).toBeTruthy();
 
       // Now create new active stint (should succeed)
       const { data: stint2, error: error2 } = await testUserClient
@@ -261,12 +261,12 @@ describe('Single Active Stint Enforcement', () => {
           status: 'active',
         })
         .select()
-        .single()
+        .single();
 
-      expect(error2).toBeNull()
-      expect(stint2).toBeTruthy()
-      expect(stint2!.status).toBe('active')
-    })
+      expect(error2).toBeNull();
+      expect(stint2).toBeTruthy();
+      expect(stint2!.status).toBe('active');
+    });
 
     it('should allow new active stint after interrupting previous one', async () => {
       // Create interrupted stint
@@ -279,10 +279,10 @@ describe('Single Active Stint Enforcement', () => {
           ended_at: new Date().toISOString(),
         })
         .select()
-        .single()
+        .single();
 
-      expect(error1).toBeNull()
-      expect(stint1).toBeTruthy()
+      expect(error1).toBeNull();
+      expect(stint1).toBeTruthy();
 
       // Now create new active stint (should succeed)
       const { data: stint2, error: error2 } = await testUserClient
@@ -293,11 +293,11 @@ describe('Single Active Stint Enforcement', () => {
           status: 'active',
         })
         .select()
-        .single()
+        .single();
 
-      expect(error2).toBeNull()
-      expect(stint2).toBeTruthy()
-      expect(stint2!.status).toBe('active')
-    })
-  })
-})
+      expect(error2).toBeNull();
+      expect(stint2).toBeTruthy();
+      expect(stint2!.status).toBe('active');
+    });
+  });
+});

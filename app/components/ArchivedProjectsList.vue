@@ -1,85 +1,85 @@
 <script setup lang="ts">
-import type { ProjectRow } from '~/lib/supabase/projects'
-import { usePermanentlyDeleteProject, useUnarchiveProject } from '~/composables/useProjects'
+import type { ProjectRow } from '~/lib/supabase/projects';
+import { usePermanentlyDeleteProject, useUnarchiveProject } from '~/composables/useProjects';
 
 defineProps<{
   projects: ProjectRow[]
-}>()
+}>();
 
-const toast = useToast()
-const { mutateAsync: permanentlyDeleteProject, isPending: isDeleting } = usePermanentlyDeleteProject()
-const { mutateAsync: unarchiveProject, isPending: isUnarchiving } = useUnarchiveProject()
+const toast = useToast();
+const { mutateAsync: permanentlyDeleteProject, isPending: isDeleting } = usePermanentlyDeleteProject();
+const { mutateAsync: unarchiveProject, isPending: isUnarchiving } = useUnarchiveProject();
 
-const deletingProjectId = ref<string | null>(null)
-const unarchivingProjectId = ref<string | null>(null)
-const showDeleteConfirm = ref(false)
-const projectToDelete = ref<ProjectRow | null>(null)
+const deletingProjectId = ref<string | null>(null);
+const unarchivingProjectId = ref<string | null>(null);
+const showDeleteConfirm = ref(false);
+const projectToDelete = ref<ProjectRow | null>(null);
 
 function formatDate(dateString: string | null) {
-  if (!dateString) return 'Unknown'
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  if (!dateString) return 'Unknown';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function openDeleteConfirmation(project: ProjectRow) {
-  projectToDelete.value = project
-  showDeleteConfirm.value = true
+  projectToDelete.value = project;
+  showDeleteConfirm.value = true;
 }
 
 function closeDeleteConfirmation() {
-  showDeleteConfirm.value = false
-  projectToDelete.value = null
+  showDeleteConfirm.value = false;
+  projectToDelete.value = null;
 }
 
 async function handleUnarchive(project: ProjectRow) {
-  unarchivingProjectId.value = project.id
+  unarchivingProjectId.value = project.id;
 
   try {
-    await unarchiveProject(project.id)
+    await unarchiveProject(project.id);
 
     toast.add({
       title: 'Project unarchived',
       description: `${project.name} has been restored to your dashboard`,
       color: 'success',
-    })
+    });
   }
   catch (error) {
     toast.add({
       title: 'Failed to unarchive project',
       description: error instanceof Error ? error.message : 'An unexpected error occurred',
       color: 'error',
-    })
+    });
   }
   finally {
-    unarchivingProjectId.value = null
+    unarchivingProjectId.value = null;
   }
 }
 
 async function handlePermanentDelete() {
-  if (!projectToDelete.value) return
+  if (!projectToDelete.value) return;
 
-  deletingProjectId.value = projectToDelete.value.id
+  deletingProjectId.value = projectToDelete.value.id;
 
   try {
-    await permanentlyDeleteProject(projectToDelete.value.id)
+    await permanentlyDeleteProject(projectToDelete.value.id);
 
     toast.add({
       title: 'Project permanently deleted',
       description: `${projectToDelete.value.name} and all associated stints have been permanently deleted`,
       color: 'success',
-    })
+    });
 
-    closeDeleteConfirmation()
+    closeDeleteConfirmation();
   }
   catch (error) {
     toast.add({
       title: 'Failed to delete project',
       description: error instanceof Error ? error.message : 'An unexpected error occurred',
       color: 'error',
-    })
+    });
   }
   finally {
-    deletingProjectId.value = null
+    deletingProjectId.value = null;
   }
 }
 </script>

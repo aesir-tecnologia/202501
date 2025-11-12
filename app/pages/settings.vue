@@ -68,9 +68,9 @@ async function saveAccountChanges() {
       const { error } = await supabase.auth.updateUser({
         email: accountForm.value.email,
       });
-      
+
       if (error) throw error;
-      
+
       toast.add({
         title: 'Email update sent',
         description: 'Please check your email to confirm the new address',
@@ -78,21 +78,23 @@ async function saveAccountChanges() {
         icon: 'i-lucide-mail',
       });
     }
-    
+
     // Save other account settings (would need user_profiles table)
     toast.add({
       title: 'Settings saved',
       color: 'success',
       icon: 'i-lucide-check-circle',
     });
-  } catch (error) {
+  }
+  catch (error) {
     toast.add({
       title: 'Failed to save settings',
       description: error instanceof Error ? error.message : 'An error occurred',
       color: 'error',
       icon: 'i-lucide-alert-circle',
     });
-  } finally {
+  }
+  finally {
     isSavingAccount.value = false;
   }
 }
@@ -113,27 +115,28 @@ async function changePassword() {
     });
     return;
   }
-  
+
   try {
     const { error } = await supabase.auth.updateUser({
       password: passwordForm.value.newPassword,
     });
-    
+
     if (error) throw error;
-    
+
     toast.add({
       title: 'Password updated',
       color: 'success',
       icon: 'i-lucide-check-circle',
     });
-    
+
     showPasswordDialog.value = false;
     passwordForm.value = {
       currentPassword: '',
       newPassword: '',
       confirmPassword: '',
     };
-  } catch (error) {
+  }
+  catch (error) {
     toast.add({
       title: 'Failed to update password',
       description: error instanceof Error ? error.message : 'An error occurred',
@@ -151,20 +154,22 @@ async function savePreferences() {
   try {
     // Save preferences (would need user_profiles table or localStorage)
     localStorage.setItem('preferences', JSON.stringify(preferences.value));
-    
+
     toast.add({
       title: 'Preferences saved',
       color: 'success',
       icon: 'i-lucide-check-circle',
     });
-  } catch (error) {
+  }
+  catch (error) {
     toast.add({
       title: 'Failed to save preferences',
       description: error instanceof Error ? error.message : 'An error occurred',
       color: 'error',
       icon: 'i-lucide-alert-circle',
     });
-  } finally {
+  }
+  finally {
     isSavingPreferences.value = false;
   }
 }
@@ -180,7 +185,8 @@ async function requestNotificationPermission() {
         color: 'success',
         icon: 'i-lucide-check-circle',
       });
-    } else {
+    }
+    else {
       toast.add({
         title: 'Notification permission denied',
         color: 'warning',
@@ -191,7 +197,7 @@ async function requestNotificationPermission() {
 }
 
 // Security actions
-async function logoutSession(sessionId: string) {
+async function logoutSession(_sessionId: string) {
   try {
     // In a real app, you'd call an API to invalidate the session
     // For now, we'll just show a message
@@ -200,7 +206,8 @@ async function logoutSession(sessionId: string) {
       color: 'success',
       icon: 'i-lucide-check-circle',
     });
-  } catch (error) {
+  }
+  catch (error) {
     toast.add({
       title: 'Failed to logout session',
       description: error instanceof Error ? error.message : 'An error occurred',
@@ -221,7 +228,7 @@ function exportData() {
     preferences: preferences.value,
     exportDate: new Date().toISOString(),
   };
-  
+
   const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -231,7 +238,7 @@ function exportData() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  
+
   toast.add({
     title: 'Data exported',
     description: 'Your data has been downloaded',
@@ -252,7 +259,7 @@ async function deleteAccount() {
     });
     return;
   }
-  
+
   try {
     // In a real app, you'd call an API to delete the account
     toast.add({
@@ -261,10 +268,11 @@ async function deleteAccount() {
       color: 'warning',
       icon: 'i-lucide-alert-triangle',
     });
-    
+
     showDeleteAccountDialog.value = false;
     deleteConfirmText.value = '';
-  } catch (error) {
+  }
+  catch (error) {
     toast.add({
       title: 'Failed to delete account',
       description: error instanceof Error ? error.message : 'An error occurred',
@@ -280,7 +288,8 @@ onMounted(() => {
   if (saved) {
     try {
       preferences.value = { ...preferences.value, ...JSON.parse(saved) };
-    } catch {
+    }
+    catch {
       // Ignore parse errors
     }
   }
@@ -811,4 +820,3 @@ const timezones = [
     </UModal>
   </UContainer>
 </template>
-

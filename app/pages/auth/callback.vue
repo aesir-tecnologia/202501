@@ -1,107 +1,107 @@
 <script setup lang="ts">
 definePageMeta({
   layout: false,
-})
+});
 
 useSeoMeta({
   title: 'Authenticating - LifeStint',
   description: 'Completing your authentication to LifeStint.',
-})
+});
 
-const appConfig = useAppConfig()
-const supabase = useSupabaseClient()
+const appConfig = useAppConfig();
+const supabase = useSupabaseClient();
 
-const loading = ref(true)
-const error = ref('')
-const success = ref(false)
+const loading = ref(true);
+const error = ref('');
+const success = ref(false);
 
 async function handleAuthCallback() {
   try {
     // Get the current URL and check for auth parameters
-    const { data, error: sessionError } = await supabase.auth.getSession()
+    const { data, error: sessionError } = await supabase.auth.getSession();
 
     if (sessionError) {
-      throw sessionError
+      throw sessionError;
     }
 
     // Check if we have a valid session
     if (data.session && data.session.user) {
-      success.value = true
-      navigateTo(appConfig.auth.redirectUrl, { replace: true })
+      success.value = true;
+      navigateTo(appConfig.auth.redirectUrl, { replace: true });
     }
     else {
       // Check for URL query parameters (email confirmation)
-      const route = useRoute()
-      const callbackCode = route.query.code
+      const route = useRoute();
+      const callbackCode = route.query.code;
 
       // Handle email confirmation or password reset
       if (callbackCode && typeof callbackCode === 'string') {
-        const hashParams = new URLSearchParams(callbackCode.substring(1))
-        const accessToken = hashParams.get('access_token')
-        const refreshToken = hashParams.get('refresh_token')
-        const type = hashParams.get('type')
+        const hashParams = new URLSearchParams(callbackCode.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        const type = hashParams.get('type');
 
         if (accessToken && refreshToken) {
           const { error: setSessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
-          })
+          });
 
           if (setSessionError) {
-            throw setSessionError
+            throw setSessionError;
           }
 
           if (type === 'signup') {
-            success.value = true
-            navigateTo(appConfig.auth.redirectUrl, { replace: true })
+            success.value = true;
+            navigateTo(appConfig.auth.redirectUrl, { replace: true });
           }
           else if (type === 'recovery') {
             // Redirect to password reset page
             // navigateTo('/auth/reset-password', { replace: true })
-            alert('Redirect TO reset password')
+            alert('Redirect TO reset password');
           }
           else {
-            success.value = true
-            navigateTo(appConfig.auth.redirectUrl, { replace: true })
+            success.value = true;
+            navigateTo(appConfig.auth.redirectUrl, { replace: true });
           }
         }
         else {
-          throw new Error('Missing authentication tokens in callback URL')
+          throw new Error('Missing authentication tokens in callback URL');
         }
       }
       else {
-        throw new Error('No valid session or authentication parameters found')
+        throw new Error('No valid session or authentication parameters found');
       }
     }
   }
   catch (err: unknown) {
-    console.error('Auth callback error:', err)
+    console.error('Auth callback error:', err);
 
     // Handle specific error types
-    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorMessage = err instanceof Error ? err.message : String(err);
     switch (errorMessage) {
       case 'Email link is invalid or has expired':
-        error.value = 'This confirmation link has expired or is invalid. Please request a new one.'
-        break
+        error.value = 'This confirmation link has expired or is invalid. Please request a new one.';
+        break;
       case 'Token has expired or is invalid':
-        error.value = 'This authentication link has expired. Please sign in again.'
-        break
+        error.value = 'This authentication link has expired. Please sign in again.';
+        break;
       case 'Email not confirmed':
-        error.value = 'Please check your email and click the confirmation link.'
-        break
+        error.value = 'Please check your email and click the confirmation link.';
+        break;
       default:
-        error.value = errorMessage || 'An error occurred during authentication. Please try signing in again.'
+        error.value = errorMessage || 'An error occurred during authentication. Please try signing in again.';
     }
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 // Handle the callback when component mounts
 onMounted(() => {
-  handleAuthCallback()
-})
+  handleAuthCallback();
+});
 </script>
 
 <template>

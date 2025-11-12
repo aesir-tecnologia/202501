@@ -1,20 +1,20 @@
-import type { Database } from '~/types/database.types'
-import type { TypedSupabaseClient } from '~/utils/supabase'
+import type { Database } from '~/types/database.types';
+import type { TypedSupabaseClient } from '~/utils/supabase';
 
 /**
  * Data-access helpers for the Supabase `stints` table.
  */
-export type StintRow = Database['public']['Tables']['stints']['Row']
-export type StintInsert = Database['public']['Tables']['stints']['Insert']
-export type StintUpdate = Database['public']['Tables']['stints']['Update']
+export type StintRow = Database['public']['Tables']['stints']['Row'];
+export type StintInsert = Database['public']['Tables']['stints']['Insert'];
+export type StintUpdate = Database['public']['Tables']['stints']['Update'];
 
-export type CreateStintPayload = Omit<StintInsert, 'user_id'>
-export type UpdateStintPayload = Omit<StintUpdate, 'user_id' | 'id'>
+export type CreateStintPayload = Omit<StintInsert, 'user_id'>;
+export type UpdateStintPayload = Omit<StintUpdate, 'user_id' | 'id'>;
 
 export type Result<T> = {
   data: T | null
   error: Error | null
-}
+};
 
 interface ListStintsOptions {
   projectId?: string
@@ -25,7 +25,7 @@ export type ConflictError = {
   code: 'CONFLICT'
   existingStint: StintRow | null
   message: string
-}
+};
 
 interface SupabaseFunctionsError {
   context?: {
@@ -51,103 +51,103 @@ export type StintConflictResult = {
 } | {
   error: null
   data: StintRow
-}
+};
 
 async function requireUserId(client: TypedSupabaseClient): Promise<Result<string>> {
-  const { data, error } = await client.auth.getUser()
+  const { data, error } = await client.auth.getUser();
 
   if (error || !data?.user) {
-    return { data: null, error: new Error('User must be authenticated to interact with stints') }
+    return { data: null, error: new Error('User must be authenticated to interact with stints') };
   }
 
-  return { data: data.user.id, error: null }
+  return { data: data.user.id, error: null };
 }
 
 /**
  * Validate that an object has the required fields of a StintRow
  */
 function isValidStintRow(obj: unknown): obj is StintRow {
-  if (!obj || typeof obj !== 'object') return false
-  const stint = obj as Record<string, unknown>
+  if (!obj || typeof obj !== 'object') return false;
+  const stint = obj as Record<string, unknown>;
   return (
     typeof stint.id === 'string'
     && typeof stint.user_id === 'string'
     && typeof stint.project_id === 'string'
     && typeof stint.status === 'string'
-  )
+  );
 }
 
 export async function listStints(
   client: TypedSupabaseClient,
   options: ListStintsOptions = {},
 ): Promise<Result<StintRow[]>> {
-  const userResult = await requireUserId(client)
-  if (userResult.error) return { data: null, error: userResult.error }
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
 
   let query = client
     .from('stints')
     .select('*')
     .eq('user_id', userResult.data!)
-    .order('started_at', { ascending: false })
+    .order('started_at', { ascending: false });
 
   if (options.projectId) {
-    query = query.eq('project_id', options.projectId)
+    query = query.eq('project_id', options.projectId);
   }
 
   if (options.activeOnly) {
-    query = query.in('status', ['active', 'paused'])
+    query = query.in('status', ['active', 'paused']);
   }
 
-  const { data, error } = await query
+  const { data, error } = await query;
 
-  if (error) return { data: null, error }
-  return { data: data || [], error: null }
+  if (error) return { data: null, error };
+  return { data: data || [], error: null };
 }
 
 export async function getStintById(
   client: TypedSupabaseClient,
   stintId: string | number,
 ): Promise<Result<StintRow | null>> {
-  const userResult = await requireUserId(client)
-  if (userResult.error) return { data: null, error: userResult.error }
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
 
   const { data, error } = await client
     .from('stints')
     .select('*')
     .eq('user_id', userResult.data!)
     .eq('id', String(stintId))
-    .maybeSingle<StintRow>()
+    .maybeSingle<StintRow>();
 
-  if (error) return { data: null, error }
-  return { data, error: null }
+  if (error) return { data: null, error };
+  return { data, error: null };
 }
 
 export async function getActiveStint(
   client: TypedSupabaseClient,
 ): Promise<Result<StintRow | null>> {
-  const userResult = await requireUserId(client)
-  if (userResult.error) return { data: null, error: userResult.error }
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
 
   // Call the stints-active Edge Function
   const { data, error } = await client.functions.invoke('stints-active', {
     body: {},
-  })
+  });
 
   if (error) {
     // Map Edge Function errors
-    return { data: null, error: new Error(error.message || 'Failed to get active stint') }
+    return { data: null, error: new Error(error.message || 'Failed to get active stint') };
   }
 
   // Edge Function returns null if no active stint, or the stint object
-  return { data: (data as StintRow | null) || null, error: null }
+  return { data: (data as StintRow | null) || null, error: null };
 }
 
 export async function createStint(
   client: TypedSupabaseClient,
   payload: CreateStintPayload,
 ): Promise<Result<StintRow>> {
-  const userResult = await requireUserId(client)
-  if (userResult.error) return { data: null, error: userResult.error }
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
 
   const { data, error } = await client
     .from('stints')
@@ -156,10 +156,10 @@ export async function createStint(
       user_id: userResult.data!,
     })
     .select('*')
-    .single<StintRow>()
+    .single<StintRow>();
 
-  if (error) return { data: null, error }
-  return { data, error: null }
+  if (error) return { data: null, error };
+  return { data, error: null };
 }
 
 export async function updateStint(
@@ -167,8 +167,8 @@ export async function updateStint(
   stintId: string | number,
   updates: UpdateStintPayload,
 ): Promise<Result<StintRow>> {
-  const userResult = await requireUserId(client)
-  if (userResult.error) return { data: null, error: userResult.error }
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
 
   const { data, error } = await client
     .from('stints')
@@ -176,34 +176,34 @@ export async function updateStint(
     .eq('user_id', userResult.data!)
     .eq('id', String(stintId))
     .select('*')
-    .single<StintRow>()
+    .single<StintRow>();
 
-  if (error) return { data: null, error }
-  return { data, error: null }
+  if (error) return { data: null, error };
+  return { data, error: null };
 }
 
 export async function deleteStint(
   client: TypedSupabaseClient,
   stintId: string | number,
 ): Promise<Result<void>> {
-  const userResult = await requireUserId(client)
-  if (userResult.error) return { data: null, error: userResult.error }
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
 
   // Verify stint exists and is owned by user
-  const stintResult = await getStintById(client, stintId)
-  if (stintResult.error) return { data: null, error: stintResult.error }
+  const stintResult = await getStintById(client, stintId);
+  if (stintResult.error) return { data: null, error: stintResult.error };
   if (!stintResult.data) {
-    return { data: null, error: new Error('Stint not found or you do not have permission to delete it') }
+    return { data: null, error: new Error('Stint not found or you do not have permission to delete it') };
   }
 
   const { error } = await client
     .from('stints')
     .delete()
     .eq('user_id', userResult.data!)
-    .eq('id', String(stintId))
+    .eq('id', String(stintId));
 
-  if (error) return { data: null, error }
-  return { data: null, error: null }
+  if (error) return { data: null, error };
+  return { data: null, error: null };
 }
 
 /**
@@ -212,17 +212,17 @@ export async function deleteStint(
 export async function getUserVersion(
   client: TypedSupabaseClient,
 ): Promise<Result<number>> {
-  const userResult = await requireUserId(client)
-  if (userResult.error) return { data: null, error: userResult.error }
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
 
   const { data, error } = await client
     .from('user_profiles')
     .select('version')
     .eq('id', userResult.data!)
-    .single<{ version: number }>()
+    .single<{ version: number }>();
 
-  if (error) return { data: null, error }
-  return { data: data.version, error: null }
+  if (error) return { data: null, error };
+  return { data: data.version, error: null };
 }
 
 /**
@@ -232,25 +232,25 @@ export async function pauseStint(
   client: TypedSupabaseClient,
   stintId: string,
 ): Promise<Result<StintRow>> {
-  const userResult = await requireUserId(client)
-  if (userResult.error) return { data: null, error: userResult.error }
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
 
   // Call the stints-pause Edge Function
   const { data, error } = await client.functions.invoke('stints-pause', {
     body: { stintId },
-  })
+  });
 
   if (error) {
     // Map Edge Function errors to user-friendly messages
-    const errorMessage = error.message || 'Failed to pause stint'
-    return { data: null, error: new Error(errorMessage) }
+    const errorMessage = error.message || 'Failed to pause stint';
+    return { data: null, error: new Error(errorMessage) };
   }
 
   if (!data) {
-    return { data: null, error: new Error('No data returned from pause stint') }
+    return { data: null, error: new Error('No data returned from pause stint') };
   }
 
-  return { data: data as StintRow, error: null }
+  return { data: data as StintRow, error: null };
 }
 
 /**
@@ -260,25 +260,25 @@ export async function resumeStint(
   client: TypedSupabaseClient,
   stintId: string,
 ): Promise<Result<StintRow>> {
-  const userResult = await requireUserId(client)
-  if (userResult.error) return { data: null, error: userResult.error }
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
 
   // Call the stints-resume Edge Function
   const { data, error } = await client.functions.invoke('stints-resume', {
     body: { stintId },
-  })
+  });
 
   if (error) {
     // Map Edge Function errors to user-friendly messages
-    const errorMessage = error.message || 'Failed to resume stint'
-    return { data: null, error: new Error(errorMessage) }
+    const errorMessage = error.message || 'Failed to resume stint';
+    return { data: null, error: new Error(errorMessage) };
   }
 
   if (!data) {
-    return { data: null, error: new Error('No data returned from resume stint') }
+    return { data: null, error: new Error('No data returned from resume stint') };
   }
 
-  return { data: data as StintRow, error: null }
+  return { data: data as StintRow, error: null };
 }
 
 /**
@@ -290,27 +290,27 @@ export async function completeStint(
   completionType: 'manual' | 'auto' | 'interrupted',
   notes?: string | null,
 ): Promise<Result<StintRow>> {
-  const userResult = await requireUserId(client)
-  if (userResult.error) return { data: null, error: userResult.error }
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
 
   // For manual completion, use the stints-stop Edge Function
   // For auto/interrupted, we still need to use RPC directly since Edge Function only handles manual
   if (completionType === 'manual') {
     const { data, error } = await client.functions.invoke('stints-stop', {
       body: { stintId, notes: notes || null },
-    })
+    });
 
     if (error) {
       // Map Edge Function errors to user-friendly messages
-      const errorMessage = error.message || 'Failed to complete stint'
-      return { data: null, error: new Error(errorMessage) }
+      const errorMessage = error.message || 'Failed to complete stint';
+      return { data: null, error: new Error(errorMessage) };
     }
 
     if (!data) {
-      return { data: null, error: new Error('No data returned from complete stint') }
+      return { data: null, error: new Error('No data returned from complete stint') };
     }
 
-    return { data: data as StintRow, error: null }
+    return { data: data as StintRow, error: null };
   }
 
   // For auto/interrupted completion, use RPC directly
@@ -321,20 +321,20 @@ export async function completeStint(
       p_completion_type: completionType,
       p_notes: notes ?? undefined,
     })
-    .single<StintRow>()
+    .single<StintRow>();
 
   if (error) {
     // Map database errors to user-friendly messages
     if (error.message?.includes('not active')) {
-      return { data: null, error: new Error('Stint is not active and cannot be completed') }
+      return { data: null, error: new Error('Stint is not active and cannot be completed') };
     }
     if (error.message?.includes('not found')) {
-      return { data: null, error: new Error('Stint not found') }
+      return { data: null, error: new Error('Stint not found') };
     }
-    return { data: null, error }
+    return { data: null, error };
   }
 
-  return { data, error: null }
+  return { data, error: null };
 }
 
 /**
@@ -346,8 +346,8 @@ export async function startStint(
   plannedDurationMinutes?: number,
   notes?: string,
 ): Promise<StintConflictResult | Result<StintRow>> {
-  const userResult = await requireUserId(client)
-  if (userResult.error) return { data: null, error: userResult.error }
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
 
   // Call the stints-start Edge Function
   const { data, error } = await client.functions.invoke('stints-start', {
@@ -356,17 +356,17 @@ export async function startStint(
       plannedDurationMinutes,
       notes: notes || null,
     },
-  })
+  });
 
   if (error) {
-    const functionError = error as SupabaseFunctionsError
-    const errorContext = functionError.context || {}
-    const errorData = errorContext.body || functionError.data || functionError
+    const functionError = error as SupabaseFunctionsError;
+    const errorContext = functionError.context || {};
+    const errorData = errorContext.body || functionError.data || functionError;
 
     if (errorContext.status === 409 || errorData?.error === 'CONFLICT' || functionError.status === 409) {
       const existingStint = errorData.existingStint && isValidStintRow(errorData.existingStint)
         ? errorData.existingStint
-        : null
+        : null;
 
       return {
         error: {
@@ -375,16 +375,16 @@ export async function startStint(
           message: errorData.message || 'An active stint already exists',
         },
         data: null,
-      }
+      };
     }
 
-    const errorMessage = errorData.message || functionError.message || 'Failed to start stint'
-    return { data: null, error: new Error(errorMessage) }
+    const errorMessage = errorData.message || functionError.message || 'Failed to start stint';
+    return { data: null, error: new Error(errorMessage) };
   }
 
   if (!data) {
-    return { data: null, error: new Error('No data returned from start stint') }
+    return { data: null, error: new Error('No data returned from start stint') };
   }
 
-  return { data: data as StintRow, error: null }
+  return { data: data as StintRow, error: null };
 }

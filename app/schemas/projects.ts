@@ -1,19 +1,19 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
-const PROJECT_NAME_MAX_LENGTH = 60
-const PROJECT_NAME_MIN_LENGTH = 2
-const DAILY_STINTS_MIN = 1
-const DAILY_STINTS_MAX = 12
-const CUSTOM_DURATION_MIN_MINUTES = 5
-const CUSTOM_DURATION_MAX_MINUTES = 480
+const PROJECT_NAME_MAX_LENGTH = 60;
+const PROJECT_NAME_MIN_LENGTH = 2;
+const DAILY_STINTS_MIN = 1;
+const DAILY_STINTS_MAX = 12;
+const CUSTOM_DURATION_MIN_MINUTES = 5;
+const CUSTOM_DURATION_MAX_MINUTES = 480;
 
 // TailwindCSS color options for project tags
-export const PROJECT_COLORS = ['red', 'orange', 'amber', 'green', 'teal', 'blue', 'purple', 'pink'] as const
-export type ProjectColor = typeof PROJECT_COLORS[number]
+export const PROJECT_COLORS = ['red', 'orange', 'amber', 'green', 'teal', 'blue', 'purple', 'pink'] as const;
+export type ProjectColor = typeof PROJECT_COLORS[number];
 
 export const projectIdentifierSchema = z.object({
   id: z.string().uuid(),
-})
+});
 
 const projectBaseSchema = z.object({
   name: z
@@ -39,11 +39,11 @@ const projectBaseSchema = z.object({
     .nullable()
     .optional(),
   isActive: z.boolean().optional(),
-})
+});
 
 export const projectCreateSchema = projectBaseSchema.extend({
   expectedDailyStints: projectBaseSchema.shape.expectedDailyStints.default(2),
-})
+});
 
 export const projectUpdateSchema = projectBaseSchema.partial({
   name: true,
@@ -51,17 +51,17 @@ export const projectUpdateSchema = projectBaseSchema.partial({
   customStintDuration: true,
   colorTag: true,
   isActive: true,
-})
+});
 
-export type ProjectCreatePayload = z.infer<typeof projectCreateSchema>
-export type ProjectUpdatePayload = z.infer<typeof projectUpdateSchema>
-export type ProjectIdentifier = z.infer<typeof projectIdentifierSchema>
+export type ProjectCreatePayload = z.infer<typeof projectCreateSchema>;
+export type ProjectUpdatePayload = z.infer<typeof projectUpdateSchema>;
+export type ProjectIdentifier = z.infer<typeof projectIdentifierSchema>;
 
 export const projectListFiltersSchema = z.object({
   includeInactive: z.boolean().optional(),
-})
+});
 
-export type ProjectListFilters = z.infer<typeof projectListFiltersSchema>
+export type ProjectListFilters = z.infer<typeof projectListFiltersSchema>;
 
 export const PROJECT_SCHEMA_LIMITS = {
   NAME_MIN: PROJECT_NAME_MIN_LENGTH,
@@ -70,4 +70,4 @@ export const PROJECT_SCHEMA_LIMITS = {
   DAILY_STINTS_MAX,
   CUSTOM_DURATION_MIN_MINUTES,
   CUSTOM_DURATION_MAX_MINUTES,
-} as const
+} as const;

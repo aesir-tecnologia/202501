@@ -135,22 +135,22 @@
 </template>
 
 <script setup lang="ts">
-import { z } from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
+import { z } from 'zod';
+import type { FormSubmitEvent } from '@nuxt/ui';
 
 // Page meta
 definePageMeta({
   layout: false,
-})
+});
 
 // SEO
 useSeoMeta({
   title: 'Reset Password - LifeStint',
   description: 'Set your new LifeStint account password.',
-})
+});
 
 // Password validation regex ensures length and required character sets
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 // Form validation schema
 const resetPasswordSchema = z.object({
@@ -164,108 +164,108 @@ const resetPasswordSchema = z.object({
     message: 'Passwords don\'t match',
     path: ['confirmPassword'],
   },
-)
+);
 
-type ResetPasswordSchema = z.output<typeof resetPasswordSchema>
+type ResetPasswordSchema = z.output<typeof resetPasswordSchema>;
 
 // Form state
 const state = reactive<ResetPasswordSchema>({
   password: '',
   confirmPassword: '',
-})
+});
 
 // UI state
-const loading = ref(false)
-const error = ref('')
-const success = ref('')
-const successDescription = ref('')
+const loading = ref(false);
+const error = ref('');
+const success = ref('');
+const successDescription = ref('');
 
 // Supabase client
-const supabase = useSupabaseClient()
+const supabase = useSupabaseClient();
 
 // Check if user has valid session for password reset (client-side only for SSG)
-const hasValidSession = ref(false)
-const sessionChecked = ref(false)
+const hasValidSession = ref(false);
+const sessionChecked = ref(false);
 
 // Check session on client-side only
 onMounted(async () => {
   try {
-    const { data: session } = await supabase.auth.getSession()
-    hasValidSession.value = Boolean(session?.session)
+    const { data: session } = await supabase.auth.getSession();
+    hasValidSession.value = Boolean(session?.session);
 
     if (!hasValidSession.value) {
-      error.value = 'Invalid or expired reset link. Please request a new password reset.'
+      error.value = 'Invalid or expired reset link. Please request a new password reset.';
     }
   }
   catch (err) {
-    console.error('Session check error:', err)
-    error.value = 'Unable to verify reset session. Please try again.'
+    console.error('Session check error:', err);
+    error.value = 'Unable to verify reset session. Please try again.';
   }
   finally {
-    sessionChecked.value = true
+    sessionChecked.value = true;
   }
-})
+});
 
 // Handle form submission
 async function handleResetPassword(event: FormSubmitEvent<ResetPasswordSchema>) {
-  loading.value = true
-  error.value = ''
-  success.value = ''
-  successDescription.value = ''
+  loading.value = true;
+  error.value = '';
+  success.value = '';
+  successDescription.value = '';
 
   try {
     const { error: updateError } = await supabase.auth.updateUser({
       password: event.data.password,
-    })
+    });
 
     if (updateError) {
-      throw updateError
+      throw updateError;
     }
 
-    success.value = 'Password updated successfully!'
-    successDescription.value = 'Your password has been updated. You can now sign in with your new password.'
+    success.value = 'Password updated successfully!';
+    successDescription.value = 'Your password has been updated. You can now sign in with your new password.';
 
     // Clear the form
-    state.password = ''
-    state.confirmPassword = ''
+    state.password = '';
+    state.confirmPassword = '';
 
     // Redirect to login after success
     setTimeout(() => {
-      navigateTo('/auth/login')
-    }, 3000)
+      navigateTo('/auth/login');
+    }, 3000);
   }
   catch (err: unknown) {
-    console.error('Reset password error:', err)
+    console.error('Reset password error:', err);
 
     // Handle specific error types
-    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorMessage = err instanceof Error ? err.message : String(err);
     switch (errorMessage) {
       case 'New password should be different from the old password.':
-        error.value = 'Your new password must be different from your current password.'
-        break
+        error.value = 'Your new password must be different from your current password.';
+        break;
       case 'Password should be at least 6 characters':
-        error.value = 'Password must be at least 6 characters long.'
-        break
+        error.value = 'Password must be at least 6 characters long.';
+        break;
       case 'Auth session missing!':
-        error.value = 'Your reset session has expired. Please request a new password reset.'
-        break
+        error.value = 'Your reset session has expired. Please request a new password reset.';
+        break;
       default:
-        error.value = errorMessage || 'An error occurred while updating your password. Please try again.'
+        error.value = errorMessage || 'An error occurred while updating your password. Please try again.';
     }
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 // Clear messages when user starts typing
 watch(() => state.password, () => {
-  error.value = ''
-  success.value = ''
-})
+  error.value = '';
+  success.value = '';
+});
 
 watch(() => state.confirmPassword, () => {
-  error.value = ''
-  success.value = ''
-})
+  error.value = '';
+  success.value = '';
+});
 </script>

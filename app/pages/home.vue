@@ -1270,7 +1270,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue';
 
 // ============================================================================
 // Configuration Constants
@@ -1286,7 +1286,7 @@ const ANIMATION_CONFIG = {
   FLOATING_SELECTOR: '.floating',
   TRIGGER_CLASS: 'animate-in',
   FLOAT_CLASS: 'animate-float',
-} as const
+} as const;
 
 // ============================================================================
 // Page Configuration
@@ -1294,7 +1294,7 @@ const ANIMATION_CONFIG = {
 
 definePageMeta({
   layout: false,
-})
+});
 
 // SEO
 useSeoMeta({
@@ -1303,24 +1303,24 @@ useSeoMeta({
   ogTitle: 'LifeStint - Professional Focus Tracking for Consultants',
   ogDescription: 'Single active stint enforcement prevents multitasking. Export professional Focus Ledgers that demonstrate work quality without surveillance metrics.',
   twitterCard: 'summary_large_image',
-})
+});
 
 // ============================================================================
 // State & Initialization
 // ============================================================================
 
 // Auth user with error handling
-let user = null
+let user = null;
 try {
-  user = useAuthUser()
+  user = useAuthUser();
 }
 catch (error) {
-  console.error('Failed to initialize auth:', error)
+  console.error('Failed to initialize auth:', error);
   // User remains null, auth-dependent features will handle gracefully
 }
 
 // Intersection Observer for scroll animations
-let observer: IntersectionObserver | null = null
+let observer: IntersectionObserver | null = null;
 
 // ============================================================================
 // Lifecycle Hooks
@@ -1331,38 +1331,38 @@ onMounted(() => {
   const observerOptions: IntersectionObserverInit = {
     threshold: ANIMATION_CONFIG.OBSERVER_THRESHOLD,
     rootMargin: ANIMATION_CONFIG.OBSERVER_ROOT_MARGIN,
-  }
+  };
 
   observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add(ANIMATION_CONFIG.TRIGGER_CLASS)
+        entry.target.classList.add(ANIMATION_CONFIG.TRIGGER_CLASS);
         // Optionally unobserve after animation triggers (performance optimization)
         // observer?.unobserve(entry.target)
       }
-    })
-  }, observerOptions)
+    });
+  }, observerOptions);
 
   // Observe all animated elements
-  const animatedElements = document.querySelectorAll(ANIMATION_CONFIG.ANIMATED_SELECTORS)
+  const animatedElements = document.querySelectorAll(ANIMATION_CONFIG.ANIMATED_SELECTORS);
   animatedElements.forEach((el) => {
-    observer?.observe(el)
-  })
+    observer?.observe(el);
+  });
 
   // Initialize floating animations
-  const floatingElements = document.querySelectorAll(ANIMATION_CONFIG.FLOATING_SELECTOR)
+  const floatingElements = document.querySelectorAll(ANIMATION_CONFIG.FLOATING_SELECTOR);
   floatingElements.forEach((el) => {
-    el.classList.add(ANIMATION_CONFIG.FLOAT_CLASS)
-  })
-})
+    el.classList.add(ANIMATION_CONFIG.FLOAT_CLASS);
+  });
+});
 
 onUnmounted(() => {
   // Cleanup: Disconnect observer to prevent memory leaks
   if (observer) {
-    observer.disconnect()
-    observer = null
+    observer.disconnect();
+    observer = null;
   }
-})
+});
 </script>
 
 <style>

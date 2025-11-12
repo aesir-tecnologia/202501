@@ -106,4 +106,4 @@ export default defineNuxtConfig({
       cookieRedirect: false,
     },
   },
-})
+});

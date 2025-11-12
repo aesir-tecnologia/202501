@@ -1,8 +1,8 @@
-import { VueQueryPlugin, QueryClient } from '@tanstack/vue-query'
+import { VueQueryPlugin, QueryClient } from '@tanstack/vue-query';
 
 export default defineNuxtPlugin((nuxtApp) => {
   // Only initialize on client side (SSG consideration)
-  if (import.meta.server) return
+  if (import.meta.server) return;
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -14,19 +14,19 @@ export default defineNuxtPlugin((nuxtApp) => {
       },
       mutations: {
         onError: (error) => {
-          console.error('Mutation error:', error)
+          console.error('Mutation error:', error);
           // Component-level error handling is preferred for custom messages
         },
       },
     },
-  })
+  });
 
-  nuxtApp.vueApp.use(VueQueryPlugin, { queryClient })
+  nuxtApp.vueApp.use(VueQueryPlugin, { queryClient });
 
   // Install devtools in development mode
   if (import.meta.dev) {
     import('@tanstack/vue-query-devtools').then(({ VueQueryDevtools }) => {
-      nuxtApp.vueApp.component('VueQueryDevtools', VueQueryDevtools)
-    })
+      nuxtApp.vueApp.component('VueQueryDevtools', VueQueryDevtools);
+    });
   }
-})
+});

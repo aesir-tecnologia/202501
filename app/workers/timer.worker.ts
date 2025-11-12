@@ -5,10 +5,10 @@
  */
 
 // Worker state
-let intervalId: ReturnType<typeof setInterval> | null = null
-let endTime: number | null = null
-let _stintId: string | null = null
-let isPaused = false
+let intervalId: ReturnType<typeof setInterval> | null = null;
+let endTime: number | null = null;
+let _stintId: string | null = null;
+let isPaused = false;
 
 // Message types from main thread
 type IncomingMessage
@@ -16,13 +16,13 @@ type IncomingMessage
     | { type: 'pause' }
     | { type: 'resume', endTime: number }
     | { type: 'stop' }
-    | { type: 'sync', serverSecondsRemaining: number }
+    | { type: 'sync', serverSecondsRemaining: number };
 
 // Message types to main thread
 type OutgoingMessage
   = | { type: 'tick', secondsRemaining: number }
     | { type: 'complete' }
-    | { type: 'error', message: string }
+    | { type: 'error', message: string };
 
 /**
  * Start the countdown timer
@@ -30,25 +30,25 @@ type OutgoingMessage
 function startTimer(newEndTime: number, newStintId: string): void {
   // Clean up existing timer if any
   if (intervalId) {
-    clearInterval(intervalId)
+    clearInterval(intervalId);
   }
 
-  endTime = newEndTime
-  _stintId = newStintId
-  isPaused = false
+  endTime = newEndTime;
+  _stintId = newStintId;
+  isPaused = false;
 
   // Start interval - tick every second
-  intervalId = setInterval(tick, 1000)
+  intervalId = setInterval(tick, 1000);
 
   // Immediate first tick for instant UI feedback
-  tick()
+  tick();
 }
 
 /**
  * Pause the timer (stop ticking)
  */
 function pauseTimer(): void {
-  isPaused = true
+  isPaused = true;
 }
 
 /**
@@ -56,11 +56,11 @@ function pauseTimer(): void {
  * The composable calculates the adjusted end time accounting for pause duration
  */
 function resumeTimer(newEndTime: number): void {
-  endTime = newEndTime
-  isPaused = false
+  endTime = newEndTime;
+  isPaused = false;
 
   // Immediate tick to update UI
-  tick()
+  tick();
 }
 
 /**
@@ -68,12 +68,12 @@ function resumeTimer(newEndTime: number): void {
  */
 function stopTimer(): void {
   if (intervalId) {
-    clearInterval(intervalId)
-    intervalId = null
+    clearInterval(intervalId);
+    intervalId = null;
   }
-  endTime = null
-  _stintId = null
-  isPaused = false
+  endTime = null;
+  _stintId = null;
+  isPaused = false;
 }
 
 /**
@@ -81,16 +81,16 @@ function stopTimer(): void {
  * Server provides authoritative remaining time
  */
 function syncWithServer(serverSecondsRemaining: number): void {
-  if (!endTime) return
+  if (!endTime) return;
 
   // Calculate new end time based on server's remaining time
-  const now = Date.now()
-  const newEndTime = now + serverSecondsRemaining * 1000
+  const now = Date.now();
+  const newEndTime = now + serverSecondsRemaining * 1000;
 
-  endTime = newEndTime
+  endTime = newEndTime;
 
   // Immediate tick to update UI with corrected time
-  tick()
+  tick();
 }
 
 /**
@@ -99,24 +99,24 @@ function syncWithServer(serverSecondsRemaining: number): void {
  */
 function tick(): void {
   // Don't tick if paused or no end time set
-  if (!endTime || isPaused) return
+  if (!endTime || isPaused) return;
 
-  const now = Date.now()
-  const msRemaining = endTime - now
-  const secondsRemaining = Math.max(0, Math.floor(msRemaining / 1000))
+  const now = Date.now();
+  const msRemaining = endTime - now;
+  const secondsRemaining = Math.max(0, Math.floor(msRemaining / 1000));
 
   // Post tick message to main thread
   const message: OutgoingMessage = {
     type: 'tick',
     secondsRemaining,
-  }
-  self.postMessage(message)
+  };
+  self.postMessage(message);
 
   // Check if timer completed
   if (secondsRemaining === 0) {
-    const completeMessage: OutgoingMessage = { type: 'complete' }
-    self.postMessage(completeMessage)
-    stopTimer()
+    const completeMessage: OutgoingMessage = { type: 'complete' };
+    self.postMessage(completeMessage);
+    stopTimer();
   }
 }
 
@@ -125,42 +125,42 @@ function tick(): void {
  */
 self.onmessage = (event: MessageEvent<IncomingMessage>) => {
   try {
-    const message = event.data
+    const message = event.data;
 
     switch (message.type) {
       case 'start':
-        startTimer(message.endTime, message.stintId)
-        break
+        startTimer(message.endTime, message.stintId);
+        break;
 
       case 'pause':
-        pauseTimer()
-        break
+        pauseTimer();
+        break;
 
       case 'resume':
-        resumeTimer(message.endTime)
-        break
+        resumeTimer(message.endTime);
+        break;
 
       case 'stop':
-        stopTimer()
-        break
+        stopTimer();
+        break;
 
       case 'sync':
-        syncWithServer(message.serverSecondsRemaining)
-        break
+        syncWithServer(message.serverSecondsRemaining);
+        break;
 
       default:
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        throw new Error(`Unknown message type: ${(message as any).type}`)
+        throw new Error(`Unknown message type: ${(message as any).type}`);
     }
   }
   catch (error) {
     const errorMessage: OutgoingMessage = {
       type: 'error',
       message: error instanceof Error ? error.message : 'Unknown error in timer worker',
-    }
-    self.postMessage(errorMessage)
+    };
+    self.postMessage(errorMessage);
   }
-}
+};
 
 /**
  * Handle worker errors
@@ -169,6 +169,6 @@ self.onerror = (error) => {
   const errorMessage: OutgoingMessage = {
     type: 'error',
     message: error.message || 'Worker error occurred',
-  }
-  self.postMessage(errorMessage)
-}
+  };
+  self.postMessage(errorMessage);
+};

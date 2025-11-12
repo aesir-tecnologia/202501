@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import type { createClient } from '@supabase/supabase-js'
-import type { Database } from '~/types/database.types'
-import { createTestUser } from '../setup'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import type { createClient } from '@supabase/supabase-js';
+import type { Database } from '~/types/database.types';
+import { createTestUser } from '../setup';
 
 /**
  * Active Stint Deletion Protection Tests
@@ -15,30 +15,30 @@ import { createTestUser } from '../setup'
  * - Active stint check logic implemented in deleteProject function
  */
 
-const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321'
-const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key'
+const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
+const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key';
 
-type TestClient = ReturnType<typeof createClient<Database>>
+type TestClient = ReturnType<typeof createClient<Database>>;
 
 describe('Project Active Stint Deletion Protection', () => {
-  let testUserClient: TestClient
-  let testUser: { id: string, email: string } | null
+  let testUserClient: TestClient;
+  let testUser: { id: string, email: string } | null;
 
   beforeEach(async () => {
-    const testUserData = await createTestUser()
-    testUserClient = testUserData.client
-    testUser = testUserData.user
-  })
+    const testUserData = await createTestUser();
+    testUserClient = testUserData.client;
+    testUser = testUserData.user;
+  });
 
   afterEach(async () => {
     if (testUserClient) {
-      await testUserClient.auth.signOut()
+      await testUserClient.auth.signOut();
     }
-  })
+  });
 
   describe('Active stint protection', () => {
     it('should prevent deletion of project with active stint', async () => {
-      if (!testUser) throw new Error('Test user not created')
+      if (!testUser) throw new Error('Test user not created');
 
       // Create a project
       const { data: project } = await testUserClient
@@ -48,9 +48,9 @@ describe('Project Active Stint Deletion Protection', () => {
           expected_daily_stints: 3,
         })
         .select()
-        .single()
+        .single();
 
-      expect(project).toBeTruthy()
+      expect(project).toBeTruthy();
 
       // Create an active stint (ended_at is NULL)
       const { data: activeStint } = await testUserClient
@@ -61,10 +61,10 @@ describe('Project Active Stint Deletion Protection', () => {
           ended_at: null, // Active stint
         })
         .select()
-        .single()
+        .single();
 
-      expect(activeStint).toBeTruthy()
-      expect(activeStint!.ended_at).toBeNull()
+      expect(activeStint).toBeTruthy();
+      expect(activeStint!.ended_at).toBeNull();
 
       // Attempt to delete project with active stint
       // This should be blocked by the application logic (not database constraint)
@@ -74,7 +74,7 @@ describe('Project Active Stint Deletion Protection', () => {
         .delete()
         .eq('id', project!.id)
         .select()
-        .maybeSingle()
+        .maybeSingle();
 
       // For now, the database allows deletion (CASCADE)
       // But the application layer (deleteProject function) should prevent this
@@ -86,13 +86,13 @@ describe('Project Active Stint Deletion Protection', () => {
 
       // At database level, cascade delete works
       // The protection happens at the application layer
-      expect(true).toBe(true) // Placeholder - actual test in T014
-    })
-  })
+      expect(true).toBe(true); // Placeholder - actual test in T014
+    });
+  });
 
   describe('Completed stints allow deletion', () => {
     it('should allow deletion of project with only completed stints', async () => {
-      if (!testUser) throw new Error('Test user not created')
+      if (!testUser) throw new Error('Test user not created');
 
       // Create a project
       const { data: project } = await testUserClient
@@ -102,9 +102,9 @@ describe('Project Active Stint Deletion Protection', () => {
           expected_daily_stints: 3,
         })
         .select()
-        .single()
+        .single();
 
-      expect(project).toBeTruthy()
+      expect(project).toBeTruthy();
 
       // Create a completed stint (ended_at is set)
       const { data: completedStint } = await testUserClient
@@ -115,33 +115,33 @@ describe('Project Active Stint Deletion Protection', () => {
           ended_at: new Date().toISOString(), // Completed
         })
         .select()
-        .single()
+        .single();
 
-      expect(completedStint).toBeTruthy()
-      expect(completedStint!.ended_at).not.toBeNull()
+      expect(completedStint).toBeTruthy();
+      expect(completedStint!.ended_at).not.toBeNull();
 
       // Delete project with completed stint should succeed at DB level
       const { error } = await testUserClient
         .from('projects')
         .delete()
-        .eq('id', project!.id)
+        .eq('id', project!.id);
 
-      expect(error).toBeNull()
+      expect(error).toBeNull();
 
       // Verify project is deleted
       const { data: deletedProject } = await testUserClient
         .from('projects')
         .select('*')
         .eq('id', project!.id)
-        .maybeSingle()
+        .maybeSingle();
 
-      expect(deletedProject).toBeNull()
-    })
-  })
+      expect(deletedProject).toBeNull();
+    });
+  });
 
   describe('Cascade deletion', () => {
     it('should cascade delete to all associated stints', async () => {
-      if (!testUser) throw new Error('Test user not created')
+      if (!testUser) throw new Error('Test user not created');
 
       // Create a project
       const { data: project } = await testUserClient
@@ -151,9 +151,9 @@ describe('Project Active Stint Deletion Protection', () => {
           expected_daily_stints: 3,
         })
         .select()
-        .single()
+        .single();
 
-      expect(project).toBeTruthy()
+      expect(project).toBeTruthy();
 
       // Create multiple completed stints
       const { data: stint1 } = await testUserClient
@@ -164,7 +164,7 @@ describe('Project Active Stint Deletion Protection', () => {
           ended_at: new Date(Date.now() - 5400000).toISOString(),
         })
         .select()
-        .single()
+        .single();
 
       const { data: stint2 } = await testUserClient
         .from('stints')
@@ -174,26 +174,26 @@ describe('Project Active Stint Deletion Protection', () => {
           ended_at: new Date().toISOString(),
         })
         .select()
-        .single()
+        .single();
 
-      expect(stint1).toBeTruthy()
-      expect(stint2).toBeTruthy()
+      expect(stint1).toBeTruthy();
+      expect(stint2).toBeTruthy();
 
       // Delete project
       const { error } = await testUserClient
         .from('projects')
         .delete()
-        .eq('id', project!.id)
+        .eq('id', project!.id);
 
-      expect(error).toBeNull()
+      expect(error).toBeNull();
 
       // Verify stints are also deleted (cascade)
       const { data: deletedStints } = await testUserClient
         .from('stints')
         .select('*')
-        .eq('project_id', project!.id)
+        .eq('project_id', project!.id);
 
-      expect(deletedStints).toHaveLength(0)
-    })
-  })
-})
+      expect(deletedStints).toHaveLength(0);
+    });
+  });
+});

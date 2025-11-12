@@ -1,34 +1,34 @@
 <script setup lang="ts">
-import { useCreateProject } from '~/composables/useProjects'
-import type { ProjectColor } from '~/schemas/projects'
+import { useCreateProject } from '~/composables/useProjects';
+import type { ProjectColor } from '~/schemas/projects';
 
-const toast = useToast()
-const { mutateAsync: createProject, isPending } = useCreateProject()
+const toast = useToast();
+const { mutateAsync: createProject, isPending } = useCreateProject();
 
-const isOpen = defineModel<boolean>('open')
+const isOpen = defineModel<boolean>('open');
 
 function closeModal() {
-  isOpen.value = false
+  isOpen.value = false;
 }
 
 async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number, colorTag: ProjectColor | null }) {
   try {
-    await createProject(data)
+    await createProject(data);
 
     toast.add({
       title: 'Project created',
       description: `${data.name} has been created successfully`,
       color: 'success',
-    })
+    });
 
-    closeModal()
+    closeModal();
   }
   catch (error) {
     toast.add({
       title: 'Failed to create project',
       description: error instanceof Error ? error.message : 'An unexpected error occurred',
       color: 'error',
-    })
+    });
   }
 }
 </script>

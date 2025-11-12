@@ -162,21 +162,21 @@
 </template>
 
 <script setup lang="ts">
-import { z } from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
+import { z } from 'zod';
+import type { FormSubmitEvent } from '@nuxt/ui';
 
 definePageMeta({
   layout: false,
   middleware: 'guest',
-})
+});
 
 useSeoMeta({
   title: 'Sign Up - LifeStint',
   description: 'Create your LifeStint account to start tracking your focus sessions and boost your productivity.',
-})
+});
 
 // Password validation regex ensures length and required character sets
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 // Form validation schema
 const registerSchema = z.object({
@@ -200,9 +200,9 @@ const registerSchema = z.object({
     message: 'Passwords don\'t match',
     path: ['confirmPassword'],
   },
-)
+);
 
-type RegisterSchema = z.output<typeof registerSchema>
+type RegisterSchema = z.output<typeof registerSchema>;
 
 // Form state
 const state = reactive<RegisterSchema>({
@@ -212,31 +212,31 @@ const state = reactive<RegisterSchema>({
   confirmPassword: '',
   acceptTerms: false,
   emailNotifications: true,
-})
+});
 
 // UI state
-const loading = ref(false)
-const error = ref('')
-const success = ref('')
-const successDescription = ref('')
+const loading = ref(false);
+const error = ref('');
+const success = ref('');
+const successDescription = ref('');
 
 // Supabase client
-const supabase = useSupabaseClient()
-const user = useAuthUser()
+const supabase = useSupabaseClient();
+const user = useAuthUser();
 
 // Redirect if already logged in
 watch(user, (newUser) => {
   if (newUser) {
-    navigateTo('/')
+    navigateTo('/');
   }
-})
+});
 
 // Handle form submission
 async function handleRegister(event: FormSubmitEvent<RegisterSchema>) {
-  loading.value = true
-  error.value = ''
-  success.value = ''
-  successDescription.value = ''
+  loading.value = true;
+  error.value = '';
+  success.value = '';
+  successDescription.value = '';
 
   try {
     const { data, error: authError } = await supabase.auth.signUp({
@@ -249,74 +249,74 @@ async function handleRegister(event: FormSubmitEvent<RegisterSchema>) {
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
-    })
+    });
 
     if (authError) {
-      throw authError
+      throw authError;
     }
 
     if (data.user) {
       // Check if email is confirmed by looking at the user state
       // Note: Need to check Supabase user directly as useAuthUser transforms it
-      const supabaseUserDirect = useSupabaseUser()
+      const supabaseUserDirect = useSupabaseUser();
       if (supabaseUserDirect.value?.email_confirmed_at) {
         // Auto-confirmed (development mode)
-        success.value = 'Account created successfully!'
-        successDescription.value = 'You are now signed in. Redirecting to dashboard...'
+        success.value = 'Account created successfully!';
+        successDescription.value = 'You are now signed in. Redirecting to dashboard...';
 
         setTimeout(() => {
-          navigateTo('/')
-        }, 2000)
+          navigateTo('/');
+        }, 2000);
       }
       else {
         // Email confirmation required - redirect to verification page
         navigateTo({
           path: '/auth/verify-email',
           query: { email: event.data.email },
-        })
+        });
       }
     }
   }
   catch (err: unknown) {
-    console.error('Registration error:', err)
+    console.error('Registration error:', err);
 
     // Handle specific error types
-    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorMessage = err instanceof Error ? err.message : String(err);
     switch (errorMessage) {
       case 'User already registered':
-        error.value = 'An account with this email already exists. Please sign in instead.'
-        break
+        error.value = 'An account with this email already exists. Please sign in instead.';
+        break;
       case 'Password should be at least 6 characters':
-        error.value = 'Password must be at least 6 characters long.'
-        break
+        error.value = 'Password must be at least 6 characters long.';
+        break;
       case 'Signup is disabled':
-        error.value = 'Account registration is currently disabled. Please contact support.'
-        break
+        error.value = 'Account registration is currently disabled. Please contact support.';
+        break;
       case 'Invalid email':
-        error.value = 'Please enter a valid email address.'
-        break
+        error.value = 'Please enter a valid email address.';
+        break;
       default:
-        error.value = errorMessage || 'An unexpected error occurred during registration. Please try again.'
+        error.value = errorMessage || 'An unexpected error occurred during registration. Please try again.';
     }
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 // Clear messages when user starts typing
 watch(() => state.email, () => {
-  error.value = ''
-  success.value = ''
-})
+  error.value = '';
+  success.value = '';
+});
 
 watch(() => state.password, () => {
-  error.value = ''
-  success.value = ''
-})
+  error.value = '';
+  success.value = '';
+});
 
 watch(() => state.confirmPassword, () => {
-  error.value = ''
-  success.value = ''
-})
+  error.value = '';
+  success.value = '';
+});
 </script>

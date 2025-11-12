@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
-import type { UseQueryReturnType, UseMutationReturnType } from '@tanstack/vue-query'
-import type { TypedSupabaseClient } from '~/utils/supabase'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
+import type { UseQueryReturnType, UseMutationReturnType } from '@tanstack/vue-query';
+import type { TypedSupabaseClient } from '~/utils/supabase';
 import {
   listStints,
   getStintById,
@@ -15,7 +15,7 @@ import {
   type StintRow,
   type CreateStintPayload as DbCreateStintPayload,
   type UpdateStintPayload as DbUpdateStintPayload,
-} from '~/lib/supabase/stints'
+} from '~/lib/supabase/stints';
 import {
   stintStartSchema,
   stintUpdateSchema,
@@ -29,7 +29,7 @@ import {
   type StintCompletionPayload,
   type StintStartEnhancedPayload,
   type StintInterruptPayload,
-} from '~/schemas/stints'
+} from '~/schemas/stints';
 
 // ============================================================================
 // Query Key Factory
@@ -42,7 +42,7 @@ export const stintKeys = {
   details: () => [...stintKeys.all, 'detail'] as const,
   detail: (id: string) => [...stintKeys.details(), id] as const,
   active: () => [...stintKeys.all, 'active'] as const,
-}
+};
 
 export interface StintListFilters {
   projectId?: string
@@ -53,65 +53,65 @@ export interface StintListFilters {
 // TypeScript Type Exports
 // ============================================================================
 
-export type StintsQueryResult = UseQueryReturnType<StintRow[], Error>
-export type StintQueryResult = UseQueryReturnType<StintRow | null, Error>
-export type ActiveStintQueryResult = UseQueryReturnType<StintRow | null, Error>
+export type StintsQueryResult = UseQueryReturnType<StintRow[], Error>;
+export type StintQueryResult = UseQueryReturnType<StintRow | null, Error>;
+export type ActiveStintQueryResult = UseQueryReturnType<StintRow | null, Error>;
 
 export type CreateStintMutation = UseMutationReturnType<
   StintRow,
   Error,
   StintStartPayload,
   unknown
->
+>;
 
 export type UpdateStintMutation = UseMutationReturnType<
   StintRow,
   Error,
   { id: string, data: StintUpdatePayload },
   unknown
->
+>;
 
 export type CompleteStintMutation = UseMutationReturnType<
   StintRow,
   Error,
   StintCompletionPayload,
   unknown
->
+>;
 
 export type DeleteStintMutation = UseMutationReturnType<
   void,
   Error,
   string,
   unknown
->
+>;
 
 export type PauseStintMutation = UseMutationReturnType<
   StintRow,
   Error,
   string,
   unknown
->
+>;
 
 export type ResumeStintMutation = UseMutationReturnType<
   StintRow,
   Error,
   string,
   unknown
->
+>;
 
 export type StartStintMutation = UseMutationReturnType<
   StintRow,
   Error,
   StintStartEnhancedPayload,
   unknown
->
+>;
 
 export type InterruptStintMutation = UseMutationReturnType<
   StintRow,
   Error,
   StintInterruptPayload,
   unknown
->
+>;
 
 // ============================================================================
 // Helper Functions
@@ -123,29 +123,29 @@ export type InterruptStintMutation = UseMutationReturnType<
 function toDbCreatePayload(payload: StintStartPayload): DbCreateStintPayload {
   const result: Record<string, unknown> = {
     project_id: payload.projectId,
-  }
+  };
 
   if (payload.startedAt !== undefined) {
-    result.started_at = payload.startedAt.toISOString()
+    result.started_at = payload.startedAt.toISOString();
   }
   if (payload.notes !== undefined) {
-    result.notes = payload.notes
+    result.notes = payload.notes;
   }
 
-  return result as DbCreateStintPayload
+  return result as DbCreateStintPayload;
 }
 
 /**
  * Transforms camelCase update payload to snake_case for database operations
  */
 function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
-  const result: Record<string, unknown> = {}
+  const result: Record<string, unknown> = {};
 
   if (payload.notes !== undefined) {
-    result.notes = payload.notes
+    result.notes = payload.notes;
   }
 
-  return result as DbUpdateStintPayload
+  return result as DbUpdateStintPayload;
 }
 
 // ============================================================================
@@ -163,16 +163,16 @@ function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
  * ```
  */
 export function useStintsQuery(filters?: StintListFilters) {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
 
   return useQuery({
     queryKey: stintKeys.list(filters),
     queryFn: async () => {
-      const { data, error } = await listStints(client, filters)
-      if (error) throw error
-      return data || []
+      const { data, error } = await listStints(client, filters);
+      if (error) throw error;
+      return data || [];
     },
-  })
+  });
 }
 
 /**
@@ -184,18 +184,18 @@ export function useStintsQuery(filters?: StintListFilters) {
  * ```
  */
 export function useStintQuery(id: MaybeRefOrGetter<string>) {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
-  const stintId = toValue(id)
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const stintId = toValue(id);
 
   return useQuery({
     queryKey: stintKeys.detail(stintId),
     queryFn: async () => {
-      const { data, error } = await getStintById(client, stintId)
-      if (error) throw error
-      return data
+      const { data, error } = await getStintById(client, stintId);
+      if (error) throw error;
+      return data;
     },
     enabled: !!stintId,
-  })
+  });
 }
 
 /**
@@ -207,16 +207,16 @@ export function useStintQuery(id: MaybeRefOrGetter<string>) {
  * ```
  */
 export function useActiveStintQuery() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
 
   return useQuery({
     queryKey: stintKeys.active(),
     queryFn: async () => {
-      const { data, error } = await getActiveStint(client)
-      if (error) throw error
-      return data
+      const { data, error } = await getActiveStint(client);
+      if (error) throw error;
+      return data;
     },
-  })
+  });
 }
 
 // ============================================================================
@@ -234,35 +234,35 @@ export function useActiveStintQuery() {
  * ```
  */
 export function useCreateStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
-  const queryClient = useQueryClient()
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (payload: StintStartPayload) => {
       // Validate input
-      const validation = stintStartSchema.safeParse(payload)
+      const validation = stintStartSchema.safeParse(payload);
       if (!validation.success) {
-        throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+        throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
       // Call database
-      const dbPayload = toDbCreatePayload(validation.data)
-      const { data, error } = await createStintDb(client, dbPayload)
+      const dbPayload = toDbCreatePayload(validation.data);
+      const { data, error } = await createStintDb(client, dbPayload);
 
       if (error || !data) {
-        throw error || new Error('Failed to create stint')
+        throw error || new Error('Failed to create stint');
       }
 
-      return data
+      return data;
     },
     onMutate: async (payload) => {
       // Cancel outgoing refetches for all list queries
-      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
-      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() });
 
       // Snapshot previous value (use list with undefined filters to match default query)
-      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
-      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
 
       // Optimistically update to the new value
       if (previousStints) {
@@ -283,33 +283,33 @@ export function useCreateStint() {
           notes: payload.notes || null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        }
+        };
 
         queryClient.setQueryData<StintRow[]>(
           stintKeys.list(undefined),
           [optimisticStint, ...previousStints],
-        )
+        );
 
         // Set as active stint
-        queryClient.setQueryData<StintRow | null>(stintKeys.active(), optimisticStint)
+        queryClient.setQueryData<StintRow | null>(stintKeys.active(), optimisticStint);
       }
 
-      return { previousStints, previousActiveStint }
+      return { previousStints, previousActiveStint };
     },
     onError: (_err, _payload, context) => {
       // Rollback to previous value on error
       if (context?.previousStints) {
-        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints);
       }
       if (context?.previousActiveStint !== undefined) {
-        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
     },
     onSuccess: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: stintKeys.all })
+      queryClient.invalidateQueries({ queryKey: stintKeys.all });
     },
-  })
+  });
 }
 
 /**
@@ -323,37 +323,37 @@ export function useCreateStint() {
  * ```
  */
 export function useUpdateStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
-  const queryClient = useQueryClient()
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string, data: StintUpdatePayload }) => {
       // Validate input
-      const validation = stintUpdateSchema.safeParse(data)
+      const validation = stintUpdateSchema.safeParse(data);
       if (!validation.success) {
-        throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+        throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
       // Call database
-      const dbPayload = toDbUpdatePayload(validation.data)
-      const { data: result, error } = await updateStintDb(client, id, dbPayload)
+      const dbPayload = toDbUpdatePayload(validation.data);
+      const { data: result, error } = await updateStintDb(client, id, dbPayload);
 
       if (error || !result) {
-        throw error || new Error('Failed to update stint')
+        throw error || new Error('Failed to update stint');
       }
 
-      return result
+      return result;
     },
     onMutate: async ({ id, data }) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
-      await queryClient.cancelQueries({ queryKey: stintKeys.detail(id) })
-      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: stintKeys.detail(id) });
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() });
 
       // Snapshot previous values
-      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
-      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(id))
-      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
+      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(id));
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
 
       // Optimistically update list
       if (previousStints) {
@@ -368,7 +368,7 @@ export function useUpdateStint() {
                 }
               : s,
           ),
-        )
+        );
       }
 
       // Optimistically update detail
@@ -377,7 +377,7 @@ export function useUpdateStint() {
           ...previousStint,
           notes: data.notes !== undefined ? data.notes : previousStint.notes,
           updated_at: new Date().toISOString(),
-        })
+        });
       }
 
       // Optimistically update active stint if it matches
@@ -386,30 +386,30 @@ export function useUpdateStint() {
           ...previousActiveStint,
           notes: data.notes !== undefined ? data.notes : previousActiveStint.notes,
           updated_at: new Date().toISOString(),
-        })
+        });
       }
 
-      return { previousStints, previousStint, previousActiveStint }
+      return { previousStints, previousStint, previousActiveStint };
     },
     onError: (_err, { id }, context) => {
       // Rollback on error
       if (context?.previousStints) {
-        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints);
       }
       if (context?.previousStint) {
-        queryClient.setQueryData(stintKeys.detail(id), context.previousStint)
+        queryClient.setQueryData(stintKeys.detail(id), context.previousStint);
       }
       if (context?.previousActiveStint !== undefined) {
-        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
     },
     onSuccess: (_data, { id }) => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: stintKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: stintKeys.detail(id) })
-      queryClient.invalidateQueries({ queryKey: stintKeys.active() })
+      queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: stintKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: stintKeys.active() });
     },
-  })
+  });
 }
 
 /**
@@ -423,15 +423,15 @@ export function useUpdateStint() {
  * ```
  */
 export function useCompleteStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
-  const queryClient = useQueryClient()
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (payload: StintCompletionPayload) => {
       // Validate input
-      const validation = stintCompletionSchema.safeParse(payload)
+      const validation = stintCompletionSchema.safeParse(payload);
       if (!validation.success) {
-        throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+        throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
       // Call database with completeStint RPC function
@@ -440,24 +440,24 @@ export function useCompleteStint() {
         payload.stintId,
         payload.completionType,
         payload.notes,
-      )
+      );
 
       if (error || !data) {
-        throw error || new Error('Failed to complete stint')
+        throw error || new Error('Failed to complete stint');
       }
 
-      return data
+      return data;
     },
     onMutate: async (payload) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
-      await queryClient.cancelQueries({ queryKey: stintKeys.detail(payload.stintId) })
-      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: stintKeys.detail(payload.stintId) });
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() });
 
       // Snapshot previous values
-      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
-      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(payload.stintId))
-      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
+      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(payload.stintId));
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
 
       // Optimistically update list
       if (previousStints) {
@@ -478,7 +478,7 @@ export function useCompleteStint() {
                 }
               : s,
           ),
-        )
+        );
       }
 
       // Optimistically update detail
@@ -493,35 +493,35 @@ export function useCompleteStint() {
           ended_at: new Date().toISOString(),
           notes: payload.notes !== undefined ? payload.notes : previousStint.notes,
           updated_at: new Date().toISOString(),
-        })
+        });
       }
 
       // Clear active stint (since it's being completed)
       if (previousActiveStint && previousActiveStint.id === payload.stintId) {
-        queryClient.setQueryData<StintRow | null>(stintKeys.active(), null)
+        queryClient.setQueryData<StintRow | null>(stintKeys.active(), null);
       }
 
-      return { previousStints, previousStint, previousActiveStint }
+      return { previousStints, previousStint, previousActiveStint };
     },
     onError: (_err, payload, context) => {
       // Rollback on error
       if (context?.previousStints) {
-        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints);
       }
       if (context?.previousStint) {
-        queryClient.setQueryData(stintKeys.detail(payload.stintId), context.previousStint)
+        queryClient.setQueryData(stintKeys.detail(payload.stintId), context.previousStint);
       }
       if (context?.previousActiveStint !== undefined) {
-        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
     },
     onSuccess: (_data, payload) => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: stintKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: stintKeys.detail(payload.stintId) })
-      queryClient.invalidateQueries({ queryKey: stintKeys.active() })
+      queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: stintKeys.detail(payload.stintId) });
+      queryClient.invalidateQueries({ queryKey: stintKeys.active() });
     },
-  })
+  });
 }
 
 /**
@@ -535,55 +535,55 @@ export function useCompleteStint() {
  * ```
  */
 export function useDeleteStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
-  const queryClient = useQueryClient()
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await deleteStintDb(client, id)
+      const { error } = await deleteStintDb(client, id);
 
       if (error) {
-        throw error
+        throw error;
       }
     },
     onMutate: async (id) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
-      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() });
 
       // Snapshot previous value
-      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
-      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
 
       // Optimistically remove from list
       if (previousStints) {
         queryClient.setQueryData<StintRow[]>(
           stintKeys.list(undefined),
           previousStints.filter(s => s.id !== id),
-        )
+        );
       }
 
       // Clear active stint if it matches the deleted stint
       if (previousActiveStint && previousActiveStint.id === id) {
-        queryClient.setQueryData<StintRow | null>(stintKeys.active(), null)
+        queryClient.setQueryData<StintRow | null>(stintKeys.active(), null);
       }
 
-      return { previousStints, previousActiveStint }
+      return { previousStints, previousActiveStint };
     },
     onError: (_err, _id, context) => {
       // Rollback on error
       if (context?.previousStints) {
-        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints);
       }
       if (context?.previousActiveStint !== undefined) {
-        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
     },
     onSuccess: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: stintKeys.all })
+      queryClient.invalidateQueries({ queryKey: stintKeys.all });
     },
-  })
+  });
 }
 
 /**
@@ -597,36 +597,36 @@ export function useDeleteStint() {
  * ```
  */
 export function usePauseStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
-  const queryClient = useQueryClient()
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (stintId: string) => {
       // Validate input
-      const validation = stintPauseSchema.safeParse({ stintId })
+      const validation = stintPauseSchema.safeParse({ stintId });
       if (!validation.success) {
-        throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+        throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
       // Call database
-      const { data, error } = await pauseStintDb(client, stintId)
+      const { data, error } = await pauseStintDb(client, stintId);
 
       if (error || !data) {
-        throw error || new Error('Failed to pause stint')
+        throw error || new Error('Failed to pause stint');
       }
 
-      return data
+      return data;
     },
     onMutate: async (stintId) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
-      await queryClient.cancelQueries({ queryKey: stintKeys.detail(stintId) })
-      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: stintKeys.detail(stintId) });
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() });
 
       // Snapshot previous values
-      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
-      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(stintId))
-      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
+      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(stintId));
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
 
       // Optimistically update list
       if (previousStints) {
@@ -642,7 +642,7 @@ export function usePauseStint() {
                 }
               : s,
           ),
-        )
+        );
       }
 
       // Optimistically update detail
@@ -652,7 +652,7 @@ export function usePauseStint() {
           status: 'paused' as const,
           paused_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        })
+        });
       }
 
       // Optimistically update active stint (keep it, just mark as paused)
@@ -662,30 +662,30 @@ export function usePauseStint() {
           status: 'paused' as const,
           paused_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        })
+        });
       }
 
-      return { previousStints, previousStint, previousActiveStint }
+      return { previousStints, previousStint, previousActiveStint };
     },
     onError: (_err, stintId, context) => {
       // Rollback on error
       if (context?.previousStints) {
-        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints);
       }
       if (context?.previousStint) {
-        queryClient.setQueryData(stintKeys.detail(stintId), context.previousStint)
+        queryClient.setQueryData(stintKeys.detail(stintId), context.previousStint);
       }
       if (context?.previousActiveStint !== undefined) {
-        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
     },
     onSuccess: (_data, stintId) => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: stintKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: stintKeys.detail(stintId) })
-      queryClient.invalidateQueries({ queryKey: stintKeys.active() })
+      queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: stintKeys.detail(stintId) });
+      queryClient.invalidateQueries({ queryKey: stintKeys.active() });
     },
-  })
+  });
 }
 
 /**
@@ -699,36 +699,36 @@ export function usePauseStint() {
  * ```
  */
 export function useResumeStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
-  const queryClient = useQueryClient()
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (stintId: string) => {
       // Validate input
-      const validation = stintResumeSchema.safeParse({ stintId })
+      const validation = stintResumeSchema.safeParse({ stintId });
       if (!validation.success) {
-        throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+        throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
       // Call database
-      const { data, error } = await resumeStintDb(client, stintId)
+      const { data, error } = await resumeStintDb(client, stintId);
 
       if (error || !data) {
-        throw error || new Error('Failed to resume stint')
+        throw error || new Error('Failed to resume stint');
       }
 
-      return data
+      return data;
     },
     onMutate: async (stintId) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
-      await queryClient.cancelQueries({ queryKey: stintKeys.detail(stintId) })
-      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: stintKeys.detail(stintId) });
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() });
 
       // Snapshot previous values
-      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
-      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(stintId))
-      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
+      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(stintId));
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
 
       // Optimistically update list
       if (previousStints) {
@@ -743,7 +743,7 @@ export function useResumeStint() {
                 }
               : s,
           ),
-        )
+        );
       }
 
       // Optimistically update detail
@@ -752,7 +752,7 @@ export function useResumeStint() {
           ...previousStint,
           status: 'active' as const,
           updated_at: new Date().toISOString(),
-        })
+        });
       }
 
       // Optimistically update active stint
@@ -761,30 +761,30 @@ export function useResumeStint() {
           ...previousActiveStint,
           status: 'active' as const,
           updated_at: new Date().toISOString(),
-        })
+        });
       }
 
-      return { previousStints, previousStint, previousActiveStint }
+      return { previousStints, previousStint, previousActiveStint };
     },
     onError: (_err, stintId, context) => {
       // Rollback on error
       if (context?.previousStints) {
-        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints);
       }
       if (context?.previousStint) {
-        queryClient.setQueryData(stintKeys.detail(stintId), context.previousStint)
+        queryClient.setQueryData(stintKeys.detail(stintId), context.previousStint);
       }
       if (context?.previousActiveStint !== undefined) {
-        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
     },
     onSuccess: (_data, stintId) => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: stintKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: stintKeys.detail(stintId) })
-      queryClient.invalidateQueries({ queryKey: stintKeys.active() })
+      queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: stintKeys.detail(stintId) });
+      queryClient.invalidateQueries({ queryKey: stintKeys.active() });
     },
-  })
+  });
 }
 
 /**
@@ -806,15 +806,15 @@ export function useResumeStint() {
  * ```
  */
 export function useStartStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
-  const queryClient = useQueryClient()
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (payload: StintStartEnhancedPayload) => {
       // Validate input
-      const validation = stintStartEnhancedSchema.safeParse(payload)
+      const validation = stintStartEnhancedSchema.safeParse(payload);
       if (!validation.success) {
-        throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+        throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
       // Call database with enhanced start function (handles validation and conflicts)
@@ -823,31 +823,31 @@ export function useStartStint() {
         payload.projectId,
         payload.plannedDurationMinutes,
         payload.notes,
-      )
+      );
 
       // Check for conflict
       if (result.error && 'code' in result.error && result.error.code === 'CONFLICT') {
         // Throw error with conflict details for UI to handle
-        const error = new Error('Another stint is already active') as Error & { conflict: StintRow | null }
-        error.conflict = result.error.existingStint
-        throw error
+        const error = new Error('Another stint is already active') as Error & { conflict: StintRow | null };
+        error.conflict = result.error.existingStint;
+        throw error;
       }
 
-      const { data, error } = result
+      const { data, error } = result;
       if (error || !data) {
-        throw error || new Error('Failed to start stint')
+        throw error || new Error('Failed to start stint');
       }
 
-      return data
+      return data;
     },
     onMutate: async (payload) => {
       // Cancel outgoing refetches for all list queries
-      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
-      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() });
 
       // Snapshot previous value (use list with undefined filters to match default query)
-      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
-      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
 
       // Optimistically update to the new value
       if (previousStints) {
@@ -868,33 +868,33 @@ export function useStartStint() {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           is_completed: false,
-        }
+        };
 
         queryClient.setQueryData<StintRow[]>(
           stintKeys.list(undefined),
           [optimisticStint, ...previousStints],
-        )
+        );
 
         // Set as active stint
-        queryClient.setQueryData<StintRow | null>(stintKeys.active(), optimisticStint)
+        queryClient.setQueryData<StintRow | null>(stintKeys.active(), optimisticStint);
       }
 
-      return { previousStints, previousActiveStint }
+      return { previousStints, previousActiveStint };
     },
     onError: (_err, _payload, context) => {
       // Rollback to previous value on error (including conflicts)
       if (context?.previousStints) {
-        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints);
       }
       if (context?.previousActiveStint !== undefined) {
-        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
     },
     onSuccess: () => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: stintKeys.all })
+      queryClient.invalidateQueries({ queryKey: stintKeys.all });
     },
-  })
+  });
 }
 
 /**
@@ -909,15 +909,15 @@ export function useStartStint() {
  * ```
  */
 export function useInterruptStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient
-  const queryClient = useQueryClient()
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (payload: StintInterruptPayload) => {
       // Validate input
-      const validation = stintInterruptSchema.safeParse(payload)
+      const validation = stintInterruptSchema.safeParse(payload);
       if (!validation.success) {
-        throw new Error(validation.error.issues[0]?.message || 'Validation failed')
+        throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
       // Call database with completeStint using 'interrupted' type
@@ -926,24 +926,24 @@ export function useInterruptStint() {
         payload.stintId,
         'interrupted',
         payload.reason,
-      )
+      );
 
       if (error || !data) {
-        throw error || new Error('Failed to interrupt stint')
+        throw error || new Error('Failed to interrupt stint');
       }
 
-      return data
+      return data;
     },
     onMutate: async (payload) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: stintKeys.lists() })
-      await queryClient.cancelQueries({ queryKey: stintKeys.detail(payload.stintId) })
-      await queryClient.cancelQueries({ queryKey: stintKeys.active() })
+      await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: stintKeys.detail(payload.stintId) });
+      await queryClient.cancelQueries({ queryKey: stintKeys.active() });
 
       // Snapshot previous values
-      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined))
-      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(payload.stintId))
-      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active())
+      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
+      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(payload.stintId));
+      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
 
       // Optimistically update list
       if (previousStints) {
@@ -960,7 +960,7 @@ export function useInterruptStint() {
                 }
               : s,
           ),
-        )
+        );
       }
 
       // Optimistically update detail
@@ -971,33 +971,33 @@ export function useInterruptStint() {
           ended_at: new Date().toISOString(),
           notes: payload.reason || previousStint.notes,
           updated_at: new Date().toISOString(),
-        })
+        });
       }
 
       // Clear active stint (since it's being interrupted)
       if (previousActiveStint && previousActiveStint.id === payload.stintId) {
-        queryClient.setQueryData<StintRow | null>(stintKeys.active(), null)
+        queryClient.setQueryData<StintRow | null>(stintKeys.active(), null);
       }
 
-      return { previousStints, previousStint, previousActiveStint }
+      return { previousStints, previousStint, previousActiveStint };
     },
     onError: (_err, payload, context) => {
       // Rollback on error
       if (context?.previousStints) {
-        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints)
+        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints);
       }
       if (context?.previousStint) {
-        queryClient.setQueryData(stintKeys.detail(payload.stintId), context.previousStint)
+        queryClient.setQueryData(stintKeys.detail(payload.stintId), context.previousStint);
       }
       if (context?.previousActiveStint !== undefined) {
-        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint)
+        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
     },
     onSuccess: (_data, payload) => {
       // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: stintKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: stintKeys.detail(payload.stintId) })
-      queryClient.invalidateQueries({ queryKey: stintKeys.active() })
+      queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: stintKeys.detail(payload.stintId) });
+      queryClient.invalidateQueries({ queryKey: stintKeys.active() });
     },
-  })
+  });
 }

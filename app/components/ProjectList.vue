@@ -1,44 +1,44 @@
 <script setup lang="ts">
-import { useSortable } from '@vueuse/integrations/useSortable'
-import type { ProjectRow } from '~/lib/supabase/projects'
-import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects'
-import { useActiveStintQuery, useStartStint } from '~/composables/useStints'
-import type { StintRow } from '~/lib/supabase/stints'
-import StintTimer from './StintTimer.vue'
-import StintControls from './StintControls.vue'
+import { useSortable } from '@vueuse/integrations/useSortable';
+import type { ProjectRow } from '~/lib/supabase/projects';
+import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
+import { useActiveStintQuery, useStartStint } from '~/composables/useStints';
+import type { StintRow } from '~/lib/supabase/stints';
+import StintTimer from './StintTimer.vue';
+import StintControls from './StintControls.vue';
 
 const props = defineProps<{
   projects: ProjectRow[]
-}>()
+}>();
 
 const emit = defineEmits<{
   edit: [project: ProjectRow]
-}>()
+}>();
 
-const toast = useToast()
-const { mutate: reorderProjects, isError, error } = useReorderProjects()
-const { mutateAsync: toggleActive } = useToggleProjectActive()
-const togglingProjectId = ref<string | null>(null)
+const toast = useToast();
+const { mutate: reorderProjects, isError, error } = useReorderProjects();
+const { mutateAsync: toggleActive } = useToggleProjectActive();
+const togglingProjectId = ref<string | null>(null);
 
-const activeListRef = ref<HTMLElement | null>(null)
-const localProjects = ref<ProjectRow[]>([...props.projects])
-const isDragging = ref(false)
-const showInactiveProjects = ref(false)
+const activeListRef = ref<HTMLElement | null>(null);
+const localProjects = ref<ProjectRow[]>([...props.projects]);
+const isDragging = ref(false);
+const showInactiveProjects = ref(false);
 
 // Stint management
-const { data: activeStint } = useActiveStintQuery()
-const { mutateAsync: startStint, isPending: isStarting } = useStartStint()
+const { data: activeStint } = useActiveStintQuery();
+const { mutateAsync: startStint, isPending: isStarting } = useStartStint();
 
 // Separate active and inactive projects
-const activeProjects = computed(() => localProjects.value.filter(p => p.is_active))
-const inactiveProjects = computed(() => localProjects.value.filter(p => !p.is_active))
+const activeProjects = computed(() => localProjects.value.filter(p => p.is_active));
+const inactiveProjects = computed(() => localProjects.value.filter(p => !p.is_active));
 
 // Update local projects when props change (but not during drag)
 watch(() => props.projects, (newProjects) => {
   if (!isDragging.value) {
-    localProjects.value = [...newProjects]
+    localProjects.value = [...newProjects];
   }
-}, { deep: true })
+}, { deep: true });
 
 // Show error toast when reorder fails
 watch(isError, (hasError) => {
@@ -47,81 +47,81 @@ watch(isError, (hasError) => {
       title: 'Failed to reorder projects',
       description: error.value.message || 'An unexpected error occurred',
       color: 'error',
-    })
+    });
   }
-})
+});
 
 // Setup drag-and-drop for active projects only
 useSortable(activeListRef, activeProjects, {
   animation: 150,
   handle: '.drag-handle',
   onStart: () => {
-    isDragging.value = true
+    isDragging.value = true;
   },
   onEnd: (evt: { oldIndex?: number, newIndex?: number }) => {
     // Manually update the array based on the drag event
     if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
-      const newOrder = [...activeProjects.value]
-      const [movedItem] = newOrder.splice(evt.oldIndex, 1)
+      const newOrder = [...activeProjects.value];
+      const [movedItem] = newOrder.splice(evt.oldIndex, 1);
 
       if (movedItem) {
-        newOrder.splice(evt.newIndex, 0, movedItem)
+        newOrder.splice(evt.newIndex, 0, movedItem);
 
         // Combine with inactive projects to maintain complete list
-        const completeOrder = [...newOrder, ...inactiveProjects.value]
-        localProjects.value = completeOrder
+        const completeOrder = [...newOrder, ...inactiveProjects.value];
+        localProjects.value = completeOrder;
 
-        isDragging.value = false
+        isDragging.value = false;
         // Reorder projects based on new order (debounced mutation)
-        reorderProjects(completeOrder)
+        reorderProjects(completeOrder);
       }
       else {
-        isDragging.value = false
+        isDragging.value = false;
       }
     }
     else {
-      isDragging.value = false
+      isDragging.value = false;
     }
   },
-})
+});
 
 function handleEdit(project: ProjectRow) {
-  emit('edit', project)
+  emit('edit', project);
 }
 
 async function handleToggleActive(project: ProjectRow) {
-  togglingProjectId.value = project.id
+  togglingProjectId.value = project.id;
   try {
-    await toggleActive(project.id)
+    await toggleActive(project.id);
     toast.add({
       title: project.is_active ? 'Project deactivated' : 'Project activated',
       description: `${project.name} is now ${project.is_active ? 'inactive' : 'active'}`,
       color: 'success',
-    })
+    });
   }
   catch (error) {
     toast.add({
       title: 'Failed to toggle project status',
       description: error instanceof Error ? error.message : 'An unexpected error occurred',
       color: 'error',
-    })
+    });
   }
   finally {
-    togglingProjectId.value = null
+    togglingProjectId.value = null;
   }
 }
 
 function formatDuration(minutes: number | null) {
-  const duration = minutes ?? 45 // Default to 45 minutes if null
-  if (duration < 60) return `${duration}m`
-  const hours = Math.floor(duration / 60)
-  const mins = duration % 60
-  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+  const duration = minutes ?? 45; // Default to 45 minutes if null
+  if (duration < 60) return `${duration}m`;
+  const hours = Math.floor(duration / 60);
+  const mins = duration % 60;
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
 }
 
 // Get border color class for project color tag
 function getColorBorderClass(colorTag: string | null) {
-  if (!colorTag) return ''
+  if (!colorTag) return '';
 
   const colorMap: Record<string, string> = {
     red: 'border-l-red-500',
@@ -132,22 +132,22 @@ function getColorBorderClass(colorTag: string | null) {
     blue: 'border-l-blue-500',
     purple: 'border-l-purple-500',
     pink: 'border-l-pink-500',
-  }
+  };
 
-  return colorMap[colorTag] || ''
+  return colorMap[colorTag] || '';
 }
 
 // Check if a project has an active stint
 function isProjectActive(projectId: string): boolean {
-  return activeStint.value?.project_id === projectId
+  return activeStint.value?.project_id === projectId;
 }
 
 // Get the active stint for a specific project
 function projectActiveStint(projectId: string): StintRow | null {
   if (activeStint.value?.project_id === projectId) {
-    return activeStint.value
+    return activeStint.value;
   }
-  return null
+  return null;
 }
 
 // Handle starting a stint
@@ -156,14 +156,14 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
     await startStint({
       projectId: project.id,
       plannedDurationMinutes: project.custom_stint_duration ?? undefined,
-    })
+    });
 
     toast.add({
       title: 'Stint Started',
       description: `Started working on ${project.name}`,
       color: 'green',
       icon: 'i-lucide-play-circle',
-    })
+    });
   }
   catch (error) {
     toast.add({
@@ -171,7 +171,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
       description: error instanceof Error ? error.message : 'Could not start stint. Please try again.',
       color: 'red',
       icon: 'i-lucide-alert-circle',
-    })
+    });
   }
 }
 </script>

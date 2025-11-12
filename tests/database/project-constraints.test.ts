@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import type { createClient } from '@supabase/supabase-js'
-import type { Database } from '~/types/database.types'
-import { createTestUser } from '../setup'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import type { createClient } from '@supabase/supabase-js';
+import type { Database } from '~/types/database.types';
+import { createTestUser } from '../setup';
 
 /**
  * Database Constraint Tests for Project Management Feature
@@ -17,26 +17,26 @@ import { createTestUser } from '../setup'
  * - CHECK constraints on numeric fields
  */
 
-const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321'
-const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key'
+const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
+const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key';
 
-type TestClient = ReturnType<typeof createClient<Database>>
+type TestClient = ReturnType<typeof createClient<Database>>;
 
 describe('Project Database Constraints', () => {
-  let testUserClient: TestClient
-  let _testUser: { id: string, email: string } | null
+  let testUserClient: TestClient;
+  let _testUser: { id: string, email: string } | null;
 
   beforeEach(async () => {
-    const testUserData = await createTestUser()
-    testUserClient = testUserData.client
-    _testUser = testUserData.user
-  })
+    const testUserData = await createTestUser();
+    testUserClient = testUserData.client;
+    _testUser = testUserData.user;
+  });
 
   afterEach(async () => {
     if (testUserClient) {
-      await testUserClient.auth.signOut()
+      await testUserClient.auth.signOut();
     }
-  })
+  });
 
   describe('Duplicate project names (case-insensitive)', () => {
     it('should reject duplicate project names with same case', async () => {
@@ -48,10 +48,10 @@ describe('Project Database Constraints', () => {
           expected_daily_stints: 3,
         })
         .select()
-        .single()
+        .single();
 
-      expect(error1).toBeNull()
-      expect(project1).toBeTruthy()
+      expect(error1).toBeNull();
+      expect(project1).toBeTruthy();
 
       // Attempt to create second project with same name
       const { data: project2, error: error2 } = await testUserClient
@@ -61,13 +61,13 @@ describe('Project Database Constraints', () => {
           expected_daily_stints: 4,
         })
         .select()
-        .single()
+        .single();
 
       // Should fail with unique constraint violation (error code 23505)
-      expect(error2).toBeTruthy()
-      expect(error2?.code).toBe('23505')
-      expect(project2).toBeNull()
-    })
+      expect(error2).toBeTruthy();
+      expect(error2?.code).toBe('23505');
+      expect(project2).toBeNull();
+    });
 
     it('should reject duplicate project names with different case', async () => {
       // Create first project
@@ -78,10 +78,10 @@ describe('Project Database Constraints', () => {
           expected_daily_stints: 3,
         })
         .select()
-        .single()
+        .single();
 
-      expect(error1).toBeNull()
-      expect(project1).toBeTruthy()
+      expect(error1).toBeNull();
+      expect(project1).toBeTruthy();
 
       // Attempt to create second project with different case
       const { data: project2, error: error2 } = await testUserClient
@@ -91,13 +91,13 @@ describe('Project Database Constraints', () => {
           expected_daily_stints: 4,
         })
         .select()
-        .single()
+        .single();
 
       // Should fail with unique constraint violation (case-insensitive)
-      expect(error2).toBeTruthy()
-      expect(error2?.code).toBe('23505')
-      expect(project2).toBeNull()
-    })
+      expect(error2).toBeTruthy();
+      expect(error2?.code).toBe('23505');
+      expect(project2).toBeNull();
+    });
 
     it('should reject duplicate project names with mixed case', async () => {
       // Create first project
@@ -108,10 +108,10 @@ describe('Project Database Constraints', () => {
           expected_daily_stints: 3,
         })
         .select()
-        .single()
+        .single();
 
-      expect(error1).toBeNull()
-      expect(project1).toBeTruthy()
+      expect(error1).toBeNull();
+      expect(project1).toBeTruthy();
 
       // Attempt to create second project with mixed case
       const { data: project2, error: error2 } = await testUserClient
@@ -121,14 +121,14 @@ describe('Project Database Constraints', () => {
           expected_daily_stints: 4,
         })
         .select()
-        .single()
+        .single();
 
       // Should fail with unique constraint violation (case-insensitive)
-      expect(error2).toBeTruthy()
-      expect(error2?.code).toBe('23505')
-      expect(project2).toBeNull()
-    })
-  })
+      expect(error2).toBeTruthy();
+      expect(error2?.code).toBe('23505');
+      expect(project2).toBeNull();
+    });
+  });
 
   describe('Negative expected_daily_stints validation', () => {
     it('should reject negative expected_daily_stints', async () => {
@@ -140,14 +140,14 @@ describe('Project Database Constraints', () => {
           custom_stint_duration: 45,
         })
         .select()
-        .single()
+        .single();
 
       // Should fail with CHECK constraint violation (error code 23514)
-      expect(error).toBeTruthy()
-      expect(error?.code).toBe('23514')
-      expect(data).toBeNull()
-    })
-  })
+      expect(error).toBeTruthy();
+      expect(error?.code).toBe('23514');
+      expect(data).toBeNull();
+    });
+  });
 
   describe('Zero expected_daily_stints validation', () => {
     it('should reject zero expected_daily_stints', async () => {
@@ -159,14 +159,14 @@ describe('Project Database Constraints', () => {
           custom_stint_duration: 45,
         })
         .select()
-        .single()
+        .single();
 
       // Should fail with CHECK constraint violation
-      expect(error).toBeTruthy()
-      expect(error?.code).toBe('23514')
-      expect(data).toBeNull()
-    })
-  })
+      expect(error).toBeTruthy();
+      expect(error?.code).toBe('23514');
+      expect(data).toBeNull();
+    });
+  });
 
   describe('Negative custom_stint_duration validation', () => {
     it('should reject negative custom_stint_duration', async () => {
@@ -178,14 +178,14 @@ describe('Project Database Constraints', () => {
           custom_stint_duration: -5,
         })
         .select()
-        .single()
+        .single();
 
       // Should fail with CHECK constraint violation
-      expect(error).toBeTruthy()
-      expect(error?.code).toBe('23514')
-      expect(data).toBeNull()
-    })
-  })
+      expect(error).toBeTruthy();
+      expect(error?.code).toBe('23514');
+      expect(data).toBeNull();
+    });
+  });
 
   describe('Zero custom_stint_duration validation', () => {
     it('should reject zero custom_stint_duration', async () => {
@@ -197,14 +197,14 @@ describe('Project Database Constraints', () => {
           custom_stint_duration: 0,
         })
         .select()
-        .single()
+        .single();
 
       // Should fail with CHECK constraint violation
-      expect(error).toBeTruthy()
-      expect(error?.code).toBe('23514')
-      expect(data).toBeNull()
-    })
-  })
+      expect(error).toBeTruthy();
+      expect(error?.code).toBe('23514');
+      expect(data).toBeNull();
+    });
+  });
 
   describe('Valid values should pass', () => {
     it('should accept valid positive values', async () => {
@@ -216,14 +216,14 @@ describe('Project Database Constraints', () => {
           custom_stint_duration: 60,
         })
         .select()
-        .single()
+        .single();
 
-      expect(error).toBeNull()
-      expect(data).toBeTruthy()
-      expect(data!.name).toBe('Valid Project')
-      expect(data!.expected_daily_stints).toBe(5)
-      expect(data!.custom_stint_duration).toBe(60)
-    })
+      expect(error).toBeNull();
+      expect(data).toBeTruthy();
+      expect(data!.name).toBe('Valid Project');
+      expect(data!.expected_daily_stints).toBe(5);
+      expect(data!.custom_stint_duration).toBe(60);
+    });
 
     it('should accept minimum valid values (1)', async () => {
       const { data, error } = await testUserClient
@@ -234,12 +234,12 @@ describe('Project Database Constraints', () => {
           custom_stint_duration: 1,
         })
         .select()
-        .single()
+        .single();
 
-      expect(error).toBeNull()
-      expect(data).toBeTruthy()
-      expect(data!.expected_daily_stints).toBe(1)
-      expect(data!.custom_stint_duration).toBe(1)
-    })
-  })
-})
+      expect(error).toBeNull();
+      expect(data).toBeTruthy();
+      expect(data!.expected_daily_stints).toBe(1);
+      expect(data!.custom_stint_duration).toBe(1);
+    });
+  });
+});

@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { createClient } from '@supabase/supabase-js'
-import type { Database } from '~/types/database.types'
-import { getStintById, getActiveStint } from '~/lib/supabase/stints'
-import { createTestUser } from '../../setup'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '~/types/database.types';
+import { getStintById, getActiveStint } from '~/lib/supabase/stints';
+import { createTestUser } from '../../setup';
 
 /**
  * Contract Test: getStintById & getActiveStint
@@ -15,36 +15,36 @@ import { createTestUser } from '../../setup'
  * - getActiveStint: returns null when no active stint
  */
 
-const supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321'
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key'
+const supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key';
 
-type TestClient = ReturnType<typeof createClient<Database>>
+type TestClient = ReturnType<typeof createClient<Database>>;
 
 describe('getStintById Contract', () => {
-  let testUser1Client: TestClient
-  let testUser2Client: TestClient
-  let testUser1: { id: string, email: string } | null
-  let _testUser2: { id: string, email: string } | null
-  let projectId: string
-  let stintId: string
+  let testUser1Client: TestClient;
+  let testUser2Client: TestClient;
+  let testUser1: { id: string, email: string } | null;
+  let _testUser2: { id: string, email: string } | null;
+  let projectId: string;
+  let stintId: string;
 
   beforeEach(async () => {
-    const testUser1Data = await createTestUser()
-    testUser1Client = testUser1Data.client
-    testUser1 = testUser1Data.user
+    const testUser1Data = await createTestUser();
+    testUser1Client = testUser1Data.client;
+    testUser1 = testUser1Data.user;
 
-    const testUser2Data = await createTestUser()
-    testUser2Client = testUser2Data.client
-    _testUser2 = testUser2Data.user
+    const testUser2Data = await createTestUser();
+    testUser2Client = testUser2Data.client;
+    _testUser2 = testUser2Data.user;
 
     // Create test project for user 1
     const { data: project } = await testUser1Client
       .from('projects')
       .insert({ name: 'Test Project', expected_daily_stints: 3, user_id: testUser1!.id })
       .select()
-      .single()
+      .single();
 
-    projectId = project!.id
+    projectId = project!.id;
 
     // Create a test stint
     const { data: stint } = await testUser1Client
@@ -55,91 +55,91 @@ describe('getStintById Contract', () => {
         user_id: testUser1!.id,
       })
       .select()
-      .single()
+      .single();
 
-    stintId = stint!.id
-  })
+    stintId = stint!.id;
+  });
 
   afterEach(async () => {
-    if (testUser1Client) await testUser1Client.auth.signOut()
-    if (testUser2Client) await testUser2Client.auth.signOut()
-  })
+    if (testUser1Client) await testUser1Client.auth.signOut();
+    if (testUser2Client) await testUser2Client.auth.signOut();
+  });
 
   it('should fetch stint by ID successfully', async () => {
-    const { data, error } = await getStintById(testUser1Client, stintId)
+    const { data, error } = await getStintById(testUser1Client, stintId);
 
-    expect(error).toBeNull()
-    expect(data).toBeTruthy()
-    expect(data!.id).toBe(stintId)
-    expect(data!.project_id).toBe(projectId)
-    expect(data!.user_id).toBe(testUser1!.id)
-  })
+    expect(error).toBeNull();
+    expect(data).toBeTruthy();
+    expect(data!.id).toBe(stintId);
+    expect(data!.project_id).toBe(projectId);
+    expect(data!.user_id).toBe(testUser1!.id);
+  });
 
   it('should return null when stint not found', async () => {
-    const fakeStintId = '00000000-0000-0000-0000-000000000000'
+    const fakeStintId = '00000000-0000-0000-0000-000000000000';
 
-    const { data, error } = await getStintById(testUser1Client, fakeStintId)
+    const { data, error } = await getStintById(testUser1Client, fakeStintId);
 
-    expect(error).toBeNull()
-    expect(data).toBeNull()
-  })
+    expect(error).toBeNull();
+    expect(data).toBeNull();
+  });
 
   it('should prevent fetching other users\' stints (RLS)', async () => {
     // User 2 tries to fetch User 1's stint
-    const { data } = await getStintById(testUser2Client, stintId)
+    const { data } = await getStintById(testUser2Client, stintId);
 
     // RLS should prevent access, returning null (or potentially an error)
-    expect(data).toBeNull()
-  })
+    expect(data).toBeNull();
+  });
 
   it('should error if user not authenticated', async () => {
-    const unauthClient = createClient<Database>(supabaseUrl, supabaseAnonKey)
+    const unauthClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
-    const { data, error } = await getStintById(unauthClient, stintId)
+    const { data, error } = await getStintById(unauthClient, stintId);
 
-    expect(data).toBeNull()
-    expect(error).toBeTruthy()
-  })
+    expect(data).toBeNull();
+    expect(error).toBeTruthy();
+  });
 
   it('should return all stint fields', async () => {
-    const { data } = await getStintById(testUser1Client, stintId)
+    const { data } = await getStintById(testUser1Client, stintId);
 
-    expect(data).toHaveProperty('id')
-    expect(data).toHaveProperty('user_id')
-    expect(data).toHaveProperty('project_id')
-    expect(data).toHaveProperty('started_at')
-    expect(data).toHaveProperty('ended_at')
-    expect(data).toHaveProperty('duration_minutes')
-    expect(data).toHaveProperty('is_completed')
-    expect(data).toHaveProperty('notes')
-    expect(data).toHaveProperty('created_at')
-    expect(data).toHaveProperty('updated_at')
-  })
-})
+    expect(data).toHaveProperty('id');
+    expect(data).toHaveProperty('user_id');
+    expect(data).toHaveProperty('project_id');
+    expect(data).toHaveProperty('started_at');
+    expect(data).toHaveProperty('ended_at');
+    expect(data).toHaveProperty('duration_minutes');
+    expect(data).toHaveProperty('is_completed');
+    expect(data).toHaveProperty('notes');
+    expect(data).toHaveProperty('created_at');
+    expect(data).toHaveProperty('updated_at');
+  });
+});
 
 describe('getActiveStint Contract', () => {
-  let testUserClient: TestClient
-  let testUser: { id: string, email: string } | null
-  let projectId: string
+  let testUserClient: TestClient;
+  let testUser: { id: string, email: string } | null;
+  let projectId: string;
 
   beforeEach(async () => {
-    const testUserData = await createTestUser()
-    testUserClient = testUserData.client
-    testUser = testUserData.user
+    const testUserData = await createTestUser();
+    testUserClient = testUserData.client;
+    testUser = testUserData.user;
 
     // Create test project
     const { data: project } = await testUserClient
       .from('projects')
       .insert({ name: 'Test Project', expected_daily_stints: 3, user_id: testUser!.id })
       .select()
-      .single()
+      .single();
 
-    projectId = project!.id
-  })
+    projectId = project!.id;
+  });
 
   afterEach(async () => {
-    if (testUserClient) await testUserClient.auth.signOut()
-  })
+    if (testUserClient) await testUserClient.auth.signOut();
+  });
 
   it('should return active stint when one exists', async () => {
     // Create active stint (ended_at IS NULL)
@@ -153,26 +153,26 @@ describe('getActiveStint Contract', () => {
         user_id: testUser!.id,
       })
       .select()
-      .single()
+      .single();
 
-    const { data, error } = await getActiveStint(testUserClient)
+    const { data, error } = await getActiveStint(testUserClient);
 
-    expect(error).toBeNull()
-    expect(data).toBeTruthy()
-    expect(data!.id).toBe(activeStint!.id)
-    expect(data!.ended_at).toBeNull()
-    expect(data!.is_completed).toBe(false)
-  })
+    expect(error).toBeNull();
+    expect(data).toBeTruthy();
+    expect(data!.id).toBe(activeStint!.id);
+    expect(data!.ended_at).toBeNull();
+    expect(data!.is_completed).toBe(false);
+  });
 
   it('should return null when no active stint exists', async () => {
-    const { data, error } = await getActiveStint(testUserClient)
+    const { data, error } = await getActiveStint(testUserClient);
 
-    expect(error).toBeNull()
-    expect(data).toBeNull()
-  })
+    expect(error).toBeNull();
+    expect(data).toBeNull();
+  });
 
   it('should return null when only completed stints exist', async () => {
-    const now = new Date()
+    const now = new Date();
 
     // Create completed stint
     await testUserClient
@@ -183,16 +183,16 @@ describe('getActiveStint Contract', () => {
         ended_at: now.toISOString(),
         is_completed: true,
         user_id: testUser!.id,
-      })
+      });
 
-    const { data, error } = await getActiveStint(testUserClient)
+    const { data, error } = await getActiveStint(testUserClient);
 
-    expect(error).toBeNull()
-    expect(data).toBeNull()
-  })
+    expect(error).toBeNull();
+    expect(data).toBeNull();
+  });
 
   it('should only return stint where ended_at IS NULL', async () => {
-    const now = new Date()
+    const now = new Date();
 
     // Create completed stint
     await testUserClient
@@ -203,7 +203,7 @@ describe('getActiveStint Contract', () => {
         ended_at: new Date(now.getTime() - 5400000).toISOString(),
         is_completed: true,
         user_id: testUser!.id,
-      })
+      });
 
     // Create active stint
     const { data: activeStint } = await testUserClient
@@ -216,21 +216,21 @@ describe('getActiveStint Contract', () => {
         user_id: testUser!.id,
       })
       .select()
-      .single()
+      .single();
 
-    const { data } = await getActiveStint(testUserClient)
+    const { data } = await getActiveStint(testUserClient);
 
-    expect(data).toBeTruthy()
-    expect(data!.id).toBe(activeStint!.id)
-    expect(data!.ended_at).toBeNull()
-  })
+    expect(data).toBeTruthy();
+    expect(data!.id).toBe(activeStint!.id);
+    expect(data!.ended_at).toBeNull();
+  });
 
   it('should error if user not authenticated', async () => {
-    const unauthClient = createClient<Database>(supabaseUrl, supabaseAnonKey)
+    const unauthClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
-    const { data, error } = await getActiveStint(unauthClient)
+    const { data, error } = await getActiveStint(unauthClient);
 
-    expect(data).toBeNull()
-    expect(error).toBeTruthy()
-  })
-})
+    expect(data).toBeNull();
+    expect(error).toBeTruthy();
+  });
+});

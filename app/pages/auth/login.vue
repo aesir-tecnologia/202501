@@ -1,94 +1,94 @@
 <script setup lang="ts">
-import { z } from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
+import { z } from 'zod';
+import type { FormSubmitEvent } from '@nuxt/ui';
 
 definePageMeta({
   layout: false,
   middleware: 'guest',
-})
+});
 
 useSeoMeta({
   title: 'Sign In - LifeStint',
   description: 'Sign in to your LifeStint account to start tracking your focus sessions.',
-})
+});
 
-const appConfig = useAppConfig()
-const supabase = useSupabaseClient()
+const appConfig = useAppConfig();
+const supabase = useSupabaseClient();
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   remember: z.boolean().optional(),
-})
+});
 
-type LoginSchema = z.output<typeof loginSchema>
+type LoginSchema = z.output<typeof loginSchema>;
 
 const state = reactive<LoginSchema>({
   email: '',
   password: '',
   remember: false,
-})
+});
 
-const loading = ref(false)
-const error = ref('')
-const success = ref('')
+const loading = ref(false);
+const error = ref('');
+const success = ref('');
 
 async function handleLogin(event: FormSubmitEvent<LoginSchema>) {
-  loading.value = true
-  error.value = ''
-  success.value = ''
+  loading.value = true;
+  error.value = '';
+  success.value = '';
 
   try {
     const { data, error: authError } = await supabase.auth.signInWithPassword({
       email: event.data.email,
       password: event.data.password,
-    })
+    });
 
     if (authError) {
-      throw authError
+      throw authError;
     }
 
     if (data.user) {
       if (!data.user.email_confirmed_at) {
-        error.value = 'Please check your email and click the confirmation link before signing in.'
-        return
+        error.value = 'Please check your email and click the confirmation link before signing in.';
+        return;
       }
 
-      success.value = 'Successfully signed in! Redirecting...'
+      success.value = 'Successfully signed in! Redirecting...';
 
-      navigateTo(appConfig.auth.redirectUrl)
+      navigateTo(appConfig.auth.redirectUrl);
     }
   }
   catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : String(err)
+    const errorMessage = err instanceof Error ? err.message : String(err);
     switch (errorMessage) {
       case 'Invalid login credentials':
-        error.value = 'Invalid email or password. Please try again.'
-        break
+        error.value = 'Invalid email or password. Please try again.';
+        break;
       case 'Email not confirmed':
-        error.value = 'Please check your email and confirm your account before signing in.'
-        break
+        error.value = 'Please check your email and confirm your account before signing in.';
+        break;
       case 'Too many requests':
-        error.value = 'Too many login attempts. Please wait a moment and try again.'
-        break
+        error.value = 'Too many login attempts. Please wait a moment and try again.';
+        break;
       default:
-        error.value = errorMessage || 'An unexpected error occurred. Please try again.'
+        error.value = errorMessage || 'An unexpected error occurred. Please try again.';
     }
   }
   finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 watch(() => state.email, () => {
-  error.value = ''
-  success.value = ''
-})
+  error.value = '';
+  success.value = '';
+});
 
 watch(() => state.password, () => {
-  error.value = ''
-  success.value = ''
-})
+  error.value = '';
+  success.value = '';
+});
 </script>
 
 <template>

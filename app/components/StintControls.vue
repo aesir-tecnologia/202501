@@ -1,44 +1,44 @@
 <script setup lang="ts">
-import type { StintRow } from '~/lib/supabase/stints'
+import type { StintRow } from '~/lib/supabase/stints';
 
 const props = defineProps<{
   stint: StintRow
-}>()
+}>();
 
 // Mutation hooks
-const { mutateAsync: pauseStint, isPending: isPausing } = usePauseStint()
-const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint()
-const { mutateAsync: completeStint, isPending: isCompleting } = useCompleteStint()
+const { mutateAsync: pauseStint, isPending: isPausing } = usePauseStint();
+const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint();
+const { mutateAsync: completeStint, isPending: isCompleting } = useCompleteStint();
 
-const toast = useToast()
+const toast = useToast();
 
 // State for notes modal (placeholder for Task 10)
-const showNotesModal = ref(false)
-const completionNotes = ref('')
+const showNotesModal = ref(false);
+const completionNotes = ref('');
 
 /**
  * Pause the active stint
  */
 async function handlePause(): Promise<void> {
   try {
-    await pauseStint(props.stint.id)
+    await pauseStint(props.stint.id);
 
     toast.add({
       title: 'Stint Paused',
       description: 'Take a break! Resume when ready.',
       color: 'gray',
       icon: 'i-lucide-pause-circle',
-    })
+    });
   }
   catch (error) {
-    console.error('Failed to pause stint:', error)
+    console.error('Failed to pause stint:', error);
 
     toast.add({
       title: 'Pause Failed',
       description: error instanceof Error ? error.message : 'Could not pause stint. Please try again.',
       color: 'red',
       icon: 'i-lucide-alert-circle',
-    })
+    });
   }
 }
 
@@ -47,24 +47,24 @@ async function handlePause(): Promise<void> {
  */
 async function handleResume(): Promise<void> {
   try {
-    await resumeStint(props.stint.id)
+    await resumeStint(props.stint.id);
 
     toast.add({
       title: 'Stint Resumed',
       description: 'Back to work! Keep going.',
       color: 'green',
       icon: 'i-lucide-play-circle',
-    })
+    });
   }
   catch (error) {
-    console.error('Failed to resume stint:', error)
+    console.error('Failed to resume stint:', error);
 
     toast.add({
       title: 'Resume Failed',
       description: error instanceof Error ? error.message : 'Could not resume stint. Please try again.',
       color: 'red',
       icon: 'i-lucide-alert-circle',
-    })
+    });
   }
 }
 
@@ -74,7 +74,7 @@ async function handleResume(): Promise<void> {
 function handleStopClick(): void {
   // TODO: Task 10 - Show StintCompletionModal instead
   // For now, complete immediately without notes
-  handleStopConfirm()
+  handleStopConfirm();
 }
 
 /**
@@ -86,7 +86,7 @@ async function handleStopConfirm(): Promise<void> {
       stintId: props.stint.id,
       completionType: 'manual',
       notes: completionNotes.value || undefined,
-    })
+    });
 
     toast.add({
       title: 'Stint Completed!',
@@ -94,26 +94,26 @@ async function handleStopConfirm(): Promise<void> {
       color: 'green',
       icon: 'i-lucide-circle-check',
       timeout: 5000,
-    })
+    });
 
     // Reset modal state
-    showNotesModal.value = false
-    completionNotes.value = ''
+    showNotesModal.value = false;
+    completionNotes.value = '';
   }
   catch (error) {
-    console.error('Failed to complete stint:', error)
+    console.error('Failed to complete stint:', error);
 
     toast.add({
       title: 'Stop Failed',
       description: error instanceof Error ? error.message : 'Could not complete stint. Please try again.',
       color: 'red',
       icon: 'i-lucide-alert-circle',
-    })
+    });
   }
 }
 
 // Determine if any action is in progress
-const isAnyPending = computed(() => isPausing.value || isResuming.value || isCompleting.value)
+const isAnyPending = computed(() => isPausing.value || isResuming.value || isCompleting.value);
 </script>
 
 <template>

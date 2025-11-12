@@ -37,14 +37,14 @@ const presetRanges = [
   { label: 'This month', getStart: () => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
-  }},
+  } },
   { label: 'Last month', getStart: () => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth() - 1, 1);
   }, getEnd: () => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 0);
-  }},
+  } },
 ];
 
 // Initialize date range to last 30 days
@@ -52,7 +52,7 @@ onMounted(() => {
   const end = new Date();
   const start = new Date();
   start.setDate(start.getDate() - 30);
-  
+
   dateRange.value.end = end.toISOString().split('T')[0];
   dateRange.value.start = start.toISOString().split('T')[0];
 });
@@ -60,23 +60,26 @@ onMounted(() => {
 function applyPresetRange(preset: typeof presetRanges[0]) {
   const end = new Date();
   let start: Date;
-  
+
   if (preset.days) {
     start = new Date();
     start.setDate(start.getDate() - preset.days);
-  } else if (preset.getStart) {
+  }
+  else if (preset.getStart) {
     start = preset.getStart();
     if (preset.getEnd) {
       const presetEnd = preset.getEnd();
       dateRange.value.end = presetEnd.toISOString().split('T')[0];
-    } else {
+    }
+    else {
       dateRange.value.end = end.toISOString().split('T')[0];
     }
-  } else {
+  }
+  else {
     start = new Date();
     start.setDate(start.getDate() - 7);
   }
-  
+
   dateRange.value.start = start.toISOString().split('T')[0];
   if (!preset.getEnd) {
     dateRange.value.end = end.toISOString().split('T')[0];
@@ -85,36 +88,36 @@ function applyPresetRange(preset: typeof presetRanges[0]) {
 
 // Filter stints by date range and project
 const filteredStints = computed(() => {
-  let filtered = stints.value.filter(s => {
+  const filtered = stints.value.filter((s) => {
     // Only completed stints
     if (s.status !== 'completed' || !s.ended_at) return false;
-    
+
     // Date range filter
     if (dateRange.value.start || dateRange.value.end) {
       const stintDate = new Date(s.ended_at);
       stintDate.setHours(0, 0, 0, 0);
-      
+
       if (dateRange.value.start) {
         const startDate = new Date(dateRange.value.start);
         startDate.setHours(0, 0, 0, 0);
         if (stintDate < startDate) return false;
       }
-      
+
       if (dateRange.value.end) {
         const endDate = new Date(dateRange.value.end);
         endDate.setHours(23, 59, 59, 999);
         if (stintDate > endDate) return false;
       }
     }
-    
+
     // Project filter
     if (selectedProjectId.value && s.project_id !== selectedProjectId.value) {
       return false;
     }
-    
+
     return true;
   });
-  
+
   return filtered.sort((a, b) => {
     const dateA = a.ended_at ? new Date(a.ended_at).getTime() : 0;
     const dateB = b.ended_at ? new Date(b.ended_at).getTime() : 0;
@@ -128,20 +131,20 @@ const summary = computed(() => {
   const totalTimeSeconds = filteredStints.value.reduce((sum, s) => sum + (s.actual_duration || 0), 0);
   const totalTimeMinutes = Math.round(totalTimeSeconds / 60);
   const averageDuration = totalStints > 0 ? Math.round(totalTimeMinutes / totalStints) : 0;
-  
+
   // Projects worked
   const projectIds = new Set(filteredStints.value.map(s => s.project_id));
   const projectsWorked = projects.value.filter(p => projectIds.has(p.id) && !p.archived_at).length;
-  
+
   // Days with stints
   const daysWithStints = new Set(
-    filteredStints.value.map(s => {
+    filteredStints.value.map((s) => {
       if (!s.ended_at) return '';
       const date = new Date(s.ended_at);
       return date.toISOString().split('T')[0];
-    }).filter(Boolean)
+    }).filter(Boolean),
   ).size;
-  
+
   return {
     totalStints,
     totalTimeMinutes,
@@ -156,16 +159,17 @@ const summary = computed(() => {
 // Project breakdown
 const projectBreakdown = computed(() => {
   const breakdown = new Map<string, { project: ProjectRow, stintCount: number, totalTimeMinutes: number, stints: StintRow[] }>();
-  
-  filteredStints.value.forEach(stint => {
+
+  filteredStints.value.forEach((stint) => {
     const existing = breakdown.get(stint.project_id);
     const timeMinutes = Math.round((stint.actual_duration || 0) / 60);
-    
+
     if (existing) {
       existing.stintCount++;
       existing.totalTimeMinutes += timeMinutes;
       existing.stints.push(stint);
-    } else {
+    }
+    else {
       const project = projects.value.find(p => p.id === stint.project_id);
       if (project) {
         breakdown.set(stint.project_id, {
@@ -177,7 +181,7 @@ const projectBreakdown = computed(() => {
       }
     }
   });
-  
+
   return Array.from(breakdown.values())
     .sort((a, b) => b.totalTimeMinutes - a.totalTimeMinutes);
 });
@@ -185,20 +189,21 @@ const projectBreakdown = computed(() => {
 // Daily breakdown
 const dailyBreakdown = computed(() => {
   const daily = new Map<string, { date: string, stintCount: number, totalTimeMinutes: number, stints: StintRow[] }>();
-  
-  filteredStints.value.forEach(stint => {
+
+  filteredStints.value.forEach((stint) => {
     if (!stint.ended_at) return;
-    
+
     const date = new Date(stint.ended_at);
     const dateKey = date.toISOString().split('T')[0];
     const timeMinutes = Math.round((stint.actual_duration || 0) / 60);
-    
+
     const existing = daily.get(dateKey);
     if (existing) {
       existing.stintCount++;
       existing.totalTimeMinutes += timeMinutes;
       existing.stints.push(stint);
-    } else {
+    }
+    else {
       daily.set(dateKey, {
         date: dateKey,
         stintCount: 1,
@@ -207,7 +212,7 @@ const dailyBreakdown = computed(() => {
       });
     }
   });
-  
+
   return Array.from(daily.values())
     .sort((a, b) => b.date.localeCompare(a.date));
 });
@@ -229,9 +234,9 @@ function formatDate(dateString: string): string {
 
 function formatDateTime(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
@@ -251,7 +256,7 @@ function exportCSV() {
     });
     return;
   }
-  
+
   // CSV header
   const headers = [
     'Date',
@@ -263,13 +268,13 @@ function exportCSV() {
     'Status',
     'Notes',
   ];
-  
+
   // CSV rows
-  const rows = filteredStints.value.map(stint => {
+  const rows = filteredStints.value.map((stint) => {
     const project = projects.value.find(p => p.id === stint.project_id);
     const durationMinutes = stint.actual_duration ? Math.round(stint.actual_duration / 60) : 0;
     const durationHours = (durationMinutes / 60).toFixed(2);
-    
+
     return [
       stint.ended_at ? formatDate(stint.ended_at) : '',
       project?.name || 'Unknown',
@@ -281,13 +286,13 @@ function exportCSV() {
       (stint.notes || '').replace(/"/g, '""'), // Escape quotes
     ];
   });
-  
+
   // Combine header and rows
   const csvContent = [
     headers.join(','),
     ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
   ].join('\n');
-  
+
   // Create blob and download
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -298,7 +303,7 @@ function exportCSV() {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
-  
+
   toast.add({
     title: 'CSV exported',
     description: `Exported ${filteredStints.value.length} stints`,
@@ -317,7 +322,7 @@ function exportJSON() {
     });
     return;
   }
-  
+
   const exportData = {
     reportDate: new Date().toISOString(),
     dateRange: {
@@ -331,7 +336,7 @@ function exportJSON() {
       projectsWorked: summary.value.projectsWorked,
       daysWithStints: summary.value.daysWithStints,
     },
-    stints: filteredStints.value.map(stint => {
+    stints: filteredStints.value.map((stint) => {
       const project = projects.value.find(p => p.id === stint.project_id);
       return {
         id: stint.id,
@@ -357,7 +362,7 @@ function exportJSON() {
       totalTimeMinutes: item.totalTimeMinutes,
     })),
   };
-  
+
   const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -367,7 +372,7 @@ function exportJSON() {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
-  
+
   toast.add({
     title: 'JSON exported',
     description: `Exported ${filteredStints.value.length} stints`,
@@ -819,5 +824,3 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
     </div>
   </UContainer>
 </template>
-
-

@@ -1,9 +1,9 @@
-import type { User as SupabaseUser } from '@supabase/supabase-js'
-import type { User } from '~/types/auth'
+import type { User as SupabaseUser } from '@supabase/supabase-js';
+import type { User } from '~/types/auth';
 
 function transformSupabaseUser(supabaseUser: SupabaseUser | null): User | null {
   if (!supabaseUser) {
-    return null
+    return null;
   }
 
   return {
@@ -13,7 +13,7 @@ function transformSupabaseUser(supabaseUser: SupabaseUser | null): User | null {
     fullName: supabaseUser.user_metadata?.full_name,
     emailNotifications: supabaseUser.user_metadata?.email_notifications,
     createdAt: supabaseUser.created_at,
-  }
+  };
 }
 
 /**
@@ -34,7 +34,7 @@ function transformSupabaseUser(supabaseUser: SupabaseUser | null): User | null {
 export function useAuthUser(
   supabaseUserOverride?: Ref<SupabaseUser | null>,
 ): ComputedRef<User | null> {
-  const supabaseUser = supabaseUserOverride ?? useSupabaseUser()
+  const supabaseUser = supabaseUserOverride ?? useSupabaseUser();
 
-  return computed(() => transformSupabaseUser(supabaseUser.value))
+  return computed(() => transformSupabaseUser(supabaseUser.value));
 }

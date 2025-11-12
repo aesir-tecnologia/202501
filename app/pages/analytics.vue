@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { StintRow } from '~/lib/supabase/stints';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import { useStintsQuery } from '~/composables/useStints';
 import { useProjectsQuery } from '~/composables/useProjects';
@@ -21,72 +20,73 @@ const stints = computed(() => stintsData.value ?? []);
 const projects = computed(() => projectsData.value ?? []);
 
 // Filter completed stints only
-const completedStints = computed(() => 
-  stints.value.filter(s => s.status === 'completed' && s.ended_at && s.actual_duration)
+const completedStints = computed(() =>
+  stints.value.filter(s => s.status === 'completed' && s.ended_at && s.actual_duration),
 );
 
 // Calculate streak
 const currentStreak = computed(() => {
   if (completedStints.value.length === 0) return 0;
-  
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   let streak = 0;
-  let checkDate = new Date(today);
-  
+  const checkDate = new Date(today);
+
   // Check backwards from today
   while (true) {
-    const hasStintOnDate = completedStints.value.some(stint => {
+    const hasStintOnDate = completedStints.value.some((stint) => {
       if (!stint.ended_at) return false;
       const stintDate = new Date(stint.ended_at);
       stintDate.setHours(0, 0, 0, 0);
       return stintDate.getTime() === checkDate.getTime();
     });
-    
+
     if (!hasStintOnDate) break;
-    
+
     streak++;
     checkDate.setDate(checkDate.getDate() - 1);
   }
-  
+
   return streak;
 });
 
 const longestStreak = computed(() => {
   if (completedStints.value.length === 0) return 0;
-  
+
   const dates = new Set<string>();
-  completedStints.value.forEach(stint => {
+  completedStints.value.forEach((stint) => {
     if (stint.ended_at) {
       const date = new Date(stint.ended_at);
       date.setHours(0, 0, 0, 0);
       dates.add(date.toISOString());
     }
   });
-  
+
   const sortedDates = Array.from(dates)
     .map(d => new Date(d))
     .sort((a, b) => a.getTime() - b.getTime());
-  
+
   if (sortedDates.length === 0) return 0;
-  
+
   let maxStreak = 1;
   let currentStreak = 1;
-  
+
   for (let i = 1; i < sortedDates.length; i++) {
     const diffDays = Math.floor(
-      (sortedDates[i].getTime() - sortedDates[i - 1].getTime()) / (1000 * 60 * 60 * 24)
+      (sortedDates[i].getTime() - sortedDates[i - 1].getTime()) / (1000 * 60 * 60 * 24),
     );
-    
+
     if (diffDays === 1) {
       currentStreak++;
       maxStreak = Math.max(maxStreak, currentStreak);
-    } else {
+    }
+    else {
       currentStreak = 1;
     }
   }
-  
+
   return maxStreak;
 });
 
@@ -94,8 +94,8 @@ const longestStreak = computed(() => {
 const todayStints = computed(() => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
-  return completedStints.value.filter(stint => {
+
+  return completedStints.value.filter((stint) => {
     if (!stint.ended_at) return false;
     const stintDate = new Date(stint.ended_at);
     stintDate.setHours(0, 0, 0, 0);
@@ -117,17 +117,17 @@ const todayAverageDuration = computed(() => {
 const todayGoalsMet = computed(() => {
   const todayProjects = new Set(todayStints.value.map(s => s.project_id));
   let goalsMet = 0;
-  
-  projects.value.forEach(project => {
+
+  projects.value.forEach((project) => {
     if (project.archived_at) return;
     if (!todayProjects.has(project.id)) return;
-    
+
     const projectStintsToday = todayStints.value.filter(s => s.project_id === project.id).length;
     if (projectStintsToday >= project.expected_daily_stints) {
       goalsMet++;
     }
   });
-  
+
   return goalsMet;
 });
 
@@ -135,11 +135,11 @@ const todayProjectsWorked = computed(() => {
   const projectIds = new Set(todayStints.value.map(s => s.project_id));
   return projects.value
     .filter(p => projectIds.has(p.id) && !p.archived_at)
-    .map(project => {
+    .map((project) => {
       const stints = todayStints.value.filter(s => s.project_id === project.id);
       const totalTime = stints.reduce((sum, s) => sum + (s.actual_duration || 0), 0);
       const goalMet = stints.length >= project.expected_daily_stints;
-      
+
       return {
         project,
         stintCount: stints.length,
@@ -155,8 +155,8 @@ const weekStints = computed(() => {
   const weekStart = new Date(today);
   weekStart.setDate(today.getDate() - today.getDay()); // Sunday
   weekStart.setHours(0, 0, 0, 0);
-  
-  return completedStints.value.filter(stint => {
+
+  return completedStints.value.filter((stint) => {
     if (!stint.ended_at) return false;
     const stintDate = new Date(stint.ended_at);
     return stintDate >= weekStart;
@@ -176,21 +176,21 @@ const weekDataByDay = computed(() => {
   const weekStart = new Date(today);
   weekStart.setDate(today.getDate() - today.getDay());
   weekStart.setHours(0, 0, 0, 0);
-  
+
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const weekData = days.map((day, index) => {
     const date = new Date(weekStart);
     date.setDate(weekStart.getDate() + index);
-    
-    const dayStints = weekStints.value.filter(stint => {
+
+    const dayStints = weekStints.value.filter((stint) => {
       if (!stint.ended_at) return false;
       const stintDate = new Date(stint.ended_at);
       stintDate.setHours(0, 0, 0, 0);
       return stintDate.getTime() === date.getTime();
     });
-    
+
     const totalTime = dayStints.reduce((sum, s) => sum + (s.actual_duration || 0), 0);
-    
+
     return {
       day,
       date: date.toISOString(),
@@ -199,31 +199,32 @@ const weekDataByDay = computed(() => {
       isToday: date.getTime() === new Date(today.setHours(0, 0, 0, 0)).getTime(),
     };
   });
-  
+
   return weekData;
 });
 
 const mostProductiveDay = computed(() => {
   if (weekDataByDay.value.length === 0) return 'N/A';
-  
+
   const maxStints = Math.max(...weekDataByDay.value.map(d => d.stintCount));
   const productiveDay = weekDataByDay.value.find(d => d.stintCount === maxStints);
-  
+
   return productiveDay?.day || 'N/A';
 });
 
 // Project breakdown (top 5)
 const projectBreakdown = computed(() => {
   const projectStats = new Map<string, { project: ProjectRow, stintCount: number, totalTime: number }>();
-  
-  weekStints.value.forEach(stint => {
+
+  weekStints.value.forEach((stint) => {
     const existing = projectStats.get(stint.project_id);
     const timeMinutes = Math.round((stint.actual_duration || 0) / 60);
-    
+
     if (existing) {
       existing.stintCount++;
       existing.totalTime += timeMinutes;
-    } else {
+    }
+    else {
       const project = projects.value.find(p => p.id === stint.project_id);
       if (project && !project.archived_at) {
         projectStats.set(stint.project_id, {
@@ -234,7 +235,7 @@ const projectBreakdown = computed(() => {
       }
     }
   });
-  
+
   return Array.from(projectStats.values())
     .sort((a, b) => b.stintCount - a.stintCount)
     .slice(0, 5);
@@ -569,4 +570,3 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
     </div>
   </UContainer>
 </template>
-
