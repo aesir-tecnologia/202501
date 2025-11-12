@@ -33,7 +33,7 @@ The LifeStint documentation is organized into 9 focused documents plus a master 
 
 ### Additional Resources
 
-- **[DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md)** - Design tokens, component guidelines, UI patterns
+- **[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** - Design tokens, component guidelines, UI patterns
 
 ---
 
@@ -53,7 +53,7 @@ The LifeStint documentation is organized into 9 focused documents plus a master 
 
 **If UI/UX Work:**
 - [02-user-personas-flows.md](./02-user-personas-flows.md) - User flows
-- [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) - Design guidelines
+- [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) - Design guidelines
 
 ### For Architecture Decisions
 
@@ -68,7 +68,7 @@ The LifeStint documentation is organized into 9 focused documents plus a master 
 - **Feature bug** → [03-feature-requirements.md](./03-feature-requirements.md)
 - **Database issue** → [05-database-schema.md](./05-database-schema.md)
 - **Sync/conflict issue** → [06-implementation-guide.md](./06-implementation-guide.md)
-- **UI/UX issue** → [02-user-personas-flows.md](./02-user-personas-flows.md) + [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md)
+- **UI/UX issue** → [02-user-personas-flows.md](./02-user-personas-flows.md) + [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
 
 ### For Testing
 

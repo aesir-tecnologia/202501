@@ -160,9 +160,6 @@ All mutations implement optimistic updates with automatic cache rollback on erro
 - `onError`: Restores snapshot if mutation fails
 - `onSuccess`: Invalidates affected queries for refetch
 
-**Conflict Detection:**
-`startStint()` detects concurrent operations and returns `ConflictError` type with existing stint data. Components display conflict resolution modal for user action.
-
 ### State Management
 
 **Architecture:** Pure TanStack Query - no Pinia/Vuex stores. All server state managed through TanStack Query cache.
@@ -182,9 +179,6 @@ export const projectKeys = {
 - **Broad:** `invalidateQueries({ queryKey: projectKeys.all })` after create/delete
 - **Targeted:** `invalidateQueries({ queryKey: projectKeys.detail(id) })` after specific updates
 - **Multiple:** Update both list and detail caches simultaneously when needed
-
-**Real-time Sync:**
-`useStintRealtime()` subscribes to Supabase real-time changes and directly updates TanStack Query cache via `setQueryData()` for cross-device synchronization.
 
 **Timer Singleton:**
 `useStintTimer()` maintains a global singleton Web Worker for accurate time tracking, shared across all component instances.
@@ -233,7 +227,7 @@ SUPABASE_ANON_KEY=your_supabase_anon_key_here
 - **Output Directory:** `.output/public`
 - **Environment:** Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` in Vercel dashboard
 
-See `DEPLOYMENT.md` for detailed instructions.
+See `README.md` for detailed deployment instructions.
 
 ## Important Conventions
 

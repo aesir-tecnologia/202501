@@ -323,7 +323,7 @@
 ---
 
 **Related Documents:**
-- [05-database-schema.md](./05-database-schema.md) - Database schema with all constraints
-- [03-feature-requirements.md](./03-feature-requirements.md) - Feature requirements including settings
-- [07-development-roadmap.md](./07-development-roadmap.md) - Phase 8: Settings & Preferences implementation
+- [05-database-schema.md](05-database-schema.md) - Database schema with all constraints
+- [03-feature-requirements.md](03-feature-requirements.md) - Feature requirements including settings
+- [07-development-roadmap.md](07-development-roadmap.md) - Phase 8: Settings & Preferences implementation
 
