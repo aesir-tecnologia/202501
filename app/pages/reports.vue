@@ -398,7 +398,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
     <div class="space-y-6">
       <!-- Page Header -->
       <div>
-        <h1 class="text-3xl font-bold">
+        <h1 class="text-3xl font-semibold text-gray-900 dark:text-gray-100">
           Reports
         </h1>
         <p class="mt-2 text-gray-600 dark:text-gray-400">
@@ -433,7 +433,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                 name="i-lucide-filter"
                 class="h-5 w-5"
               />
-              <h2 class="text-lg font-semibold">
+              <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                 Filters
               </h2>
             </div>
@@ -507,7 +507,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
 
         <!-- Summary Section -->
         <div>
-          <h2 class="text-xl font-semibold mb-4">
+          <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
             Summary
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -597,7 +597,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                 name="i-lucide-download"
                 class="h-5 w-5"
               />
-              <h2 class="text-lg font-semibold">
+              <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                 Export Reports
               </h2>
             </div>
@@ -606,6 +606,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
           <div class="flex flex-wrap gap-3">
             <UButton
               icon="i-lucide-file-spreadsheet"
+              size="md"
               :disabled="filteredStints.length === 0"
               @click="exportCSV"
             >
@@ -613,6 +614,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
             </UButton>
             <UButton
               icon="i-lucide-file-code"
+              size="md"
               :disabled="filteredStints.length === 0"
               variant="outline"
               @click="exportJSON"
@@ -621,6 +623,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
             </UButton>
             <UButton
               icon="i-lucide-file-text"
+              size="md"
               :disabled="filteredStints.length === 0"
               variant="outline"
               @click="exportPDF"
@@ -645,7 +648,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                 name="i-lucide-bar-chart-3"
                 class="h-5 w-5"
               />
-              <h2 class="text-lg font-semibold">
+              <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                 Project Breakdown
               </h2>
             </div>

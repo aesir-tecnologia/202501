@@ -1,11 +1,15 @@
 import { vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
+import { createMockSupabaseClient, resetMockStore } from './mocks/supabase';
+import type { TypedSupabaseClient } from '~/utils/supabase';
 
-// Validate required environment variables are loaded
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+const USE_MOCK = process.env.USE_MOCK_SUPABASE !== 'false';
+
+// Validate required environment variables only if using real Supabase
+if (!USE_MOCK && (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY)) {
   throw new Error(
-    'Missing required environment variables: SUPABASE_URL and SUPABASE_ANON_KEY must be set in .env file'
+    'Missing required environment variables: SUPABASE_URL and SUPABASE_ANON_KEY must be set in .env file',
   );
 }
 
@@ -13,6 +17,11 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
 beforeEach(() => {
   // Reset all mocks before each test
   vi.clearAllMocks();
+
+  // Reset mock store if using mocked Supabase
+  if (USE_MOCK) {
+    resetMockStore();
+  }
 });
 
 // Mock File constructor for Node.js environment
@@ -36,25 +45,38 @@ global.File = class MockFile {
 
 /**
  * Get one of the global test users (1 or 2)
- * Users are created once in globalSetup and reused across all tests
+ * Returns a mocked client by default (unless USE_MOCK_SUPABASE=false)
+ * For integration tests with real Supabase, set USE_MOCK_SUPABASE=false
  */
 export async function getTestUser(userNumber: 1 | 2 = 1) {
   const envPrefix = `TEST_USER_${userNumber}`;
-  const email = process.env[`${envPrefix}_EMAIL`];
-  const password = process.env[`${envPrefix}_PASSWORD`];
-  const userId = process.env[`${envPrefix}_ID`];
+  const email = `test-user-${userNumber}@lifestint.test`;
+  const userId = `mock-user-${userNumber}-id`;
 
-  if (!email || !password || !userId) {
+  if (USE_MOCK) {
+    const client = createMockSupabaseClient(userId, email);
+    return {
+      client: client as TypedSupabaseClient,
+      user: { id: userId, email },
+      email,
+    };
+  }
+
+  const realEmail = process.env[`${envPrefix}_EMAIL`];
+  const password = process.env[`${envPrefix}_PASSWORD`];
+  const realUserId = process.env[`${envPrefix}_ID`];
+
+  if (!realEmail || !password || !realUserId) {
     throw new Error(`Global test user ${userNumber} not initialized. Check globalSetup.ts`);
   }
 
   const client = createClient<Database>(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!
+    process.env.SUPABASE_ANON_KEY!,
   );
 
   const { data, error } = await client.auth.signInWithPassword({
-    email,
+    email: realEmail,
     password,
   });
 
@@ -65,15 +87,21 @@ export async function getTestUser(userNumber: 1 | 2 = 1) {
   return {
     client,
     user: data.user,
-    email,
+    email: realEmail,
   };
 }
 
 /**
  * Clean up test data for a specific user
  * Deletes all projects and stints but preserves the user account
+ * For mocked clients, this resets the mock store
  */
-export async function cleanupTestData(client: ReturnType<typeof createClient<Database>>) {
+export async function cleanupTestData(client: TypedSupabaseClient) {
+  if (USE_MOCK) {
+    resetMockStore();
+    return;
+  }
+
   await client.from('stints').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   await client.from('projects').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 }

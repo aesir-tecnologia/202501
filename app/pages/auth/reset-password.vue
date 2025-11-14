@@ -18,7 +18,7 @@
           >
             <UIcon
               name="i-lucide-loader-2"
-              class="w-8 h-8 mx-auto text-primary-600 animate-spin dark:text-primary-400"
+              class="w-8 h-8 mx-auto text-brand-600 animate-spin dark:text-brand-400"
             />
             <p class="text-gray-600 dark:text-gray-300">
               Verifying reset link...
@@ -42,7 +42,7 @@
             <div class="text-center mt-6">
               <NuxtLink
                 to="/auth/forgot-password"
-                class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+                class="text-sm font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
               >
                 Request a new password reset
               </NuxtLink>
@@ -103,7 +103,7 @@
             <div class="text-center mt-6 text-gray-600 dark:text-gray-300">
               <NuxtLink
                 to="/auth/login"
-                class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+                class="text-sm font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
               >
                 Back to sign in
               </NuxtLink>

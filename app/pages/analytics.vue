@@ -273,7 +273,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
     <div class="space-y-6">
       <!-- Page Header -->
       <div>
-        <h1 class="text-3xl font-bold">
+        <h1 class="text-3xl font-semibold text-gray-900 dark:text-gray-100">
           Analytics
         </h1>
         <p class="mt-2 text-gray-600 dark:text-gray-400">
@@ -288,7 +288,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
       >
         <Icon
           name="i-lucide-loader-2"
-          class="h-8 w-8 mx-auto animate-spin text-gray-400"
+          class="h-8 w-8 mx-auto animate-spin text-gray-400 dark:text-gray-500"
         />
         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
           Loading analytics...
@@ -309,7 +309,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                   name="i-lucide-flame"
                   class="h-6 w-6"
                 />
-                <h2 class="text-xl font-semibold">
+                <h2 class="text-2xl font-semibold text-white">
                   Current Streak
                 </h2>
               </div>
@@ -333,7 +333,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
 
         <!-- Today's Summary -->
         <div>
-          <h2 class="text-xl font-semibold mb-4">
+          <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
             Today's Summary
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -419,7 +419,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
             v-if="todayProjectsWorked.length > 0"
             class="mt-4 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70"
           >
-            <h3 class="text-lg font-semibold mb-3">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">
               Projects Worked Today
             </h3>
             <div class="space-y-2">
@@ -444,7 +444,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                   </span>
                   <UBadge
                     v-if="item.goalMet"
-                    color="green"
+                    color="success"
                     variant="soft"
                   >
                     Goal Met
@@ -457,7 +457,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
 
         <!-- Weekly Overview -->
         <div>
-          <h2 class="text-xl font-semibold mb-4">
+          <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
             Weekly Overview
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -491,7 +491,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
 
           <!-- Weekly Chart -->
           <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-            <h3 class="text-lg font-semibold mb-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
               Stints Per Day
             </h3>
             <div class="space-y-3">
@@ -531,7 +531,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
             v-if="projectBreakdown.length > 0"
             class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70"
           >
-            <h3 class="text-lg font-semibold mb-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
               Top Projects This Week
             </h3>
             <div class="space-y-3">

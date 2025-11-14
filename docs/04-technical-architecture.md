@@ -89,7 +89,7 @@
   - Utility-first styling
   - Responsive design system
   - Dark mode variants
-  - Custom color palette (brand colors)
+  - Semantic color palette (primary, secondary, success, warning, error, neutral)
 
 ### Charts (Post-MVP)
 

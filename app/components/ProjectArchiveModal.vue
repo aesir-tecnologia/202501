@@ -83,7 +83,7 @@ async function handleArchive() {
     <template #content>
       <UCard>
         <template #header>
-          <h3 class="text-lg font-semibold">
+          <h3 class="text-lg font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
             Archive Project
           </h3>
         </template>
@@ -116,23 +116,23 @@ async function handleArchive() {
           </div>
 
           <div v-else>
-            <p class="text-gray-700 dark:text-gray-300">
+            <p class="leading-normal text-neutral-700 dark:text-neutral-300">
               Archive <strong>{{ project.name }}</strong>? Past stints will be preserved for analytics.
             </p>
 
-            <div class="mt-4 rounded-md bg-blue-50 dark:bg-blue-950 p-4">
+            <div class="mt-4 rounded-md bg-brand-50 dark:bg-brand-950 p-4">
               <div class="flex items-start">
                 <div class="flex-shrink-0">
                   <Icon
                     name="i-lucide-info"
-                    class="h-5 w-5 text-blue-400"
+                    class="h-5 w-5 text-brand-400"
                   />
                 </div>
                 <div class="ml-3">
-                  <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">
+                  <h3 class="text-sm font-medium text-brand-800 dark:text-brand-200">
                     About Archiving
                   </h3>
-                  <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                  <div class="mt-2 text-sm text-brand-700 dark:text-brand-300">
                     <p>Archived projects are hidden from the dashboard but all stint history is preserved. You can view archived projects anytime from the "View Archived" link.</p>
                   </div>
                 </div>

@@ -87,13 +87,13 @@ watch(isCompleted, (completed) => {
       v-if="isPaused && stint"
       class="flex flex-col items-center gap-2"
     >
-      <div class="text-sm font-medium text-orange-600 dark:text-orange-400">
+      <div class="text-sm font-medium leading-normal text-warning-600 dark:text-warning-400">
         Paused
       </div>
-      <div class="text-2xl font-mono font-bold text-gray-900 dark:text-gray-100">
+      <div class="font-mono text-2xl font-bold leading-tight tabular-nums text-neutral-900 dark:text-neutral-50">
         {{ formattedTime }}
       </div>
-      <div class="text-xs text-gray-500 dark:text-gray-400">
+      <div class="text-xs leading-tight text-neutral-500 dark:text-neutral-400">
         Paused for {{ pausedDuration }}
       </div>
     </div>
@@ -103,11 +103,11 @@ watch(isCompleted, (completed) => {
       v-else-if="stint && !isCompleted"
       class="flex flex-col items-center gap-2"
     >
-      <div class="text-sm font-medium text-green-600 dark:text-green-400">
+      <div class="text-sm font-medium leading-normal text-success-600 dark:text-success-400">
         Active
       </div>
       <div
-        class="text-4xl font-mono font-bold text-gray-900 dark:text-gray-100 tabular-nums"
+        class="font-mono text-4xl font-bold leading-tight tabular-nums text-neutral-900 dark:text-neutral-50"
       >
         {{ formattedTime }}
       </div>
@@ -116,13 +116,13 @@ watch(isCompleted, (completed) => {
     <!-- Completed Animation -->
     <div
       v-if="showCompletionAnimation"
-      class="absolute inset-0 flex items-center justify-center bg-green-50 dark:bg-green-950 rounded-lg animate-pulse"
+      class="absolute inset-0 flex items-center justify-center bg-success-50 dark:bg-success-950 rounded-lg motion-safe:animate-pulse"
     >
       <div class="text-center">
-        <div class="text-4xl mb-2">
+        <div class="text-4xl leading-tight mb-2">
           🎉
         </div>
-        <div class="text-lg font-semibold text-green-700 dark:text-green-300">
+        <div class="text-lg font-semibold leading-snug text-success-700 dark:text-success-300">
           Stint Complete!
         </div>
       </div>

@@ -70,7 +70,7 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
         />
 
         <template #footer>
-          <div class="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-800">
+          <div class="flex justify-between items-center pt-4 border-t border-neutral-200 dark:border-neutral-800">
             <UTooltip text="Archive this project">
               <span>
                 <UButton

@@ -115,7 +115,7 @@ onMounted(() => {
           >
             <UIcon
               name="i-lucide-loader-2"
-              class="w-8 h-8 mx-auto text-primary-600 animate-spin dark:text-primary-400"
+              class="w-8 h-8 mx-auto text-brand-600 animate-spin dark:text-brand-400"
             />
             <h2 class="text-xl font-semibold">
               Verifying your account...
@@ -163,7 +163,7 @@ onMounted(() => {
           >
             <UIcon
               name="i-lucide-circle-check"
-              class="w-8 h-8 mx-auto text-green-500 dark:text-green-400"
+              class="w-8 h-8 mx-auto text-mint-500 dark:text-mint-400"
             />
             <h2 class="text-xl font-semibold">
               Welcome to LifeStint!

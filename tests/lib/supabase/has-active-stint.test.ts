@@ -1,6 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import type { createClient } from '@supabase/supabase-js';
-import type { Database } from '~/types/database.types';
 import { createProject, hasActiveStint } from '~/lib/supabase/projects';
 import { getTestUser, cleanupTestData } from '../../setup';
 

@@ -92,12 +92,12 @@ async function handlePermanentDelete() {
     >
       <Icon
         name="i-lucide-archive"
-        class="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600"
+        class="h-12 w-12 mx-auto text-neutral-400 dark:text-neutral-600"
       />
-      <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+      <h3 class="mt-4 text-lg font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
         No archived projects
       </h3>
-      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      <p class="mt-2 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
         Projects you archive will appear here
       </p>
     </div>
@@ -109,16 +109,16 @@ async function handlePermanentDelete() {
       <li
         v-for="project in projects"
         :key="project.id"
-        class="flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50"
+        class="flex items-center gap-3 p-4 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50"
       >
         <!-- Project info -->
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
-            <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
+            <h3 class="text-base font-medium leading-normal text-neutral-900 dark:text-neutral-50 truncate">
               {{ project.name }}
             </h3>
           </div>
-          <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <div class="mt-1 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
             Archived {{ formatDate(project.archived_at) }}
           </div>
         </div>
@@ -174,7 +174,7 @@ async function handlePermanentDelete() {
           </template>
 
           <div class="space-y-4">
-            <p class="text-gray-700 dark:text-gray-300">
+            <p class="text-neutral-700 dark:text-neutral-300">
               Are you sure you want to permanently delete <strong>{{ projectToDelete?.name }}</strong>?
             </p>
 
