@@ -206,8 +206,29 @@ export const projectKeys = {
 
 **Test Categories:**
 1. **Unit Tests** (`tests/lib/`, `tests/composables/`) - Pure logic, no DOM
-2. **Database Tests** (`tests/database/`) - RLS policies, migrations
-3. **Component Tests** - Use `@nuxt/test-utils` for Vue component testing
+2. **Component Tests** - Use `@nuxt/test-utils` for Vue component testing
+
+**Minimal Mocking Philosophy:**
+- Tests should NOT be overly mocked just to pass
+- Mock ONLY what is completely out of scope for the test
+- Prefer real implementations and integration tests over heavily mocked unit tests
+- If you find yourself mocking extensively, consider if you're testing the right thing
+- Real database interactions, real composables, and real components are preferred when feasible
+
+**Database Mocking Exception:**
+- Database connections **MAY** be mocked when necessary to avoid external service rate-limits (e.g., Supabase API limits during CI/CD or high-frequency test runs)
+- Use mocked Supabase client for unit tests that validate logic without requiring actual database state
+- Maintain dedicated integration tests with real database connections to validate full data flow
+- Mock implementations MUST match the contract/interface of real implementations
+- **Balance:** Unit tests with mocks for speed and isolation, integration tests with real DB for confidence
+
+**Test Organization:**
+```
+tests/
+├── lib/              # Unit tests for database layer (may use mocked Supabase)
+├── composables/      # Unit tests for composables (may use mocked Supabase)
+└── integration/      # Integration tests with real Supabase connection
+```
 
 ## Environment Variables
 
@@ -258,3 +279,10 @@ See `README.md` for detailed deployment instructions.
    - Test SSG build: `npm run generate && npm run serve`
    - Verify auth flows work on static preview
    - Deploy to Vercel
+
+## Active Technologies
+- TypeScript 5.x with Vue 3 Composition API + Nuxt 4 (SSG), Nuxt UI v4, Tailwind CSS v4, Lucide Icons (001-design-system-enforcement)
+- N/A (UI/styling changes only, no data layer modifications) (001-design-system-enforcement)
+
+## Recent Changes
+- 001-design-system-enforcement: Added TypeScript 5.x with Vue 3 Composition API + Nuxt 4 (SSG), Nuxt UI v4, Tailwind CSS v4, Lucide Icons
