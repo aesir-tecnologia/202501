@@ -5,7 +5,7 @@ import type { Database } from '~/types/database.types';
 // Validate required environment variables are loaded
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
   throw new Error(
-    'Missing required environment variables: SUPABASE_URL and SUPABASE_ANON_KEY must be set in .env file'
+    'Missing required environment variables: SUPABASE_URL and SUPABASE_ANON_KEY must be set in .env file',
   );
 }
 
@@ -50,7 +50,7 @@ export async function getTestUser(userNumber: 1 | 2 = 1) {
 
   const client = createClient<Database>(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!
+    process.env.SUPABASE_ANON_KEY!,
   );
 
   const { data, error } = await client.auth.signInWithPassword({
