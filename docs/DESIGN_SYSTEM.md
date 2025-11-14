@@ -2,7 +2,7 @@
 
 ## Overview
 
-LifeStint uses a modern, component-based design system built on **Nuxt UI v4** with **Tailwind CSS v4**, featuring a custom color palette, typography system, and comprehensive dark mode support.
+LifeStint uses a modern, component-based design system built on **Nuxt UI v4** with **Tailwind CSS v4**, featuring semantic color aliases, typography system, and comprehensive dark mode support. The color system uses Tailwind's default palettes mapped to semantic aliases in `app.config.ts` for Nuxt UI components.
 
 ---
 
@@ -10,9 +10,10 @@ LifeStint uses a modern, component-based design system built on **Nuxt UI v4** w
 
 - **UI Framework**: Nuxt UI v4 (`@nuxt/ui`)
 - **CSS Framework**: Tailwind CSS v4 (via `@theme` directive)
+- **Color System**: Nuxt UI semantic colors (configured in `app.config.ts`)
 - **Icons**: Lucide Icons
 - **Build Tool**: Nuxt 4.1.2
-- **Styling Approach**: Utility-first CSS with custom CSS variables
+- **Styling Approach**: Utility-first CSS with semantic color aliases
 
 ### Tailwind CSS v4 Configuration
 
@@ -26,16 +27,98 @@ This project uses **Tailwind CSS v4**, which introduces a new configuration appr
 **Example from `main.css`:**
 ```css
 @import "tailwindcss";
+@import "@nuxt/ui";
 
 @theme {
   --font-sans: 'Public Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --color-brand-500: #2b86ff;
-  /* ... all design tokens defined here */
+  /* Custom colors can be defined here if needed */
+  /* --color-custom-500: #hexvalue; */
 }
 ```
 
+**Note:**
+- Custom colors can be defined in `@theme` and used with Tailwind utilities (e.g., `bg-custom-500`)
+- For Nuxt UI components to use colors via semantic aliases (e.g., `color="primary"`), they must be mapped in `app.config.ts`
+- This project uses Tailwind's default color palettes without custom `@theme` definitions
+
 This modern approach provides better type safety, improved performance, and tighter integration with CSS tooling.
+
+### Nuxt UI Color Configuration
+
+Nuxt UI components require semantic color mapping in `app/app.config.ts`:
+
+```typescript
+export default defineAppConfig({
+  ui: {
+    colors: {
+      primary: 'violet',    // Maps to Tailwind's violet palette
+      secondary: 'sky',     // Maps to Tailwind's sky palette
+    },
+  },
+})
+```
+
+**How it works:**
+- **Tailwind colors**: Can be Tailwind defaults (violet, sky, green) or custom colors defined in `@theme`
+- **Nuxt UI mapping**: Maps Tailwind colors to semantic aliases for use in Nuxt UI components
+- **Pure Tailwind utilities**: Work with any color from `@theme` without mapping (e.g., `bg-violet-500`, `text-sky-600`)
+- **Nuxt UI components**: Require mapping to use semantic aliases (e.g., `<UButton color="primary" />`)
+
+**Benefits:**
+- **Runtime configuration**: Change colors without rebuilding
+- **Semantic naming**: Use `color="primary"` instead of `color="violet"` in components
+- **Consistency**: Standardized color usage across all Nuxt UI components
+- **Flexibility**: Easily swap color palettes by updating one file
+
+---
+
+## Nuxt UI Semantic Color System
+
+### Overview
+
+Nuxt UI provides **semantic color aliases** that describe the purpose of colors rather than their appearance. This allows for consistent theming and easier maintenance across the application.
+
+**Two-layer color system:**
+1. **Tailwind layer**: Colors defined in Tailwind (defaults or custom `@theme` definitions) — usable with utility classes
+2. **Nuxt UI layer**: Tailwind colors mapped to semantic aliases in `app.config.ts` — usable with component `color` props
+
+### Semantic Color Mapping
+
+The following semantic colors are configured in `app/app.config.ts`:
+
+| Semantic Alias | Tailwind Color | Purpose |
+|----------------|----------------|---------|
+| `primary` | `violet` | Main CTAs, active navigation, brand elements, important links |
+| `secondary` | `sky` | Secondary buttons, alternative actions, complementary UI elements |
+| `success` | `green` | Success messages, completed states, positive confirmations |
+| `info` | `blue` | Info alerts, tooltips, help text, neutral notifications |
+| `warning` | `yellow` | Warning messages, pending states, attention-needed items |
+| `error` | `red` | Error messages, validation errors, destructive actions |
+| `neutral` | `slate` | Text, borders, backgrounds, disabled states |
+
+### Using Semantic Colors
+
+All Nuxt UI components accept a `color` prop with semantic aliases:
+
+```vue
+<!-- Nuxt UI components: Use semantic aliases -->
+<UButton color="primary">Create Project</UButton>
+<UButton color="secondary">Learn More</UButton>
+<UAlert color="success" title="Operation successful!" />
+<UAlert color="error" title="Something went wrong" />
+
+<!-- Pure Tailwind utilities: Use color names directly -->
+<div class="bg-violet-500 text-white">Direct Tailwind usage</div>
+<p class="text-sky-600">Sky colored text</p>
+```
+
+**Benefits:**
+- **Consistency**: Semantic naming ensures consistent use across Nuxt UI components
+- **Flexibility**: Change the entire theme by updating `app.config.ts`
+- **Maintainability**: Purpose-driven naming makes component code more readable
+- **Runtime Configuration**: Update colors without rebuilding the app
+- **Hybrid approach**: Use semantic colors in components, direct colors in utilities
 
 ---
 
@@ -45,111 +128,131 @@ This modern approach provides better type safety, improved performance, and tigh
 
 The design system uses a semantic color naming system with six core color categories:
 
-#### Primary Colors (Blue Palette)
-Main brand color for primary actions, CTAs, and brand identity.
+#### Primary Colors (Violet Palette)
+Main brand color for primary actions, CTAs, and brand identity. Maps to Tailwind's `violet` palette.
 
 ```css
---color-primary-50:  #eef7ff  /* Lightest */
---color-primary-100: #d9edff
---color-primary-200: #b8dcff
---color-primary-300: #8ec6ff
---color-primary-400: #5ea8ff
---color-primary-500: #2b86ff  /* Primary */
---color-primary-600: #196af0
---color-primary-700: #1656c7
---color-primary-800: #153f8f
---color-primary-900: #132e67  /* Darkest */
+violet-50:  #faf5ff  /* Lightest */
+violet-100: #f3e8ff
+violet-200: #e9d5ff
+violet-300: #d8b4fe
+violet-400: #c084fc
+violet-500: #a855f7  /* Primary */
+violet-600: #9333ea
+violet-700: #7e22ce
+violet-800: #6b21a8
+violet-900: #581c87
+violet-950: #3b0764  /* Darkest */
 ```
 
-#### Secondary Colors (Purple Palette)
-Secondary actions and complementary UI elements.
+#### Secondary Colors (Sky Palette)
+Secondary actions and complementary UI elements. Maps to Tailwind's `sky` palette.
 
 ```css
---color-secondary-50:  #faf5ff  /* Lightest */
---color-secondary-100: #f3e8ff
---color-secondary-200: #e9d5ff
---color-secondary-300: #d8b4fe
---color-secondary-400: #c084fc
---color-secondary-500: #a855f7  /* Secondary */
---color-secondary-600: #9333ea
---color-secondary-700: #7e22ce
---color-secondary-800: #6b21a8
---color-secondary-900: #581c87  /* Darkest */
+sky-50:  #f0f9ff  /* Lightest */
+sky-100: #e0f2fe
+sky-200: #bae6fd
+sky-300: #7dd3fc
+sky-400: #38bdf8
+sky-500: #0ea5e9  /* Secondary */
+sky-600: #0284c7
+sky-700: #0369a1
+sky-800: #075985
+sky-900: #0c4a6e
+sky-950: #082f49  /* Darkest */
 ```
 
 #### Success Colors (Green Palette)
-Success states, positive actions, and confirmations.
+Success states, positive actions, and confirmations. Maps to Tailwind's `green` palette.
 
 ```css
---color-success-50:  #ecfff7  /* Lightest */
---color-success-100: #ccfee9
---color-success-200: #97f7d1
---color-success-300: #5eeab5
---color-success-400: #2fd89a
---color-success-500: #15bf83  /* Success */
---color-success-600: #0da36f
---color-success-700: #0a855c
---color-success-800: #0a684b
---color-success-900: #0a523d  /* Darkest */
+green-50:  #f0fdf4  /* Lightest */
+green-100: #dcfce7
+green-200: #bbf7d0
+green-300: #86efac
+green-400: #4ade80
+green-500: #22c55e  /* Success */
+green-600: #16a34a
+green-700: #15803d
+green-800: #166534
+green-900: #14532d
+green-950: #052e16  /* Darkest */
 ```
 
-#### Warning Colors (Orange Palette)
-Warning states, pause actions, and attention elements.
+#### Warning Colors (Yellow Palette)
+Warning states, pause actions, and attention elements. Maps to Tailwind's `yellow` palette.
 
 ```css
---color-warning-50:  #fff7eb  /* Lightest */
---color-warning-100: #ffedcc
---color-warning-200: #ffd99a
---color-warning-300: #ffc166
---color-warning-400: #ffa234
---color-warning-500: #ff8714  /* Warning */
---color-warning-600: #e36f06
---color-warning-700: #bb5907
---color-warning-800: #90440a
---color-warning-900: #6f350c  /* Darkest */
+yellow-50:  #fefce8  /* Lightest */
+yellow-100: #fef9c3
+yellow-200: #fef08a
+yellow-300: #fde047
+yellow-400: #facc15
+yellow-500: #eab308  /* Warning */
+yellow-600: #ca8a04
+yellow-700: #a16207
+yellow-800: #854d0e
+yellow-900: #713f12
+yellow-950: #422006  /* Darkest */
 ```
 
 #### Error Colors (Red Palette)
-Error states, destructive actions, and critical alerts.
+Error states, destructive actions, and critical alerts. Maps to Tailwind's `red` palette.
 
 ```css
---color-error-50:  #fef2f2  /* Lightest */
---color-error-100: #fee2e2
---color-error-200: #fecaca
---color-error-300: #fca5a5
---color-error-400: #f87171
---color-error-500: #ef4444  /* Error */
---color-error-600: #dc2626
---color-error-700: #b91c1c
---color-error-800: #991b1b
---color-error-900: #7f1d1d  /* Darkest */
+red-50:  #fef2f2  /* Lightest */
+red-100: #fee2e2
+red-200: #fecaca
+red-300: #fca5a5
+red-400: #f87171
+red-500: #ef4444  /* Error */
+red-600: #dc2626
+red-700: #b91c1c
+red-800: #991b1b
+red-900: #7f1d1d
+red-950: #450a0a  /* Darkest */
 ```
 
-#### Neutral Colors (Gray Palette)
-Neutral UI elements, text, backgrounds, and borders.
+#### Neutral Colors (Slate Palette)
+Neutral UI elements, text, backgrounds, and borders. Maps to Tailwind's `slate` palette.
 
 ```css
---color-neutral-50:  #f5f7fb  /* Lightest */
---color-neutral-100: #e7eaf2
---color-neutral-200: #c5cbda
---color-neutral-300: #98a0b5
---color-neutral-400: #6b7490
---color-neutral-500: #3b4667  /* Neutral */
---color-neutral-600: #2b3552
---color-neutral-700: #1e2740
---color-neutral-800: #141b2f
---color-neutral-900: #0b1020  /* Darkest */
+slate-50:  #f8fafc  /* Lightest */
+slate-100: #f1f5f9
+slate-200: #e2e8f0
+slate-300: #cbd5e1
+slate-400: #94a3b8
+slate-500: #64748b  /* Neutral */
+slate-600: #475569
+slate-700: #334155
+slate-800: #1e293b
+slate-900: #0f172a
+slate-950: #020617  /* Darkest */
 ```
 
 ### Color Usage Guidelines
 
-- **Primary Actions**: Primary colors (blue) - main CTAs, active states, links
-- **Secondary Actions**: Secondary colors (purple) - less prominent actions, supporting UI
+- **Primary Actions**: Primary colors (violet) - main CTAs, active states, links
+- **Secondary Actions**: Secondary colors (sky) - less prominent actions, supporting UI
 - **Success States**: Success colors (green) - confirmations, completed actions, positive feedback
-- **Warning States**: Warning colors (orange) - cautions, pause actions, attention needed
+- **Warning States**: Warning colors (yellow) - cautions, pause actions, attention needed
 - **Error States**: Error colors (red) - errors, destructive actions, critical alerts
-- **Neutral Elements**: Neutral colors (gray) - text, backgrounds, borders, disabled states
+- **Neutral Elements**: Neutral colors (slate) - text, backgrounds, borders, disabled states
+- **Info States**: Info colors (blue) - informational messages, help text, neutral notifications
 - **Project Color Tags**: Red, Orange, Amber, Green, Teal, Blue, Purple, Pink (independent tag system)
+
+**Usage with Nuxt UI Components:**
+Use semantic color props in components instead of specific color names:
+
+```vue
+<!-- Good: Semantic colors -->
+<UButton color="primary">Create</UButton>
+<UButton color="secondary">Learn More</UButton>
+<UAlert color="success" title="Success!" />
+
+<!-- Avoid: Specific colors (unless needed for project tags) -->
+<UButton color="violet">Create</UButton>
+```
 
 ---
 
@@ -1161,13 +1264,19 @@ toast.add({
 
 ## Design Tokens Summary
 
-### Colors
-- **Primary**: Blue (`--color-primary-500`: `#2b86ff`)
-- **Secondary**: Purple (`--color-secondary-500`: `#a855f7`)
-- **Success**: Green (`--color-success-500`: `#15bf83`)
-- **Warning**: Orange (`--color-warning-500`: `#ff8714`)
-- **Error**: Red (`--color-error-500`: `#ef4444`)
-- **Neutral**: Gray (`--color-neutral-500`: `#3b4667`)
+### Semantic Colors
+
+Configured in `app/app.config.ts` using Tailwind's default color palettes:
+
+- **Primary**: Violet (`violet-500`: `#a855f7`) - Tailwind's `violet` palette
+- **Secondary**: Sky (`sky-500`: `#0ea5e9`) - Tailwind's `sky` palette
+- **Success**: Green (`green-500`: `#22c55e`) - Tailwind's `green` palette
+- **Warning**: Yellow (`yellow-500`: `#eab308`) - Tailwind's `yellow` palette
+- **Error**: Red (`red-500`: `#ef4444`) - Tailwind's `red` palette
+- **Neutral**: Slate (`slate-500`: `#64748b`) - Tailwind's `slate` palette
+- **Info**: Blue (Nuxt UI default) - Tailwind's `blue` palette
+
+**Usage:** Use semantic aliases (`color="primary"`) in components, not specific colors (`color="violet"`).
 
 ### Typography
 - **Primary Font**: Public Sans (sans-serif)
@@ -1247,11 +1356,11 @@ toast.add({
 app/
 ├── assets/
 │   └── css/
-│       └── main.css          # Design system CSS variables
+│       └── main.css          # Tailwind @theme (fonts only)
 ├── components/                # Vue components using design system
 ├── layouts/
 │   └── default.vue           # Main layout with header/navigation
-└── app.config.ts              # App configuration (UI icons, etc.)
+└── app.config.ts              # Nuxt UI config (semantic colors, icons)
 
 nuxt.config.ts                 # Nuxt config (UI module, color mode)
 ```
