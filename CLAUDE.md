@@ -204,31 +204,78 @@ export const projectKeys = {
 
 ## Testing
 
-**Test Categories:**
-1. **Unit Tests** (`tests/lib/`, `tests/composables/`) - Pure logic, no DOM
-2. **Component Tests** - Use `@nuxt/test-utils` for Vue component testing
+**Dual-Mode Testing Infrastructure:**
+Tests run against a **mocked Supabase client by default** to avoid API rate limits and provide fast feedback. Integration tests can optionally run against a real Supabase instance.
 
-**Minimal Mocking Philosophy:**
-- Tests should NOT be overly mocked just to pass
-- Mock ONLY what is completely out of scope for the test
-- Prefer real implementations and integration tests over heavily mocked unit tests
-- If you find yourself mocking extensively, consider if you're testing the right thing
-- Real database interactions, real composables, and real components are preferred when feasible
+### Test Modes
 
-**Database Mocking Exception:**
-- Database connections **MAY** be mocked when necessary to avoid external service rate-limits (e.g., Supabase API limits during CI/CD or high-frequency test runs)
-- Use mocked Supabase client for unit tests that validate logic without requiring actual database state
-- Maintain dedicated integration tests with real database connections to validate full data flow
-- Mock implementations MUST match the contract/interface of real implementations
-- **Balance:** Unit tests with mocks for speed and isolation, integration tests with real DB for confidence
+**1. Unit Tests (Mocked - Default)**
+```bash
+npm test                 # Run in watch mode (mocked)
+npm run test:ui          # Run with Vitest UI (mocked)
+npm run test:run         # Run once in CI mode (mocked)
+```
+- **Speed:** ~1 second for full suite
+- **API Calls:** Zero external calls
+- **Rate Limiting:** None
+- **Use Case:** Local development, CI/CD, rapid iteration
 
-**Test Organization:**
+**2. Integration Tests (Real Supabase)**
+```bash
+USE_MOCK_SUPABASE=false npm run test:run
+```
+- **Speed:** ~7-10 seconds (network dependent)
+- **API Calls:** Real Supabase API
+- **Rate Limiting:** Subject to Supabase limits
+- **Use Case:** Pre-deployment validation, RLS testing
+
+### Mock Implementation
+
+**Location:** `tests/mocks/supabase.ts`
+
+**Features:**
+- In-memory storage for projects and stints
+- Client-isolated auth state (per-client user sessions)
+- Query builder API matching Supabase PostgREST
+- Automatic cleanup between tests via `resetMockStore()`
+
+**Supported Operations:**
+- Query: `.select()`, `.eq()`, `.neq()`, `.in()`, `.is()`, `.filter()`, `.order()`, `.limit()`, `.single()`, `.maybeSingle()`
+- Mutations: `.insert()`, `.update()`, `.delete()`
+- Auth: `client.auth.getUser()`, `client.auth.signOut()`
+
+**Mock Limitations:**
+- Complex RLS policies (basic user_id filtering only)
+- Database triggers (e.g., `updated_at` auto-update)
+- PostgreSQL-specific functions
+- Real-time subscriptions
+
+### Test Helpers
+
+**`getTestUser(userNumber: 1 | 2)`**
+- Returns mocked client by default
+- Returns real authenticated client when `USE_MOCK_SUPABASE=false`
+- Each user has isolated session and data
+
+**`cleanupTestData(client)`**
+- Resets mock store when using mocks
+- Deletes database rows when using real Supabase
+
+### Test Organization
+
 ```
 tests/
-├── lib/              # Unit tests for database layer (may use mocked Supabase)
-├── composables/      # Unit tests for composables (may use mocked Supabase)
-└── integration/      # Integration tests with real Supabase connection
+├── mocks/
+│   └── supabase.ts       # Mock Supabase client implementation
+├── lib/                  # Unit tests for database layer (mocked by default)
+├── composables/          # Unit tests for composables (mocked by default)
+├── schemas/              # Schema validation tests (no DB needed)
+├── setup.ts              # Global test setup with dual-mode support
+├── globalSetup.ts        # Real Supabase setup (only when USE_MOCK_SUPABASE=false)
+└── README.md             # Detailed testing documentation
 ```
+
+**See `tests/README.md` for comprehensive testing guide, mock architecture details, and examples.**
 
 ## Environment Variables
 
@@ -272,8 +319,9 @@ See `README.md` for detailed deployment instructions.
 
 3. **Testing:**
    - Write tests alongside implementation
-   - Run `npm test` during development
+   - Run `npm test` during development (uses mocked Supabase)
    - Verify with `npm run test:run` before committing
+   - Optional: Run integration tests with `USE_MOCK_SUPABASE=false npm run test:run` before major releases
 
 4. **Deployment:**
    - Test SSG build: `npm run generate && npm run serve`
@@ -286,3 +334,4 @@ See `README.md` for detailed deployment instructions.
 
 ## Recent Changes
 - 001-design-system-enforcement: Added TypeScript 5.x with Vue 3 Composition API + Nuxt 4 (SSG), Nuxt UI v4, Tailwind CSS v4, Lucide Icons
+- Testing Infrastructure: Implemented dual-mode testing with mocked Supabase client (default) for fast unit tests (~1s) and optional real Supabase integration tests. Eliminates API rate limiting during development and CI/CD. See `tests/README.md` for details.
