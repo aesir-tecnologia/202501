@@ -1,15 +1,14 @@
 <!--
 Sync Impact Report:
-Version Change: 1.1.0 → 1.2.0 (MINOR - expanded design system guidance)
+Version Change: 1.2.0 → 1.2.1 (PATCH - clarification to testing principles)
 Modified Principles:
-  - Principle II (Test-Driven Development) - Added minimal mocking philosophy (v1.1.0)
-  - Technical Architecture Principles > Component Library & Styling - Added design system compliance requirement (v1.2.0)
+  - Principle II (Test-Driven Development) - Clarified database mocking policy for rate-limit scenarios
 Added Sections: None
 Removed Sections: None
 Templates Requiring Updates:
-  ✅ plan-template.md - No changes required
+  ✅ plan-template.md - No changes required (testing section references constitution)
   ✅ spec-template.md - No changes required
-  ✅ tasks-template.md - No changes required
+  ✅ tasks-template.md - No changes required (testing section references constitution)
 Follow-up TODOs: None
 -->
 
@@ -47,7 +46,6 @@ All data access MUST follow the strict three-layer pattern:
 Testing is mandatory for all critical features:
 
 - **Unit Tests** for pure logic (lib/, composables/)
-- **Database Tests** for RLS policies and migrations
 - **Component Tests** using @nuxt/test-utils
 - Tests MUST be written alongside implementation
 - Run `npm test` during development
@@ -60,7 +58,14 @@ Testing is mandatory for all critical features:
 - If you find yourself mocking extensively, consider if you're testing the right thing
 - Real database interactions, real composables, and real components are preferred when feasible
 
-**Rationale**: Maintains code quality, prevents regressions, ensures reliability in production, and tests actual behavior rather than implementation details. Over-mocking creates brittle tests that pass but don't catch real bugs.
+**Database Mocking Exception**:
+- Database connections MAY be mocked when necessary to avoid external service rate-limits (e.g., Supabase API limits during CI/CD or high-frequency test runs)
+- Use mocked Supabase client for unit tests that validate logic without requiring actual database state
+- Maintain dedicated integration tests with real database connections to validate full data flow
+- Mock implementations MUST match the contract/interface of real implementations
+- Balance: Unit tests with mocks for speed and isolation, integration tests with real DB for confidence
+
+**Rationale**: Maintains code quality, prevents regressions, ensures reliability in production, and tests actual behavior rather than implementation details. Over-mocking creates brittle tests that pass but don't catch real bugs. Strategic database mocking enables faster test execution while maintaining test coverage and avoiding service rate-limits.
 
 ### III. Static Site Generation (SSG) + Client-Side Auth
 
@@ -251,4 +256,4 @@ export const entityKeys = {
 
 This constitution supersedes all other practices and conventions. When in doubt, refer to these principles. All team members and AI assistants MUST follow these guidelines.
 
-**Version**: 1.2.0 | **Ratified**: 2025-11-12 | **Last Amended**: 2025-11-12
+**Version**: 1.2.1 | **Ratified**: 2025-11-12 | **Last Amended**: 2025-11-14
