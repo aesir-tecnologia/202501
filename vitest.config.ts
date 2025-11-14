@@ -1,11 +1,14 @@
 import { defineConfig } from 'vitest/config';
+import { loadEnv } from 'vite';
 import path from 'path';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   test: {
     globals: true,
     environment: 'node',
     setupFiles: ['./tests/setup.ts'],
+    globalSetup: ['./tests/globalSetup.ts'],
+    env: loadEnv(mode ?? 'test', process.cwd(), ''),
   },
   resolve: {
     alias: {
@@ -18,4 +21,4 @@ export default defineConfig({
       '~/composables': path.resolve(__dirname, 'app/composables'),
     },
   },
-});
+}));

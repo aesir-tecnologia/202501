@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
 import { createProject, hasActiveStint } from '~/lib/supabase/projects';
-import { createTestUser } from '../../setup';
+import { getTestUser, cleanupTestData } from '../../setup';
 
 /**
  * Contract Test: hasActiveStint
@@ -16,16 +16,17 @@ import { createTestUser } from '../../setup';
 const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
 const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key';
 
-type TestClient = ReturnType<typeof createClient<Database>>;
+type TestClient = Awaited<ReturnType<typeof getTestUser>>['client'];
 
 describe('hasActiveStint Contract', () => {
   let testUserClient: TestClient;
   let testUser: { id: string, email: string } | null;
 
   beforeEach(async () => {
-    const testUserData = await createTestUser();
+    const testUserData = await getTestUser();
     testUserClient = testUserData.client;
     testUser = testUserData.user;
+    await cleanupTestData(testUserClient);
   });
 
   afterEach(async () => {

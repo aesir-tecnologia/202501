@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
-import { createTestUser } from '../setup';
+import { getTestUser, cleanupTestData } from '../setup';
 
 /**
  * RLS Policy Tests for Project Management Feature
@@ -26,13 +26,15 @@ describe('Project RLS Policies', () => {
   let testUser2: { id: string, email: string } | null;
 
   beforeEach(async () => {
-    const testUser1Data = await createTestUser();
+    const testUser1Data = await getTestUser(1);
     testUser1Client = testUser1Data.client;
     testUser1 = testUser1Data.user;
+    await cleanupTestData(testUser1Client);
 
-    const testUser2Data = await createTestUser();
+    const testUser2Data = await getTestUser(2);
     testUser2Client = testUser2Data.client;
     testUser2 = testUser2Data.user;
+    await cleanupTestData(testUser2Client);
   });
 
   afterEach(async () => {
@@ -53,6 +55,7 @@ describe('Project RLS Policies', () => {
       const { data: project1 } = await testUser1Client
         .from('projects')
         .insert({
+          user_id: testUser1.id,
           name: 'User 1 Project',
           expected_daily_stints: 3,
           custom_stint_duration: 45,
@@ -64,6 +67,7 @@ describe('Project RLS Policies', () => {
       const { data: project2 } = await testUser2Client
         .from('projects')
         .insert({
+          user_id: testUser2.id,
           name: 'User 2 Project',
           expected_daily_stints: 4,
           custom_stint_duration: 60,
@@ -101,6 +105,7 @@ describe('Project RLS Policies', () => {
       const { data, error } = await testUser1Client
         .from('projects')
         .insert({
+          user_id: testUser1.id,
           name: 'New Project',
           expected_daily_stints: 3,
         })
@@ -122,6 +127,7 @@ describe('Project RLS Policies', () => {
       const { data: project } = await testUser1Client
         .from('projects')
         .insert({
+          user_id: testUser1.id,
           name: 'Original Name',
           expected_daily_stints: 3,
         })
@@ -148,6 +154,7 @@ describe('Project RLS Policies', () => {
       const { data: project2 } = await testUser2Client
         .from('projects')
         .insert({
+          user_id: testUser2.id,
           name: 'User 2 Project',
           expected_daily_stints: 3,
         })
@@ -179,6 +186,7 @@ describe('Project RLS Policies', () => {
       const { data: project } = await testUser1Client
         .from('projects')
         .insert({
+          user_id: testUser1.id,
           name: 'Project to Delete',
           expected_daily_stints: 3,
         })
@@ -210,6 +218,7 @@ describe('Project RLS Policies', () => {
       const { data: project2 } = await testUser2Client
         .from('projects')
         .insert({
+          user_id: testUser2.id,
           name: 'User 2 Project',
           expected_daily_stints: 3,
         })

@@ -2,9 +2,12 @@ import { vi } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
 
-// Mock environment variables for tests
-process.env.SUPABASE_URL = process.env.SUPABASE_URL || 'http://localhost:54321';
-process.env.SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'test-anon-key';
+// Validate required environment variables are loaded
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+  throw new Error(
+    'Missing required environment variables: SUPABASE_URL and SUPABASE_ANON_KEY must be set in .env file'
+  );
+}
 
 // Global test setup
 beforeEach(() => {
@@ -32,48 +35,45 @@ global.File = class MockFile {
 } as typeof globalThis.File;
 
 /**
- * Helper function to create a test user with auth and user_profile
- * This is required because user_profiles must be manually created after signup
+ * Get one of the global test users (1 or 2)
+ * Users are created once in globalSetup and reused across all tests
  */
-export async function createTestUser() {
-  const testEmail = `test-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`;
-  const testPassword = 'testPassword123!';
+export async function getTestUser(userNumber: 1 | 2 = 1) {
+  const envPrefix = `TEST_USER_${userNumber}`;
+  const email = process.env[`${envPrefix}_EMAIL`];
+  const password = process.env[`${envPrefix}_PASSWORD`];
+  const userId = process.env[`${envPrefix}_ID`];
 
-  const supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
-
-  const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
-
-  // Sign up the user
-  const { data: userData, error: signUpError } = await supabase.auth.signUp({
-    email: testEmail,
-    password: testPassword,
-  });
-
-  if (signUpError || !userData.user) {
-    throw new Error(`Failed to create test user: ${signUpError?.message}`);
+  if (!email || !password || !userId) {
+    throw new Error(`Global test user ${userNumber} not initialized. Check globalSetup.ts`);
   }
 
-  // Create a new client for this user
-  const userClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
+  const client = createClient<Database>(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!
+  );
 
-  // Sign in
-  await userClient.auth.signInWithPassword({
-    email: testEmail,
-    password: testPassword,
+  const { data, error } = await client.auth.signInWithPassword({
+    email,
+    password,
   });
 
-  // Create user_profile (required for foreign key constraint)
-  await userClient
-    .from('user_profiles')
-    .insert({
-      id: userData.user.id,
-      email: testEmail,
-    });
+  if (error || !data.user) {
+    throw new Error(`Failed to sign in test user ${userNumber}: ${error?.message}`);
+  }
 
   return {
-    client: userClient,
-    user: userData.user,
-    email: testEmail,
+    client,
+    user: data.user,
+    email,
   };
+}
+
+/**
+ * Clean up test data for a specific user
+ * Deletes all projects and stints but preserves the user account
+ */
+export async function cleanupTestData(client: ReturnType<typeof createClient<Database>>) {
+  await client.from('stints').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  await client.from('projects').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 }

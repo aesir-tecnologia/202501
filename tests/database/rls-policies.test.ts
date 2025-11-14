@@ -276,7 +276,7 @@ describe('Row Level Security Policies', () => {
       const { data: project1 } = await testUser1Client
         .from('projects')
         .insert({
-          user_id: testUser1.id,
+          user_id: testUser1!.id,
           name: 'Stint Test Project 1',
         })
         .select()
@@ -286,7 +286,7 @@ describe('Row Level Security Policies', () => {
       const { data: project2 } = await testUser2Client
         .from('projects')
         .insert({
-          user_id: testUser2.id,
+          user_id: testUser2!.id,
           name: 'Stint Test Project 2',
         })
         .select()
@@ -297,8 +297,8 @@ describe('Row Level Security Policies', () => {
       const { data: stint1 } = await testUser1Client
         .from('stints')
         .insert({
+          user_id: testUser1!.id,
           project_id: testProject1Id,
-          user_id: testUser1.id,
           started_at: new Date().toISOString(),
           duration_minutes: 25,
         })
@@ -309,8 +309,8 @@ describe('Row Level Security Policies', () => {
       const { data: stint2 } = await testUser2Client
         .from('stints')
         .insert({
+          user_id: testUser2!.id,
           project_id: testProject2Id,
-          user_id: testUser2.id,
           started_at: new Date().toISOString(),
           duration_minutes: 30,
         })
@@ -377,8 +377,8 @@ describe('Row Level Security Policies', () => {
       const { error } = await testUser1Client
         .from('stints')
         .insert({
+          user_id: testUser1.id,
           project_id: testProject2Id, // User 2's project
-          user_id: testUser1.id, // User 1's ID
           started_at: new Date().toISOString(),
           duration_minutes: 25,
         });
@@ -439,8 +439,8 @@ describe('Row Level Security Policies', () => {
         stintDate.setDate(baseDate.getDate() - i); // Spread over 20 days
 
         return {
-          project_id: project!.id,
           user_id: testUser1.id,
+          project_id: project!.id,
           started_at: stintDate.toISOString(),
           duration_minutes: 25 + (i % 10), // Varied durations
         };

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
-import { createTestUser } from '../setup';
+import { getTestUser, cleanupTestData } from '../setup';
 
 /**
  * Active Stint Deletion Protection Tests
@@ -18,16 +18,17 @@ import { createTestUser } from '../setup';
 const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
 const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key';
 
-type TestClient = ReturnType<typeof createClient<Database>>;
+type TestClient = Awaited<ReturnType<typeof getTestUser>>['client'];
 
 describe('Project Active Stint Deletion Protection', () => {
   let testUserClient: TestClient;
   let testUser: { id: string, email: string } | null;
 
   beforeEach(async () => {
-    const testUserData = await createTestUser();
+    const testUserData = await getTestUser();
     testUserClient = testUserData.client;
     testUser = testUserData.user;
+    await cleanupTestData(testUserClient);
   });
 
   afterEach(async () => {
@@ -44,6 +45,7 @@ describe('Project Active Stint Deletion Protection', () => {
       const { data: project } = await testUserClient
         .from('projects')
         .insert({
+          user_id: testUser!.id,
           name: 'Project with Active Stint',
           expected_daily_stints: 3,
         })
@@ -56,6 +58,7 @@ describe('Project Active Stint Deletion Protection', () => {
       const { data: activeStint } = await testUserClient
         .from('stints')
         .insert({
+          user_id: testUser!.id,
           project_id: project!.id,
           started_at: new Date().toISOString(),
           ended_at: null, // Active stint
@@ -98,6 +101,7 @@ describe('Project Active Stint Deletion Protection', () => {
       const { data: project } = await testUserClient
         .from('projects')
         .insert({
+          user_id: testUser!.id,
           name: 'Project with Completed Stints',
           expected_daily_stints: 3,
         })
@@ -110,6 +114,7 @@ describe('Project Active Stint Deletion Protection', () => {
       const { data: completedStint } = await testUserClient
         .from('stints')
         .insert({
+          user_id: testUser!.id,
           project_id: project!.id,
           started_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
           ended_at: new Date().toISOString(), // Completed
@@ -147,6 +152,7 @@ describe('Project Active Stint Deletion Protection', () => {
       const { data: project } = await testUserClient
         .from('projects')
         .insert({
+          user_id: testUser!.id,
           name: 'Project for Cascade Test',
           expected_daily_stints: 3,
         })
@@ -159,6 +165,7 @@ describe('Project Active Stint Deletion Protection', () => {
       const { data: stint1 } = await testUserClient
         .from('stints')
         .insert({
+          user_id: testUser!.id,
           project_id: project!.id,
           started_at: new Date(Date.now() - 7200000).toISOString(),
           ended_at: new Date(Date.now() - 5400000).toISOString(),
@@ -169,6 +176,7 @@ describe('Project Active Stint Deletion Protection', () => {
       const { data: stint2 } = await testUserClient
         .from('stints')
         .insert({
+          user_id: testUser!.id,
           project_id: project!.id,
           started_at: new Date(Date.now() - 3600000).toISOString(),
           ended_at: new Date().toISOString(),

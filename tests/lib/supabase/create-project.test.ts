@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createProject } from '~/lib/supabase/projects';
-import { createTestUser } from '../../setup';
+import { getTestUser, cleanupTestData } from '../../setup';
 
 /**
  * Contract Test: createProject
@@ -12,16 +12,17 @@ import { createTestUser } from '../../setup';
  * - Throws error on duplicate name (case-insensitive)
  */
 
-type TestClient = Awaited<ReturnType<typeof createTestUser>>['client'];
+type TestClient = Awaited<ReturnType<typeof getTestUser>>['client'];
 
 describe('createProject Contract', () => {
   let testUserClient: TestClient;
   let testUser: { id: string, email: string } | null;
 
   beforeEach(async () => {
-    const testUserData = await createTestUser();
+    const testUserData = await getTestUser();
     testUserClient = testUserData.client;
     testUser = testUserData.user;
+    await cleanupTestData(testUserClient);
   });
 
   afterEach(async () => {

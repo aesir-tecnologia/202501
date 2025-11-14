@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
 import { deleteStint, getStintById } from '~/lib/supabase/stints';
-import { createTestUser } from '../../setup';
+import { getTestUser, cleanupTestData } from '../../setup';
 
 /**
  * Contract Test: deleteStint
@@ -27,13 +27,15 @@ describe('deleteStint Contract', () => {
   let stintId: string;
 
   beforeEach(async () => {
-    const testUser1Data = await createTestUser();
+    const testUser1Data = await getTestUser(1);
     testUser1Client = testUser1Data.client;
     testUser1 = testUser1Data.user;
+    await cleanupTestData(testUser1Client);
 
-    const testUser2Data = await createTestUser();
+    const testUser2Data = await getTestUser(2);
     testUser2Client = testUser2Data.client;
     _testUser2 = testUser2Data.user;
+    await cleanupTestData(testUser2Client);
 
     // Create test project for user 1
     const { data: project } = await testUser1Client

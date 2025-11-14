@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
-import { createTestUser } from '../setup';
+import { getTestUser, cleanupTestData } from '../setup';
 
 /**
  * Sort Order Tests for Projects
@@ -19,16 +19,17 @@ import { createTestUser } from '../setup';
 const supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key';
 
-type TestClient = ReturnType<typeof createClient<Database>>;
+type TestClient = Awaited<ReturnType<typeof getTestUser>>['client'];
 
 describe('Project Sort Order', () => {
   let testUserClient: TestClient;
   let testUser: { id: string, email: string } | null;
 
   beforeEach(async () => {
-    const testUserData = await createTestUser();
+    const testUserData = await getTestUser();
     testUserClient = testUserData.client;
     testUser = testUserData.user;
+    await cleanupTestData(testUserClient);
   });
 
   afterEach(async () => {
@@ -43,6 +44,7 @@ describe('Project Sort Order', () => {
       const { data: project1 } = await testUserClient
         .from('projects')
         .insert({
+          user_id: testUser!.id,
           name: 'First Project',
           expected_daily_stints: 3,
         })
@@ -58,6 +60,7 @@ describe('Project Sort Order', () => {
       const { data: project1 } = await testUserClient
         .from('projects')
         .insert({
+          user_id: testUser!.id,
           name: 'Project 1',
           expected_daily_stints: 3,
         })
@@ -67,6 +70,7 @@ describe('Project Sort Order', () => {
       const { data: project2 } = await testUserClient
         .from('projects')
         .insert({
+          user_id: testUser!.id,
           name: 'Project 2',
           expected_daily_stints: 3,
         })
@@ -76,6 +80,7 @@ describe('Project Sort Order', () => {
       const { data: project3 } = await testUserClient
         .from('projects')
         .insert({
+          user_id: testUser!.id,
           name: 'Project 3',
           expected_daily_stints: 3,
         })
@@ -94,6 +99,7 @@ describe('Project Sort Order', () => {
       const { data: project1 } = await testUserClient
         .from('projects')
         .insert({
+          user_id: testUser.id,
           name: 'User 1 Project',
           expected_daily_stints: 3,
         })
@@ -122,6 +128,7 @@ describe('Project Sort Order', () => {
       const { data: project2 } = await testUser2Client
         .from('projects')
         .insert({
+          user_id: _userData2!.user!.id,
           name: 'User 2 Project',
           expected_daily_stints: 3,
         })
@@ -141,9 +148,9 @@ describe('Project Sort Order', () => {
       await testUserClient
         .from('projects')
         .insert([
-          { name: 'Alpha', expected_daily_stints: 3 },
-          { name: 'Beta', expected_daily_stints: 3 },
-          { name: 'Gamma', expected_daily_stints: 3 },
+          { user_id: testUser!.id, name: 'Alpha', expected_daily_stints: 3 },
+          { user_id: testUser!.id, name: 'Beta', expected_daily_stints: 3 },
+          { user_id: testUser!.id, name: 'Gamma', expected_daily_stints: 3 },
         ]);
 
       // Query projects ordered by sort_order
@@ -169,9 +176,9 @@ describe('Project Sort Order', () => {
       const { data: projects } = await testUserClient
         .from('projects')
         .insert([
-          { name: 'Project A', expected_daily_stints: 3 },
-          { name: 'Project B', expected_daily_stints: 3 },
-          { name: 'Project C', expected_daily_stints: 3 },
+          { user_id: testUser!.id, name: 'Project A', expected_daily_stints: 3 },
+          { user_id: testUser!.id, name: 'Project B', expected_daily_stints: 3 },
+          { user_id: testUser!.id, name: 'Project C', expected_daily_stints: 3 },
         ])
         .select();
 
@@ -214,9 +221,9 @@ describe('Project Sort Order', () => {
       const { data: projects } = await testUserClient
         .from('projects')
         .insert([
-          { name: 'Project 1', expected_daily_stints: 3 },
-          { name: 'Project 2', expected_daily_stints: 3 },
-          { name: 'Project 3', expected_daily_stints: 3 },
+          { user_id: testUser!.id, name: 'Project 1', expected_daily_stints: 3 },
+          { user_id: testUser!.id, name: 'Project 2', expected_daily_stints: 3 },
+          { user_id: testUser!.id, name: 'Project 3', expected_daily_stints: 3 },
         ])
         .select();
 
@@ -245,6 +252,7 @@ describe('Project Sort Order', () => {
       const { data: newProject } = await testUserClient
         .from('projects')
         .insert({
+          user_id: testUser!.id,
           name: 'Project 4',
           expected_daily_stints: 3,
         })

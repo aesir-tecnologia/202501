@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
 import { listProjects } from '~/lib/supabase/projects';
-import { createTestUser } from '../../setup';
+import { getTestUser, cleanupTestData } from '../../setup';
 
 /**
  * Contract Test: listProjects
@@ -30,13 +30,15 @@ describe('listProjects Contract', () => {
   let testUser2: { id: string, email: string } | null;
 
   beforeEach(async () => {
-    const testUser1Data = await createTestUser();
+    const testUser1Data = await getTestUser(1);
     testUser1Client = testUser1Data.client;
     testUser1 = testUser1Data.user;
+    await cleanupTestData(testUser1Client);
 
-    const testUser2Data = await createTestUser();
+    const testUser2Data = await getTestUser(2);
     testUser2Client = testUser2Data.client;
     testUser2 = testUser2Data.user;
+    await cleanupTestData(testUser2Client);
   });
 
   afterEach(async () => {
@@ -56,9 +58,9 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert([
-        { name: 'Project C', sort_order: 2, expected_daily_stints: 3, user_id: testUser1!.id },
-        { name: 'Project A', sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id },
-        { name: 'Project B', sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id },
+        { user_id: testUser1!.id, name: 'Project C', sort_order: 2, expected_daily_stints: 3 },
+        { user_id: testUser1!.id, name: 'Project A', sort_order: 0, expected_daily_stints: 3 },
+        { user_id: testUser1!.id, name: 'Project B', sort_order: 1, expected_daily_stints: 3 },
       ]);
 
     const { data, error } = await listProjects(testUser1Client);
@@ -78,16 +80,16 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert([
-        { name: 'User 1 Project A', sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id },
-        { name: 'User 1 Project B', sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id },
+        { user_id: testUser1!.id, name: 'User 1 Project A', sort_order: 0, expected_daily_stints: 3 },
+        { user_id: testUser1!.id, name: 'User 1 Project B', sort_order: 1, expected_daily_stints: 3 },
       ]);
 
     // User 2 creates projects
     await testUser2Client
       .from('projects')
       .insert([
-        { name: 'User 2 Project A', sort_order: 0, expected_daily_stints: 3, user_id: testUser2!.id },
-        { name: 'User 2 Project B', sort_order: 1, expected_daily_stints: 3, user_id: testUser2!.id },
+        { user_id: testUser2!.id, name: 'User 2 Project A', sort_order: 0, expected_daily_stints: 3 },
+        { user_id: testUser2!.id, name: 'User 2 Project B', sort_order: 1, expected_daily_stints: 3 },
       ]);
 
     // User 1 should see only their projects
@@ -107,12 +109,12 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert({
+        user_id: testUser1!.id,
         name: 'Full Project',
         expected_daily_stints: 5,
         custom_stint_duration: 60,
         sort_order: 0,
         is_active: true,
-        user_id: testUser1!.id,
       });
 
     const { data } = await listProjects(testUser1Client);
@@ -143,10 +145,10 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert([
-        { name: 'Active Project 1', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id },
-        { name: 'Inactive Project 1', is_active: false, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id },
-        { name: 'Active Project 2', is_active: true, sort_order: 2, expected_daily_stints: 3, user_id: testUser1!.id },
-        { name: 'Inactive Project 2', is_active: false, sort_order: 3, expected_daily_stints: 3, user_id: testUser1!.id },
+        { user_id: testUser1!.id, name: 'Active Project 1', is_active: true, sort_order: 0, expected_daily_stints: 3 },
+        { user_id: testUser1!.id, name: 'Inactive Project 1', is_active: false, sort_order: 1, expected_daily_stints: 3 },
+        { user_id: testUser1!.id, name: 'Active Project 2', is_active: true, sort_order: 2, expected_daily_stints: 3 },
+        { user_id: testUser1!.id, name: 'Inactive Project 2', is_active: false, sort_order: 3, expected_daily_stints: 3 },
       ]);
 
     const { data, error } = await listProjects(testUser1Client);
@@ -164,8 +166,8 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert([
-        { name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id },
-        { name: 'Inactive Project', is_active: false, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id },
+        { user_id: testUser1!.id, name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3 },
+        { user_id: testUser1!.id, name: 'Inactive Project', is_active: false, sort_order: 1, expected_daily_stints: 3 },
       ]);
 
     const { data, error } = await listProjects(testUser1Client, { includeInactive: true });
@@ -183,8 +185,8 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert([
-        { name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id },
-        { name: 'Inactive Project', is_active: false, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id },
+        { user_id: testUser1!.id, name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3 },
+        { user_id: testUser1!.id, name: 'Inactive Project', is_active: false, sort_order: 1, expected_daily_stints: 3 },
       ]);
 
     const { data, error } = await listProjects(testUser1Client, { includeInactive: false });
@@ -200,10 +202,10 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert([
-        { name: 'Active C', is_active: true, sort_order: 2, expected_daily_stints: 3, user_id: testUser1!.id },
-        { name: 'Inactive A', is_active: false, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id },
-        { name: 'Active A', is_active: true, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id },
-        { name: 'Active B', is_active: true, sort_order: 3, expected_daily_stints: 3, user_id: testUser1!.id },
+        { user_id: testUser1!.id, name: 'Active C', is_active: true, sort_order: 2, expected_daily_stints: 3 },
+        { user_id: testUser1!.id, name: 'Inactive A', is_active: false, sort_order: 0, expected_daily_stints: 3 },
+        { user_id: testUser1!.id, name: 'Active A', is_active: true, sort_order: 1, expected_daily_stints: 3 },
+        { user_id: testUser1!.id, name: 'Active B', is_active: true, sort_order: 3, expected_daily_stints: 3 },
       ]);
 
     const { data, error } = await listProjects(testUser1Client);
@@ -221,8 +223,8 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert([
-        { name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: null },
-        { name: 'Archived Project', is_active: true, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+        { user_id: testUser1!.id, name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, archived_at: null },
+        { user_id: testUser1!.id, name: 'Archived Project', is_active: true, sort_order: 1, expected_daily_stints: 3, archived_at: now },
       ]);
 
     const { data, error } = await listProjects(testUser1Client);
@@ -239,9 +241,9 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert([
-        { name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: null },
-        { name: 'Archived Project 1', is_active: true, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
-        { name: 'Archived Project 2', is_active: false, sort_order: 2, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+        { user_id: testUser1!.id, name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, archived_at: null },
+        { user_id: testUser1!.id, name: 'Archived Project 1', is_active: true, sort_order: 1, expected_daily_stints: 3, archived_at: now },
+        { user_id: testUser1!.id, name: 'Archived Project 2', is_active: false, sort_order: 2, expected_daily_stints: 3, archived_at: now },
       ]);
 
     const { data, error } = await listProjects(testUser1Client, { archived: true });
@@ -258,7 +260,7 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert([
-        { name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: null },
+        { user_id: testUser1!.id, name: 'Active Project', is_active: true, sort_order: 0, expected_daily_stints: 3, archived_at: null },
       ]);
 
     const { data, error } = await listProjects(testUser1Client, { archived: true });
@@ -273,9 +275,9 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert([
-        { name: 'Archived C', is_active: true, sort_order: 2, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
-        { name: 'Archived A', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
-        { name: 'Archived B', is_active: true, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+        { user_id: testUser1!.id, name: 'Archived C', is_active: true, sort_order: 2, expected_daily_stints: 3, archived_at: now },
+        { user_id: testUser1!.id, name: 'Archived A', is_active: true, sort_order: 0, expected_daily_stints: 3, archived_at: now },
+        { user_id: testUser1!.id, name: 'Archived B', is_active: true, sort_order: 1, expected_daily_stints: 3, archived_at: now },
       ]);
 
     const { data, error } = await listProjects(testUser1Client, { archived: true });
@@ -296,9 +298,9 @@ describe('listProjects Contract', () => {
     await testUser1Client
       .from('projects')
       .insert([
-        { name: 'Active Non-Archived', is_active: true, sort_order: 0, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: null },
-        { name: 'Active Archived', is_active: true, sort_order: 1, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
-        { name: 'Inactive Archived', is_active: false, sort_order: 2, expected_daily_stints: 3, user_id: testUser1!.id, archived_at: now },
+        { user_id: testUser1!.id, name: 'Active Non-Archived', is_active: true, sort_order: 0, expected_daily_stints: 3, archived_at: null },
+        { user_id: testUser1!.id, name: 'Active Archived', is_active: true, sort_order: 1, expected_daily_stints: 3, archived_at: now },
+        { user_id: testUser1!.id, name: 'Inactive Archived', is_active: false, sort_order: 2, expected_daily_stints: 3, archived_at: now },
       ]);
 
     const { data, error } = await listProjects(testUser1Client, { archived: true });

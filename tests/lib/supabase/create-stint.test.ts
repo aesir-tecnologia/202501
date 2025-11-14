@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
 import { createStint } from '~/lib/supabase/stints';
-import { createTestUser } from '../../setup';
+import { getTestUser, cleanupTestData } from '../../setup';
 
 /**
  * Contract Test: createStint
@@ -29,18 +29,20 @@ describe('createStint Contract', () => {
   let projectId: string;
 
   beforeEach(async () => {
-    const testUser1Data = await createTestUser();
+    const testUser1Data = await getTestUser(1);
     testUser1Client = testUser1Data.client;
     testUser1 = testUser1Data.user;
+    await cleanupTestData(testUser1Client);
 
-    const testUser2Data = await createTestUser();
+    const testUser2Data = await getTestUser(2);
     testUser2Client = testUser2Data.client;
     testUser2 = testUser2Data.user;
+    await cleanupTestData(testUser2Client);
 
     // Create test project for user 1
     const { data: project } = await testUser1Client
       .from('projects')
-      .insert({ name: 'Test Project', expected_daily_stints: 3, user_id: testUser1!.id })
+      .insert({ user_id: testUser1!.id, name: 'Test Project', expected_daily_stints: 3 })
       .select()
       .single();
 
@@ -126,7 +128,7 @@ describe('createStint Contract', () => {
     // User 2 creates a project
     const { data: user2Project } = await testUser2Client
       .from('projects')
-      .insert({ name: 'User 2 Project', expected_daily_stints: 3, user_id: testUser2!.id })
+      .insert({ user_id: testUser2!.id, name: 'User 2 Project', expected_daily_stints: 3 })
       .select()
       .single();
 

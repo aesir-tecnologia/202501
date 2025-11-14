@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
-import { createTestUser } from '../setup';
+import { getTestUser, cleanupTestData } from '../setup';
 
 /**
  * Database Constraint Tests for Stint Management Feature
@@ -19,7 +19,7 @@ import { createTestUser } from '../setup';
 const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
 const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key';
 
-type TestClient = ReturnType<typeof createClient<Database>>;
+type TestClient = Awaited<ReturnType<typeof getTestUser>>['client'];
 
 describe('Stint Database Constraints', () => {
   let testUserClient: TestClient;
@@ -27,14 +27,16 @@ describe('Stint Database Constraints', () => {
   let _testUser: { id: string, email: string } | null;
 
   beforeEach(async () => {
-    const testUserData = await createTestUser();
+    const testUserData = await getTestUser();
     testUserClient = testUserData.client;
     _testUser = testUserData.user;
+    await cleanupTestData(testUserClient);
 
     // Create a test project
     const { data: project, error: projectError } = await testUserClient
       .from('projects')
       .insert({
+        user_id: _testUser!.id,
         name: 'Test Project',
         expected_daily_stints: 2,
         custom_stint_duration: 50,
@@ -60,6 +62,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 9,
           status: 'active',
@@ -76,6 +79,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 121,
           status: 'active',
@@ -92,6 +96,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: null,
           status: 'active',
@@ -108,6 +113,7 @@ describe('Stint Database Constraints', () => {
       const { data: stint1, error: error1 } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 10,
           status: 'active',
@@ -122,6 +128,7 @@ describe('Stint Database Constraints', () => {
       const { data: stint2, error: error2 } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 120,
           status: 'active',
@@ -136,6 +143,7 @@ describe('Stint Database Constraints', () => {
       const { data: stint3, error: error3 } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'active',
@@ -155,6 +163,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'active',
@@ -173,6 +182,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'active',
@@ -190,6 +200,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'active',
@@ -207,6 +218,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'active',
@@ -229,6 +241,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'completed',
@@ -249,6 +262,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'completed',
@@ -269,6 +283,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'completed',
@@ -288,6 +303,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'completed',
@@ -305,6 +321,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'active',
@@ -323,6 +340,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'paused',
@@ -344,6 +362,7 @@ describe('Stint Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('stints')
         .insert({
+          user_id: _testUser!.id,
           project_id: testProjectId,
           planned_duration: 50,
           status: 'completed',

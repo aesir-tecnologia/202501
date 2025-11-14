@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
-import { createTestUser } from '../setup';
+import { getTestUser, cleanupTestData } from '../setup';
 
 /**
  * Database Constraint Tests for Project Management Feature
@@ -20,16 +20,17 @@ import { createTestUser } from '../setup';
 const _supabaseUrl = process.env.SUPABASE_URL || 'http://localhost:54321';
 const _supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'your-anon-key';
 
-type TestClient = ReturnType<typeof createClient<Database>>;
+type TestClient = Awaited<ReturnType<typeof getTestUser>>['client'];
 
 describe('Project Database Constraints', () => {
   let testUserClient: TestClient;
   let _testUser: { id: string, email: string } | null;
 
   beforeEach(async () => {
-    const testUserData = await createTestUser();
+    const testUserData = await getTestUser();
     testUserClient = testUserData.client;
     _testUser = testUserData.user;
+    await cleanupTestData(testUserClient);
   });
 
   afterEach(async () => {
@@ -44,6 +45,7 @@ describe('Project Database Constraints', () => {
       const { data: project1, error: error1 } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'Client Alpha',
           expected_daily_stints: 3,
         })
@@ -57,6 +59,7 @@ describe('Project Database Constraints', () => {
       const { data: project2, error: error2 } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'Client Alpha',
           expected_daily_stints: 4,
         })
@@ -74,6 +77,7 @@ describe('Project Database Constraints', () => {
       const { data: project1, error: error1 } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'Client Beta',
           expected_daily_stints: 3,
         })
@@ -87,6 +91,7 @@ describe('Project Database Constraints', () => {
       const { data: project2, error: error2 } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'client beta', // lowercase
           expected_daily_stints: 4,
         })
@@ -104,6 +109,7 @@ describe('Project Database Constraints', () => {
       const { data: project1, error: error1 } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'Client Gamma',
           expected_daily_stints: 3,
         })
@@ -117,6 +123,7 @@ describe('Project Database Constraints', () => {
       const { data: project2, error: error2 } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'CLIENT GAMMA', // uppercase
           expected_daily_stints: 4,
         })
@@ -135,6 +142,7 @@ describe('Project Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'Invalid Negative Stints',
           expected_daily_stints: -1,
           custom_stint_duration: 45,
@@ -154,6 +162,7 @@ describe('Project Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'Invalid Zero Stints',
           expected_daily_stints: 0,
           custom_stint_duration: 45,
@@ -173,6 +182,7 @@ describe('Project Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'Invalid Negative Duration',
           expected_daily_stints: 3,
           custom_stint_duration: -5,
@@ -192,6 +202,7 @@ describe('Project Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'Invalid Zero Duration',
           expected_daily_stints: 3,
           custom_stint_duration: 0,
@@ -211,6 +222,7 @@ describe('Project Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'Valid Project',
           expected_daily_stints: 5,
           custom_stint_duration: 60,
@@ -229,6 +241,7 @@ describe('Project Database Constraints', () => {
       const { data, error } = await testUserClient
         .from('projects')
         .insert({
+          user_id: _testUser!.id,
           name: 'Minimum Valid Project',
           expected_daily_stints: 1,
           custom_stint_duration: 1,

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { createClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
 import { createProject, updateProjectSortOrder } from '~/lib/supabase/projects';
-import { createTestUser } from '../../setup';
+import { getTestUser, cleanupTestData } from '../../setup';
 
 /**
  * Contract Test: updateProjectSortOrder
@@ -20,11 +20,13 @@ describe('updateProjectSortOrder Contract', () => {
   let testUser2Client: TestClient;
 
   beforeEach(async () => {
-    const testUser1Data = await createTestUser();
+    const testUser1Data = await getTestUser(1);
     testUser1Client = testUser1Data.client;
+    await cleanupTestData(testUser1Client);
 
-    const testUser2Data = await createTestUser();
+    const testUser2Data = await getTestUser(2);
     testUser2Client = testUser2Data.client;
+    await cleanupTestData(testUser2Client);
   });
 
   afterEach(async () => {
