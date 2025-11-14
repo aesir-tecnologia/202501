@@ -21,7 +21,7 @@ function closeModal() {
       <UCard>
         <template #header>
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold">
+            <h3 class="text-lg font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
               Archived Projects
             </h3>
             <UButton
@@ -40,9 +40,9 @@ function closeModal() {
         >
           <Icon
             name="i-lucide-loader-2"
-            class="h-8 w-8 mx-auto animate-spin text-gray-400"
+            class="h-8 w-8 mx-auto motion-safe:animate-spin text-neutral-400"
           />
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          <p class="mt-2 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
             Loading archived projects...
           </p>
         </div>

@@ -116,23 +116,23 @@ async function handleDelete() {
           </div>
 
           <div v-else>
-            <p class="text-gray-700 dark:text-gray-300">
+            <p class="leading-normal text-neutral-700 dark:text-neutral-300">
               Are you sure you want to delete <strong>{{ project.name }}</strong>?
             </p>
 
-            <div class="mt-4 rounded-md bg-yellow-50 dark:bg-yellow-950 p-4">
+            <div class="mt-4 rounded-md bg-warning-50 dark:bg-warning-950 p-4">
               <div class="flex items-start">
                 <div class="flex-shrink-0">
                   <Icon
                     name="i-lucide-alert-triangle"
-                    class="h-5 w-5 text-yellow-400"
+                    class="h-5 w-5 text-warning-400"
                   />
                 </div>
                 <div class="ml-3">
-                  <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                  <h3 class="text-sm font-medium leading-normal text-warning-800 dark:text-warning-200">
                     Warning
                   </h3>
-                  <div class="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
+                  <div class="mt-2 text-sm leading-normal text-warning-700 dark:text-warning-300">
                     <p>This will permanently delete the project and all associated stint history. This action cannot be undone.</p>
                   </div>
                 </div>

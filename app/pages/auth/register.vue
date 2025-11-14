@@ -10,7 +10,7 @@
             Already have an account?
             <NuxtLink
               to="/auth/login"
-              class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+              class="font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
             >
               Sign in here
             </NuxtLink>
@@ -33,6 +33,7 @@
                 v-model="state.fullName"
                 placeholder="Enter your full name"
                 autocomplete="name"
+                size="lg"
                 :disabled="loading"
                 class="w-full"
               />
@@ -48,6 +49,7 @@
                 type="email"
                 placeholder="Enter your email"
                 autocomplete="email"
+                size="lg"
                 :disabled="loading"
                 class="w-full"
               />
@@ -63,6 +65,7 @@
                 type="password"
                 placeholder="Create a password"
                 autocomplete="new-password"
+                size="lg"
                 :disabled="loading"
                 class="w-full"
               />
@@ -81,6 +84,7 @@
                 type="password"
                 placeholder="Confirm your password"
                 autocomplete="new-password"
+                size="lg"
                 :disabled="loading"
                 class="w-full"
               />
@@ -97,7 +101,7 @@
                     I agree to the
                     <NuxtLink
                       to="/legal/terms"
-                      class="text-primary-600 hover:text-primary-500 font-medium dark:text-primary-400 dark:hover:text-primary-300"
+                      class="text-brand-600 hover:text-brand-500 font-medium dark:text-brand-400 dark:hover:text-brand-300"
                       target="_blank"
                     >
                       Terms of Service
@@ -105,7 +109,7 @@
                     and
                     <NuxtLink
                       to="/legal/privacy"
-                      class="text-primary-600 hover:text-primary-500 font-medium dark:text-primary-400 dark:hover:text-primary-300"
+                      class="text-brand-600 hover:text-brand-500 font-medium dark:text-brand-400 dark:hover:text-brand-300"
                       target="_blank"
                     >
                       Privacy Policy

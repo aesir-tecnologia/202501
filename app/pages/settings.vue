@@ -313,7 +313,7 @@ const timezones = [
     <div class="space-y-6">
       <!-- Page Header -->
       <div>
-        <h1 class="text-3xl font-bold">
+        <h1 class="text-3xl font-semibold text-gray-900 dark:text-gray-100">
           Settings
         </h1>
         <p class="mt-2 text-gray-600 dark:text-gray-400">
@@ -329,7 +329,7 @@ const timezones = [
               name="i-lucide-user"
               class="h-5 w-5"
             />
-            <h2 class="text-lg font-semibold">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
               Account
             </h2>
           </div>
@@ -349,7 +349,7 @@ const timezones = [
               <div class="flex items-center gap-1 mt-1">
                 <Icon
                   name="i-lucide-check-circle"
-                  class="h-4 w-4 text-green-500"
+                  class="h-4 w-4 text-mint-500"
                 />
                 <span class="text-xs text-gray-500 dark:text-gray-400">
                   Verified
@@ -394,6 +394,7 @@ const timezones = [
               Change Password
             </UButton>
             <UButton
+              color="primary"
               :loading="isSavingAccount"
               @click="saveAccountChanges"
             >
@@ -411,7 +412,7 @@ const timezones = [
               name="i-lucide-palette"
               class="h-5 w-5"
             />
-            <h2 class="text-lg font-semibold">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
               Preferences
             </h2>
           </div>
@@ -516,6 +517,7 @@ const timezones = [
           </div>
 
           <UButton
+            color="primary"
             :loading="isSavingPreferences"
             @click="savePreferences"
           >
@@ -532,7 +534,7 @@ const timezones = [
               name="i-lucide-shield"
               class="h-5 w-5"
             />
-            <h2 class="text-lg font-semibold">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
               Security
             </h2>
           </div>
@@ -540,7 +542,7 @@ const timezones = [
 
         <div class="space-y-4">
           <div>
-            <h3 class="text-sm font-medium mb-3">
+            <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">
               Active Sessions
             </h3>
             <div
@@ -565,7 +567,7 @@ const timezones = [
                     </p>
                     <UBadge
                       v-if="session.isCurrent"
-                      color="green"
+                      color="success"
                       variant="soft"
                       size="sm"
                     >
@@ -606,7 +608,7 @@ const timezones = [
               name="i-lucide-eye"
               class="h-5 w-5"
             />
-            <h2 class="text-lg font-semibold">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
               Privacy
             </h2>
           </div>
@@ -614,6 +616,7 @@ const timezones = [
 
         <div class="space-y-4">
           <UButton
+            color="primary"
             variant="outline"
             @click="exportData"
           >
@@ -769,7 +772,10 @@ const timezones = [
           >
             Cancel
           </UButton>
-          <UButton @click="changePassword">
+          <UButton
+            color="primary"
+            @click="changePassword"
+          >
             Update Password
           </UButton>
         </div>

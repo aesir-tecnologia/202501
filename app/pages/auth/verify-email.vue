@@ -13,10 +13,10 @@
 
         <UCard class="p-8 text-center bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
           <div class="space-y-6">
-            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-mint-100 dark:bg-mint-900/40">
               <UIcon
                 name="i-lucide-mail"
-                class="h-6 w-6 text-green-600 dark:text-green-400"
+                class="h-6 w-6 text-mint-600 dark:text-mint-400"
               />
             </div>
 
@@ -42,6 +42,7 @@
                 :loading="resending"
                 :disabled="resending || cooldownActive"
                 variant="outline"
+                size="lg"
                 class="w-full"
                 @click="resendVerification"
               >
@@ -79,7 +80,7 @@
             <div class="space-y-2">
               <NuxtLink
                 to="/auth/login"
-                class="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+                class="text-sm font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
               >
                 Back to sign in
               </NuxtLink>

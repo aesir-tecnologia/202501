@@ -161,7 +161,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
     toast.add({
       title: 'Stint Started',
       description: `Started working on ${project.name}`,
-      color: 'green',
+      color: 'success',
       icon: 'i-lucide-play-circle',
     });
   }
@@ -169,7 +169,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
     toast.add({
       title: 'Failed to Start Stint',
       description: error instanceof Error ? error.message : 'Could not start stint. Please try again.',
-      color: 'red',
+      color: 'error',
       icon: 'i-lucide-alert-circle',
     });
   }
@@ -185,12 +185,12 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
     >
       <Icon
         name="i-lucide-folder-open"
-        class="h-12 w-12 mx-auto text-gray-400 dark:text-gray-600"
+        class="h-12 w-12 mx-auto text-neutral-400 dark:text-neutral-600"
       />
-      <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">
+      <h3 class="mt-4 text-xl font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
         No projects yet
       </h3>
-      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      <p class="mt-2 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
         Get started by creating your first project
       </p>
     </div>
@@ -199,7 +199,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
     <div v-else>
       <h3
         v-if="inactiveProjects.length > 0"
-        class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+        class="text-sm font-medium leading-normal text-neutral-700 dark:text-neutral-300 mb-2"
       >
         Active Projects
       </h3>
@@ -212,10 +212,10 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
           v-for="project in activeProjects"
           :key="project.id"
           :class="[
-            'flex flex-col gap-3 p-4 rounded-lg border-2 transition-all border-l-4',
+            'flex flex-col gap-3 p-4 rounded-lg border-2 motion-safe:transition-all border-l-4',
             isProjectActive(project.id)
-              ? 'border-green-500 ring-2 ring-green-500/50 pulsing-active bg-green-50/50 dark:bg-green-950/20'
-              : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700',
+              ? 'border-success-500 ring-2 ring-success-500/50 pulsing-active bg-success-50/50 dark:bg-success-950/20'
+              : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-neutral-300 dark:hover:border-neutral-700',
             getColorBorderClass(project.color_tag),
           ]"
         >
@@ -225,23 +225,23 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
             <UTooltip text="Reorder project">
               <button
                 type="button"
-                class="drag-handle cursor-move p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-all duration-200"
+                class="drag-handle cursor-move p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded motion-safe:transition-all motion-safe:duration-200"
                 aria-label="Reorder project"
               >
                 <Icon
                   name="i-lucide-grip-vertical"
-                  class="h-5 w-5 text-gray-400"
+                  class="h-5 w-5 text-neutral-400 dark:text-neutral-500"
                 />
               </button>
             </UTooltip>
 
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
-                <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
+                <h3 class="text-base font-medium leading-normal text-neutral-900 dark:text-neutral-50 truncate">
                   {{ project.name }}
                 </h3>
               </div>
-              <div class="mt-1 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+              <div class="mt-1 flex items-center gap-4 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
                 <span class="flex items-center gap-1">
                   <Icon
                     name="i-lucide-target"
@@ -281,7 +281,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
                       variant="ghost"
                       size="sm"
                       aria-label="Edit project"
-                      class="transition-all duration-200 hover:scale-105"
+                      class="motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:scale-105"
                       @click="handleEdit(project)"
                     />
                   </span>
@@ -293,7 +293,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
           <!-- Active Stint Section (expanded when project has active stint) -->
           <div
             v-if="isProjectActive(project.id)"
-            class="flex flex-col items-center gap-4 pt-4 border-t border-green-200 dark:border-green-800"
+            class="flex flex-col items-center gap-4 pt-4 border-t border-success-200 dark:border-success-800"
           >
             <!-- Timer Display -->
             <StintTimer :stint="projectActiveStint(project.id)" />
@@ -309,7 +309,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
           >
             <UButton
               v-if="!activeStint"
-              color="green"
+              color="success"
               icon="i-lucide-play"
               :loading="isStarting"
               :disabled="isStarting"
@@ -323,7 +323,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
             >
               <span>
                 <UButton
-                  color="gray"
+                  color="neutral"
                   variant="soft"
                   icon="i-lucide-play"
                   disabled
@@ -343,7 +343,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
       >
         <button
           type="button"
-          class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 hover:text-gray-900 dark:hover:text-gray-100"
+          class="flex items-center gap-2 text-sm font-medium leading-normal text-neutral-700 dark:text-neutral-300 mb-2 hover:text-neutral-900 dark:hover:text-neutral-100"
           @click="showInactiveProjects = !showInactiveProjects"
         >
           <Icon
@@ -361,15 +361,15 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
             v-for="project in inactiveProjects"
             :key="project.id"
             :class="[
-              'flex items-center gap-3 p-4 rounded-lg border-2 transition-colors border-l-4',
-              'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 opacity-60',
+              'flex items-center gap-3 p-4 rounded-lg border-2 motion-safe:transition-colors border-l-4',
+              'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50 opacity-60',
               getColorBorderClass(project.color_tag),
             ]"
           >
             <!-- Project info -->
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
-                <h3 class="text-base font-medium text-gray-900 dark:text-gray-100 truncate">
+                <h3 class="text-base font-medium leading-normal text-neutral-900 dark:text-neutral-50 truncate">
                   {{ project.name }}
                 </h3>
                 <UBadge
@@ -380,7 +380,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
                   Inactive
                 </UBadge>
               </div>
-              <div class="mt-1 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+              <div class="mt-1 flex items-center gap-4 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
                 <span class="flex items-center gap-1">
                   <Icon
                     name="i-lucide-target"
@@ -420,7 +420,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
                       variant="ghost"
                       size="sm"
                       aria-label="Edit project"
-                      class="transition-all duration-200 hover:scale-105"
+                      class="motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:scale-105"
                       @click="handleEdit(project)"
                     />
                   </span>
@@ -437,16 +437,18 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
 <style scoped>
 @keyframes pulse-border {
   0%, 100% {
-    border-color: rgb(34 197 94);
-    box-shadow: 0 0 0 0 rgb(34 197 94 / 0.4);
+    border-color: var(--color-success-500);
+    box-shadow: 0 0 0 0 rgb(from var(--color-success-500) r g b / 0.4);
   }
   50% {
-    border-color: rgb(74 222 128);
-    box-shadow: 0 0 0 4px rgb(74 222 128 / 0.2);
+    border-color: var(--color-success-400);
+    box-shadow: 0 0 0 4px rgb(from var(--color-success-400) r g b / 0.2);
   }
 }
 
-.pulsing-active {
-  animation: pulse-border 2s ease-in-out infinite;
+@media (prefers-reduced-motion: no-preference) {
+  .pulsing-active {
+    animation: pulse-border 300ms ease-in-out infinite;
+  }
 }
 </style>

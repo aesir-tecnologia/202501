@@ -135,16 +135,16 @@ function handleCancel() {
         <button
           type="button"
           :class="[
-            'w-10 h-10 rounded-md border-2 transition-all flex items-center justify-center',
+            'w-10 h-10 rounded-md border-2 motion-safe:transition-all flex items-center justify-center',
             formData.colorTag === null
-              ? 'border-gray-900 dark:border-gray-100 ring-2 ring-gray-900 dark:ring-gray-100'
-              : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600',
+              ? 'border-neutral-900 dark:border-neutral-100 ring-2 ring-neutral-900 dark:ring-neutral-100'
+              : 'border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600',
           ]"
           @click="selectColor(null)"
         >
           <Icon
             name="i-lucide-x"
-            class="h-5 w-5 text-gray-400"
+            class="h-5 w-5 text-neutral-400"
           />
         </button>
 
@@ -154,11 +154,11 @@ function handleCancel() {
           :key="color"
           type="button"
           :class="[
-            'w-10 h-10 rounded-md border-2 transition-all',
+            'w-10 h-10 rounded-md border-2 motion-safe:transition-all',
             getColorClasses(color).bg,
             formData.colorTag === color
               ? `${getColorClasses(color).border} ring-2 ${getColorClasses(color).ring}`
-              : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600',
+              : 'border-transparent hover:border-neutral-300 dark:hover:border-neutral-600',
           ]"
           :aria-label="`Select ${color} color`"
           @click="selectColor(color)"

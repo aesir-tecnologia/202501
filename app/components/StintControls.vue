@@ -26,7 +26,7 @@ async function handlePause(): Promise<void> {
     toast.add({
       title: 'Stint Paused',
       description: 'Take a break! Resume when ready.',
-      color: 'gray',
+      color: 'warning',
       icon: 'i-lucide-pause-circle',
     });
   }
@@ -36,7 +36,7 @@ async function handlePause(): Promise<void> {
     toast.add({
       title: 'Pause Failed',
       description: error instanceof Error ? error.message : 'Could not pause stint. Please try again.',
-      color: 'red',
+      color: 'error',
       icon: 'i-lucide-alert-circle',
     });
   }
@@ -52,7 +52,7 @@ async function handleResume(): Promise<void> {
     toast.add({
       title: 'Stint Resumed',
       description: 'Back to work! Keep going.',
-      color: 'green',
+      color: 'success',
       icon: 'i-lucide-play-circle',
     });
   }
@@ -62,7 +62,7 @@ async function handleResume(): Promise<void> {
     toast.add({
       title: 'Resume Failed',
       description: error instanceof Error ? error.message : 'Could not resume stint. Please try again.',
-      color: 'red',
+      color: 'error',
       icon: 'i-lucide-alert-circle',
     });
   }
@@ -91,7 +91,7 @@ async function handleStopConfirm(): Promise<void> {
     toast.add({
       title: 'Stint Completed!',
       description: 'Great work! Your progress has been saved.',
-      color: 'green',
+      color: 'success',
       icon: 'i-lucide-circle-check',
       timeout: 5000,
     });
@@ -106,7 +106,7 @@ async function handleStopConfirm(): Promise<void> {
     toast.add({
       title: 'Stop Failed',
       description: error instanceof Error ? error.message : 'Could not complete stint. Please try again.',
-      color: 'red',
+      color: 'error',
       icon: 'i-lucide-alert-circle',
     });
   }
@@ -121,7 +121,7 @@ const isAnyPending = computed(() => isPausing.value || isResuming.value || isCom
     <!-- Pause Button (shown when active) -->
     <UButton
       v-if="stint.status === 'active'"
-      color="orange"
+      color="warning"
       variant="soft"
       icon="i-lucide-pause"
       :loading="isPausing"
@@ -134,7 +134,7 @@ const isAnyPending = computed(() => isPausing.value || isResuming.value || isCom
     <!-- Resume Button (shown when paused) -->
     <UButton
       v-if="stint.status === 'paused'"
-      color="green"
+      color="success"
       variant="soft"
       icon="i-lucide-play"
       :loading="isResuming"
@@ -147,7 +147,7 @@ const isAnyPending = computed(() => isPausing.value || isResuming.value || isCom
     <!-- Stop Button (always shown for active/paused) -->
     <UButton
       v-if="stint.status === 'active' || stint.status === 'paused'"
-      color="red"
+      color="error"
       variant="soft"
       icon="i-lucide-square"
       :loading="isCompleting"
