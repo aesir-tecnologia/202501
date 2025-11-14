@@ -1,50 +1,254 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+Version Change: 1.1.0 → 1.2.0 (MINOR - expanded design system guidance)
+Modified Principles:
+  - Principle II (Test-Driven Development) - Added minimal mocking philosophy (v1.1.0)
+  - Technical Architecture Principles > Component Library & Styling - Added design system compliance requirement (v1.2.0)
+Added Sections: None
+Removed Sections: None
+Templates Requiring Updates:
+  ✅ plan-template.md - No changes required
+  ✅ spec-template.md - No changes required
+  ✅ tasks-template.md - No changes required
+Follow-up TODOs: None
+-->
+
+# LifeStint Project Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Three-Layer Data Access Architecture (NON-NEGOTIABLE)
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All data access MUST follow the strict three-layer pattern:
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+1. **Database Layer** (`app/lib/supabase/`): Direct Supabase queries with type safety
+   - Export typed helpers (Row, Insert, Update)
+   - Require TypedSupabaseClient parameter
+   - Enforce user authentication and RLS
+   - Return Result<T> = { data, error } with user-friendly error messages
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+2. **Schema Layer** (`app/schemas/`): Zod schemas for validation and type inference
+   - Use camelCase for API surface
+   - Export schema limits as constants (*_SCHEMA_LIMITS)
+   - Separate create/update schemas with appropriate defaults
+   - Export inferred TypeScript types
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+3. **Composable Layer** (`app/composables/`): TanStack Query hooks
+   - Query hooks for data fetching
+   - Mutation hooks with optimistic updates
+   - Automatic validation with Zod schemas
+   - Automatic rollback on failure
+   - Transform camelCase → snake_case via toDbPayload()
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: This separation ensures type safety, consistent error handling, automatic caching, and optimal user experience with optimistic updates.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### II. Test-Driven Development
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Testing is mandatory for all critical features:
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- **Unit Tests** for pure logic (lib/, composables/)
+- **Database Tests** for RLS policies and migrations
+- **Component Tests** using @nuxt/test-utils
+- Tests MUST be written alongside implementation
+- Run `npm test` during development
+- Verify with `npm run test:run` before committing
+
+**Minimal Mocking Philosophy**:
+- Tests should NOT be overly mocked just to pass
+- Mock ONLY what is completely out of scope for the test
+- Prefer real implementations and integration tests over heavily mocked unit tests
+- If you find yourself mocking extensively, consider if you're testing the right thing
+- Real database interactions, real composables, and real components are preferred when feasible
+
+**Rationale**: Maintains code quality, prevents regressions, ensures reliability in production, and tests actual behavior rather than implementation details. Over-mocking creates brittle tests that pass but don't catch real bugs.
+
+### III. Static Site Generation (SSG) + Client-Side Auth
+
+Architecture pattern that MUST be followed:
+
+- Public routes (`/home`, `/auth/*`) are pre-rendered at build time
+- Protected routes (`/`, `/analytics`, `/reports`, `/settings`) use `ssr: false`
+- Client-side auth middleware only (skips on server)
+- Supabase credentials embedded at build time (only anon keys!)
+- Never commit service role keys
+
+**Rationale**: Provides fast loading times, good SEO for public pages, and secure client-side authentication.
+
+### IV. Type Safety & Code Generation
+
+Type safety is enforced at all levels:
+
+- **Generated Types**: `app/types/database.types.ts` auto-generated from Supabase schema
+- **TypedSupabaseClient**: Custom type wrapper for all database operations
+- **Zod Schemas**: Runtime validation with TypeScript type inference
+- **Type Exports**: Each layer exports its own types (Row, Insert, Update)
+- Run `npm run supabase:types` after schema changes
+
+**Rationale**: Prevents runtime errors, improves developer experience, and catches issues at compile time.
+
+### V. User-Friendly Error Handling
+
+Three-layer error propagation pattern:
+
+1. **Database Layer**: Translates PostgreSQL errors to user-friendly messages
+   - Example: `23505` duplicate key → "A project with this name already exists"
+   - Business validation errors with clear explanations
+
+2. **Composable Layer**: Validates with Zod, throws errors for TanStack Query
+   - Clear validation error messages
+   - Automatic error propagation to components
+
+3. **Component Layer**: Try-catch with toast notifications
+   - `toast.add()` for all user feedback
+   - Success, error, warning, and info states
+   - Detailed error descriptions when available
+
+**Rationale**: Ensures users always understand what went wrong and how to fix it, improving UX and reducing support burden.
+
+### VI. Optimistic Updates with Automatic Rollback
+
+All mutations MUST implement optimistic updates:
+
+- **onMutate**: Snapshot current cache state, apply optimistic update
+- **onError**: Restore snapshot if mutation fails
+- **onSuccess**: Invalidate affected queries for refetch
+- Never leave cache in inconsistent state
+
+**Rationale**: Provides instant UI feedback while maintaining data consistency, delivering the best possible user experience.
+
+### VII. Query Key Factory Pattern
+
+Cache organization MUST use centralized key factories:
+
+```typescript
+export const entityKeys = {
+  all: ['entity'] as const,
+  lists: () => [...entityKeys.all, 'list'] as const,
+  list: (filters?) => [...entityKeys.lists(), filters] as const,
+  detail: (id: string) => [...entityKeys.all, 'detail', id] as const,
+}
+```
+
+**Cache Invalidation Strategies**:
+- Broad: `invalidateQueries({ queryKey: entityKeys.all })` after create/delete
+- Targeted: `invalidateQueries({ queryKey: entityKeys.detail(id) })` after updates
+- Multiple: Update both list and detail caches when needed
+
+**Rationale**: Ensures consistent cache management, prevents stale data, and enables precise cache invalidation.
+
+## Technical Architecture Principles
+
+### State Management
+
+- **TanStack Query Only**: No Pinia/Vuex stores for server state
+- All server state managed through TanStack Query cache
+- **Singleton Pattern**: Use for global state (e.g., useStintTimer Web Worker)
+- Local component state with ref/reactive as needed
+
+**Rationale**: Simplifies architecture, leverages TanStack Query's powerful caching, reduces boilerplate.
+
+### Component Library & Styling
+
+- **Nuxt UI 4**: Primary component library
+- **Tailwind CSS v4**: Styling via `@theme` directive in `app/assets/css/main.css`
+- **Lucide Icons**: Bundled locally, used with `i-lucide-*` prefix
+- **Dark Mode**: Always provide dark mode variants (`dark:*` classes)
+- **No tailwind.config.ts**: All configuration in CSS via `@theme`
+- **Design System Compliance**: ALL styling MUST follow `docs/DESIGN_SYSTEM.md`
+  - Use documented color tokens (brand, ink, mint, amberx)
+  - Follow typography scale and font families
+  - Use Nuxt UI components with documented patterns
+  - Apply spacing, layout, and animation guidelines
+  - Reference design system for component usage examples
+  - No custom styling that deviates from the design system without justification
+
+**Rationale**: Modern approach with better type safety, improved performance, and consistent design system. Strict adherence to design system ensures visual consistency, accessibility, and maintainability across the entire application.
+
+### Database Operations
+
+- **Remote Supabase Only**: No local database
+- **RLS (Row Level Security)**: Enforced on all tables
+- **Migrations**: Created in `supabase/migrations/`, applied to remote
+- **Type Generation**: `npm run supabase:types` after schema changes
+- **Functions**: PostgreSQL functions for complex operations
+
+**Rationale**: Ensures data security, maintains schema consistency, provides type safety.
+
+### Code Quality
+
+- **ESLint**: Configured via `@nuxt/eslint` with stylistic rules
+- **Auto-fix**: Run `npm run lint:fix` before committing
+- **Exception**: Single-word component names allowed for pages only
+- **Naming**: camelCase for API, snake_case for database
+- **No Comments**: Unless logic is too complex or explicitly requested
+
+**Rationale**: Maintains consistent code style, prevents common errors, improves readability.
+
+## Development Workflow
+
+### Feature Development Process
+
+1. **Database Changes**:
+   - Create migration in `supabase/migrations/`
+   - Apply to remote database
+   - Regenerate types: `npm run supabase:types`
+
+2. **Implementation**:
+   - Update database layer (`app/lib/supabase/`)
+   - Add/update Zod schema (`app/schemas/`)
+   - Create/update composable with optimistic updates (`app/composables/`)
+   - Write tests in corresponding `tests/` subdirectory
+
+3. **Testing**:
+   - Write tests alongside implementation
+   - Run `npm test` during development
+   - Verify with `npm run test:run` before committing
+
+4. **Deployment**:
+   - Test SSG build: `npm run generate && npm run serve`
+   - Verify auth flows work on static preview
+   - Deploy to Vercel
+
+### Git Workflow
+
+- **Never Auto-Commit**: Only commit when explicitly requested by user
+- **Clear Messages**: Describe what and why, not how
+- **Atomic Commits**: Each commit should be a logical unit
+- **Verify Before Push**: Run tests and linting before pushing
+
+### Environment Management
+
+- **`.env` Required**: SUPABASE_URL and SUPABASE_ANON_KEY
+- **Public Keys Only**: Never commit service role keys
+- **Multiple Environments**: Development (remote), Staging, Production
+- **Vercel Deployment**: Set environment variables in dashboard
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+### Amendment Process
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+1. **Propose Change**: Document change with rationale
+2. **Impact Analysis**: Check all templates and dependent docs
+3. **Version Bump**: Follow semantic versioning (MAJOR.MINOR.PATCH)
+4. **Sync Templates**: Update all affected template files
+5. **Update Report**: Add Sync Impact Report to constitution
+6. **Commit**: Use format `docs: amend constitution to vX.Y.Z (summary)`
+
+### Versioning Policy
+
+- **MAJOR**: Backward incompatible governance/principle changes
+- **MINOR**: New principles or materially expanded guidance
+- **PATCH**: Clarifications, wording fixes, non-semantic refinements
+
+### Compliance Review
+
+- All PRs MUST verify compliance with these principles
+- Architecture decisions MUST be justified if deviating from patterns
+- Complexity MUST be justified and simpler alternatives documented
+- Use CLAUDE.md for runtime development guidance
+
+### Constitution Authority
+
+This constitution supersedes all other practices and conventions. When in doubt, refer to these principles. All team members and AI assistants MUST follow these guidelines.
+
+**Version**: 1.2.0 | **Ratified**: 2025-11-12 | **Last Amended**: 2025-11-12
