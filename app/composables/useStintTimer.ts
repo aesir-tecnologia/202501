@@ -189,7 +189,7 @@ function handleWorkerError(error: ErrorEvent): void {
   globalTimerState.toast?.add({
     title: 'Timer Error',
     description: 'Timer encountered an error. Please refresh if the timer stops working.',
-    color: 'red',
+    color: 'error',
   });
 }
 
@@ -389,18 +389,35 @@ async function syncWithServer(stintId: string): Promise<void> {
     const supabase = useSupabaseClient();
     const clientRemaining = globalTimerState.secondsRemaining.value;
 
-    // Call stint-sync-check Edge Function
-    const { data, error } = await supabase.functions.invoke('stint-sync-check', {
-      body: {
-        stintId,
-        remaining: clientRemaining,
+    // Get auth token for Edge Function
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      console.error('No active session for sync check');
+      return;
+    }
+
+    // Construct URL with query parameters
+    const config = useRuntimeConfig();
+    const url = new URL(`${config.public.supabase.url}/functions/v1/stint-sync-check`);
+    url.searchParams.set('stintId', stintId);
+    url.searchParams.set('remaining', clientRemaining.toString());
+
+    // Make GET request to Edge Function
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': config.public.supabase.key,
+        'Content-Type': 'application/json',
       },
     });
 
-    if (error) {
-      console.error('Sync check failed:', error);
+    if (!response.ok) {
+      console.error('Sync check failed:', response.status, response.statusText);
       return;
     }
+
+    const data = await response.json();
 
     // Check for drift
     const serverRemaining = data.secondsRemaining;
@@ -449,8 +466,7 @@ async function handleTimerComplete(): Promise<void> {
   globalTimerState.toast?.add({
     title: 'Stint Completed!',
     description: `Your stint for ${projectName} has ended.`,
-    color: 'green',
-    timeout: NOTIFICATION_TIMEOUT_MS,
+    color: 'success',
   });
 }
 
