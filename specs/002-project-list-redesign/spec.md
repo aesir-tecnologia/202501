@@ -77,7 +77,7 @@ Users need clear visual hierarchy that guides attention to actionable items (Sta
 
 ### Edge Cases
 
-- What happens when user has 25 active projects (free tier limit)? Project list should remain scannable with virtual scrolling or pagination
+- What happens when user has 25 active projects (free tier limit)? Project list should remain scannable with optimized rendering (v-memo)
 - How does the interface handle projects with very long names (80+ characters)? Text should truncate with ellipsis and show full name on hover
 - What happens when user has 0 active projects but 15 inactive projects? Interface should encourage activating projects rather than showing empty state
 - How does layout adapt on narrow mobile devices (320px width)? Cards should stack vertically with critical information (name, progress, Start button) always visible
@@ -95,14 +95,14 @@ Users need clear visual hierarchy that guides attention to actionable items (Sta
 - **FR-005**: System MUST disable stint initiation on all projects when a stint is already running
 - **FR-006**: System MUST display remaining time for active stint in MM:SS format with update frequency of 1 second
 - **FR-007**: System MUST allow users to reorder active projects via drag-and-drop with visual feedback during drag operation
-- **FR-008**: System MUST persist project order across browser sessions and sync across devices
-- **FR-009**: System MUST collapse inactive projects by default with visible count and expand-on-click functionality
-- **FR-010**: System MUST display project color tags as visual identifiers without relying solely on color for information
+- **FR-008**: System MUST persist project order to database for consistency across sessions
+- **FR-009**: System MUST collapse inactive projects by default with visible count and expand-on-click functionality (collapsed state resets on page load, no persistence)
+- **FR-010**: System MUST display project color tags as visual identifiers (border-left color accent)
 - **FR-011**: System MUST provide quick access to edit project details from project card (1-click to modal)
 - **FR-012**: System MUST show active/inactive toggle switch on each project card with loading state during toggle
 - **FR-013**: System MUST prevent stint initiation on inactive projects (only active projects can have stints started)
 - **FR-014**: System MUST prevent drag-and-drop reordering of inactive projects (only active projects reorderable)
-- **FR-015**: System MUST display celebration indicator when user completes daily stint goal for a project
+- **FR-015**: System MUST display celebration indicator (success-colored badge with checkmark icon) when user completes daily stint goal for a project
 - **FR-016**: System MUST show empty state with actionable CTA when user has zero projects
 - **FR-017**: System MUST adapt layout for mobile viewports (≤768px) with vertically stacked cards
 - **FR-018**: System MUST provide keyboard navigation for all interactive elements (Tab, Enter, Space)
@@ -119,17 +119,17 @@ Users need clear visual hierarchy that guides attention to actionable items (Sta
 
 ## Success Criteria *(mandatory)*
 
-### Measurable Outcomes
+### Qualitative Goals & Technical Requirements
 
-- **SC-001**: Users can identify their current progress on all active projects within 2 seconds of viewing dashboard (measured via user testing or eye-tracking)
-- **SC-002**: 90% of users successfully start a stint within 3 seconds of dashboard load (measured via user testing with stopwatch)
+- **SC-001**: Users can quickly identify their current progress on all active projects at a glance without interaction
+- **SC-002**: Users can rapidly start a stint with minimal cognitive load and interaction steps
 - **SC-003**: Users complete common management tasks (reorder, toggle active, edit) in 2 clicks or fewer (verified through manual testing and interaction flow analysis)
-- **SC-004**: Active stint project is identifiable within 1 second by 80% of users (measured via user testing)
+- **SC-004**: Active stint project is immediately identifiable through clear visual distinction
 - **SC-005**: Mobile users can view all critical project information (name, progress, actions) without horizontal scrolling on 375px viewport
 - **SC-006**: Project list remains performant (60fps scrolling) with up to 25 active projects
 - **SC-007**: Keyboard-only users can navigate entire project list and perform all actions without mouse input
 - **SC-008**: Screen reader users receive clear announcements for all state changes (tested via accessibility audit)
-- **SC-009**: Users report reduced cognitive load when managing multiple projects compared to current design (measured via user satisfaction survey)
+- **SC-009**: Users experience reduced cognitive load when managing multiple projects compared to current design
 
 ## Assumptions
 

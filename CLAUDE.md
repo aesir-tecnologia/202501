@@ -331,6 +331,8 @@ See `README.md` for detailed deployment instructions.
 ## Active Technologies
 - TypeScript 5.x with Vue 3 Composition API + Nuxt 4 (SSG), Nuxt UI v4, Tailwind CSS v4, Lucide Icons (001-design-system-enforcement)
 - N/A (UI/styling changes only, no data layer modifications) (001-design-system-enforcement)
+- TypeScript 5.x with Vue 3 Composition API + Nuxt 4 (SSG mode) + Nuxt UI 4, Tailwind CSS v4, TanStack Query (Vue Query), Lucide Icons, @vueuse/integrations (for useSortable drag-and-drop) (002-project-list-redesign)
+- Supabase PostgreSQL (remote) with Row Level Security (RLS) (002-project-list-redesign)
 
 ## Recent Changes
 - 001-design-system-enforcement: Added TypeScript 5.x with Vue 3 Composition API + Nuxt 4 (SSG), Nuxt UI v4, Tailwind CSS v4, Lucide Icons
