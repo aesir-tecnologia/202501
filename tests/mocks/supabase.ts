@@ -50,7 +50,7 @@ export function createMockSupabaseClient(userId: string, userEmail: string): Typ
           error: null,
         };
       },
-      signInWithPassword: async ({ email }: { email: string; password: string }) => {
+      signInWithPassword: async ({ email }: { email: string, password: string }) => {
         const user = Array.from(store.users.values()).find(u => u.email === email);
         if (!user) {
           return {
@@ -83,9 +83,9 @@ export function createMockSupabaseClient(userId: string, userEmail: string): Typ
 function createQueryBuilder(table: string, getCurrentUser: () => MockUser | null) {
   const state = {
     table,
-    filters: [] as Array<{ field: string; op: string; value: unknown }>,
+    filters: [] as Array<{ field: string, op: string, value: unknown }>,
     selectFields: '*',
-    orderBy: null as { field: string; ascending: boolean } | null,
+    orderBy: null as { field: string, ascending: boolean } | null,
     limitValue: null as number | null,
     isSingle: false,
     isMaybeSingle: false,
@@ -284,7 +284,7 @@ function createQueryBuilder(table: string, getCurrentUser: () => MockUser | null
   });
 }
 
-function matchesFilters(row: Record<string, unknown>, filters: Array<{ field: string; op: string; value: unknown }>): boolean {
+function matchesFilters(row: Record<string, unknown>, filters: Array<{ field: string, op: string, value: unknown }>): boolean {
   return filters.every(({ field, op, value }) => {
     const fieldValue = row[field];
     switch (op) {
@@ -305,8 +305,8 @@ function matchesFilters(row: Record<string, unknown>, filters: Array<{ field: st
 }
 
 function executeProjectQuery(state: {
-  filters: Array<{ field: string; op: string; value: unknown }>
-  orderBy: { field: string; ascending: boolean } | null
+  filters: Array<{ field: string, op: string, value: unknown }>
+  orderBy: { field: string, ascending: boolean } | null
   limitValue: number | null
   isSingle: boolean
   isMaybeSingle: boolean
@@ -340,8 +340,8 @@ function executeProjectQuery(state: {
 }
 
 function executeStintQuery(state: {
-  filters: Array<{ field: string; op: string; value: unknown }>
-  orderBy: { field: string; ascending: boolean } | null
+  filters: Array<{ field: string, op: string, value: unknown }>
+  orderBy: { field: string, ascending: boolean } | null
   limitValue: number | null
   isSingle: boolean
   isMaybeSingle: boolean
@@ -425,7 +425,7 @@ function handleProjectInsert(payload: Partial<ProjectRow>, getCurrentUser: () =>
 }
 
 function handleProjectUpdate(
-  filters: Array<{ field: string; op: string; value: unknown }>,
+  filters: Array<{ field: string, op: string, value: unknown }>,
   payload: Partial<ProjectRow>,
 ) {
   const matching = Array.from(store.projects.values()).filter(row =>
@@ -449,7 +449,7 @@ function handleProjectUpdate(
   return { data: updated, error: null };
 }
 
-function handleProjectDelete(filters: Array<{ field: string; op: string; value: unknown }>) {
+function handleProjectDelete(filters: Array<{ field: string, op: string, value: unknown }>) {
   const matching = Array.from(store.projects.values()).filter(row =>
     matchesFilters(row as unknown as Record<string, unknown>, filters),
   );
@@ -524,7 +524,7 @@ function handleStintInsert(payload: Partial<StintRow>, getCurrentUser: () => Moc
 }
 
 function handleStintUpdate(
-  filters: Array<{ field: string; op: string; value: unknown }>,
+  filters: Array<{ field: string, op: string, value: unknown }>,
   payload: Partial<StintRow>,
 ) {
   const matching = Array.from(store.stints.values()).filter(row =>
@@ -548,7 +548,7 @@ function handleStintUpdate(
   return { data: updated, error: null };
 }
 
-function handleStintDelete(filters: Array<{ field: string; op: string; value: unknown }>) {
+function handleStintDelete(filters: Array<{ field: string, op: string, value: unknown }>) {
   const matching = Array.from(store.stints.values()).filter(row =>
     matchesFilters(row as unknown as Record<string, unknown>, filters),
   );

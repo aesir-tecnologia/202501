@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useSortable } from '@vueuse/integrations/useSortable';
 import type { ProjectRow } from '~/lib/supabase/projects';
-import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
-import { useActiveStintQuery, useStartStint } from '~/composables/useStints';
 import type { StintRow } from '~/lib/supabase/stints';
-import StintTimer from './StintTimer.vue';
-import StintControls from './StintControls.vue';
+import type { DailyProgress } from '~/types/progress';
+import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
+import { useActiveStintQuery, useStartStint, usePauseStint, useResumeStint, useCompleteStint, useStintsQuery } from '~/composables/useStints';
+import ProjectListCard from './ProjectListCard.vue';
 
 const props = defineProps<{
   projects: ProjectRow[]
@@ -20,6 +20,8 @@ const { mutate: reorderProjects, isError, error } = useReorderProjects();
 const { mutateAsync: toggleActive } = useToggleProjectActive();
 const togglingProjectId = ref<string | null>(null);
 
+const screenReaderAnnouncement = ref<string>('');
+
 const activeListRef = ref<HTMLElement | null>(null);
 const localProjects = ref<ProjectRow[]>([...props.projects]);
 const isDragging = ref(false);
@@ -28,6 +30,72 @@ const showInactiveProjects = ref(false);
 // Stint management
 const { data: activeStint } = useActiveStintQuery();
 const { mutateAsync: startStint, isPending: isStarting } = useStartStint();
+const { mutateAsync: pauseStint, isPending: isPausing } = usePauseStint();
+const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint();
+const { mutateAsync: completeStint, isPending: isCompleting } = useCompleteStint();
+
+// Query all stints for daily progress calculation
+const { data: allStints } = useStintsQuery();
+
+// Helper function: Get start of day (midnight) for a date
+function startOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// Helper function: Add days to a date
+function addDays(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function computeAllDailyProgress(
+  projects: ProjectRow[],
+  stints: StintRow[] | undefined,
+): Map<string, DailyProgress> {
+  const today = startOfDay(new Date());
+  const tomorrow = addDays(today, 1);
+
+  const completedCounts = new Map<string, number>();
+
+  if (stints) {
+    for (const stint of stints) {
+      if (stint.status !== 'completed' || !stint.ended_at) continue;
+
+      const endedAt = new Date(stint.ended_at);
+      if (endedAt >= today && endedAt < tomorrow) {
+        const currentCount = completedCounts.get(stint.project_id) || 0;
+        completedCounts.set(stint.project_id, currentCount + 1);
+      }
+    }
+  }
+
+  const progressMap = new Map<string, DailyProgress>();
+
+  for (const project of projects) {
+    const completed = completedCounts.get(project.id) || 0;
+    const expected = Math.max(0, project.expected_daily_stints ?? 0);
+    const percentage = expected > 0 ? Math.min((completed / expected) * 100, 100) : 0;
+
+    progressMap.set(project.id, {
+      projectId: project.id,
+      completed,
+      expected,
+      percentage,
+      isOverAchieving: expected > 0 && completed > expected,
+      isMet: expected > 0 && completed >= expected,
+    });
+  }
+
+  return progressMap;
+}
+
+// Computed: Daily progress for all projects (single calculation)
+const dailyProgressMap = computed(() => {
+  return computeAllDailyProgress(props.projects, allStints.value);
+});
 
 // Separate active and inactive projects
 const activeProjects = computed(() => localProjects.value.filter(p => p.is_active));
@@ -93,13 +161,16 @@ async function handleToggleActive(project: ProjectRow) {
   togglingProjectId.value = project.id;
   try {
     await toggleActive(project.id);
+    const newStatus = project.is_active ? 'inactive' : 'active';
+    screenReaderAnnouncement.value = `${project.name} is now ${newStatus}`;
     toast.add({
       title: project.is_active ? 'Project deactivated' : 'Project activated',
-      description: `${project.name} is now ${project.is_active ? 'inactive' : 'active'}`,
+      description: `${project.name} is now ${newStatus}`,
       color: 'success',
     });
   }
   catch (error) {
+    screenReaderAnnouncement.value = `Failed to toggle ${project.name} status`;
     toast.add({
       title: 'Failed to toggle project status',
       description: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -111,46 +182,6 @@ async function handleToggleActive(project: ProjectRow) {
   }
 }
 
-function formatDuration(minutes: number | null) {
-  const duration = minutes ?? 45; // Default to 45 minutes if null
-  if (duration < 60) return `${duration}m`;
-  const hours = Math.floor(duration / 60);
-  const mins = duration % 60;
-  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-}
-
-// Get border color class for project color tag
-function getColorBorderClass(colorTag: string | null) {
-  if (!colorTag) return '';
-
-  const colorMap: Record<string, string> = {
-    red: 'border-l-red-500',
-    orange: 'border-l-orange-500',
-    amber: 'border-l-amber-500',
-    green: 'border-l-green-500',
-    teal: 'border-l-teal-500',
-    blue: 'border-l-blue-500',
-    purple: 'border-l-purple-500',
-    pink: 'border-l-pink-500',
-  };
-
-  return colorMap[colorTag] || '';
-}
-
-// Check if a project has an active stint
-function isProjectActive(projectId: string): boolean {
-  return activeStint.value?.project_id === projectId;
-}
-
-// Get the active stint for a specific project
-function projectActiveStint(projectId: string): StintRow | null {
-  if (activeStint.value?.project_id === projectId) {
-    return activeStint.value;
-  }
-  return null;
-}
-
-// Handle starting a stint
 async function handleStartStint(project: ProjectRow): Promise<void> {
   try {
     await startStint({
@@ -158,6 +189,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
       plannedDurationMinutes: project.custom_stint_duration ?? undefined,
     });
 
+    screenReaderAnnouncement.value = `Started working on ${project.name}`;
     toast.add({
       title: 'Stint Started',
       description: `Started working on ${project.name}`,
@@ -166,9 +198,76 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
     });
   }
   catch (error) {
+    screenReaderAnnouncement.value = `Failed to start stint on ${project.name}`;
     toast.add({
       title: 'Failed to Start Stint',
       description: error instanceof Error ? error.message : 'Could not start stint. Please try again.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    });
+  }
+}
+
+async function handlePauseStint(stint: StintRow): Promise<void> {
+  try {
+    await pauseStint(stint.id);
+    screenReaderAnnouncement.value = 'Stint paused';
+    toast.add({
+      title: 'Stint Paused',
+      color: 'warning',
+      icon: 'i-lucide-pause-circle',
+    });
+  }
+  catch (error) {
+    screenReaderAnnouncement.value = 'Failed to pause stint';
+    toast.add({
+      title: 'Failed to Pause Stint',
+      description: error instanceof Error ? error.message : 'Could not pause stint. Please try again.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    });
+  }
+}
+
+async function handleResumeStint(stint: StintRow): Promise<void> {
+  try {
+    await resumeStint(stint.id);
+    screenReaderAnnouncement.value = 'Stint resumed';
+    toast.add({
+      title: 'Stint Resumed',
+      color: 'success',
+      icon: 'i-lucide-play-circle',
+    });
+  }
+  catch (error) {
+    screenReaderAnnouncement.value = 'Failed to resume stint';
+    toast.add({
+      title: 'Failed to Resume Stint',
+      description: error instanceof Error ? error.message : 'Could not resume stint. Please try again.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    });
+  }
+}
+
+async function handleCompleteStint(stint: StintRow): Promise<void> {
+  try {
+    await completeStint({
+      stintId: stint.id,
+      completionType: 'manual',
+    });
+    screenReaderAnnouncement.value = 'Stint completed';
+    toast.add({
+      title: 'Stint Completed',
+      color: 'success',
+      icon: 'i-lucide-check-circle',
+    });
+  }
+  catch (error) {
+    screenReaderAnnouncement.value = 'Failed to complete stint';
+    toast.add({
+      title: 'Failed to Complete Stint',
+      description: error instanceof Error ? error.message : 'Could not complete stint. Please try again.',
       color: 'error',
       icon: 'i-lucide-alert-circle',
     });
@@ -178,7 +277,16 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
 
 <template>
   <div>
-    <!-- Empty state -->
+    <!-- Screen reader announcements -->
+    <div
+      aria-live="polite"
+      aria-atomic="true"
+      class="sr-only"
+    >
+      {{ screenReaderAnnouncement }}
+    </div>
+
+    <!-- Empty state: No projects at all -->
     <div
       v-if="projects.length === 0"
       class="text-center py-12"
@@ -195,6 +303,57 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
       </p>
     </div>
 
+    <!-- Empty state: All projects inactive -->
+    <div
+      v-else-if="activeProjects.length === 0 && inactiveProjects.length > 0"
+      class="text-center py-12"
+    >
+      <Icon
+        name="i-lucide-pause-circle"
+        class="h-12 w-12 mx-auto text-neutral-400 dark:text-neutral-600"
+      />
+      <h3 class="mt-4 text-xl font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
+        All projects are inactive
+      </h3>
+      <p class="mt-2 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
+        Activate a project below to start tracking stints
+      </p>
+
+      <!-- Show inactive projects expanded -->
+      <div class="mt-8 max-w-2xl mx-auto">
+        <h4 class="text-sm font-medium leading-normal text-neutral-700 dark:text-neutral-300 mb-2 text-left">
+          Inactive Projects ({{ inactiveProjects.length }})
+        </h4>
+        <ul class="space-y-2">
+          <ProjectListCard
+            v-for="project in inactiveProjects"
+            :key="project.id"
+            :project="project"
+            :active-stint="activeStint ?? null"
+            :daily-progress="dailyProgressMap.get(project.id) ?? {
+              projectId: project.id,
+              completed: 0,
+              expected: project.expected_daily_stints ?? 0,
+              percentage: 0,
+              isOverAchieving: false,
+              isMet: false,
+            }"
+            :is-toggling="togglingProjectId === project.id"
+            :is-starting="false"
+            :is-pausing="isPausing || isResuming"
+            :is-completing="isCompleting"
+            :is-draggable="false"
+            @edit="handleEdit"
+            @toggle-active="handleToggleActive"
+            @start-stint="handleStartStint"
+            @pause-stint="handlePauseStint"
+            @resume-stint="handleResumeStint"
+            @complete-stint="handleCompleteStint"
+          />
+        </ul>
+      </div>
+    </div>
+
     <!-- Active Projects Section -->
     <div v-else>
       <h3
@@ -208,132 +367,31 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
         ref="activeListRef"
         class="space-y-2"
       >
-        <li
+        <ProjectListCard
           v-for="project in activeProjects"
           :key="project.id"
-          :class="[
-            'flex flex-col gap-3 p-4 rounded-lg border-2 motion-safe:transition-all border-l-4',
-            isProjectActive(project.id)
-              ? 'border-success-500 ring-2 ring-success-500/50 pulsing-active bg-success-50/50 dark:bg-success-950/20'
-              : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-neutral-300 dark:hover:border-neutral-700',
-            getColorBorderClass(project.color_tag),
-          ]"
-        >
-          <!-- Project Header Row -->
-          <div class="flex items-center gap-3 w-full">
-            <!-- Drag handle -->
-            <UTooltip text="Reorder project">
-              <button
-                type="button"
-                class="drag-handle cursor-move p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded motion-safe:transition-all motion-safe:duration-200"
-                aria-label="Reorder project"
-              >
-                <Icon
-                  name="i-lucide-grip-vertical"
-                  class="h-5 w-5 text-neutral-400 dark:text-neutral-500"
-                />
-              </button>
-            </UTooltip>
-
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2">
-                <h3 class="text-base font-medium leading-normal text-neutral-900 dark:text-neutral-50 truncate">
-                  {{ project.name }}
-                </h3>
-              </div>
-              <div class="mt-1 flex items-center gap-4 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
-                <span class="flex items-center gap-1">
-                  <Icon
-                    name="i-lucide-target"
-                    class="h-4 w-4"
-                  />
-                  {{ project.expected_daily_stints }} stints/day
-                </span>
-                <span class="flex items-center gap-1">
-                  <Icon
-                    name="i-lucide-timer"
-                    class="h-4 w-4"
-                  />
-                  {{ formatDuration(project.custom_stint_duration) }} per stint
-                </span>
-              </div>
-            </div>
-
-            <!-- Toggle and Actions -->
-            <div class="flex items-center gap-2">
-              <UTooltip :text="project.is_active ? 'Deactivate project' : 'Activate project'">
-                <span>
-                  <USwitch
-                    :model-value="project.is_active ?? true"
-                    :loading="togglingProjectId === project.id"
-                    :disabled="togglingProjectId === project.id"
-                    aria-label="Toggle project active status"
-                    @update:model-value="handleToggleActive(project)"
-                  />
-                </span>
-              </UTooltip>
-              <div class="flex items-center gap-1">
-                <UTooltip text="Edit project">
-                  <span>
-                    <UButton
-                      icon="i-lucide-pencil"
-                      color="neutral"
-                      variant="ghost"
-                      size="sm"
-                      aria-label="Edit project"
-                      class="motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:scale-105"
-                      @click="handleEdit(project)"
-                    />
-                  </span>
-                </UTooltip>
-              </div>
-            </div>
-          </div>
-
-          <!-- Active Stint Section (expanded when project has active stint) -->
-          <div
-            v-if="isProjectActive(project.id)"
-            class="flex flex-col items-center gap-4 pt-4 border-t border-success-200 dark:border-success-800"
-          >
-            <!-- Timer Display -->
-            <StintTimer :stint="projectActiveStint(project.id)" />
-
-            <!-- Controls -->
-            <StintControls :stint="projectActiveStint(project.id)!" />
-          </div>
-
-          <!-- Start Button Section (when no active stint or different project active) -->
-          <div
-            v-else
-            class="flex items-center justify-center gap-2 pt-2"
-          >
-            <UButton
-              v-if="!activeStint"
-              color="success"
-              icon="i-lucide-play"
-              :loading="isStarting"
-              :disabled="isStarting"
-              @click="handleStartStint(project)"
-            >
-              Start Stint
-            </UButton>
-            <UTooltip
-              v-else
-              text="Stop current stint to start new one"
-            >
-              <span>
-                <UButton
-                  color="neutral"
-                  variant="soft"
-                  icon="i-lucide-play"
-                  disabled
-                >
-                  Start Stint
-                </UButton>
-              </span>
-            </UTooltip>
-          </div>
-        </li>
+          :project="project"
+          :active-stint="activeStint ?? null"
+          :daily-progress="dailyProgressMap.get(project.id) ?? {
+            projectId: project.id,
+            completed: 0,
+            expected: project.expected_daily_stints ?? 0,
+            percentage: 0,
+            isOverAchieving: false,
+            isMet: false,
+          }"
+          :is-toggling="togglingProjectId === project.id"
+          :is-starting="isStarting"
+          :is-pausing="isPausing || isResuming"
+          :is-completing="isCompleting"
+          :is-draggable="true"
+          @edit="handleEdit"
+          @toggle-active="handleToggleActive"
+          @start-stint="handleStartStint"
+          @pause-stint="handlePauseStint"
+          @resume-stint="handleResumeStint"
+          @complete-stint="handleCompleteStint"
+        />
       </ul>
 
       <!-- Inactive Projects Section -->
@@ -357,98 +415,33 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
           v-if="showInactiveProjects"
           class="space-y-2"
         >
-          <li
+          <ProjectListCard
             v-for="project in inactiveProjects"
             :key="project.id"
-            :class="[
-              'flex items-center gap-3 p-4 rounded-lg border-2 motion-safe:transition-colors border-l-4',
-              'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50 opacity-60',
-              getColorBorderClass(project.color_tag),
-            ]"
-          >
-            <!-- Project info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2">
-                <h3 class="text-base font-medium leading-normal text-neutral-900 dark:text-neutral-50 truncate">
-                  {{ project.name }}
-                </h3>
-                <UBadge
-                  color="neutral"
-                  variant="subtle"
-                  size="sm"
-                >
-                  Inactive
-                </UBadge>
-              </div>
-              <div class="mt-1 flex items-center gap-4 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
-                <span class="flex items-center gap-1">
-                  <Icon
-                    name="i-lucide-target"
-                    class="h-4 w-4"
-                  />
-                  {{ project.expected_daily_stints }} stints/day
-                </span>
-                <span class="flex items-center gap-1">
-                  <Icon
-                    name="i-lucide-timer"
-                    class="h-4 w-4"
-                  />
-                  {{ formatDuration(project.custom_stint_duration) }} per stint
-                </span>
-              </div>
-            </div>
-
-            <!-- Toggle and Actions -->
-            <div class="flex items-center gap-2">
-              <UTooltip :text="project.is_active ? 'Deactivate project' : 'Activate project'">
-                <span>
-                  <USwitch
-                    :model-value="project.is_active ?? false"
-                    :loading="togglingProjectId === project.id"
-                    :disabled="togglingProjectId === project.id"
-                    aria-label="Toggle project active status"
-                    @update:model-value="handleToggleActive(project)"
-                  />
-                </span>
-              </UTooltip>
-              <div class="flex items-center gap-1">
-                <UTooltip text="Edit project">
-                  <span>
-                    <UButton
-                      icon="i-lucide-pencil"
-                      color="neutral"
-                      variant="ghost"
-                      size="sm"
-                      aria-label="Edit project"
-                      class="motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:scale-105"
-                      @click="handleEdit(project)"
-                    />
-                  </span>
-                </UTooltip>
-              </div>
-            </div>
-          </li>
+            :project="project"
+            :active-stint="activeStint ?? null"
+            :daily-progress="dailyProgressMap.get(project.id) ?? {
+              projectId: project.id,
+              completed: 0,
+              expected: project.expected_daily_stints ?? 0,
+              percentage: 0,
+              isOverAchieving: false,
+              isMet: false,
+            }"
+            :is-toggling="togglingProjectId === project.id"
+            :is-starting="false"
+            :is-pausing="isPausing || isResuming"
+            :is-completing="isCompleting"
+            :is-draggable="false"
+            @edit="handleEdit"
+            @toggle-active="handleToggleActive"
+            @start-stint="handleStartStint"
+            @pause-stint="handlePauseStint"
+            @resume-stint="handleResumeStint"
+            @complete-stint="handleCompleteStint"
+          />
         </ul>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-@keyframes pulse-border {
-  0%, 100% {
-    border-color: var(--color-success-500);
-    box-shadow: 0 0 0 0 rgb(from var(--color-success-500) r g b / 0.4);
-  }
-  50% {
-    border-color: var(--color-success-400);
-    box-shadow: 0 0 0 4px rgb(from var(--color-success-400) r g b / 0.2);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .pulsing-active {
-    animation: pulse-border 300ms ease-in-out infinite;
-  }
-}
-</style>
