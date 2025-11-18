@@ -54,9 +54,19 @@ const hasActiveStint = computed(() => {
   return props.activeStint?.project_id === props.project.id;
 });
 
-const { canStart: canStartStint, isChecking: isCheckingCanStart, reason: disabledReason } = useCanStartStint(
-  computed(() => props.project),
-);
+const canStartStint = computed(() => {
+  if (!props.project.is_active) return false;
+  if (props.activeStint) return false;
+  return true;
+});
+
+const isCheckingCanStart = computed(() => false);
+
+const disabledReason = computed(() => {
+  if (!props.project.is_active) return 'Project is inactive';
+  if (props.activeStint) return 'Stop current stint to start new one';
+  return '';
+});
 
 // Computed: Progress text display
 const progressText = computed(() => {
@@ -271,7 +281,7 @@ function handleCompleteStint() {
       <!-- Play button (when no active stint and project is active) -->
       <UTooltip
         v-if="canStartStint"
-        text="Start stint1"
+        text="Start stint"
       >
         <span>
           <UButton

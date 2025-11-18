@@ -6,6 +6,7 @@ import type { DailyProgress } from '~/types/progress';
 import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
 import { useActiveStintQuery, useStartStint, usePauseStint, useResumeStint, useCompleteStint, useStintsQuery } from '~/composables/useStints';
 import ProjectListCard from './ProjectListCard.vue';
+import { parseSafeDate } from '~/utils/date-helpers';
 
 const props = defineProps<{
   projects: ProjectRow[]
@@ -64,8 +65,8 @@ function computeAllDailyProgress(
     for (const stint of stints) {
       if (stint.status !== 'completed' || !stint.ended_at) continue;
 
-      const endedAt = new Date(stint.ended_at);
-      if (endedAt >= today && endedAt < tomorrow) {
+      const endedAt = parseSafeDate(stint.ended_at);
+      if (endedAt && endedAt >= today && endedAt < tomorrow) {
         const currentCount = completedCounts.get(stint.project_id) || 0;
         completedCounts.set(stint.project_id, currentCount + 1);
       }
