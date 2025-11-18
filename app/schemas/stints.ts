@@ -1,8 +1,5 @@
 import { z } from 'zod';
-
-const STINT_DURATION_MIN_MINUTES = 10;
-const STINT_DURATION_MAX_MINUTES = 120;
-const STINT_NOTES_MAX_LENGTH = 500;
+import { STINT } from '~/constants';
 
 export const stintIdentifierSchema = z.object({
   id: z.string().uuid(),
@@ -10,27 +7,16 @@ export const stintIdentifierSchema = z.object({
 
 export const stintStartSchema = z.object({
   projectId: z.string().uuid('A valid project id is required'),
-  startedAt: z.date().optional(),
-  notes: z
-    .string()
-    .trim()
-    .max(STINT_NOTES_MAX_LENGTH, 'Notes must be 500 characters or fewer')
-    .optional()
-    .or(z.literal('').transform(() => undefined)),
-});
-
-export const stintStartEnhancedSchema = z.object({
-  projectId: z.string().uuid('A valid project id is required'),
   plannedDurationMinutes: z
     .number()
     .int()
-    .min(STINT_DURATION_MIN_MINUTES, `Stint duration must be at least ${STINT_DURATION_MIN_MINUTES} minutes`)
-    .max(STINT_DURATION_MAX_MINUTES, `Stint duration must be at most ${STINT_DURATION_MAX_MINUTES} minutes`)
+    .min(STINT.DURATION_MINUTES.MIN, `Stint duration must be at least ${STINT.DURATION_MINUTES.MIN} minutes`)
+    .max(STINT.DURATION_MINUTES.MAX, `Stint duration must be at most ${STINT.DURATION_MINUTES.MAX} minutes`)
     .optional(),
   notes: z
     .string()
     .trim()
-    .max(STINT_NOTES_MAX_LENGTH, 'Notes must be 500 characters or fewer')
+    .max(STINT.NOTES.MAX_LENGTH, `Notes must be ${STINT.NOTES.MAX_LENGTH} characters or fewer`)
     .optional()
     .or(z.literal('').transform(() => undefined)),
 });
@@ -39,7 +25,7 @@ export const stintUpdateSchema = z.object({
   notes: z
     .string()
     .trim()
-    .max(STINT_NOTES_MAX_LENGTH, 'Notes must be 500 characters or fewer')
+    .max(STINT.NOTES.MAX_LENGTH, `Notes must be ${STINT.NOTES.MAX_LENGTH} characters or fewer`)
     .optional()
     .or(z.literal('').transform(() => undefined)),
 });
@@ -65,22 +51,15 @@ export const stintInterruptSchema = z.object({
   reason: z
     .string()
     .trim()
-    .max(STINT_NOTES_MAX_LENGTH, 'Reason must be 500 characters or fewer')
+    .max(STINT.NOTES.MAX_LENGTH, `Reason must be ${STINT.NOTES.MAX_LENGTH} characters or fewer`)
     .optional()
     .or(z.literal('').transform(() => undefined)),
 });
 
 export type StintStartPayload = z.infer<typeof stintStartSchema>;
-export type StintStartEnhancedPayload = z.infer<typeof stintStartEnhancedSchema>;
 export type StintUpdatePayload = z.infer<typeof stintUpdateSchema>;
 export type StintPausePayload = z.infer<typeof stintPauseSchema>;
 export type StintResumePayload = z.infer<typeof stintResumeSchema>;
 export type StintCompletionPayload = z.infer<typeof stintCompletionSchema>;
 export type StintInterruptPayload = z.infer<typeof stintInterruptSchema>;
 export type StintIdentifier = z.infer<typeof stintIdentifierSchema>;
-
-export const STINT_SCHEMA_LIMITS = {
-  DURATION_MIN_MINUTES: STINT_DURATION_MIN_MINUTES,
-  DURATION_MAX_MINUTES: STINT_DURATION_MAX_MINUTES,
-  NOTES_MAX_LENGTH: STINT_NOTES_MAX_LENGTH,
-} as const;
