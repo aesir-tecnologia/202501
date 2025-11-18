@@ -1,9 +1,6 @@
 import { VueQueryPlugin, QueryClient } from '@tanstack/vue-query';
 
 export default defineNuxtPlugin((nuxtApp) => {
-  // Only initialize on client side (SSG consideration)
-  if (import.meta.server) return;
-
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {

@@ -3,6 +3,7 @@ import type { StintRow } from '~/lib/supabase/stints';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import { useStintsQuery } from '~/composables/useStints';
 import { useProjectsQuery } from '~/composables/useProjects';
+import { parseSafeDate } from '~/utils/date-helpers';
 
 definePageMeta({
   title: 'Reports',
@@ -94,17 +95,20 @@ const filteredStints = computed(() => {
 
     // Date range filter
     if (dateRange.value.start || dateRange.value.end) {
-      const stintDate = new Date(s.ended_at);
+      const stintDate = parseSafeDate(s.ended_at);
+      if (!stintDate) return false;
       stintDate.setHours(0, 0, 0, 0);
 
       if (dateRange.value.start) {
-        const startDate = new Date(dateRange.value.start);
+        const startDate = parseSafeDate(dateRange.value.start);
+        if (!startDate) return false;
         startDate.setHours(0, 0, 0, 0);
         if (stintDate < startDate) return false;
       }
 
       if (dateRange.value.end) {
-        const endDate = new Date(dateRange.value.end);
+        const endDate = parseSafeDate(dateRange.value.end);
+        if (!endDate) return false;
         endDate.setHours(23, 59, 59, 999);
         if (stintDate > endDate) return false;
       }
@@ -119,8 +123,8 @@ const filteredStints = computed(() => {
   });
 
   return filtered.sort((a, b) => {
-    const dateA = a.ended_at ? new Date(a.ended_at).getTime() : 0;
-    const dateB = b.ended_at ? new Date(b.ended_at).getTime() : 0;
+    const dateA = a.ended_at ? (parseSafeDate(a.ended_at)?.getTime() ?? 0) : 0;
+    const dateB = b.ended_at ? (parseSafeDate(b.ended_at)?.getTime() ?? 0) : 0;
     return dateB - dateA; // Most recent first
   });
 });
@@ -140,7 +144,8 @@ const summary = computed(() => {
   const daysWithStints = new Set(
     filteredStints.value.map((s) => {
       if (!s.ended_at) return '';
-      const date = new Date(s.ended_at);
+      const date = parseSafeDate(s.ended_at);
+      if (!date) return '';
       return date.toISOString().split('T')[0];
     }).filter(Boolean),
   ).size;
@@ -193,7 +198,8 @@ const dailyBreakdown = computed(() => {
   filteredStints.value.forEach((stint) => {
     if (!stint.ended_at) return;
 
-    const date = new Date(stint.ended_at);
+    const date = parseSafeDate(stint.ended_at);
+    if (!date) return;
     const dateKey = date.toISOString().split('T')[0];
     const timeMinutes = Math.round((stint.actual_duration || 0) / 60);
 
@@ -228,12 +234,14 @@ function formatTime(minutes: number): string {
 }
 
 function formatDate(dateString: string): string {
-  const date = new Date(dateString);
+  const date = parseSafeDate(dateString);
+  if (!date) return 'Invalid date';
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function formatDateTime(dateString: string): string {
-  const date = new Date(dateString);
+  const date = parseSafeDate(dateString);
+  if (!date) return 'Invalid date';
   return date.toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',

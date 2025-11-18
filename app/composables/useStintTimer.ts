@@ -8,6 +8,7 @@
 import type { Database } from '~/types/database.types';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useActiveStintQuery } from './useStints';
+import { parseSafeDate } from '~/utils/date-helpers';
 
 type StintRow = Database['public']['Tables']['stints']['Row'];
 
@@ -189,7 +190,7 @@ function handleWorkerError(error: ErrorEvent): void {
   globalTimerState.toast?.add({
     title: 'Timer Error',
     description: 'Timer encountered an error. Please refresh if the timer stops working.',
-    color: 'red',
+    color: 'error',
   });
 }
 
@@ -245,7 +246,18 @@ function startTimer(stint: StintRow): void {
   }
 
   // Calculate end time
-  const startedAt = new Date(stint.started_at!).getTime();
+  const startedAtDate = parseSafeDate(stint.started_at);
+  if (!startedAtDate) {
+    console.error('Cannot start timer: invalid started_at date', stint.started_at);
+    globalTimerState.toast?.add({
+      title: 'Timer Error',
+      description: 'Invalid stint start time. Please try again.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    });
+    return;
+  }
+  const startedAt = startedAtDate.getTime();
   const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000;
   const endTime = startedAt + plannedDurationMs;
 
@@ -297,7 +309,18 @@ function resumeTimer(stint: StintRow): void {
   }
 
   // Calculate new end time accounting for paused duration
-  const startedAt = new Date(stint.started_at!).getTime();
+  const startedAtDate = parseSafeDate(stint.started_at);
+  if (!startedAtDate) {
+    console.error('Cannot resume timer: invalid started_at date', stint.started_at);
+    globalTimerState.toast?.add({
+      title: 'Timer Error',
+      description: 'Invalid stint start time. Please try again.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    });
+    return;
+  }
+  const startedAt = startedAtDate.getTime();
   const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000;
   const pausedDurationMs = (stint.paused_duration || 0) * 1000;
   const endTime = startedAt + plannedDurationMs + pausedDurationMs;
@@ -343,8 +366,14 @@ function initializePausedState(stint: StintRow): void {
   globalTimerState.isCompleted.value = false;
 
   // Calculate remaining time for display
-  const startedAt = new Date(stint.started_at!).getTime();
-  const pausedAt = stint.paused_at ? new Date(stint.paused_at).getTime() : Date.now();
+  const startedAtDate = parseSafeDate(stint.started_at);
+  if (!startedAtDate) {
+    console.error('Cannot initialize paused state: invalid started_at date', stint.started_at);
+    return;
+  }
+  const startedAt = startedAtDate.getTime();
+  const pausedAtDate = stint.paused_at ? parseSafeDate(stint.paused_at) : null;
+  const pausedAt = pausedAtDate ? pausedAtDate.getTime() : Date.now();
   const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000;
   const pausedDurationMs = (stint.paused_duration || 0) * 1000;
 
@@ -389,18 +418,35 @@ async function syncWithServer(stintId: string): Promise<void> {
     const supabase = useSupabaseClient();
     const clientRemaining = globalTimerState.secondsRemaining.value;
 
-    // Call stint-sync-check Edge Function
-    const { data, error } = await supabase.functions.invoke('stint-sync-check', {
-      body: {
-        stintId,
-        remaining: clientRemaining,
+    // Get auth token for Edge Function
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      console.error('No active session for sync check');
+      return;
+    }
+
+    // Construct URL with query parameters
+    const config = useRuntimeConfig();
+    const url = new URL(`${config.public.supabase.url}/functions/v1/stint-sync-check`);
+    url.searchParams.set('stintId', stintId);
+    url.searchParams.set('remaining', clientRemaining.toString());
+
+    // Make GET request to Edge Function
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': config.public.supabase.key,
+        'Content-Type': 'application/json',
       },
     });
 
-    if (error) {
-      console.error('Sync check failed:', error);
+    if (!response.ok) {
+      console.error('Sync check failed:', response.status, response.statusText);
       return;
     }
+
+    const data = await response.json();
 
     // Check for drift
     const serverRemaining = data.secondsRemaining;
@@ -449,8 +495,7 @@ async function handleTimerComplete(): Promise<void> {
   globalTimerState.toast?.add({
     title: 'Stint Completed!',
     description: `Your stint for ${projectName} has ended.`,
-    color: 'green',
-    timeout: NOTIFICATION_TIMEOUT_MS,
+    color: 'success',
   });
 }
 

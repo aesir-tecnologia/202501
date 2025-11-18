@@ -277,6 +277,22 @@ tests/
 
 **See `tests/README.md` for comprehensive testing guide, mock architecture details, and examples.**
 
+### Test Users
+
+**Playwright E2E Test User** (for browser automation tests):
+- **Email:** `playwright-test@lifestint.test`
+- **Password:** `PlaywrightTest2025!`
+- **User ID:** `13a5b16a-3b36-4869-afbe-c2138d0ea426`
+- **Use Case:** Browser-based end-to-end tests with Playwright MCP
+- **Creation:** Run `node scripts/create-playwright-user.mjs` (idempotent - safe to re-run)
+
+**Unit/Integration Test Users** (for Vitest tests):
+- **User 1:** `global-test-user-1@lifestint.test` / `TestPassword123!SecureGlobal1`
+- **User 2:** `global-test-user-2@lifestint.test` / `TestPassword123!SecureGlobal2`
+- **Auto-created:** Via `tests/globalSetup.ts` when `USE_MOCK_SUPABASE=false`
+
+**Note:** All test users are automatically created on first use and persist in the Supabase database. Test data (projects/stints) is cleaned between test runs.
+
 ## Environment Variables
 
 Required in `.env` (see `.env.example`):
@@ -331,7 +347,5 @@ See `README.md` for detailed deployment instructions.
 ## Active Technologies
 - TypeScript 5.x with Vue 3 Composition API + Nuxt 4 (SSG), Nuxt UI v4, Tailwind CSS v4, Lucide Icons (001-design-system-enforcement)
 - N/A (UI/styling changes only, no data layer modifications) (001-design-system-enforcement)
-
-## Recent Changes
-- 001-design-system-enforcement: Added TypeScript 5.x with Vue 3 Composition API + Nuxt 4 (SSG), Nuxt UI v4, Tailwind CSS v4, Lucide Icons
-- Testing Infrastructure: Implemented dual-mode testing with mocked Supabase client (default) for fast unit tests (~1s) and optional real Supabase integration tests. Eliminates API rate limiting during development and CI/CD. See `tests/README.md` for details.
+- TypeScript 5.x with Vue 3 Composition API + Nuxt 4 (SSG mode) + Nuxt UI 4, Tailwind CSS v4, TanStack Query (Vue Query), Lucide Icons, @vueuse/integrations (for useSortable drag-and-drop) (002-project-list-redesign)
+- Supabase PostgreSQL (remote) with Row Level Security (RLS) (002-project-list-redesign)

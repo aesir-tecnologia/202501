@@ -7,7 +7,7 @@ export default withNuxt(
     rules: {
       // Disable multi-word component names for pages (they are route components, not reusable components)
       'vue/multi-word-component-names': ['error', {
-        ignores: ['login', 'register', 'callback', 'index', 'test', 'error', 'default', 'analytics', 'home', 'reports', 'settings'],
+        ignores: ['login', 'register', 'callback', 'index', 'test', 'error', 'default', 'dashboard', 'analytics', 'home', 'reports', 'settings'],
       }],
       // Require semicolons at the end of statements
       '@stylistic/semi': ['error', 'always'],

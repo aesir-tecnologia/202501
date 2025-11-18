@@ -63,10 +63,11 @@ export default defineNuxtConfig({
         '/auth/verify-email',
         '/design-showcase',
       ],
-      ignore: ['/', '/analytics', '/reports', '/settings', '/auth/callback', '/api/**'],
+      ignore: ['/', '/dashboard', '/analytics', '/reports', '/settings', '/auth/callback', '/api/**'],
     },
     routeRules: {
       '/': { ssr: false },
+      '/dashboard': { ssr: false },
       '/analytics': { ssr: false },
       '/reports': { ssr: false },
       '/settings': { ssr: false },

@@ -9,8 +9,8 @@ const toast = useToast();
 const items = computed<NavigationMenuItem[]>(() => [
   {
     label: 'Dashboard',
-    to: '/',
-    active: route.path === '/' || route.path === '',
+    to: '/dashboard',
+    active: route.path === '/dashboard',
   },
   {
     label: 'Analytics',

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-const STINT_DURATION_MIN_MINUTES = 5;
-const STINT_DURATION_MAX_MINUTES = 720;
+const STINT_DURATION_MIN_MINUTES = 10;
+const STINT_DURATION_MAX_MINUTES = 120;
 const STINT_NOTES_MAX_LENGTH = 500;
 
 export const stintIdentifierSchema = z.object({

@@ -2,6 +2,7 @@
 import type { ProjectRow } from '~/lib/supabase/projects';
 import { useStintsQuery } from '~/composables/useStints';
 import { useProjectsQuery } from '~/composables/useProjects';
+import { parseSafeDate } from '~/utils/date-helpers';
 
 definePageMeta({
   title: 'Analytics',
@@ -38,7 +39,8 @@ const currentStreak = computed(() => {
   while (true) {
     const hasStintOnDate = completedStints.value.some((stint) => {
       if (!stint.ended_at) return false;
-      const stintDate = new Date(stint.ended_at);
+      const stintDate = parseSafeDate(stint.ended_at);
+      if (!stintDate) return false;
       stintDate.setHours(0, 0, 0, 0);
       return stintDate.getTime() === checkDate.getTime();
     });
@@ -58,14 +60,17 @@ const longestStreak = computed(() => {
   const dates = new Set<string>();
   completedStints.value.forEach((stint) => {
     if (stint.ended_at) {
-      const date = new Date(stint.ended_at);
-      date.setHours(0, 0, 0, 0);
-      dates.add(date.toISOString());
+      const date = parseSafeDate(stint.ended_at);
+      if (date) {
+        date.setHours(0, 0, 0, 0);
+        dates.add(date.toISOString());
+      }
     }
   });
 
   const sortedDates = Array.from(dates)
-    .map(d => new Date(d))
+    .map(d => parseSafeDate(d))
+    .filter((d): d is Date => d !== null)
     .sort((a, b) => a.getTime() - b.getTime());
 
   if (sortedDates.length === 0) return 0;
@@ -97,7 +102,8 @@ const todayStints = computed(() => {
 
   return completedStints.value.filter((stint) => {
     if (!stint.ended_at) return false;
-    const stintDate = new Date(stint.ended_at);
+    const stintDate = parseSafeDate(stint.ended_at);
+    if (!stintDate) return false;
     stintDate.setHours(0, 0, 0, 0);
     return stintDate.getTime() === today.getTime();
   });
@@ -158,7 +164,8 @@ const weekStints = computed(() => {
 
   return completedStints.value.filter((stint) => {
     if (!stint.ended_at) return false;
-    const stintDate = new Date(stint.ended_at);
+    const stintDate = parseSafeDate(stint.ended_at);
+    if (!stintDate) return false;
     return stintDate >= weekStart;
   });
 });
@@ -184,7 +191,8 @@ const weekDataByDay = computed(() => {
 
     const dayStints = weekStints.value.filter((stint) => {
       if (!stint.ended_at) return false;
-      const stintDate = new Date(stint.ended_at);
+      const stintDate = parseSafeDate(stint.ended_at);
+      if (!stintDate) return false;
       stintDate.setHours(0, 0, 0, 0);
       return stintDate.getTime() === date.getTime();
     });
