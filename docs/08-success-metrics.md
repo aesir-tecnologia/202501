@@ -49,7 +49,7 @@
 ### North Star Metric
 
 **Weekly focused minutes per user**
-- Target: 300+ minutes (5+ stints at 50 min each)
+- Target: 300+ minutes (2.5+ stints at 120 min each)
 - Why: Directly measures core value proposition (focused work)
 - Tracking: Sum of `actual_duration` for completed stints per user per week
 

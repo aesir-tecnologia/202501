@@ -69,7 +69,7 @@ A tool that tracks **project-level focus sessions** with **professional reportin
 
 ### Core Concept: The Stint
 
-A **stint** is a predetermined focused work session (default 50 minutes, customizable per project) where:
+A **stint** is a predetermined focused work session (default 120 minutes, customizable per project) where:
 - User commits to single-project focus
 - Timer runs with pause/resume capability
 - System enforces single active stint across all devices

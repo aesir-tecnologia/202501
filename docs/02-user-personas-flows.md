@@ -89,8 +89,8 @@
   - User can edit or keep example
 - Slide 4: "Start your first stint"
   - Shows new project card with pulsing "Start" button
-  - User clicks Start → Begins 50-minute stint
-  - Modal: "Great! Now focus for 50 minutes. We'll notify you when done."
+  - User clicks Start → Begins 120-minute stint
+  - Modal: "Great! Now focus for 120 minutes. We'll notify you when done."
 - Slide 5: "You're all set!"
   - Quick tips:
     - "Pause if you need a break"
@@ -101,7 +101,7 @@
 ### Guided First Stint
 
 - If user stops before 10 minutes: Tooltip "Stints work best with at least 10 minutes of focus"
-- At 25 minutes: Encouraging notification "Halfway there! Keep going 💪"
+- At 60 minutes: Encouraging notification "Halfway there! Keep going 💪"
 - At completion: Celebration animation with confetti
 - Modal: "Congrats on your first stint! 🎉"
   - Shows summary: Project, duration, time
@@ -132,8 +132,7 @@
 2. Dashboard loads with today's progress (all at 0 if new day)
 3. Review project cards, decide which to work on first
 4. Click "Start" on chosen project
-5. Confirmation modal (if needed): "You're about to start a 50-minute stint on [Project]. Ready?"
-6. Begin work with timer running in corner
+5. Begin work with timer running in corner
 
 ### During Stint
 
@@ -197,7 +196,7 @@
 
 ### Scenario: Start on Desktop, Continue on Mobile
 
-1. **Desktop (9 AM):** Start stint on "Client Website" project → 50-minute timer begins
+1. **Desktop (9 AM):** Start stint on "Client Website" project → 120-minute timer begins
 2. **Leave desk (9:30 AM):** Close laptop (timer continues via server)
 3. **Open phone (9:35 AM):** LifeStint PWA loads
    - Real-time sync: Dashboard shows "Client Website" stint active

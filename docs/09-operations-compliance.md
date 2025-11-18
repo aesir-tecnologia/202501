@@ -328,7 +328,7 @@ Storage uploads → 100 per hour
 
 ## Glossary
 
-**Stint:** A predetermined focused work session on a single project, typically 50 minutes.
+**Stint:** A predetermined focused work session on a single project, typically 120 minutes.
 
 **Active Stint:** A stint currently in progress (timer running).
 

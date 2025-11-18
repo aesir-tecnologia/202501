@@ -273,8 +273,8 @@ const projectNameSchema = z.string()
 // Stint duration validation
 const stintDurationSchema = z.number()
   .int()
-  .min(10, "Minimum 10 minutes")
-  .max(120, "Maximum 120 minutes");
+  .min(5, "Minimum 5 minutes")
+  .max(480, "Maximum 480 minutes");
 
 // Expected daily stints validation
 const dailyStintsSchema = z.number()

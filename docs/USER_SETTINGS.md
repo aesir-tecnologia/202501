@@ -54,9 +54,9 @@
 
 ### Default Stint Duration
 - **Type:** Number (minutes)
-- **Default:** `50` minutes
+- **Default:** `120` minutes
 - **Constraints:**
-  - Range: 10-120 minutes
+  - Range: 5-480 minutes
   - Integer only
 - **Usage:** Used for new projects unless project has custom duration
 - **Storage:** `user_preferences.default_stint_duration`
@@ -121,7 +121,7 @@
 - **Type:** Number (minutes, optional)
 - **Default:** `null` (uses user's default stint duration)
 - **Constraints:**
-  - Range: 10-120 minutes (if specified)
+  - Range: 5-480 minutes (if specified)
   - Integer only
   - Optional (can be null)
 - **Usage:** Overrides default stint duration for this project only
@@ -226,8 +226,8 @@
 ## Constraints Summary
 
 ### Numeric Ranges
-- **Default Stint Duration:** 10-120 minutes
-- **Custom Stint Duration:** 10-120 minutes (optional)
+- **Default Stint Duration:** 5-480 minutes
+- **Custom Stint Duration:** 5-480 minutes (optional)
 - **Expected Daily Stints:** 1-8 per day
 - **Project Name Length:** 1-100 characters
 
@@ -295,7 +295,7 @@
 - `timezone` (TEXT, NOT NULL, DEFAULT 'UTC')
 
 ### `user_preferences` Table
-- `default_stint_duration` (INTEGER, NOT NULL, DEFAULT 50, CHECK: 10-120)
+- `default_stint_duration` (INTEGER, NOT NULL, DEFAULT 120, CHECK: 5-480)
 - `celebration_sound` (BOOLEAN, NOT NULL, DEFAULT true)
 - `celebration_animation` (BOOLEAN, NOT NULL, DEFAULT true)
 - `desktop_notifications` (BOOLEAN, NOT NULL, DEFAULT true)
@@ -305,7 +305,7 @@
 ### `projects` Table (Project Settings)
 - `name` (TEXT, NOT NULL, CHECK: length 1-100, UNIQUE per user)
 - `expected_daily_stints` (INTEGER, NOT NULL, DEFAULT 2, CHECK: 1-8)
-- `custom_stint_duration` (INTEGER, nullable, CHECK: 10-120 if not null)
+- `custom_stint_duration` (INTEGER, nullable, CHECK: 5-480 if not null)
 - `color_tag` (TEXT, nullable, CHECK: one of 8 colors or null)
 - `is_active` (BOOLEAN, NOT NULL, DEFAULT true)
 

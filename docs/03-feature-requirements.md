@@ -17,7 +17,7 @@
 - Modal appears with fields:
   - Project Name (required, 1-100 characters)
   - Expected Daily Stints (default: 2, range: 1-8)
-  - Custom Stint Duration (optional, default: 50 minutes, range: 10-120 minutes)
+  - Custom Stint Duration (optional, default: 120 minutes, range: 5-480 minutes)
   - Color Tag (optional, 8 preset colors)
 - Validation: No duplicate names within user account
 - Action: Creates project in "active" state
@@ -61,7 +61,7 @@
 - System checks server-side for active stints (prevents race conditions)
 - Creates stint record with:
   - `started_at`: Server timestamp (UTC)
-  - `planned_duration`: Project's custom duration or default 50 minutes
+  - `planned_duration`: Project's custom duration or default 120 minutes
   - `status`: "active"
 - Broadcasts real-time event to all user's connected devices
 - Starts countdown timer on all devices
@@ -127,8 +127,8 @@
 ### Constraints
 
 - Only 1 active stint per user across all devices
-- Minimum stint duration: 10 minutes
-- Maximum stint duration: 120 minutes
+- Minimum stint duration: 5 minutes
+- Maximum stint duration: 480 minutes
 - Maximum total stint duration: 4 hours
 - Maximum 50 stints per project per day (anti-abuse)
 

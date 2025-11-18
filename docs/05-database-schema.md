@@ -68,7 +68,7 @@ CREATE TABLE projects (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   expected_daily_stints INTEGER NOT NULL DEFAULT 2,
-  custom_stint_duration INTEGER, -- Minutes, NULL means use default (50)
+  custom_stint_duration INTEGER, -- Minutes, NULL means use default (120)
   color_tag TEXT,
   is_active BOOLEAN NOT NULL DEFAULT true,
   archived_at TIMESTAMPTZ, -- NULL if not archived
@@ -77,8 +77,8 @@ CREATE TABLE projects (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   CONSTRAINT valid_name CHECK (length(name) >= 1 AND length(name) <= 100),
   CONSTRAINT valid_daily_stints CHECK (expected_daily_stints >= 1 AND expected_daily_stints <= 8),
-  CONSTRAINT valid_stint_duration CHECK (custom_stint_duration IS NULL OR 
-    (custom_stint_duration >= 10 AND custom_stint_duration <= 120)),
+  CONSTRAINT valid_stint_duration CHECK (custom_stint_duration IS NULL OR
+    (custom_stint_duration >= 5 AND custom_stint_duration <= 480)),
   CONSTRAINT valid_color CHECK (color_tag IS NULL OR color_tag IN 
     ('red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'gray')),
   CONSTRAINT unique_name_per_user UNIQUE (user_id, name)
@@ -104,7 +104,7 @@ $$ LANGUAGE SQL STABLE;
 ```
 
 **Field Descriptions:**
-- `custom_stint_duration`: Overrides default 50 minutes if set
+- `custom_stint_duration`: Overrides default 120 minutes if set
 - `color_tag`: Visual identifier in dashboard (8 preset colors)
 - `archived_at`: Soft delete timestamp (NULL if active)
 - `sort_order`: User-defined ordering (0 = first), future drag-to-reorder
@@ -112,7 +112,7 @@ $$ LANGUAGE SQL STABLE;
 **Constraints:**
 - Project names must be unique per user
 - Expected daily stints: 1-8
-- Custom stint duration: 10-120 minutes if specified
+- Custom stint duration: 5-480 minutes if specified
 - Maximum 25 active projects per user (enforced in application logic)
 
 **Business Rules:**
@@ -142,7 +142,7 @@ CREATE TABLE stints (
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'paused', 'completed', 'interrupted')),
   paused_at TIMESTAMPTZ, -- Most recent pause time
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT valid_planned_duration CHECK (planned_duration >= 10 AND planned_duration <= 120),
+  CONSTRAINT valid_planned_duration CHECK (planned_duration >= 5 AND planned_duration <= 480),
   CONSTRAINT valid_notes CHECK (notes IS NULL OR length(notes) <= 500),
   CONSTRAINT valid_ended CHECK (ended_at IS NULL OR ended_at >= started_at),
   CONSTRAINT completed_has_ended CHECK (status IN ('active', 'paused') OR ended_at IS NOT NULL)
@@ -197,7 +197,7 @@ $$ LANGUAGE plpgsql;
 - `paused_at`: Timestamp of most recent pause (for calculating pause duration)
 
 **Constraints:**
-- Planned duration: 10-120 minutes
+- Planned duration: 5-480 minutes
 - Notes: Max 500 characters
 - Completed stints must have ended_at
 
@@ -217,14 +217,14 @@ $$ LANGUAGE plpgsql;
 ```sql
 CREATE TABLE user_preferences (
   user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-  default_stint_duration INTEGER NOT NULL DEFAULT 50,
+  default_stint_duration INTEGER NOT NULL DEFAULT 120,
   celebration_sound BOOLEAN NOT NULL DEFAULT true,
   celebration_animation BOOLEAN NOT NULL DEFAULT true,
   desktop_notifications BOOLEAN NOT NULL DEFAULT true,
   weekly_email_digest BOOLEAN NOT NULL DEFAULT false,
   theme TEXT NOT NULL DEFAULT 'system' CHECK (theme IN ('light', 'dark', 'system')),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT valid_default_duration CHECK (default_stint_duration >= 10 AND default_stint_duration <= 120)
+  CONSTRAINT valid_default_duration CHECK (default_stint_duration >= 5 AND default_stint_duration <= 480)
 );
 
 -- RLS Policy
