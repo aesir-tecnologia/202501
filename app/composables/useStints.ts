@@ -113,12 +113,6 @@ export type InterruptStintMutation = UseMutationReturnType<
   unknown
 >;
 
-export interface CanStartStintResult {
-  canStart: Ref<boolean>
-  isChecking: Ref<boolean>
-  reason: Ref<string>
-}
-
 // ============================================================================
 // Helper Functions
 // ============================================================================
@@ -157,74 +151,6 @@ function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
 // ============================================================================
 // Query Hooks
 // ============================================================================
-
-/**
- * Checks in real-time if a stint can be started for a project.
- * Performs a database check to ensure no other stint is currently active.
- *
- * @example
- * ```ts
- * const { canStart, isChecking, reason } = useCanStartStint(project)
- * // canStart - whether a stint can be started
- * // isChecking - loading state during database check
- * // reason - user-friendly reason why start is disabled
- * ```
- */
-export function useCanStartStint(project: MaybeRefOrGetter<{ id: string, is_active: boolean | null }>): CanStartStintResult {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
-  const projectRef = computed(() => toValue(project));
-
-  const canStart = ref(false);
-  const isChecking = ref(false);
-  const reason = ref('');
-
-  const checkCanStart = async () => {
-    const proj = projectRef.value;
-
-    if (!proj.is_active) {
-      canStart.value = false;
-      reason.value = 'Project is inactive';
-      return;
-    }
-
-    isChecking.value = true;
-    try {
-      const { data: activeStint, error } = await getActiveStint(client);
-
-      if (error) {
-        canStart.value = false;
-        reason.value = 'Could not verify stint status';
-        return;
-      }
-
-      if (activeStint) {
-        canStart.value = false;
-        reason.value = 'Stop current stint to start new one';
-      }
-      else {
-        canStart.value = true;
-        reason.value = '';
-      }
-    }
-    catch {
-      canStart.value = false;
-      reason.value = 'Could not verify stint status';
-    }
-    finally {
-      isChecking.value = false;
-    }
-  };
-
-  watch(() => projectRef.value.is_active, () => {
-    checkCanStart();
-  }, { immediate: true });
-
-  return {
-    canStart,
-    isChecking,
-    reason,
-  };
-}
 
 /**
  * Fetches stints with optional filtering and automatic caching.
