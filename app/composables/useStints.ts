@@ -5,7 +5,6 @@ import {
   listStints,
   getStintById,
   getActiveStint,
-  createStint as createStintDb,
   updateStint as updateStintDb,
   deleteStint as deleteStintDb,
   pauseStint as pauseStintDb,
@@ -13,7 +12,6 @@ import {
   completeStint as completeStintDb,
   startStint as startStintDb,
   type StintRow,
-  type CreateStintPayload as DbCreateStintPayload,
   type UpdateStintPayload as DbUpdateStintPayload,
 } from '~/lib/supabase/stints';
 import {
@@ -22,12 +20,10 @@ import {
   stintCompletionSchema,
   stintPauseSchema,
   stintResumeSchema,
-  stintStartEnhancedSchema,
   stintInterruptSchema,
   type StintStartPayload,
   type StintUpdatePayload,
   type StintCompletionPayload,
-  type StintStartEnhancedPayload,
   type StintInterruptPayload,
 } from '~/schemas/stints';
 
@@ -118,24 +114,6 @@ export type InterruptStintMutation = UseMutationReturnType<
 // ============================================================================
 
 /**
- * Transforms camelCase payload to snake_case for database operations
- */
-function toDbCreatePayload(payload: StintStartPayload): DbCreateStintPayload {
-  const result: Record<string, unknown> = {
-    project_id: payload.projectId,
-  };
-
-  if (payload.startedAt !== undefined) {
-    result.started_at = payload.startedAt.toISOString();
-  }
-  if (payload.notes !== undefined) {
-    result.notes = payload.notes;
-  }
-
-  return result as DbCreateStintPayload;
-}
-
-/**
  * Transforms camelCase update payload to snake_case for database operations
  */
 function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
@@ -222,95 +200,6 @@ export function useActiveStintQuery() {
 // ============================================================================
 // Mutation Hooks
 // ============================================================================
-
-/**
- * Creates (starts) a new stint with Zod validation and optimistic updates.
- * Auto-invalidates stint queries on success.
- *
- * @example
- * ```ts
- * const { mutateAsync, isPending } = useCreateStint()
- * await mutateAsync({ projectId: '123', notes: 'Starting work' })
- * ```
- */
-export function useCreateStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (payload: StintStartPayload) => {
-      // Validate input
-      const validation = stintStartSchema.safeParse(payload);
-      if (!validation.success) {
-        throw new Error(validation.error.issues[0]?.message || 'Validation failed');
-      }
-
-      // Call database
-      const dbPayload = toDbCreatePayload(validation.data);
-      const { data, error } = await createStintDb(client, dbPayload);
-
-      if (error || !data) {
-        throw error || new Error('Failed to create stint');
-      }
-
-      return data;
-    },
-    onMutate: async (payload) => {
-      // Cancel outgoing refetches for all list queries
-      await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
-      await queryClient.cancelQueries({ queryKey: stintKeys.active() });
-
-      // Snapshot previous value (use list with undefined filters to match default query)
-      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
-      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
-
-      // Optimistically update to the new value
-      if (previousStints) {
-        const optimisticStint: StintRow = {
-          id: crypto.randomUUID(),
-          project_id: payload.projectId,
-          user_id: '',
-          started_at: payload.startedAt?.toISOString() || new Date().toISOString(),
-          ended_at: null,
-          duration_minutes: null,
-          actual_duration: null,
-          completion_type: null,
-          planned_duration: null,
-          status: 'active' as const,
-          paused_at: null,
-          paused_duration: 0,
-          is_completed: false,
-          notes: payload.notes || null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-
-        queryClient.setQueryData<StintRow[]>(
-          stintKeys.list(undefined),
-          [optimisticStint, ...previousStints],
-        );
-
-        // Set as active stint
-        queryClient.setQueryData<StintRow | null>(stintKeys.active(), optimisticStint);
-      }
-
-      return { previousStints, previousActiveStint };
-    },
-    onError: (_err, _payload, context) => {
-      // Rollback to previous value on error
-      if (context?.previousStints) {
-        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints);
-      }
-      if (context?.previousActiveStint !== undefined) {
-        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
-      }
-    },
-    onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: stintKeys.all });
-    },
-  });
-}
 
 /**
  * Updates an existing stint with Zod validation and optimistic updates.
@@ -788,7 +677,7 @@ export function useResumeStint() {
 }
 
 /**
- * Starts a new stint with enhanced validation, conflict detection, and optimistic updates.
+ * Starts a new stint with validation, conflict detection, and optimistic updates.
  * Handles conflicts when another stint is already active.
  * Auto-invalidates stint queries on success.
  *
@@ -810,14 +699,14 @@ export function useStartStint() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: StintStartEnhancedPayload) => {
+    mutationFn: async (payload: StintStartPayload) => {
       // Validate input
-      const validation = stintStartEnhancedSchema.safeParse(payload);
+      const validation = stintStartSchema.safeParse(payload);
       if (!validation.success) {
         throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
-      // Call database with enhanced start function (handles validation and conflicts)
+      // Call database start function (handles validation and conflicts via Edge Function)
       const result = await startStintDb(
         client,
         payload.projectId,

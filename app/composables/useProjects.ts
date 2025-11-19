@@ -144,14 +144,6 @@ export function useProjectsQuery(filters?: MaybeRefOrGetter<ProjectListFilters |
   });
 }
 
-/**
- * Fetches a single project by ID with automatic caching.
- *
- * @example
- * ```ts
- * const { data: project, isLoading, error } = useProjectQuery(projectId)
- * ```
- */
 export function useProjectQuery(id: MaybeRefOrGetter<string>) {
   const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
   const projectId = toValue(id);
@@ -167,14 +159,6 @@ export function useProjectQuery(id: MaybeRefOrGetter<string>) {
   });
 }
 
-/**
- * Fetches all archived projects with automatic caching.
- *
- * @example
- * ```ts
- * const { data: archivedProjects, isLoading, error } = useArchivedProjectsQuery()
- * ```
- */
 export function useArchivedProjectsQuery() {
   const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
 
@@ -192,29 +176,17 @@ export function useArchivedProjectsQuery() {
 // Mutation Hooks
 // ============================================================================
 
-/**
- * Creates a new project with Zod validation and optimistic updates.
- * Auto-invalidates project queries on success.
- *
- * @example
- * ```ts
- * const { mutateAsync, isPending } = useCreateProject()
- * await mutateAsync({ name: 'New Project', expectedDailyStints: 3 })
- * ```
- */
 export function useCreateProject() {
   const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (payload: ProjectCreatePayload) => {
-      // Validate input
       const validation = projectCreateSchema.safeParse(payload);
       if (!validation.success) {
         throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
-      // Call database
       const dbPayload = toDbPayload(validation.data) as DbCreateProjectPayload;
       const { data, error } = await createProjectDb(client, dbPayload);
 
@@ -268,29 +240,17 @@ export function useCreateProject() {
   });
 }
 
-/**
- * Updates an existing project with Zod validation and optimistic updates.
- * Auto-invalidates affected queries on success.
- *
- * @example
- * ```ts
- * const { mutateAsync } = useUpdateProject()
- * await mutateAsync({ id: projectId, data: { name: 'Updated Name' } })
- * ```
- */
 export function useUpdateProject() {
   const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string, data: ProjectUpdatePayload }) => {
-      // Validate input
       const validation = projectUpdateSchema.safeParse(data);
       if (!validation.success) {
         throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
-      // Call database
       const dbPayload = toDbPayload(validation.data) as DbUpdateProjectPayload;
       const { data: result, error } = await updateProjectDb(client, id, dbPayload);
 
