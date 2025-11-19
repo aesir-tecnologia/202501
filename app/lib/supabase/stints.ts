@@ -77,6 +77,28 @@ function isValidStintRow(obj: unknown): obj is StintRow {
   );
 }
 
+/**
+ * Parses Edge Function errors with consistent handling of various error formats.
+ * Edge Functions may return errors in different structures depending on the error source.
+ */
+function parseEdgeFunctionError(error: unknown): {
+  status?: number
+  errorCode?: string
+  message: string
+  metadata?: Record<string, unknown>
+} {
+  const functionError = error as SupabaseFunctionsError;
+  const errorContext = functionError.context || {};
+  const errorData = errorContext.body || functionError.data || functionError;
+
+  return {
+    status: errorContext.status || functionError.status,
+    errorCode: errorData?.error,
+    message: errorData?.message || functionError.message || 'Unknown error occurred',
+    metadata: errorData?.existingStint ? { existingStint: errorData.existingStint } : undefined,
+  };
+}
+
 export async function listStints(
   client: TypedSupabaseClient,
   options: ListStintsOptions = {},
@@ -139,6 +161,10 @@ export async function getActiveStint(
   }
 
   // Edge Function returns null if no active stint, or the stint object
+  if (data && !isValidStintRow(data)) {
+    return { data: null, error: new Error('Invalid stint data returned from active stint query') };
+  }
+
   return { data: (data as StintRow | null) || null, error: null };
 }
 
@@ -250,7 +276,11 @@ export async function pauseStint(
     return { data: null, error: new Error('No data returned from pause stint') };
   }
 
-  return { data: data as StintRow, error: null };
+  if (!isValidStintRow(data)) {
+    return { data: null, error: new Error('Invalid stint data returned from pause operation') };
+  }
+
+  return { data, error: null };
 }
 
 /**
@@ -278,7 +308,11 @@ export async function resumeStint(
     return { data: null, error: new Error('No data returned from resume stint') };
   }
 
-  return { data: data as StintRow, error: null };
+  if (!isValidStintRow(data)) {
+    return { data: null, error: new Error('Invalid stint data returned from resume operation') };
+  }
+
+  return { data, error: null };
 }
 
 /**
@@ -310,7 +344,11 @@ export async function completeStint(
       return { data: null, error: new Error('No data returned from complete stint') };
     }
 
-    return { data: data as StintRow, error: null };
+    if (!isValidStintRow(data)) {
+      return { data: null, error: new Error('Invalid stint data returned from complete operation') };
+    }
+
+    return { data, error: null };
   }
 
   // For auto/interrupted completion, use RPC directly
@@ -332,6 +370,10 @@ export async function completeStint(
       return { data: null, error: new Error('Stint not found') };
     }
     return { data: null, error };
+  }
+
+  if (!data || !isValidStintRow(data)) {
+    return { data: null, error: new Error('Invalid stint data returned from complete operation') };
   }
 
   return { data, error: null };
@@ -359,32 +401,34 @@ export async function startStint(
   });
 
   if (error) {
-    const functionError = error as SupabaseFunctionsError;
-    const errorContext = functionError.context || {};
-    const errorData = errorContext.body || functionError.data || functionError;
+    const parsedError = parseEdgeFunctionError(error);
 
-    if (errorContext.status === 409 || errorData?.error === 'CONFLICT' || functionError.status === 409) {
-      const existingStint = errorData.existingStint && isValidStintRow(errorData.existingStint)
-        ? errorData.existingStint
+    if (parsedError.status === 409 || parsedError.errorCode === 'CONFLICT') {
+      const rawExistingStint = parsedError.metadata?.existingStint;
+      const existingStint = rawExistingStint && isValidStintRow(rawExistingStint)
+        ? rawExistingStint
         : null;
 
       return {
         error: {
           code: 'CONFLICT',
           existingStint,
-          message: errorData.message || 'An active stint already exists',
+          message: parsedError.message || 'An active stint already exists',
         },
         data: null,
       };
     }
 
-    const errorMessage = errorData.message || functionError.message || 'Failed to start stint';
-    return { data: null, error: new Error(errorMessage) };
+    return { data: null, error: new Error(parsedError.message) };
   }
 
   if (!data) {
     return { data: null, error: new Error('No data returned from start stint') };
   }
 
-  return { data: data as StintRow, error: null };
+  if (!isValidStintRow(data)) {
+    return { data: null, error: new Error('Invalid stint data returned from start operation') };
+  }
+
+  return { data, error: null };
 }
