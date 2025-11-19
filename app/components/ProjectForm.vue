@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { projectCreateSchema, projectUpdateSchema, PROJECT_COLORS, type ProjectColor } from '~/schemas/projects';
+import { projectCreateSchema, projectUpdateSchema, type ProjectColor } from '~/schemas/projects';
+import { PROJECT } from '~/constants';
 import type { ProjectRow } from '~/lib/supabase/projects';
 
 const props = defineProps<{
@@ -150,7 +151,7 @@ function handleCancel() {
 
         <!-- Color options -->
         <button
-          v-for="color in PROJECT_COLORS"
+          v-for="color in PROJECT.COLORS"
           :key="color"
           type="button"
           :class="[
