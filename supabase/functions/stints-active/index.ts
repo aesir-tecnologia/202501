@@ -9,12 +9,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-};
+import { corsHeaders, errorResponse, jsonResponse, ErrorCodes } from '../_shared/responses.ts';
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -29,10 +24,7 @@ serve(async (req) => {
     // Get authenticated user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.UNAUTHORIZED, 'Authentication required', 401);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -45,10 +37,7 @@ serve(async (req) => {
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.UNAUTHORIZED, 'Authentication required', 401);
     }
 
     // Call get_active_stint RPC function
@@ -68,31 +57,26 @@ serve(async (req) => {
 
       if (queryError) {
         console.error('Query error:', queryError);
-        return new Response(
-          JSON.stringify({ error: 'Failed to get active stint', details: queryError.message }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        return errorResponse(
+          ErrorCodes.INTERNAL_ERROR,
+          'Failed to get active stint',
+          500,
+          queryError.message,
         );
       }
 
-      return new Response(
-        JSON.stringify(stint),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return jsonResponse(stint, 200);
     }
 
-    return new Response(
-      JSON.stringify(activeStint),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    );
+    return jsonResponse(activeStint, 200);
   }
   catch (error) {
     console.error('Unexpected error in stints-active:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    return errorResponse(
+      ErrorCodes.INTERNAL_ERROR,
+      'Internal server error',
+      500,
+      error instanceof Error ? error.message : 'Unknown error',
     );
   }
 });

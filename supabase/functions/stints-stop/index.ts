@@ -10,12 +10,8 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
-};
+import { corsHeaders, errorResponse, jsonResponse, ErrorCodes } from '../_shared/responses.ts';
+import { STINT_CONSTRAINTS } from '../_shared/constants.ts';
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -30,10 +26,7 @@ serve(async (req) => {
     // Get authenticated user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.UNAUTHORIZED, 'Authentication required', 401);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -46,10 +39,7 @@ serve(async (req) => {
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.UNAUTHORIZED, 'Authentication required', 401);
     }
 
     // Parse request body to get stint ID and optional notes
@@ -58,9 +48,18 @@ serve(async (req) => {
 
     // Validate request body
     if (!stintId || typeof stintId !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'stintId is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      return errorResponse(ErrorCodes.VALIDATION_ERROR, 'stintId is required and must be a string', 400);
+    }
+
+    if (notes !== undefined && typeof notes !== 'string') {
+      return errorResponse(ErrorCodes.VALIDATION_ERROR, 'notes must be a string', 400);
+    }
+
+    if (notes && notes.length > STINT_CONSTRAINTS.MAX_NOTES_LENGTH) {
+      return errorResponse(
+        ErrorCodes.VALIDATION_ERROR,
+        `notes must not exceed ${STINT_CONSTRAINTS.MAX_NOTES_LENGTH} characters`,
+        400,
       );
     }
 
@@ -73,10 +72,7 @@ serve(async (req) => {
       .single();
 
     if (stintError || !stint) {
-      return new Response(
-        JSON.stringify({ error: 'Stint not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.NOT_FOUND, 'Stint not found or access denied', 404);
     }
 
     // Call the complete_stint RPC function with manual completion type
@@ -91,38 +87,34 @@ serve(async (req) => {
     if (completeError) {
       // Map database errors to appropriate HTTP status codes
       if (completeError.message?.includes('not active')) {
-        return new Response(
-          JSON.stringify({ error: 'Stint is not active or paused and cannot be completed' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        return errorResponse(
+          ErrorCodes.INVALID_STATE,
+          'Stint is not active or paused and cannot be completed',
+          400,
         );
       }
       if (completeError.message?.includes('not found')) {
-        return new Response(
-          JSON.stringify({ error: 'Stint not found' }),
-          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-        );
+        return errorResponse(ErrorCodes.NOT_FOUND, 'Stint not found', 404);
       }
 
       console.error('Complete error:', completeError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to complete stint', details: completeError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      return errorResponse(
+        ErrorCodes.INTERNAL_ERROR,
+        'Failed to complete stint',
+        500,
+        completeError.message,
       );
     }
 
-    return new Response(
-      JSON.stringify(completedStint),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    );
+    return jsonResponse(completedStint, 200);
   }
   catch (error) {
     console.error('Unexpected error in stints-stop:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    return errorResponse(
+      ErrorCodes.INTERNAL_ERROR,
+      'Internal server error',
+      500,
+      error instanceof Error ? error.message : 'Unknown error',
     );
   }
 });

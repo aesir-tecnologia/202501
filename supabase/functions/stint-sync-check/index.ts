@@ -12,15 +12,10 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { corsHeaders, errorResponse, jsonResponse, ErrorCodes } from '../_shared/responses.ts';
 
 // Must match TIMER_DRIFT_THRESHOLD_SECONDS in app/composables/useStintTimer.ts
 const TIMER_DRIFT_THRESHOLD_SECONDS = 5;
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-};
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -35,10 +30,7 @@ serve(async (req) => {
     // Get authenticated user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.UNAUTHORIZED, 'Authentication required', 401);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -51,10 +43,7 @@ serve(async (req) => {
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.UNAUTHORIZED, 'Authentication required', 401);
     }
 
     // Get query parameters
@@ -63,10 +52,7 @@ serve(async (req) => {
     const stintId = url.searchParams.get('stintId');
 
     if (!stintId) {
-      return new Response(
-        JSON.stringify({ error: 'stintId parameter required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.VALIDATION_ERROR, 'stintId parameter is required', 400);
     }
 
     // Fetch the active stint
@@ -78,18 +64,12 @@ serve(async (req) => {
       .single();
 
     if (stintError || !stint) {
-      return new Response(
-        JSON.stringify({ error: 'Stint not found or access denied' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.NOT_FOUND, 'Stint not found or access denied', 404);
     }
 
     // If stint is not active or paused, return error
     if (stint.status !== 'active' && stint.status !== 'paused') {
-      return new Response(
-        JSON.stringify({ error: 'Stint is not active or paused' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.INVALID_STATE, 'Stint is not active or paused', 400);
     }
 
     // Calculate server-side remaining time
@@ -115,25 +95,21 @@ serve(async (req) => {
     // Calculate drift
     const drift = Math.abs(serverRemaining - clientRemaining);
 
-    return new Response(
-      JSON.stringify({
-        secondsRemaining: serverRemaining,
-        clientRemaining,
-        drift,
-        needsCorrection: drift > TIMER_DRIFT_THRESHOLD_SECONDS,
-        status: stint.status,
-      }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    );
+    return jsonResponse({
+      secondsRemaining: serverRemaining,
+      clientRemaining,
+      drift,
+      needsCorrection: drift > TIMER_DRIFT_THRESHOLD_SECONDS,
+      status: stint.status,
+    }, 200);
   }
   catch (error) {
     console.error('Unexpected error in stint-sync-check:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    return errorResponse(
+      ErrorCodes.INTERNAL_ERROR,
+      'Internal server error',
+      500,
+      error instanceof Error ? error.message : 'Unknown error',
     );
   }
 });

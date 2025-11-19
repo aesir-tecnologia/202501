@@ -13,12 +13,11 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { corsHeaders, errorResponse, jsonResponse, ErrorCodes } from '../_shared/responses.ts';
+import { STINT_CONSTRAINTS } from '../_shared/constants.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+// PostgreSQL error codes
+const POSTGRES_UNIQUE_VIOLATION = '23505';
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -33,10 +32,7 @@ serve(async (req) => {
     // Get authenticated user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.UNAUTHORIZED, 'Authentication required', 401);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -49,22 +45,21 @@ serve(async (req) => {
     // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.UNAUTHORIZED, 'Authentication required', 401);
     }
 
     // Parse request body
     const body = await req.json();
-    const { projectId, plannedDurationMinutes, notes } = body;
+    const { projectId, plannedDurationMinutes } = body;
 
     // Validate request body
     if (!projectId || typeof projectId !== 'string') {
-      return new Response(
-        JSON.stringify({ error: 'projectId is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.VALIDATION_ERROR, 'projectId is required and must be a string', 400);
+    }
+
+    if (plannedDurationMinutes !== undefined
+      && (typeof plannedDurationMinutes !== 'number' || !Number.isInteger(plannedDurationMinutes))) {
+      return errorResponse(ErrorCodes.VALIDATION_ERROR, 'plannedDurationMinutes must be an integer', 400);
     }
 
     // Get user version for optimistic locking
@@ -75,9 +70,11 @@ serve(async (req) => {
       .single<{ version: number }>();
 
     if (profileError || !userProfile) {
-      return new Response(
-        JSON.stringify({ error: 'Failed to get user version' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      return errorResponse(
+        ErrorCodes.INTERNAL_ERROR,
+        'Failed to get user version',
+        500,
+        profileError?.message,
       );
     }
 
@@ -91,26 +88,18 @@ serve(async (req) => {
       .single<{ custom_stint_duration: number | null }>();
 
     if (projectError || !project) {
-      return new Response(
-        JSON.stringify({ error: 'Project not found or archived' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return errorResponse(ErrorCodes.NOT_FOUND, 'Project not found or archived', 404);
     }
 
-    // Determine planned duration: use provided, project custom, or default 50
-    const plannedDuration = plannedDurationMinutes ?? project.custom_stint_duration ?? 50;
+    // Determine planned duration: use provided, project custom, or default 120
+    const plannedDuration = plannedDurationMinutes ?? project.custom_stint_duration ?? STINT_CONSTRAINTS.DEFAULT_DURATION;
 
-    // Validate planned duration bounds (5-720 minutes)
-    const MIN_DURATION = 5;
-    const MAX_DURATION = 720;
-
-    if (plannedDuration < MIN_DURATION || plannedDuration > MAX_DURATION) {
-      return new Response(
-        JSON.stringify({
-          error: 'Invalid planned duration',
-          message: `Planned duration must be between ${MIN_DURATION} and ${MAX_DURATION} minutes`,
-        }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    // Validate planned duration bounds (5-480 minutes)
+    if (plannedDuration < STINT_CONSTRAINTS.MIN_DURATION || plannedDuration > STINT_CONSTRAINTS.MAX_DURATION) {
+      return errorResponse(
+        ErrorCodes.INVALID_DURATION,
+        `Planned duration must be between ${STINT_CONSTRAINTS.MIN_DURATION} and ${STINT_CONSTRAINTS.MAX_DURATION} minutes`,
+        400,
       );
     }
 
@@ -129,40 +118,51 @@ serve(async (req) => {
 
     if (validationError) {
       console.error('Validation error:', validationError);
-      return new Response(
-        JSON.stringify({ error: 'Validation failed', details: validationError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      return errorResponse(
+        ErrorCodes.INTERNAL_ERROR,
+        'Validation failed',
+        500,
+        validationError.message,
       );
     }
 
     // If validation fails, return conflict error
     if (!validation.can_start) {
+      // If no existing stint ID provided, return generic conflict
+      if (!validation.existing_stint_id) {
+        return errorResponse(
+          ErrorCodes.CONFLICT,
+          validation.conflict_message || 'Cannot start stint: conflict detected',
+          409,
+          undefined,
+          { existingStint: null },
+        );
+      }
+
       // Fetch the existing stint details
       const { data: existingStint, error: stintError } = await supabase
         .from('stints')
         .select('*')
-        .eq('id', validation.existing_stint_id!)
+        .eq('id', validation.existing_stint_id)
         .eq('user_id', user.id)
         .single();
 
       if (stintError || !existingStint) {
-        return new Response(
-          JSON.stringify({
-            error: 'CONFLICT',
-            message: validation.conflict_message || 'Cannot start stint: conflict detected',
-            existingStint: null,
-          }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        return errorResponse(
+          ErrorCodes.CONFLICT,
+          validation.conflict_message || 'Cannot start stint: conflict detected',
+          409,
+          undefined,
+          { existingStint: null },
         );
       }
 
-      return new Response(
-        JSON.stringify({
-          error: 'CONFLICT',
-          message: validation.conflict_message || 'An active stint already exists',
-          existingStint,
-        }),
-        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      return errorResponse(
+        ErrorCodes.CONFLICT,
+        validation.conflict_message || 'An active stint already exists',
+        409,
+        undefined,
+        { existingStint },
       );
     }
 
@@ -175,14 +175,13 @@ serve(async (req) => {
         status: 'active',
         planned_duration: plannedDuration,
         started_at: new Date().toISOString(),
-        notes: notes || null,
       })
       .select('*')
       .single();
 
     if (createError) {
       // Check if conflict occurred (race condition)
-      if (createError.code === '23505') {
+      if (createError.code === POSTGRES_UNIQUE_VIOLATION) {
         // Unique constraint violation - another stint was started concurrently
         const { data: activeStint } = await supabase
           .from('stints')
@@ -192,37 +191,34 @@ serve(async (req) => {
           .maybeSingle();
 
         if (activeStint) {
-          return new Response(
-            JSON.stringify({
-              error: 'CONFLICT',
-              message: 'Another stint was started concurrently',
-              existingStint: activeStint,
-            }),
-            { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+          return errorResponse(
+            ErrorCodes.CONFLICT,
+            'Another stint was started concurrently',
+            409,
+            undefined,
+            { existingStint: activeStint },
           );
         }
       }
 
       console.error('Create error:', createError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to create stint', details: createError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      return errorResponse(
+        ErrorCodes.INTERNAL_ERROR,
+        'Failed to create stint',
+        500,
+        createError.message,
       );
     }
 
-    return new Response(
-      JSON.stringify(newStint),
-      { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    );
+    return jsonResponse(newStint, 201);
   }
   catch (error) {
     console.error('Unexpected error in stints-start:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    return errorResponse(
+      ErrorCodes.INTERNAL_ERROR,
+      'Internal server error',
+      500,
+      error instanceof Error ? error.message : 'Unknown error',
     );
   }
 });

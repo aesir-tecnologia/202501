@@ -9,11 +9,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, errorResponse, jsonResponse, ErrorCodes } from '../_shared/responses.ts';
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -39,17 +35,19 @@ serve(async (req) => {
 
     if (fetchError) {
       console.error('Error fetching active stints:', fetchError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to fetch active stints', details: fetchError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      return errorResponse(
+        ErrorCodes.INTERNAL_ERROR,
+        'Failed to fetch active stints',
+        500,
+        fetchError.message,
       );
     }
 
     if (!activeStints || activeStints.length === 0) {
-      return new Response(
-        JSON.stringify({ message: 'No active stints to complete', completed: 0 }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-      );
+      return jsonResponse({
+        message: 'No active stints to complete',
+        completed: 0,
+      }, 200);
     }
 
     const now = new Date();
@@ -92,24 +90,20 @@ serve(async (req) => {
       }
     }
 
-    return new Response(
-      JSON.stringify({
-        message: 'Auto-completion check completed',
-        completed: completedStints.length,
-        completedStintIds: completedStints,
-        errors: errors.length > 0 ? errors : undefined,
-      }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    );
+    return jsonResponse({
+      message: 'Auto-completion check completed',
+      completed: completedStints.length,
+      completedStintIds: completedStints,
+      errors: errors.length > 0 ? errors : undefined,
+    }, 200);
   }
   catch (error) {
     console.error('Unexpected error in stint-auto-complete:', error);
-    return new Response(
-      JSON.stringify({
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    return errorResponse(
+      ErrorCodes.INTERNAL_ERROR,
+      'Internal server error',
+      500,
+      error instanceof Error ? error.message : 'Unknown error',
     );
   }
 });
