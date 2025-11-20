@@ -114,20 +114,20 @@ onUnmounted(() => {
         <div class="flex items-center gap-3">
           <UColorModeButton aria-label="Toggle color mode" />
           <template v-if="user">
-            <a
-              href="/dashboard"
+            <NuxtLink
+              to="/dashboard"
               class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-sm font-semibold shadow-focus"
-            >Dashboard</a>
+            >Dashboard</NuxtLink>
           </template>
           <template v-else>
-            <a
-              href="/auth/login"
+            <NuxtLink
+              to="/auth/login"
               class="hidden sm:inline-block px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm"
-            >Sign in</a>
-            <a
-              href="/auth/register"
+            >Sign in</NuxtLink>
+            <NuxtLink
+              to="/auth/register"
               class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-sm font-semibold shadow-focus"
-            >Start free</a>
+            >Start free</NuxtLink>
           </template>
         </div>
       </div>
@@ -991,12 +991,12 @@ onUnmounted(() => {
             surveillance.
           </p>
           <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-            <a
-              href="/auth/register"
+            <NuxtLink
+              to="/auth/register"
               class="inline-flex items-center justify-center rounded-xl bg-white text-ink-900 hover:bg-white/90 font-semibold px-8 py-3.5 shadow-lg transition-all"
             >
               Start your first stint — Free
-            </a>
+            </NuxtLink>
             <a
               href="#how"
               class="inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium px-8 py-3.5 backdrop-blur-sm transition-all"
@@ -1122,12 +1122,12 @@ onUnmounted(() => {
                 <span>Streak tracking & heatmaps</span>
               </li>
             </ul>
-            <a
-              href="/auth/register"
+            <NuxtLink
+              to="/auth/register"
               class="mt-6 block w-full text-center rounded-xl bg-white text-ink-900 hover:bg-white/90 py-3 font-semibold transition-colors"
             >
               Get started free
-            </a>
+            </NuxtLink>
           </div>
           <!-- Pro -->
           <div class="rounded-2xl bg-gradient-to-br from-primary-500/20 to-secondary-500/20 ring-2 ring-primary-400/30 p-7 relative fade-up stagger-2 hover-lift shimmer">
@@ -1242,12 +1242,12 @@ onUnmounted(() => {
                 <span>Priority email support</span>
               </li>
             </ul>
-            <a
-              href="/auth/register"
+            <NuxtLink
+              to="/auth/register"
               class="mt-6 block w-full text-center rounded-xl bg-primary-500 hover:bg-primary-600 py-3 font-semibold shadow-focus transition-colors text-white"
             >
               Start Pro trial
-            </a>
+            </NuxtLink>
             <p class="mt-3 text-center text-xs text-ink-300">
               14-day free trial • Cancel anytime
             </p>

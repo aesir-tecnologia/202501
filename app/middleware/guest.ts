@@ -10,9 +10,10 @@ export default defineNuxtRouteMiddleware(() => {
   }
 
   const user = useAuthUser();
+  const appConfig = useAppConfig();
 
   // If user is already authenticated, redirect to home
   if (user.value) {
-    return navigateTo('/');
+    return navigateTo(appConfig.auth.redirectUrl);
   }
 });

@@ -227,11 +227,12 @@ const successDescription = ref('');
 // Supabase client
 const supabase = useSupabaseClient();
 const user = useAuthUser();
+const appConfig = useAppConfig();
 
 // Redirect if already logged in
 watch(user, (newUser) => {
   if (newUser) {
-    navigateTo('/');
+    navigateTo(appConfig.auth.redirectUrl);
   }
 });
 
@@ -268,9 +269,7 @@ async function handleRegister(event: FormSubmitEvent<RegisterSchema>) {
         success.value = 'Account created successfully!';
         successDescription.value = 'You are now signed in. Redirecting to dashboard...';
 
-        setTimeout(() => {
-          navigateTo('/');
-        }, 2000);
+        navigateTo(appConfig.auth.redirectUrl);
       }
       else {
         // Email confirmation required - redirect to verification page

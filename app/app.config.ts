@@ -3,7 +3,7 @@ import { PROJECT, STINT } from '~/constants';
 export default defineAppConfig({
   auth: {
     home: '/',
-    redirectUrl: '/',
+    redirectUrl: '/dashboard',
   },
   ui: {
     icons: {
