@@ -18,13 +18,13 @@
  * Stint status enumeration
  * Represents the current state in the stint lifecycle
  */
-export type StintStatus = 'active' | 'paused' | 'completed'
+export type StintStatus = 'active' | 'paused' | 'completed';
 
 /**
  * Stint completion type enumeration
  * Indicates how the stint was completed
  */
-export type CompletionType = 'manual' | 'auto' | 'interrupted'
+export type CompletionType = 'manual' | 'auto' | 'interrupted';
 
 /**
  * Standard result type for database operations
@@ -46,9 +46,9 @@ export interface ConflictError {
 /**
  * Result type that handles conflict scenarios
  */
-export type StintConflictResult =
-  | { error: ConflictError; data: null }
-  | { error: null; data: StintRow }
+export type StintConflictResult
+  = | { error: ConflictError, data: null }
+    | { error: null, data: StintRow };
 
 // ============================================================================
 // Database Row Types
@@ -156,37 +156,37 @@ export interface ListStintsInput {
  * Start Stint Output
  * Returns: Newly created stint or conflict error
  */
-export type StartStintOutput = StintConflictResult
+export type StartStintOutput = StintConflictResult;
 
 /**
  * Complete Stint Output
  * Returns: Completed stint record
  */
-export type CompleteStintOutput = Result<StintRow>
+export type CompleteStintOutput = Result<StintRow>;
 
 /**
  * Pause Stint Output
  * Returns: Updated stint record with paused status
  */
-export type PauseStintOutput = Result<StintRow>
+export type PauseStintOutput = Result<StintRow>;
 
 /**
  * Resume Stint Output
  * Returns: Updated stint record with active status
  */
-export type ResumeStintOutput = Result<StintRow>
+export type ResumeStintOutput = Result<StintRow>;
 
 /**
  * Get Active Stint Output
  * Returns: Current active/paused stint or null
  */
-export type GetActiveStintOutput = Result<StintRow | null>
+export type GetActiveStintOutput = Result<StintRow | null>;
 
 /**
  * List Stints Output
  * Returns: Array of stint records
  */
-export type ListStintsOutput = Result<StintRow[]>
+export type ListStintsOutput = Result<StintRow[]>;
 
 /**
  * Sync Check Output
@@ -200,7 +200,7 @@ export interface SyncCheckOutput {
   driftSeconds?: number // Client vs server time drift (if provided)
 }
 
-export type SyncCheckResult = Result<SyncCheckOutput>
+export type SyncCheckResult = Result<SyncCheckOutput>;
 
 /**
  * Auto-Complete Summary Output
@@ -210,7 +210,7 @@ export interface AutoCompleteSummary {
   completedCount: number
   errorCount: number
   completedStintIds: string[]
-  errors?: Array<{ stintId: string; error: string }>
+  errors?: Array<{ stintId: string, error: string }>
   executedAt: string // ISO 8601 timestamp
 }
 
@@ -468,7 +468,7 @@ export const STINT_CONSTRAINTS = {
   DEFAULT_DURATION: 120, // minutes (2 hours)
   MAX_TOTAL_DURATION: 240, // minutes (4 hours)
   MAX_NOTES_LENGTH: 500, // characters
-} as const
+} as const;
 
 /**
  * Query cache keys for TanStack Query
@@ -479,4 +479,4 @@ export const STINT_QUERY_KEYS = {
   list: (filters?: ListStintsInput) => [...STINT_QUERY_KEYS.lists(), filters] as const,
   detail: (id: string) => [...STINT_QUERY_KEYS.all, 'detail', id] as const,
   active: () => [...STINT_QUERY_KEYS.all, 'active'] as const,
-} as const
+} as const;

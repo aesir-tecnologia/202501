@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
-  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -226,6 +221,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_complete_expired_stints: {
+        Args: never
+        Returns: {
+          completed_count: number
+          error_count: number
+        }[]
+      }
       calculate_actual_duration: {
         Args: {
           p_ended_at: string
@@ -495,3 +497,4 @@ export const Constants = {
     },
   },
 } as const
+

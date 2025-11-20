@@ -137,6 +137,59 @@
 
 ## Monitoring Alerts
 
+### Auto-Completion Monitoring
+
+**Critical Metric:** Auto-completion success rate
+
+Monitor the auto-completion cron job to ensure stints are being completed automatically:
+
+```sql
+-- Check recent auto-completions (last 24 hours)
+SELECT
+  DATE_TRUNC('hour', ended_at) as hour,
+  COUNT(*) as auto_completed_stints
+FROM stints
+WHERE completion_type = 'auto'
+  AND ended_at > now() - interval '24 hours'
+GROUP BY hour
+ORDER BY hour DESC;
+```
+
+```sql
+-- Verify cron job is scheduled and active
+SELECT jobname, schedule, active, last_run_time, last_run_status
+FROM cron.job
+JOIN cron.job_run_details ON job.jobid = job_run_details.jobid
+WHERE jobname = 'auto-complete-stints'
+ORDER BY last_run_time DESC
+LIMIT 1;
+```
+
+```sql
+-- Check cron execution history (last 10 runs)
+SELECT
+  runid,
+  status,
+  return_message,
+  start_time,
+  end_time,
+  end_time - start_time as duration
+FROM cron.job_run_details
+WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'auto-complete-stints')
+ORDER BY start_time DESC
+LIMIT 10;
+```
+
+**Alerts:**
+- **No auto-completions for >10 minutes** (when stints should be expiring) → Cron job failure (CRITICAL)
+- **Auto-completion error rate >5%** → Investigate function errors
+- **Stints >1 hour overdue** → Cron job not running
+- **Cron job execution time >1 second** → Performance degradation
+
+**GitHub Actions Monitoring** (if using Option 1):
+- Check workflow runs: https://github.com/{owner}/{repo}/actions/workflows/auto-complete-stints.yml
+- Set up notifications for workflow failures in repository settings
+
 ### Sentry Alerts (Slack notifications)
 
 - **>10 errors in 5 minutes** → Critical

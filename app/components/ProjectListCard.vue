@@ -136,7 +136,6 @@ function handleCompleteStint() {
 
 <template>
   <li
-    v-memo="[project.id, project.updated_at, activeStint?.id, activeStint?.status, dailyProgress, isToggling, isStarting, isPausing, isCompleting]"
     :class="[
       'grid grid-cols-[40px_1fr_auto_auto_96px] items-center gap-3 p-4 rounded-lg border-2 motion-safe:transition-all border-l-4',
       'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-neutral-300 dark:hover:border-neutral-700',

@@ -63,3 +63,13 @@ export type StintResumePayload = z.infer<typeof stintResumeSchema>;
 export type StintCompletionPayload = z.infer<typeof stintCompletionSchema>;
 export type StintInterruptPayload = z.infer<typeof stintInterruptSchema>;
 export type StintIdentifier = z.infer<typeof stintIdentifierSchema>;
+
+// Export constants for contract compatibility
+export const STINT_SCHEMA_LIMITS = STINT;
+
+// Type aliases for contract naming conventions
+export type StartStintInput = StintStartPayload;
+export type CompleteStintInput = StintCompletionPayload;
+export type StintIdInput = StintIdentifier;
+export type PauseStintInput = StintPausePayload;
+export type ResumeStintInput = StintResumePayload;
