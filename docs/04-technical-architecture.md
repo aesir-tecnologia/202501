@@ -275,7 +275,7 @@
 
 - **Production:** lifestint.com (Supabase Production project)
 - **Staging:** staging.lifestint.com (Supabase Staging project)
-- **Development:** localhost:3005 (Remote Supabase development project)
+- **Development:** localhost:3005 (Local Supabase via Docker)
 
 ### CI/CD
 

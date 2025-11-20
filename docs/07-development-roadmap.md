@@ -13,7 +13,7 @@
 **Tasks:**
 1. Initialize Nuxt 3 project with TypeScript
 2. Configure Supabase project (production + staging)
-3. Configure remote Supabase development project
+3. Set up local Supabase development environment
 4. Implement authentication:
    - Registration with email verification
    - Login/logout

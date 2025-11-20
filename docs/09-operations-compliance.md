@@ -304,17 +304,15 @@ Storage uploads → 100 per hour
 
 1. Develop schema changes in migration files
 2. Generate migration file: `supabase migration new <name>`
-3. Test migration in development database: `supabase db push`
-4. Push to staging: `supabase db push --linked` (with staging project linked)
-5. Test on staging environment
-6. Push to production: `supabase db push --linked` (with production project linked)
-7. Verify migration success (check tables, indexes, RLS policies)
+3. Test migration in local database: `supabase db reset`
+4. Verify migration success (check tables, indexes, RLS policies)
+5. Regenerate TypeScript types: `npm run supabase:types`
 
 ### Rollback Plan
 
 - Each migration includes `-- REVERT` section
-- If migration fails, apply revert manually via Supabase Dashboard
-- Database backups taken before each production migration
+- For local development: `supabase db reset` restores to clean state
+- Migration files versioned in Git for rollback history
 
 ### Zero-Downtime Migrations
 

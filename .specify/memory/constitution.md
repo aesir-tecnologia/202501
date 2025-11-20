@@ -171,9 +171,9 @@ export const entityKeys = {
 
 ### Database Operations
 
-- **Remote Supabase Only**: No local database
+- **Local Supabase**: Docker-based development environment
 - **RLS (Row Level Security)**: Enforced on all tables
-- **Migrations**: Created in `supabase/migrations/`, applied to remote
+- **Migrations**: Created in `supabase/migrations/`, applied to local database
 - **Type Generation**: `npm run supabase:types` after schema changes
 - **Functions**: PostgreSQL functions for complex operations
 
@@ -195,7 +195,7 @@ export const entityKeys = {
 
 1. **Database Changes**:
    - Create migration in `supabase/migrations/`
-   - Apply to remote database
+   - Apply to local database: `supabase db reset`
    - Regenerate types: `npm run supabase:types`
 
 2. **Implementation**:

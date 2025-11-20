@@ -43,12 +43,12 @@ npm run test:run         # Run tests once (CI mode)
 
 ### Database
 ```bash
-npm run supabase:types   # Generate TypeScript types from remote Supabase schema
+npm run supabase:types   # Generate TypeScript types from local Supabase schema
                          # Outputs to app/types/database.types.ts
-                         # Connects to linked remote database (not local)
+                         # Connects to local Supabase instance
 ```
 
-**Note:** This project uses a remote Supabase database. All database operations (migrations, type generation, etc.) are performed against the remote linked instance.
+**Note:** This project uses a local Supabase database for development. Run `supabase start` before development.
 
 ## Architecture
 
@@ -204,78 +204,30 @@ export const projectKeys = {
 
 ## Testing
 
-**Dual-Mode Testing Infrastructure:**
-Tests run against a **mocked Supabase client by default** to avoid API rate limits and provide fast feedback. Integration tests can optionally run against a real Supabase instance.
+Tests run against the **local Supabase instance** for reliable integration testing.
 
-### Test Modes
+### Running Tests
 
-**1. Unit Tests (Mocked - Default)**
 ```bash
-npm test                 # Run in watch mode (mocked)
-npm run test:ui          # Run with Vitest UI (mocked)
-npm run test:run         # Run once in CI mode (mocked)
+npm test                 # Run in watch mode
+npm run test:ui          # Run with Vitest UI
+npm run test:run         # Run once in CI mode
 ```
-- **Speed:** ~1 second for full suite
-- **API Calls:** Zero external calls
-- **Rate Limiting:** None
-- **Use Case:** Local development, CI/CD, rapid iteration
 
-**2. Integration Tests (Real Supabase)**
-```bash
-USE_MOCK_SUPABASE=false npm run test:run
-```
-- **Speed:** ~7-10 seconds (network dependent)
-- **API Calls:** Real Supabase API
-- **Rate Limiting:** Subject to Supabase limits
-- **Use Case:** Pre-deployment validation, RLS testing
-
-### Mock Implementation
-
-**Location:** `tests/mocks/supabase.ts`
-
-**Features:**
-- In-memory storage for projects and stints
-- Client-isolated auth state (per-client user sessions)
-- Query builder API matching Supabase PostgREST
-- Automatic cleanup between tests via `resetMockStore()`
-
-**Supported Operations:**
-- Query: `.select()`, `.eq()`, `.neq()`, `.in()`, `.is()`, `.filter()`, `.order()`, `.limit()`, `.single()`, `.maybeSingle()`
-- Mutations: `.insert()`, `.update()`, `.delete()`
-- Auth: `client.auth.getUser()`, `client.auth.signOut()`
-
-**Mock Limitations:**
-- Complex RLS policies (basic user_id filtering only)
-- Database triggers (e.g., `updated_at` auto-update)
-- PostgreSQL-specific functions
-- Real-time subscriptions
-
-### Test Helpers
-
-**`getTestUser(userNumber: 1 | 2)`**
-- Returns mocked client by default
-- Returns real authenticated client when `USE_MOCK_SUPABASE=false`
-- Each user has isolated session and data
-
-**`cleanupTestData(client)`**
-- Resets mock store when using mocks
-- Deletes database rows when using real Supabase
+**Prerequisites:** Ensure local Supabase is running (`supabase start`) before running tests.
 
 ### Test Organization
 
 ```
 tests/
-├── mocks/
-│   └── supabase.ts       # Mock Supabase client implementation
-├── lib/                  # Unit tests for database layer (mocked by default)
-├── composables/          # Unit tests for composables (mocked by default)
-├── schemas/              # Schema validation tests (no DB needed)
-├── setup.ts              # Global test setup with dual-mode support
-├── globalSetup.ts        # Real Supabase setup (only when USE_MOCK_SUPABASE=false)
+├── lib/                  # Unit tests for database layer
+├── composables/          # Unit tests for composables
+├── schemas/              # Schema validation tests
+├── setup.ts              # Global test setup
 └── README.md             # Detailed testing documentation
 ```
 
-**See `tests/README.md` for comprehensive testing guide, mock architecture details, and examples.**
+**See `tests/README.md` for comprehensive testing guide and examples.**
 
 ### Test Users
 
@@ -286,21 +238,16 @@ tests/
 - **Use Case:** Browser-based end-to-end tests with Playwright MCP
 - **Creation:** Run `node scripts/create-playwright-user.mjs` (idempotent - safe to re-run)
 
-**Unit/Integration Test Users** (for Vitest tests):
-- **User 1:** `global-test-user-1@lifestint.test` / `TestPassword123!SecureGlobal1`
-- **User 2:** `global-test-user-2@lifestint.test` / `TestPassword123!SecureGlobal2`
-- **Auto-created:** Via `tests/globalSetup.ts` when `USE_MOCK_SUPABASE=false`
-
-**Note:** All test users are automatically created on first use and persist in the Supabase database. Test data (projects/stints) is cleaned between test runs.
-
 ## Environment Variables
 
-Required in `.env` (see `.env.example`):
+Required in `.env` for local development:
 
 ```env
-SUPABASE_URL=https://your-project-id.supabase.co
-SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_ANON_KEY=your_local_anon_key_from_supabase_status
 ```
+
+Get credentials from `supabase status` after running `supabase start`.
 
 **Security Note:** Never commit service role keys. Only use public anon keys in `.env` since values are embedded in static build.
 
@@ -324,8 +271,8 @@ See `README.md` for detailed deployment instructions.
 
 1. **Database Changes:**
    - Create migration in `supabase/migrations/`
-   - Apply to remote database via Supabase CLI or dashboard
-   - Regenerate types from remote: `npm run supabase:types`
+   - Apply to local database: `supabase db reset`
+   - Regenerate types from local schema: `npm run supabase:types`
 
 2. **Adding Features:**
    - Update database layer (`app/lib/supabase/`)
@@ -335,17 +282,49 @@ See `README.md` for detailed deployment instructions.
 
 3. **Testing:**
    - Write tests alongside implementation
-   - Run `npm test` during development (uses mocked Supabase)
+   - Run `npm test` during development (uses local Supabase)
    - Verify with `npm run test:run` before committing
-   - Optional: Run integration tests with `USE_MOCK_SUPABASE=false npm run test:run` before major releases
 
 4. **Deployment:**
    - Test SSG build: `npm run generate && npm run serve`
    - Verify auth flows work on static preview
    - Deploy to Vercel
 
-## Active Technologies
-- TypeScript 5.x with Vue 3 Composition API + Nuxt 4 (SSG), Nuxt UI v4, Tailwind CSS v4, Lucide Icons (001-design-system-enforcement)
-- N/A (UI/styling changes only, no data layer modifications) (001-design-system-enforcement)
-- TypeScript 5.x with Vue 3 Composition API + Nuxt 4 (SSG mode) + Nuxt UI 4, Tailwind CSS v4, TanStack Query (Vue Query), Lucide Icons, @vueuse/integrations (for useSortable drag-and-drop) (002-project-list-redesign)
-- Supabase PostgreSQL (remote) with Row Level Security (RLS) (002-project-list-redesign)
+## Tech Stack
+
+### Core Framework
+- **Vue 3.5.24** - Composition API with `<script setup>` syntax
+- **Nuxt 4.2.1** - SSG mode via `nitro: { preset: 'static' }`
+- **TypeScript 5.9.3** - Full type safety with strict mode
+- **Vue Router 4.5.1** - Client-side routing (auto-generated from pages)
+
+### UI & Styling
+- **Nuxt UI 4.2.0** - Component library built on Radix Vue primitives
+- **Tailwind CSS 4.1.17** - Utility-first CSS (bundled with Nuxt UI)
+- **Lucide Icons 1.2.73** - Icon library (`@iconify-json/lucide`, bundled locally)
+- **Color Mode** - System-aware dark/light mode via Nuxt UI
+
+### State & Data Management
+- **TanStack Query 5.91.2** - Server state, caching, optimistic updates (Vue Query)
+- **VueUse 13.9.0** - Composition utilities (`@vueuse/core`, `@vueuse/integrations`)
+- **SortableJS 1.15.6** - Drag-and-drop via `useSortable` from VueUse
+
+### Backend & Database
+- **Supabase JS 2.83.0** - PostgreSQL client with auth and RLS
+- **Local PostgreSQL** - Supabase local development via Docker
+- **Row Level Security (RLS)** - User-scoped data access policies
+
+### Testing
+- **Vitest 3.2.4** - Unit and integration test runner
+- **Happy DOM 18.0.1** - Lightweight DOM implementation for tests
+- **Local Supabase** - Tests run against local Supabase instance
+- **@nuxt/test-utils 3.19.2** - Nuxt-specific testing utilities
+
+### Code Quality
+- **@nuxt/eslint 1.9.0** - ESLint configuration with stylistic rules
+- **TypeScript Strict Mode** - Type checking via `nuxt typecheck`
+
+### Build & Deployment
+- **Nitro** - Static site generation engine (Nuxt 4 built-in)
+- **Vite** - Build tool and dev server (Nuxt 4 built-in)
+- **Target Platform** - Vercel or any static hosting provider

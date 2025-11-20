@@ -1,96 +1,66 @@
 # Test Infrastructure
 
-This directory contains the test suite for LifeStint, implementing a dual-mode testing approach with mocked and real Supabase clients.
+This directory contains the test suite for LifeStint, running against a local Supabase instance for reliable integration testing.
 
 ## Overview
 
-Tests run against a **mocked Supabase client by default** to avoid API rate limits and provide fast, reliable test execution. Integration tests can optionally run against a real Supabase instance.
+Tests run against the **local Supabase instance** to provide realistic testing with actual database operations, RLS policies, and triggers.
 
-### Test Modes
+### Prerequisites
 
-#### 1. Unit Tests (Mocked - Default)
-- **Speed**: ~1 second for all tests
-- **API Calls**: Zero external calls
-- **Rate Limiting**: None
-- **Use Case**: Local development, CI/CD, rapid iteration
+Ensure local Supabase is running before executing tests:
+
+```bash
+supabase start
+```
+
+### Running Tests
 
 ```bash
 npm test                    # Run in watch mode
-npm run test:run            # Run once
-npm run test:ui             # Run with UI
+npm run test:run            # Run once (CI mode)
+npm run test:ui             # Run with Vitest UI
 ```
 
-#### 2. Integration Tests (Real Supabase)
-- **Speed**: ~7-10 seconds (depends on network)
-- **API Calls**: Real Supabase API
-- **Rate Limiting**: Subject to Supabase limits
-- **Use Case**: Pre-deployment validation, RLS testing
+## Test Setup
 
-```bash
-USE_MOCK_SUPABASE=false npm run test:run
-```
-
-## Architecture
-
-### Mock Implementation (`tests/mocks/supabase.ts`)
-
-The mock Supabase client provides:
-- **In-memory storage** for projects and stints
-- **Client-isolated auth** state (per-client user session)
-- **Query builder API** matching Supabase PostgREST
-- **Automatic cleanup** between tests via `resetMockStore()`
-
-#### Supported Operations
-
-**Query Methods:**
-- `.select()`, `.eq()`, `.neq()`, `.in()`, `.is()`, `.filter()`
-- `.order()`, `.limit()`, `.single()`, `.maybeSingle()`
-
-**Mutation Methods:**
-- `.insert().select().single()` - Create with return
-- `.update().eq()` - Update with filters
-- `.delete().eq()` - Delete with filters
-
-**Auth Methods:**
-- `client.auth.getUser()` - Returns client-specific user
-- `client.auth.signOut()` - Clears client session
-
-### Test Setup (`tests/setup.ts`)
-
-#### Environment Detection
-```typescript
-const USE_MOCK = process.env.USE_MOCK_SUPABASE !== 'false'
-```
-
-#### Helper Functions
+### Helper Functions (`tests/setup.ts`)
 
 **`getTestUser(userNumber: 1 | 2)`**
-- Returns mocked client by default
-- Returns real authenticated client when `USE_MOCK_SUPABASE=false`
+- Returns authenticated Supabase client for test user
 - Each user has isolated session and data
+- Auto-creates test users on first use
 
 **`cleanupTestData(client)`**
-- Resets mock store when using mocks
-- Deletes database rows when using real Supabase
+- Deletes all test data (projects, stints) for the user
+- Call in `beforeEach` to ensure clean test state
 
 ### Test Lifecycle
 
 ```typescript
-beforeEach(() => {
-  vi.clearAllMocks()
-  if (USE_MOCK) resetMockStore()
-})
+import { beforeEach, describe, it, expect } from 'vitest'
+import { getTestUser, cleanupTestData } from '../setup'
 
-// In test file
-beforeEach(async () => {
-  const { client, user } = await getTestUser()
-  await cleanupTestData(client)
+describe('Feature tests', () => {
+  let client, user
+
+  beforeEach(async () => {
+    const testData = await getTestUser()
+    client = testData.client
+    user = testData.user
+    await cleanupTestData(client)
+  })
+
+  it('should perform operation', async () => {
+    // Test implementation
+  })
 })
 ```
 
 ## Writing Tests
 
-### Unit Test Pattern
+### Basic Test Pattern
+
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createProject } from '~/lib/supabase/projects'
@@ -108,16 +78,21 @@ describe('createProject', () => {
 
   it('should create project successfully', async () => {
     const { data, error } = await createProject(client, {
-      name: 'Test Project'
+      name: 'Test Project',
+      expected_daily_stints: 3
     })
 
     expect(error).toBeNull()
     expect(data?.name).toBe('Test Project')
+    expect(data?.expected_daily_stints).toBe(3)
   })
 })
 ```
 
 ### Multi-User Tests
+
+Test data isolation between users:
+
 ```typescript
 it('should isolate data between users', async () => {
   const { client: client1 } = await getTestUser(1)
@@ -131,121 +106,97 @@ it('should isolate data between users', async () => {
 
   expect(user1Projects).toHaveLength(1)
   expect(user2Projects).toHaveLength(1)
+  expect(user1Projects[0].name).toBe('User 1 Project')
+  expect(user2Projects[0].name).toBe('User 2 Project')
 })
 ```
 
-## Mock Limitations
+### Testing RLS Policies
 
-The mock implementation prioritizes speed and simplicity over complete Supabase parity:
+Local Supabase allows testing actual Row Level Security policies:
 
-### Not Implemented
-- [ ] Complex RLS policies (partially mocked via user_id checks)
-- [ ] Database triggers (e.g., `updated_at` auto-update)
-- [ ] Foreign key cascade behaviors
-- [ ] PostgreSQL-specific functions (e.g., `gen_random_uuid()`)
-- [ ] Real-time subscriptions
-- [ ] Storage operations
+```typescript
+it('should enforce RLS - user cannot access other users data', async () => {
+  const { client: client1 } = await getTestUser(1)
+  const { client: client2 } = await getTestUser(2)
 
-### Workarounds
-- **RLS**: Mock enforces basic `user_id` filtering in insert/update/delete
-- **Triggers**: Tests should not rely on automatic timestamp updates
-- **Defaults**: Mock applies schema defaults manually in insert handlers
-- **Cascades**: Implemented manually in delete handlers where critical
+  const { data: project1 } = await createProject(client1, { name: 'Private Project' })
+
+  // Attempt to access user1's project with user2's client
+  const { data, error } = await client2
+    .from('projects')
+    .select('*')
+    .eq('id', project1.id)
+    .single()
+
+  expect(data).toBeNull()
+  expect(error).toBeTruthy()
+})
+```
+
+## Test Organization
+
+```
+tests/
+├── lib/                  # Database layer tests
+│   ├── supabase/
+│   │   ├── projects.test.ts
+│   │   └── stints.test.ts
+├── composables/          # Composable hook tests
+│   └── useProjects.test.ts
+├── schemas/              # Schema validation tests
+│   ├── projects.test.ts
+│   └── stints.test.ts
+├── setup.ts              # Test helpers and global setup
+└── README.md             # This file
+```
 
 ## CI/CD Integration
 
 ### GitHub Actions Example
+
 ```yaml
-- name: Run Unit Tests
-  run: npm run test:run
-  # Uses mocked Supabase by default
+- name: Start Local Supabase
+  run: supabase start
 
-- name: Run Integration Tests
+- name: Run Tests
+  run: npm run test:run
   env:
-    USE_MOCK_SUPABASE: false
-    SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-    SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-  run: npm run test:run
-```
-
-### Vercel Build
-Vercel builds run unit tests (mocked) by default - no Supabase credentials needed during build.
-
-## Extending the Mock
-
-### Adding New Table Support
-
-1. **Add type to store** (`tests/mocks/supabase.ts`):
-```typescript
-interface InMemoryStore {
-  projects: Map<string, ProjectRow>
-  stints: Map<string, StintRow>
-  newTable: Map<string, NewTableRow>  // Add here
-}
-```
-
-2. **Implement handlers**:
-```typescript
-function handleNewTableInsert(payload, getCurrentUser) { /* ... */ }
-function handleNewTableUpdate(filters, payload) { /* ... */ }
-function handleNewTableDelete(filters) { /* ... */ }
-```
-
-3. **Add to query builder**:
-```typescript
-if (state.table === 'new_table') {
-  return executeNewTableQuery(state)
-}
-```
-
-### Adding New Query Methods
-
-Add to `createQueryBuilder` function:
-```typescript
-const builder = {
-  // ...existing methods
-  gte: (field: string, value: unknown) => {
-    state.filters.push({ field, op: 'gte', value })
-    return builder
-  }
-}
-```
-
-Update `matchesFilters`:
-```typescript
-case 'gte':
-  return fieldValue >= value
+    SUPABASE_URL: http://127.0.0.1:54321
+    SUPABASE_ANON_KEY: ${{ secrets.LOCAL_ANON_KEY }}
 ```
 
 ## Troubleshooting
 
+### Tests Fail with "Connection refused"
+
+- Ensure local Supabase is running: `supabase status`
+- Verify `.env` has correct local credentials
+- Check that Docker is running (required for Supabase local)
+
 ### Tests Fail with "User not authenticated"
+
 - Ensure `getTestUser()` is called in `beforeEach`
-- Check that cleanup doesn't clear user session prematurely
+- Check that test user exists (should auto-create on first run)
+- Verify cleanup doesn't clear user session
 
-### Tests Fail with "Request rate limit reached"
-- Set `USE_MOCK_SUPABASE=true` (or omit, it's the default)
-- Check that globalSetup isn't running unnecessarily
+### Schema out of sync
 
-### Mock Behavior Doesn't Match Real Supabase
-- Run with `USE_MOCK_SUPABASE=false` to test against real DB
-- Update mock implementation to match observed behavior
-- Consider if the behavior is critical for unit tests
+- Apply migrations: `supabase db reset`
+- Regenerate types: `npm run supabase:types`
+- Restart tests
 
-### Performance Degradation
-- Mocked tests should run in <2 seconds
-- Check for accidental real Supabase calls
-- Ensure `resetMockStore()` is called in `beforeEach`
+### Performance Issues
 
-## Metrics
+- Local tests should complete in <10 seconds
+- Check for unnecessary database queries
+- Ensure `cleanupTestData()` is efficient
 
-### Test Suite Performance
-- **Unit Tests (Mocked)**: ~1s for 112 tests
-- **Integration Tests (Real DB)**: ~7-10s for 112 tests
-- **Speedup**: ~7-10x faster with mocks
+## Benefits of Local Supabase Testing
 
-### Coverage
-- **Passing Tests**: 66/112 (59%)
-- **Database Layer**: Well covered with mocks
-- **Schema Layer**: Full coverage (pure validation)
-- **Composable Layer**: Partial coverage (requires component context)
+- **Real Database Operations**: Test actual PostgreSQL queries
+- **RLS Policy Validation**: Verify security policies work correctly
+- **Trigger Testing**: Test database triggers and functions
+- **Type Safety**: Generated types match actual database schema
+- **No Rate Limits**: Local instance has no API limits
+- **Offline Development**: No internet required for testing
