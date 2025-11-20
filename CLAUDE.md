@@ -328,3 +328,10 @@ See `README.md` for detailed deployment instructions.
 - **Nitro** - Static site generation engine (Nuxt 4 built-in)
 - **Vite** - Build tool and dev server (Nuxt 4 built-in)
 - **Target Platform** - Vercel or any static hosting provider
+
+## Active Technologies
+- TypeScript 5.9.3 with Vue 3.5.24 Composition API + Nuxt 4.2.1 (SSG), @nuxtjs/supabase 1.6.2, @supabase/supabase-js 2.57.4, @tanstack/vue-query 5.90.6, Zod (via schemas) (001-migrate-edge-functions)
+- PostgreSQL via Supabase with Row Level Security (RLS), local development via Docker (001-migrate-edge-functions)
+
+## Recent Changes
+- 001-migrate-edge-functions: Added TypeScript 5.9.3 with Vue 3.5.24 Composition API + Nuxt 4.2.1 (SSG), @nuxtjs/supabase 1.6.2, @supabase/supabase-js 2.57.4, @tanstack/vue-query 5.90.6, Zod (via schemas)
