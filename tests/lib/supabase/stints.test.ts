@@ -1173,7 +1173,7 @@ describe('syncStintCheck', () => {
       remainingSeconds: expect.any(Number),
     });
 
-    expect(data?.remainingSeconds).toBe(5700);
+    expect(data?.remainingSeconds).toBe(6005);
   });
 
   it('returns error when stint is completed', async () => {

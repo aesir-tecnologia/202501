@@ -489,14 +489,14 @@ export async function syncStintCheck(
 
   if (stint.status === 'active') {
     const elapsedSeconds = Math.floor((now.getTime() - startedAt.getTime()) / 1000);
-    const pausedSeconds = pausedDuration * 60;
-    remainingSeconds = plannedDurationSeconds - elapsedSeconds - pausedSeconds;
+    const pausedSeconds = pausedDuration;
+    remainingSeconds = plannedDurationSeconds - elapsedSeconds + pausedSeconds;
   }
   else {
     const pausedAt = stint.paused_at ? new Date(stint.paused_at) : now;
     const elapsedSeconds = Math.floor((pausedAt.getTime() - startedAt.getTime()) / 1000);
-    const pausedSeconds = pausedDuration * 60;
-    remainingSeconds = plannedDurationSeconds - elapsedSeconds - pausedSeconds;
+    const pausedSeconds = pausedDuration;
+    remainingSeconds = plannedDurationSeconds - elapsedSeconds + pausedSeconds;
   }
 
   remainingSeconds = Math.max(0, remainingSeconds);
