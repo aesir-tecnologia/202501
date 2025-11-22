@@ -79,8 +79,12 @@ const longestStreak = computed(() => {
   let currentStreak = 1;
 
   for (let i = 1; i < sortedDates.length; i++) {
+    const currentDate = sortedDates[i];
+    const previousDate = sortedDates[i - 1];
+    if (!currentDate || !previousDate) continue;
+
     const diffDays = Math.floor(
-      (sortedDates[i].getTime() - sortedDates[i - 1].getTime()) / (1000 * 60 * 60 * 24),
+      (currentDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     if (diffDays === 1) {
@@ -129,7 +133,8 @@ const todayGoalsMet = computed(() => {
     if (!todayProjects.has(project.id)) return;
 
     const projectStintsToday = todayStints.value.filter(s => s.project_id === project.id).length;
-    if (projectStintsToday >= project.expected_daily_stints) {
+    const expectedStints = project.expected_daily_stints ?? 0;
+    if (projectStintsToday >= expectedStints) {
       goalsMet++;
     }
   });
@@ -144,7 +149,8 @@ const todayProjectsWorked = computed(() => {
     .map((project) => {
       const stints = todayStints.value.filter(s => s.project_id === project.id);
       const totalTime = stints.reduce((sum, s) => sum + (s.actual_duration || 0), 0);
-      const goalMet = stints.length >= project.expected_daily_stints;
+      const expectedStints = project.expected_daily_stints ?? 0;
+      const goalMet = stints.length >= expectedStints;
 
       return {
         project,

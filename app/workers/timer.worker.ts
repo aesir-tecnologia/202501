@@ -166,9 +166,13 @@ self.onmessage = (event: MessageEvent<IncomingMessage>) => {
  * Handle worker errors
  */
 self.onerror = (error) => {
+  const message = typeof error === 'string'
+    ? error
+    : (error instanceof ErrorEvent ? error.message : 'Worker error occurred');
+
   const errorMessage: OutgoingMessage = {
     type: 'error',
-    message: error.message || 'Worker error occurred',
+    message,
   };
   self.postMessage(errorMessage);
 };

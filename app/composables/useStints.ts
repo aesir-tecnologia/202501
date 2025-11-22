@@ -14,7 +14,6 @@ import {
   syncStintCheck as syncStintCheckDb,
   type StintRow,
   type UpdateStintPayload as DbUpdateStintPayload,
-  type SyncCheckOutput,
 } from '~/lib/supabase/stints';
 import {
   stintStartSchema,
@@ -27,6 +26,7 @@ import {
   type StintUpdatePayload,
   type StintCompletionPayload,
   type StintInterruptPayload,
+  type SyncCheckOutput,
 } from '~/schemas/stints';
 
 // ============================================================================
@@ -100,7 +100,7 @@ export type ResumeStintMutation = UseMutationReturnType<
 export type StartStintMutation = UseMutationReturnType<
   StintRow,
   Error,
-  StintStartEnhancedPayload,
+  StintStartPayload,
   unknown
 >;
 
@@ -904,6 +904,38 @@ export function useInterruptStint() {
 
 const lastSyncTimes = new Map<string, number>();
 const SYNC_DEBOUNCE_MS = 60 * 1000;
+const MAX_SYNC_CACHE_ENTRIES = 100;
+
+// Cleanup old entries to prevent unbounded memory growth
+function cleanupOldSyncTimes(): void {
+  if (lastSyncTimes.size > MAX_SYNC_CACHE_ENTRIES) {
+    // Remove entries older than 24 hours
+    const now = Date.now();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const entriesToDelete: string[] = [];
+
+    for (const [stintId, timestamp] of lastSyncTimes.entries()) {
+      if (now - timestamp > oneDayMs) {
+        entriesToDelete.push(stintId);
+      }
+    }
+
+    // If still too many entries after removing old ones, remove oldest entries
+    if (lastSyncTimes.size - entriesToDelete.length > MAX_SYNC_CACHE_ENTRIES) {
+      const sortedEntries = Array.from(lastSyncTimes.entries())
+        .sort((a, b) => a[1] - b[1]);
+      const numToRemove = lastSyncTimes.size - MAX_SYNC_CACHE_ENTRIES;
+      for (let i = 0; i < numToRemove; i++) {
+        const entry = sortedEntries[i];
+        if (entry) {
+          entriesToDelete.push(entry[0]);
+        }
+      }
+    }
+
+    entriesToDelete.forEach(id => lastSyncTimes.delete(id));
+  }
+}
 
 export function useSyncStintCheck() {
   const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
@@ -931,6 +963,7 @@ export function useSyncStintCheck() {
       }
 
       lastSyncTimes.set(stintId, now);
+      cleanupOldSyncTimes();
 
       return data;
     },

@@ -1,4 +1,4 @@
-import { PROJECT, STINT } from '~/constants';
+import { PROJECT, STINT } from './constants';
 
 export default defineAppConfig({
   auth: {

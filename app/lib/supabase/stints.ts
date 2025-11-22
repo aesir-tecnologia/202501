@@ -1,5 +1,6 @@
 import type { Database } from '~/types/database.types';
 import type { TypedSupabaseClient } from '~/utils/supabase';
+import type { SyncCheckOutput } from '~/schemas/stints';
 import { STINT } from '~/constants';
 
 /**
@@ -44,16 +45,6 @@ async function requireUserId(client: TypedSupabaseClient): Promise<Result<string
   }
 
   return { data: data.user.id, error: null };
-}
-
-function _isValidStintRow(data: unknown): data is StintRow {
-  return (
-    typeof data === 'object'
-    && data !== null
-    && 'id' in data
-    && 'status' in data
-    && 'started_at' in data
-  );
 }
 
 export async function listStints(
@@ -292,7 +283,7 @@ export async function completeStint(
     .rpc('complete_stint', {
       p_stint_id: stintId,
       p_completion_type: completionType,
-      p_notes: notes ?? null,
+      p_notes: notes ?? undefined,
     })
     .single<StintRow>();
 
@@ -369,7 +360,12 @@ export async function startStint(
     };
   }
 
-  // Validate stint start using RPC
+  // TOCTOU (Time-of-Check-Time-of-Use) Race Condition Handling:
+  // 1. Validate stint start using RPC (check user version + active stint status)
+  // 2. If validation passes, attempt insert with unique constraint
+  // 3. If insert fails with duplicate key (23505), handle race condition below
+  // This two-phase approach ensures atomicity: validation prevents most conflicts,
+  // and the unique constraint catches any race conditions between validation and insert.
   const { data: validation, error: validationError } = await client
     .rpc('validate_stint_start', {
       p_user_id: userId,
@@ -445,14 +441,6 @@ export async function startStint(
   return { data: newStint, error: null };
 }
 
-export interface SyncCheckOutput {
-  stintId: string
-  status: 'active' | 'paused' | 'completed'
-  remainingSeconds: number
-  serverTimestamp: string
-  driftSeconds?: number
-}
-
 export async function syncStintCheck(
   client: TypedSupabaseClient,
   stintId: string,
@@ -477,6 +465,10 @@ export async function syncStintCheck(
 
   if (stint.status === 'completed') {
     return { data: null, error: new Error('Stint is completed and cannot be synced') };
+  }
+
+  if (!stint.started_at || !stint.planned_duration) {
+    return { data: null, error: new Error('Invalid stint data: missing required fields') };
   }
 
   const now = new Date();

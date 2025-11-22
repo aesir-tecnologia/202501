@@ -93,7 +93,6 @@ async function handleStopConfirm(): Promise<void> {
       description: 'Great work! Your progress has been saved.',
       color: 'success',
       icon: 'i-lucide-circle-check',
-      timeout: 5000,
     });
 
     // Reset modal state

@@ -15,7 +15,7 @@ function closeModal() {
     v-model:open="isOpen"
     title="Archived Projects"
     description="View and manage your archived projects"
-    :ui="{ width: 'sm:max-w-3xl' }"
+    :ui="{ content: 'sm:max-w-3xl' }"
   >
     <template #content>
       <UCard>

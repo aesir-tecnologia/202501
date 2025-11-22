@@ -47,14 +47,22 @@ async function verifyProjectOwnership(
   operation: string,
 ): Promise<Result<ProjectRow>> {
   const projectResult = await getProject(client, projectId);
-  if (projectResult.error) return projectResult;
+  if (projectResult.error) {
+    return {
+      data: null,
+      error: projectResult.error,
+    };
+  }
   if (!projectResult.data) {
     return {
       data: null,
       error: new Error(`Project not found or you do not have permission to ${operation} it`),
     };
   }
-  return projectResult;
+  return {
+    data: projectResult.data,
+    error: null,
+  };
 }
 
 export async function listProjects(

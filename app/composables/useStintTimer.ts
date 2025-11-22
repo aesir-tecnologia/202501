@@ -310,6 +310,9 @@ function resumeTimer(stint: StintRow): void {
   }
 
   // Calculate new end time accounting for paused duration
+  // Formula: endTime = startedAt + plannedDuration + pausedDuration
+  // This extends the deadline by the total time spent paused, ensuring users get
+  // the full planned duration of active work time even after pause/resume cycles.
   const startedAtDate = parseSafeDate(stint.started_at);
   if (!startedAtDate) {
     console.error('Cannot resume timer: invalid started_at date', stint.started_at);
