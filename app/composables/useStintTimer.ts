@@ -37,7 +37,7 @@ const globalTimerState = {
   worker: null as Worker | null,
   secondsRemaining: ref(0),
   isPaused: ref(false),
-  isCompleted: ref(false),
+  timerCompleted: ref(false),
   currentStintId: null as string | null,
   syncIntervalId: null as ReturnType<typeof setInterval> | null,
   notificationPermission: ref<NotificationPermission>('default'),
@@ -92,7 +92,7 @@ export function useStintTimer() {
   return {
     secondsRemaining: readonly(globalTimerState.secondsRemaining),
     isPaused: readonly(globalTimerState.isPaused),
-    isCompleted: readonly(globalTimerState.isCompleted),
+    timerCompleted: readonly(globalTimerState.timerCompleted),
   };
 }
 
@@ -167,12 +167,12 @@ function handleWorkerMessage(event: MessageEvent<WorkerIncomingMessage>): void {
   switch (message.type) {
     case 'tick':
       globalTimerState.secondsRemaining.value = message.secondsRemaining;
-      globalTimerState.isCompleted.value = false;
+      globalTimerState.timerCompleted.value = false;
       break;
 
     case 'complete':
       globalTimerState.secondsRemaining.value = 0;
-      globalTimerState.isCompleted.value = true;
+      globalTimerState.timerCompleted.value = true;
       handleTimerComplete();
       break;
 
@@ -272,7 +272,7 @@ function startTimer(stint: StintRow): void {
   // Update state
   globalTimerState.currentStintId = stint.id;
   globalTimerState.isPaused.value = false;
-  globalTimerState.isCompleted.value = false;
+  globalTimerState.timerCompleted.value = false;
 
   // Start server sync
   startServerSync(stint.id);
@@ -351,7 +351,7 @@ function stopTimer(): void {
   globalTimerState.currentStintId = null;
   globalTimerState.secondsRemaining.value = 0;
   globalTimerState.isPaused.value = false;
-  globalTimerState.isCompleted.value = false;
+  globalTimerState.timerCompleted.value = false;
 
   // Stop server sync
   stopServerSync();
@@ -363,7 +363,7 @@ function stopTimer(): void {
 function initializePausedState(stint: StintRow): void {
   globalTimerState.currentStintId = stint.id;
   globalTimerState.isPaused.value = true;
-  globalTimerState.isCompleted.value = false;
+  globalTimerState.timerCompleted.value = false;
 
   // Calculate remaining time for display
   const startedAtDate = parseSafeDate(stint.started_at);
@@ -573,7 +573,7 @@ function _cleanup(): void {
   globalTimerState.currentStintId = null;
   globalTimerState.secondsRemaining.value = 0;
   globalTimerState.isPaused.value = false;
-  globalTimerState.isCompleted.value = false;
+  globalTimerState.timerCompleted.value = false;
   globalTimerState.toast = null;
   globalTimerState.isInitialized = false;
 }

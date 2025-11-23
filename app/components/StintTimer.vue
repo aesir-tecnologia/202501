@@ -6,7 +6,7 @@ const props = defineProps<{
 }>();
 
 // Get timer state from singleton composable
-const { secondsRemaining, isPaused, isCompleted } = useStintTimer();
+const { secondsRemaining, isPaused, timerCompleted } = useStintTimer();
 
 // Format time as MM:SS
 const formattedTime = computed(() => {
@@ -69,7 +69,7 @@ onUnmounted(() => {
 // Animation state
 const showCompletionAnimation = ref(false);
 
-watch(isCompleted, (completed) => {
+watch(timerCompleted, (completed) => {
   if (completed) {
     showCompletionAnimation.value = true;
     // Hide animation after 3 seconds
@@ -100,7 +100,7 @@ watch(isCompleted, (completed) => {
 
     <!-- Active State -->
     <div
-      v-else-if="stint && !isCompleted"
+      v-else-if="stint && !timerCompleted"
       class="flex flex-col items-center gap-2"
     >
       <div class="text-sm font-medium leading-normal text-success-600 dark:text-success-400">
