@@ -77,16 +77,20 @@ describe('createStint Contract', () => {
       project_id: projectId,
       started_at: now.toISOString(),
       ended_at: endedAt.toISOString(),
-      duration_minutes: 45,
+      planned_duration: 45,
+      actual_duration: 2700,
+      status: 'completed',
+      completion_type: 'manual',
       notes: 'Productive session',
-      is_completed: true,
     });
 
     expect(error).toBeNull();
     expect(new Date(data!.ended_at!).getTime()).toBe(endedAt.getTime());
-    expect(data!.duration_minutes).toBe(45);
+    expect(data!.planned_duration).toBe(45);
+    expect(data!.actual_duration).toBe(2700);
     expect(data!.notes).toBe('Productive session');
-    expect(data!.is_completed).toBe(true);
+    expect(data!.status).toBe('completed');
+    expect(data!.completion_type).toBe('manual');
   });
 
   it('should auto-inject user_id from auth session', async () => {
@@ -102,11 +106,15 @@ describe('createStint Contract', () => {
     const { data } = await createStint(testUser1Client, {
       project_id: projectId,
       started_at: new Date().toISOString(),
+      planned_duration: 120,
     });
 
-    expect(data!.is_completed).toBe(false);
+    expect(data!.status).toBe('active');
+    expect(data!.paused_duration).toBe(0);
     expect(data!.ended_at).toBeNull();
-    expect(data!.duration_minutes).toBeNull();
+    expect(data!.actual_duration).toBeNull();
+    expect(data!.paused_at).toBeNull();
+    expect(data!.completion_type).toBeNull();
     expect(data!.created_at).toBeTruthy();
   });
 

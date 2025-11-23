@@ -18,8 +18,12 @@ const baseStint: StintRow = {
   project_id: 'project-1',
   started_at: '2024-01-01T00:00:00.000Z',
   ended_at: null,
-  duration_minutes: null,
-  is_completed: false,
+  status: 'active',
+  planned_duration: 120,
+  actual_duration: null,
+  paused_duration: 0,
+  paused_at: null,
+  completion_type: null,
   notes: null,
   created_at: '2024-01-01T00:00:00.000Z',
   updated_at: null,
@@ -93,8 +97,7 @@ describe('stints data helpers', () => {
     await listStints(client, { activeOnly: true });
 
     expect(builder.eq).toHaveBeenNthCalledWith(1, 'user_id', userId);
-    expect(builder.eq).toHaveBeenNthCalledWith(2, 'is_completed', false);
-    expect(builder.is).toHaveBeenCalledWith('ended_at', null);
+    expect(builder.in).toHaveBeenCalledWith('status', ['active', 'paused']);
   });
 
   it('fetches a stint by id scoped to the user', async () => {
@@ -110,17 +113,19 @@ describe('stints data helpers', () => {
     expect(data).toEqual(baseStint);
   });
 
-  it('fetches the active stint for the user', async () => {
-    const builder = createQueryBuilder();
-    builder.maybeSingle.mockResolvedValue({ data: baseStint, error: null });
+  it('fetches the active stint for the user via Edge Function', async () => {
+    const mockFunctions = {
+      invoke: vi.fn().mockResolvedValue({ data: baseStint, error: null }),
+    };
 
-    const { client } = createClient(builder);
-    const { error } = await getActiveStint(client);
+    const { client } = createClient(createQueryBuilder());
+    client.functions = mockFunctions as any;
 
-    expect(builder.eq).toHaveBeenNthCalledWith(1, 'user_id', userId);
-    expect(builder.eq).toHaveBeenNthCalledWith(2, 'is_completed', false);
-    expect(builder.is).toHaveBeenCalledWith('ended_at', null);
+    const { data, error } = await getActiveStint(client);
+
+    expect(mockFunctions.invoke).toHaveBeenCalledWith('stints-active', { body: {} });
     expect(error).toBeNull();
+    expect(data).toEqual(baseStint);
   });
 
   it('creates a stint with the current user id injected', async () => {
@@ -132,8 +137,12 @@ describe('stints data helpers', () => {
       project_id: baseStint.project_id,
       started_at: baseStint.started_at,
       ended_at: baseStint.ended_at,
-      duration_minutes: baseStint.duration_minutes,
-      is_completed: baseStint.is_completed,
+      status: baseStint.status,
+      planned_duration: baseStint.planned_duration,
+      actual_duration: baseStint.actual_duration,
+      paused_duration: baseStint.paused_duration,
+      paused_at: baseStint.paused_at,
+      completion_type: baseStint.completion_type,
       notes: baseStint.notes,
       created_at: baseStint.created_at,
       updated_at: baseStint.updated_at,
