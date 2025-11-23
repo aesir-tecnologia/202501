@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
-  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -94,14 +89,12 @@ export type Database = {
           actual_duration: number | null
           completion_type: Database["public"]["Enums"]["completion_type"] | null
           created_at: string | null
-          duration_minutes: number | null
           ended_at: string | null
           id: string
-          is_completed: boolean | null
           notes: string | null
           paused_at: string | null
           paused_duration: number
-          planned_duration: number | null
+          planned_duration: number
           project_id: string
           started_at: string | null
           status: Database["public"]["Enums"]["stint_status"]
@@ -114,14 +107,12 @@ export type Database = {
             | Database["public"]["Enums"]["completion_type"]
             | null
           created_at?: string | null
-          duration_minutes?: number | null
           ended_at?: string | null
           id?: string
-          is_completed?: boolean | null
           notes?: string | null
           paused_at?: string | null
           paused_duration?: number
-          planned_duration?: number | null
+          planned_duration: number
           project_id: string
           started_at?: string | null
           status?: Database["public"]["Enums"]["stint_status"]
@@ -134,14 +125,12 @@ export type Database = {
             | Database["public"]["Enums"]["completion_type"]
             | null
           created_at?: string | null
-          duration_minutes?: number | null
           ended_at?: string | null
           id?: string
-          is_completed?: boolean | null
           notes?: string | null
           paused_at?: string | null
           paused_duration?: number
-          planned_duration?: number | null
+          planned_duration?: number
           project_id?: string
           started_at?: string | null
           status?: Database["public"]["Enums"]["stint_status"]
@@ -245,14 +234,12 @@ export type Database = {
           actual_duration: number | null
           completion_type: Database["public"]["Enums"]["completion_type"] | null
           created_at: string | null
-          duration_minutes: number | null
           ended_at: string | null
           id: string
-          is_completed: boolean | null
           notes: string | null
           paused_at: string | null
           paused_duration: number
-          planned_duration: number | null
+          planned_duration: number
           project_id: string
           started_at: string | null
           status: Database["public"]["Enums"]["stint_status"]
@@ -272,14 +259,12 @@ export type Database = {
           actual_duration: number | null
           completion_type: Database["public"]["Enums"]["completion_type"] | null
           created_at: string | null
-          duration_minutes: number | null
           ended_at: string | null
           id: string
-          is_completed: boolean | null
           notes: string | null
           paused_at: string | null
           paused_duration: number
-          planned_duration: number | null
+          planned_duration: number
           project_id: string
           started_at: string | null
           status: Database["public"]["Enums"]["stint_status"]
@@ -300,14 +285,12 @@ export type Database = {
           actual_duration: number | null
           completion_type: Database["public"]["Enums"]["completion_type"] | null
           created_at: string | null
-          duration_minutes: number | null
           ended_at: string | null
           id: string
-          is_completed: boolean | null
           notes: string | null
           paused_at: string | null
           paused_duration: number
-          planned_duration: number | null
+          planned_duration: number
           project_id: string
           started_at: string | null
           status: Database["public"]["Enums"]["stint_status"]
@@ -327,14 +310,12 @@ export type Database = {
           actual_duration: number | null
           completion_type: Database["public"]["Enums"]["completion_type"] | null
           created_at: string | null
-          duration_minutes: number | null
           ended_at: string | null
           id: string
-          is_completed: boolean | null
           notes: string | null
           paused_at: string | null
           paused_duration: number
-          planned_duration: number | null
+          planned_duration: number
           project_id: string
           started_at: string | null
           status: Database["public"]["Enums"]["stint_status"]
@@ -495,3 +476,4 @@ export const Constants = {
     },
   },
 } as const
+
