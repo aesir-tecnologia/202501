@@ -55,8 +55,8 @@ npm run supabase:types   # Generate TypeScript types from local Supabase schema
 ### SSG + Client-Side Auth Pattern
 
 **Critical:** This is a **static site** with client-side authentication:
-- Public routes (`/home`, `/auth/*`) are pre-rendered at build time
-- Protected routes (`/`, `/analytics`, `/reports`, `/settings`) use `ssr: false` and client-side auth middleware
+- Public routes (`/`, `/auth/*`) are pre-rendered at build time
+- Protected routes (`/dashboard`, `/analytics`, `/reports`, `/settings`) use `ssr: false` and client-side auth middleware
 - Auth middleware in `app/middleware/auth.ts` only runs on client (`if (import.meta.server) return`)
 - Supabase credentials are embedded at build time from `.env` (only use anon keys!)
 
