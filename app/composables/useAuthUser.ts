@@ -11,7 +11,6 @@ function transformSupabaseUser(supabaseUser: SupabaseUser | null): User | null {
     email: supabaseUser.email ?? '',
     emailConfirmedAt: supabaseUser.email_confirmed_at ?? null,
     fullName: supabaseUser.user_metadata?.full_name,
-    emailNotifications: supabaseUser.user_metadata?.email_notifications,
     createdAt: supabaseUser.created_at,
   };
 }

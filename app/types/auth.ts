@@ -3,6 +3,5 @@ export interface User {
   email: string
   emailConfirmedAt: string | null
   fullName?: string
-  emailNotifications?: boolean
   createdAt: string
 }
