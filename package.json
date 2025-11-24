@@ -18,6 +18,7 @@
     "supabase:types": "supabase gen types typescript --local > app/types/database.types.ts"
   },
   "dependencies": {
+    "@iconify-json/lucide": "^1.2.68",
     "@nuxt/eslint": "^1.9.0",
     "@nuxt/ui": "^4.0.0",
     "@nuxtjs/supabase": "^1.6.2",
@@ -34,7 +35,6 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.68",
     "@nuxt/test-utils": "^3.19.2",
     "@vue/test-utils": "^2.4.6",
     "baseline-browser-mapping": "^2.8.29",
