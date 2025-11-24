@@ -15,7 +15,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "supabase:types": "supabase gen types typescript --linked > app/types/database.types.ts"
+    "supabase:types": "supabase gen types typescript --local > app/types/database.types.ts"
   },
   "dependencies": {
     "@nuxt/eslint": "^1.9.0",

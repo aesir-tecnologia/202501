@@ -150,6 +150,65 @@ After deploying, test:
 4. Dashboard loads after login at `/dashboard`
 5. Theme toggle works
 
+### Cron Job Scheduling (Production)
+
+The auto-completion feature requires a cron job to run `auto_complete_expired_stints()` every 2 minutes to automatically complete expired stints.
+
+**Local Development:** Already configured via pg_cron extension (see `supabase/migrations/20251120011135_schedule_auto_complete_cron.sql`)
+
+**Production:** Choose one of the following options:
+
+#### Option 1: GitHub Actions (Recommended for SSG Apps)
+
+Create `.github/workflows/auto-complete-stints.yml`:
+
+```yaml
+name: Auto-Complete Expired Stints
+on:
+  schedule:
+    - cron: '*/2 * * * *'  # Every 2 minutes
+
+jobs:
+  auto-complete:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Auto-Complete Function
+        run: |
+          curl -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/auto_complete_expired_stints" \
+               -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+               -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+               -H "Content-Type: application/json"
+```
+
+**Required GitHub Secrets:**
+- `SUPABASE_URL`: Your production Supabase URL
+- `SUPABASE_SERVICE_ROLE_KEY`: Service role key (NOT anon key)
+
+**Important:** The service role key bypasses RLS. Store it securely in GitHub Secrets, never commit it to the repository.
+
+#### Option 2: Supabase Platform Cron (If Available)
+
+If using Supabase Cloud with pg_cron support, the migration will automatically schedule the job. Verify it's running:
+
+```sql
+SELECT jobname, schedule, active
+FROM cron.job
+WHERE jobname = 'auto-complete-stints';
+```
+
+#### Option 3: External Cron Service
+
+Use services like [cron-job.org](https://cron-job.org), [EasyCron](https://www.easycron.com), or a server crontab:
+
+```bash
+*/2 * * * * curl -X POST https://your-project.supabase.co/rest/v1/rpc/auto_complete_expired_stints \
+                 -H "apikey: YOUR_SERVICE_ROLE_KEY" \
+                 -H "Authorization: Bearer YOUR_SERVICE_ROLE_KEY" \
+                 -H "Content-Type: application/json"
+```
+
+**Monitoring:** See `docs/09-operations-compliance.md` for monitoring queries and alerts.
+
 ## Troubleshooting
 
 ### Local Development Issues

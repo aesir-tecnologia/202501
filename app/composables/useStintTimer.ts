@@ -9,6 +9,7 @@ import type { Database } from '~/types/database.types';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useActiveStintQuery } from './useStints';
 import { parseSafeDate } from '~/utils/date-helpers';
+import { syncStintCheck as syncStintCheckDb } from '~/lib/supabase/stints';
 
 type StintRow = Database['public']['Tables']['stints']['Row'];
 
@@ -309,6 +310,9 @@ function resumeTimer(stint: StintRow): void {
   }
 
   // Calculate new end time accounting for paused duration
+  // Formula: endTime = startedAt + plannedDuration + pausedDuration
+  // This extends the deadline by the total time spent paused, ensuring users get
+  // the full planned duration of active work time even after pause/resume cycles.
   const startedAtDate = parseSafeDate(stint.started_at);
   if (!startedAtDate) {
     console.error('Cannot resume timer: invalid started_at date', stint.started_at);
@@ -418,38 +422,16 @@ async function syncWithServer(stintId: string): Promise<void> {
     const supabase = useSupabaseClient();
     const clientRemaining = globalTimerState.secondsRemaining.value;
 
-    // Get auth token for Edge Function
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      console.error('No active session for sync check');
+    // Call database sync check function
+    const { data, error } = await syncStintCheckDb(supabase, stintId);
+
+    if (error || !data) {
+      console.error('Sync check failed:', error);
       return;
     }
-
-    // Construct URL with query parameters
-    const config = useRuntimeConfig();
-    const url = new URL(`${config.public.supabase.url}/functions/v1/stint-sync-check`);
-    url.searchParams.set('stintId', stintId);
-    url.searchParams.set('remaining', clientRemaining.toString());
-
-    // Make GET request to Edge Function
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'apikey': config.public.supabase.key,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      console.error('Sync check failed:', response.status, response.statusText);
-      return;
-    }
-
-    const data = await response.json();
 
     // Check for drift
-    const serverRemaining = data.secondsRemaining;
+    const serverRemaining = data.remainingSeconds;
     const drift = Math.abs(serverRemaining - clientRemaining);
 
     // Correct if drift > threshold

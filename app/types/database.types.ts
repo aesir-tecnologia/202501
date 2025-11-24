@@ -215,6 +215,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_complete_expired_stints: {
+        Args: never
+        Returns: {
+          completed_count: number
+          error_count: number
+        }[]
+      }
       calculate_actual_duration: {
         Args: {
           p_ended_at: string

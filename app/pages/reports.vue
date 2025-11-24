@@ -54,8 +54,8 @@ onMounted(() => {
   const start = new Date();
   start.setDate(start.getDate() - 30);
 
-  dateRange.value.end = end.toISOString().split('T')[0];
-  dateRange.value.start = start.toISOString().split('T')[0];
+  dateRange.value.end = end.toISOString().split('T')[0]!;
+  dateRange.value.start = start.toISOString().split('T')[0]!;
 });
 
 function applyPresetRange(preset: typeof presetRanges[0]) {
@@ -70,10 +70,10 @@ function applyPresetRange(preset: typeof presetRanges[0]) {
     start = preset.getStart();
     if (preset.getEnd) {
       const presetEnd = preset.getEnd();
-      dateRange.value.end = presetEnd.toISOString().split('T')[0];
+      dateRange.value.end = presetEnd.toISOString().split('T')[0]!;
     }
     else {
-      dateRange.value.end = end.toISOString().split('T')[0];
+      dateRange.value.end = end.toISOString().split('T')[0]!;
     }
   }
   else {
@@ -81,9 +81,9 @@ function applyPresetRange(preset: typeof presetRanges[0]) {
     start.setDate(start.getDate() - 7);
   }
 
-  dateRange.value.start = start.toISOString().split('T')[0];
+  dateRange.value.start = start.toISOString().split('T')[0]!;
   if (!preset.getEnd) {
-    dateRange.value.end = end.toISOString().split('T')[0];
+    dateRange.value.end = end.toISOString().split('T')[0]!;
   }
 }
 
@@ -200,7 +200,7 @@ const dailyBreakdown = computed(() => {
 
     const date = parseSafeDate(stint.ended_at);
     if (!date) return;
-    const dateKey = date.toISOString().split('T')[0];
+    const dateKey = date.toISOString().split('T')[0]!;
     const timeMinutes = Math.round((stint.actual_duration || 0) / 60);
 
     const existing = daily.get(dateKey);

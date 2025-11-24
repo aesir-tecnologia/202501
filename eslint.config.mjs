@@ -28,6 +28,7 @@ export default withNuxt(
       '*.log',
       '.env',
       '.env.*',
+      'specs/**',
     ],
   },
 );
