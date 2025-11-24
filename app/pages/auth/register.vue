@@ -1,3 +1,159 @@
+<script setup lang="ts">
+import type { FormSubmitEvent } from '@nuxt/ui';
+import { registerSchema, type RegisterPayload } from '~/schemas/auth';
+
+definePageMeta({
+  layout: false,
+  middleware: 'guest',
+});
+
+useSeoMeta({
+  title: 'Sign Up - LifeStint',
+  description: 'Create your LifeStint account to start tracking your focus sessions and boost your productivity.',
+});
+
+// Form state
+const state = reactive<RegisterPayload>({
+  fullName: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  acceptTerms: false,
+});
+
+// UI state
+const loading = ref(false);
+const error = ref('');
+const success = ref('');
+const successDescription = ref('');
+
+// Password requirement checks
+const hasMinLength = computed(() => state.password.length >= 8);
+const hasUppercase = computed(() => /[A-Z]/.test(state.password));
+const hasLowercase = computed(() => /[a-z]/.test(state.password));
+const hasNumber = computed(() => /\d/.test(state.password));
+const hasSpecialChar = computed(() => /[@$!%*?&]/.test(state.password));
+
+// Password strength computation
+const passwordStrength = computed(() => {
+  if (!state.password) {
+    return { level: 'none', percentage: 0, color: 'neutral' as const };
+  }
+
+  const requirementsMet = [
+    hasMinLength.value,
+    hasUppercase.value,
+    hasLowercase.value,
+    hasNumber.value,
+    hasSpecialChar.value,
+  ].filter(Boolean).length;
+
+  // Bonus for extra length
+  const lengthBonus = Math.min(state.password.length - 8, 4) * 0.1;
+  const baseScore = requirementsMet / 5;
+  const totalScore = Math.max(0, Math.min(baseScore + lengthBonus, 1));
+
+  if (totalScore < 0.4) {
+    return { level: 'Weak', percentage: totalScore * 100, color: 'error' as const };
+  }
+  else if (totalScore < 0.7) {
+    return { level: 'Fair', percentage: totalScore * 100, color: 'warning' as const };
+  }
+  else if (totalScore < 0.9) {
+    return { level: 'Good', percentage: totalScore * 100, color: 'info' as const };
+  }
+  else {
+    return { level: 'Strong', percentage: totalScore * 100, color: 'success' as const };
+  }
+});
+
+// Supabase client
+const supabase = useSupabaseClient();
+const user = useAuthUser();
+const appConfig = useAppConfig();
+
+// Redirect if already logged in
+watch(user, (newUser) => {
+  if (newUser) {
+    navigateTo(appConfig.auth.redirectUrl);
+  }
+});
+
+// Handle form submission
+async function handleRegister(event: FormSubmitEvent<RegisterPayload>) {
+  loading.value = true;
+  error.value = '';
+  success.value = '';
+  successDescription.value = '';
+
+  try {
+    const { data, error: authError } = await supabase.auth.signUp({
+      email: event.data.email,
+      password: event.data.password,
+      options: {
+        data: {
+          full_name: event.data.fullName,
+        },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (authError) {
+      throw authError;
+    }
+
+    if (data.user) {
+      // Check if email is confirmed
+      if (data.user.email_confirmed_at) {
+        // Auto-confirmed (development mode)
+        success.value = 'Account created successfully!';
+        successDescription.value = 'You are now signed in. Redirecting to dashboard...';
+
+        navigateTo(appConfig.auth.redirectUrl);
+      }
+      else {
+        // Email confirmation required - redirect to verification page
+        navigateTo({
+          path: '/auth/verify-email',
+          query: { email: event.data.email },
+        });
+      }
+    }
+  }
+  catch (err: unknown) {
+    console.error('Registration error:', err);
+
+    // Handle specific error types
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    switch (errorMessage) {
+      case 'User already registered':
+        error.value = 'An account with this email already exists. Please sign in instead.';
+        break;
+      case 'Password should be at least 6 characters':
+        error.value = 'Password must be at least 6 characters long.';
+        break;
+      case 'Signup is disabled':
+        error.value = 'Account registration is currently disabled. Please contact support.';
+        break;
+      case 'Invalid email':
+        error.value = 'Please enter a valid email address.';
+        break;
+      default:
+        error.value = errorMessage || 'An unexpected error occurred during registration. Please try again.';
+    }
+  }
+  finally {
+    loading.value = false;
+  }
+}
+
+// Clear messages when user starts typing
+watch([() => state.email, () => state.password, () => state.confirmPassword], () => {
+  error.value = '';
+  success.value = '';
+});
+</script>
+
 <template>
   <UApp>
     <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
@@ -70,8 +226,97 @@
                 class="w-full"
               />
             </UFormField>
-            <div class="text-xs text-gray-500 -mt-4 mb-2">
-              Password must be at least 8 characters with uppercase, lowercase, number, and special character
+
+            <!-- Password Requirements Checklist -->
+            <div
+              v-if="state.password"
+              class="text-xs space-y-1 -mt-4 mb-2"
+            >
+              <div
+                :class="hasMinLength ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+                class="flex items-center gap-1.5"
+              >
+                <UIcon
+                  :name="hasMinLength ? 'i-lucide-check-circle' : 'i-lucide-circle'"
+                  class="w-3.5 h-3.5"
+                />
+                <span>At least 8 characters</span>
+              </div>
+              <div
+                :class="hasUppercase ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+                class="flex items-center gap-1.5"
+              >
+                <UIcon
+                  :name="hasUppercase ? 'i-lucide-check-circle' : 'i-lucide-circle'"
+                  class="w-3.5 h-3.5"
+                />
+                <span>One uppercase letter</span>
+              </div>
+              <div
+                :class="hasLowercase ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+                class="flex items-center gap-1.5"
+              >
+                <UIcon
+                  :name="hasLowercase ? 'i-lucide-check-circle' : 'i-lucide-circle'"
+                  class="w-3.5 h-3.5"
+                />
+                <span>One lowercase letter</span>
+              </div>
+              <div
+                :class="hasNumber ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+                class="flex items-center gap-1.5"
+              >
+                <UIcon
+                  :name="hasNumber ? 'i-lucide-check-circle' : 'i-lucide-circle'"
+                  class="w-3.5 h-3.5"
+                />
+                <span>One number</span>
+              </div>
+              <div
+                :class="hasSpecialChar ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+                class="flex items-center gap-1.5"
+              >
+                <UIcon
+                  :name="hasSpecialChar ? 'i-lucide-check-circle' : 'i-lucide-circle'"
+                  class="w-3.5 h-3.5"
+                />
+                <span>One special character (@$!%*?&)</span>
+              </div>
+            </div>
+            <div
+              v-else
+              class="text-xs text-gray-500 -mt-4 mb-2"
+            >
+              Password must be at least 8 characters with uppercase, lowercase, number, and special
+              character
+            </div>
+
+            <!-- Password Strength Indicator -->
+            <div
+              v-if="state.password && passwordStrength.level !== 'none'"
+              class="-mt-2 mb-4"
+            >
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Password Strength:
+                </span>
+                <span
+                  class="text-xs font-semibold"
+                  :class="{
+                    'text-red-600 dark:text-red-400': passwordStrength.color === 'error',
+                    'text-amber-600 dark:text-amber-400': passwordStrength.color === 'warning',
+                    'text-blue-600 dark:text-blue-400': passwordStrength.color === 'info',
+                    'text-green-600 dark:text-green-400': passwordStrength.color === 'success',
+                  }"
+                >
+                  {{ passwordStrength.level }}
+                </span>
+              </div>
+              <UProgress
+                :model-value="passwordStrength.percentage"
+                :color="passwordStrength.color"
+                size="sm"
+              />
             </div>
 
             <UFormField
@@ -117,17 +362,6 @@
                   </span>
                 </template>
               </UCheckbox>
-
-              <UCheckbox
-                v-model="state.emailNotifications"
-                :disabled="loading"
-              >
-                <template #label>
-                  <span class="text-sm">
-                    I would like to receive email updates about new features (optional)
-                  </span>
-                </template>
-              </UCheckbox>
             </div>
 
             <UButton
@@ -164,162 +398,3 @@
     </div>
   </UApp>
 </template>
-
-<script setup lang="ts">
-import { z } from 'zod';
-import type { FormSubmitEvent } from '@nuxt/ui';
-
-definePageMeta({
-  layout: false,
-  middleware: 'guest',
-});
-
-useSeoMeta({
-  title: 'Sign Up - LifeStint',
-  description: 'Create your LifeStint account to start tracking your focus sessions and boost your productivity.',
-});
-
-// Password validation regex ensures length and required character sets
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-// Form validation schema
-const registerSchema = z.object({
-  fullName: z.string()
-    .min(2, 'Full name must be at least 2 characters')
-    .max(50, 'Full name must not exceed 50 characters')
-    .regex(/^[a-zA-Z\s]+$/, 'Full name can only contain letters and spaces'),
-  email: z.string()
-    .email('Please enter a valid email address')
-    .toLowerCase(),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(passwordRegex, 'Password must contain uppercase, lowercase, number, and special character'),
-  confirmPassword: z.string(),
-  acceptTerms: z.boolean()
-    .refine(val => val, 'You must accept the terms and conditions'),
-  emailNotifications: z.boolean().optional(),
-}).refine(
-  data => data.password === data.confirmPassword,
-  {
-    message: 'Passwords don\'t match',
-    path: ['confirmPassword'],
-  },
-);
-
-type RegisterSchema = z.output<typeof registerSchema>;
-
-// Form state
-const state = reactive<RegisterSchema>({
-  fullName: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-  acceptTerms: false,
-  emailNotifications: true,
-});
-
-// UI state
-const loading = ref(false);
-const error = ref('');
-const success = ref('');
-const successDescription = ref('');
-
-// Supabase client
-const supabase = useSupabaseClient();
-const user = useAuthUser();
-const appConfig = useAppConfig();
-
-// Redirect if already logged in
-watch(user, (newUser) => {
-  if (newUser) {
-    navigateTo(appConfig.auth.redirectUrl);
-  }
-});
-
-// Handle form submission
-async function handleRegister(event: FormSubmitEvent<RegisterSchema>) {
-  loading.value = true;
-  error.value = '';
-  success.value = '';
-  successDescription.value = '';
-
-  try {
-    const { data, error: authError } = await supabase.auth.signUp({
-      email: event.data.email,
-      password: event.data.password,
-      options: {
-        data: {
-          full_name: event.data.fullName,
-          email_notifications: event.data.emailNotifications || false,
-        },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (authError) {
-      throw authError;
-    }
-
-    if (data.user) {
-      // Check if email is confirmed by looking at the user state
-      // Note: Need to check Supabase user directly as useAuthUser transforms it
-      const supabaseUserDirect = useSupabaseUser();
-      if (supabaseUserDirect.value?.email_confirmed_at) {
-        // Auto-confirmed (development mode)
-        success.value = 'Account created successfully!';
-        successDescription.value = 'You are now signed in. Redirecting to dashboard...';
-
-        navigateTo(appConfig.auth.redirectUrl);
-      }
-      else {
-        // Email confirmation required - redirect to verification page
-        navigateTo({
-          path: '/auth/verify-email',
-          query: { email: event.data.email },
-        });
-      }
-    }
-  }
-  catch (err: unknown) {
-    console.error('Registration error:', err);
-
-    // Handle specific error types
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    switch (errorMessage) {
-      case 'User already registered':
-        error.value = 'An account with this email already exists. Please sign in instead.';
-        break;
-      case 'Password should be at least 6 characters':
-        error.value = 'Password must be at least 6 characters long.';
-        break;
-      case 'Signup is disabled':
-        error.value = 'Account registration is currently disabled. Please contact support.';
-        break;
-      case 'Invalid email':
-        error.value = 'Please enter a valid email address.';
-        break;
-      default:
-        error.value = errorMessage || 'An unexpected error occurred during registration. Please try again.';
-    }
-  }
-  finally {
-    loading.value = false;
-  }
-}
-
-// Clear messages when user starts typing
-watch(() => state.email, () => {
-  error.value = '';
-  success.value = '';
-});
-
-watch(() => state.password, () => {
-  error.value = '';
-  success.value = '';
-});
-
-watch(() => state.confirmPassword, () => {
-  error.value = '';
-  success.value = '';
-});
-</script>

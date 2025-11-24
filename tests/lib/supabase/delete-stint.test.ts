@@ -115,14 +115,15 @@ describe('deleteStint Contract', () => {
   });
 
   it('should delete active stint without issues', async () => {
-    // Create an active stint (ended_at IS NULL)
+    // Create an active stint (status = 'active')
     const { data: activeStint } = await testUser1Client
       .from('stints')
       .insert({
         project_id: projectId,
         started_at: new Date().toISOString(),
         ended_at: null,
-        is_completed: false,
+        status: 'active',
+        planned_duration: 120,
         user_id: testUser1!.id,
       })
       .select()
@@ -147,8 +148,9 @@ describe('deleteStint Contract', () => {
         project_id: projectId,
         started_at: new Date(now.getTime() - 3600000).toISOString(),
         ended_at: now.toISOString(),
-        is_completed: true,
-        duration_minutes: 60,
+        status: 'completed',
+        planned_duration: 120,
+        actual_duration: 3600,
         user_id: testUser1!.id,
       })
       .select()

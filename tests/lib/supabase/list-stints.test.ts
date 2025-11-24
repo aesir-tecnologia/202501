@@ -132,22 +132,25 @@ describe('listStints Contract', () => {
         {
           project_id: project1Id,
           started_at: now.toISOString(),
-          ended_at: null, // Active
-          is_completed: false,
+          ended_at: null,
+          status: 'active',
+          planned_duration: 120,
           user_id: testUser1!.id,
         },
         {
           project_id: project1Id,
           started_at: new Date(now.getTime() - 3600000).toISOString(),
-          ended_at: now.toISOString(), // Completed
-          is_completed: true,
+          ended_at: now.toISOString(),
+          status: 'completed',
+          planned_duration: 120,
           user_id: testUser1!.id,
         },
         {
           project_id: project1Id,
           started_at: new Date(now.getTime() - 7200000).toISOString(),
-          ended_at: new Date(now.getTime() - 5400000).toISOString(), // Completed
-          is_completed: true,
+          ended_at: new Date(now.getTime() - 5400000).toISOString(),
+          status: 'completed',
+          planned_duration: 120,
           user_id: testUser1!.id,
         },
       ]);
@@ -156,7 +159,7 @@ describe('listStints Contract', () => {
 
     expect(error).toBeNull();
     expect(data).toHaveLength(1);
-    expect(data![0].is_completed).toBe(false);
+    expect(data![0].status).toBe('active');
     expect(data![0].ended_at).toBeNull();
   });
 
@@ -213,8 +216,12 @@ describe('listStints Contract', () => {
     expect(data![0]).toHaveProperty('project_id');
     expect(data![0]).toHaveProperty('started_at');
     expect(data![0]).toHaveProperty('ended_at');
-    expect(data![0]).toHaveProperty('duration_minutes');
-    expect(data![0]).toHaveProperty('is_completed');
+    expect(data![0]).toHaveProperty('status');
+    expect(data![0]).toHaveProperty('planned_duration');
+    expect(data![0]).toHaveProperty('actual_duration');
+    expect(data![0]).toHaveProperty('paused_duration');
+    expect(data![0]).toHaveProperty('paused_at');
+    expect(data![0]).toHaveProperty('completion_type');
     expect(data![0]).toHaveProperty('notes');
     expect(data![0]).toHaveProperty('created_at');
     expect(data![0]).toHaveProperty('updated_at');

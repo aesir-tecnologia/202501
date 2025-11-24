@@ -111,8 +111,12 @@ describe('getStintById Contract', () => {
     expect(data).toHaveProperty('project_id');
     expect(data).toHaveProperty('started_at');
     expect(data).toHaveProperty('ended_at');
-    expect(data).toHaveProperty('duration_minutes');
-    expect(data).toHaveProperty('is_completed');
+    expect(data).toHaveProperty('status');
+    expect(data).toHaveProperty('planned_duration');
+    expect(data).toHaveProperty('actual_duration');
+    expect(data).toHaveProperty('paused_duration');
+    expect(data).toHaveProperty('paused_at');
+    expect(data).toHaveProperty('completion_type');
     expect(data).toHaveProperty('notes');
     expect(data).toHaveProperty('created_at');
     expect(data).toHaveProperty('updated_at');
@@ -145,14 +149,15 @@ describe('getActiveStint Contract', () => {
   });
 
   it('should return active stint when one exists', async () => {
-    // Create active stint (ended_at IS NULL)
+    // Create active stint (status = 'active')
     const { data: activeStint } = await testUserClient
       .from('stints')
       .insert({
         project_id: projectId,
         started_at: new Date().toISOString(),
         ended_at: null,
-        is_completed: false,
+        status: 'active',
+        planned_duration: 120,
         user_id: testUser!.id,
       })
       .select()
@@ -164,7 +169,7 @@ describe('getActiveStint Contract', () => {
     expect(data).toBeTruthy();
     expect(data!.id).toBe(activeStint!.id);
     expect(data!.ended_at).toBeNull();
-    expect(data!.is_completed).toBe(false);
+    expect(data!.status).toBe('active');
   });
 
   it('should return null when no active stint exists', async () => {
@@ -184,7 +189,8 @@ describe('getActiveStint Contract', () => {
         project_id: projectId,
         started_at: new Date(now.getTime() - 3600000).toISOString(),
         ended_at: now.toISOString(),
-        is_completed: true,
+        status: 'completed',
+        planned_duration: 120,
         user_id: testUser!.id,
       });
 
@@ -194,7 +200,7 @@ describe('getActiveStint Contract', () => {
     expect(data).toBeNull();
   });
 
-  it('should only return stint where ended_at IS NULL', async () => {
+  it('should only return stint where status is active or paused', async () => {
     const now = new Date();
 
     // Create completed stint
@@ -204,7 +210,8 @@ describe('getActiveStint Contract', () => {
         project_id: projectId,
         started_at: new Date(now.getTime() - 7200000).toISOString(),
         ended_at: new Date(now.getTime() - 5400000).toISOString(),
-        is_completed: true,
+        status: 'completed',
+        planned_duration: 120,
         user_id: testUser!.id,
       });
 
@@ -215,7 +222,8 @@ describe('getActiveStint Contract', () => {
         project_id: projectId,
         started_at: now.toISOString(),
         ended_at: null,
-        is_completed: false,
+        status: 'active',
+        planned_duration: 120,
         user_id: testUser!.id,
       })
       .select()

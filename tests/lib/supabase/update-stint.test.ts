@@ -82,14 +82,16 @@ describe('updateStint Contract', () => {
 
     const { data, error } = await updateStint(testUser1Client, stintId, {
       ended_at: endedAt.toISOString(),
-      duration_minutes: 45,
-      is_completed: true,
+      actual_duration: 2700,
+      status: 'completed',
+      completion_type: 'manual',
     });
 
     expect(error).toBeNull();
     expect(new Date(data!.ended_at!).getTime()).toBe(endedAt.getTime());
-    expect(data!.duration_minutes).toBe(45);
-    expect(data!.is_completed).toBe(true);
+    expect(data!.actual_duration).toBe(2700);
+    expect(data!.status).toBe('completed');
+    expect(data!.completion_type).toBe('manual');
   });
 
   it('should update multiple fields at once', async () => {
@@ -97,15 +99,17 @@ describe('updateStint Contract', () => {
 
     const { data } = await updateStint(testUser1Client, stintId, {
       ended_at: endedAt.toISOString(),
-      duration_minutes: 30,
+      actual_duration: 1800,
       notes: 'Completed session',
-      is_completed: true,
+      status: 'completed',
+      completion_type: 'auto',
     });
 
     expect(new Date(data!.ended_at!).getTime()).toBe(endedAt.getTime());
-    expect(data!.duration_minutes).toBe(30);
+    expect(data!.actual_duration).toBe(1800);
     expect(data!.notes).toBe('Completed session');
-    expect(data!.is_completed).toBe(true);
+    expect(data!.status).toBe('completed');
+    expect(data!.completion_type).toBe('auto');
   });
 
   it('should verify updated_at trigger updates timestamp', async () => {
@@ -198,12 +202,12 @@ describe('updateStint Contract', () => {
 
     // Update only one field
     const { data } = await updateStint(testUser1Client, newStint!.id, {
-      is_completed: true,
+      status: 'paused',
     });
 
     // Other fields should remain unchanged
     expect(new Date(data!.started_at).getTime()).toBe(startedAt.getTime());
     expect(data!.notes).toBe('Original notes');
-    expect(data!.is_completed).toBe(true);
+    expect(data!.status).toBe('paused');
   });
 });

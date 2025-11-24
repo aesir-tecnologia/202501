@@ -22,14 +22,8 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
 });
 
-// Auth user with error handling
-let user = null;
-try {
-  user = useAuthUser();
-}
-catch (error) {
-  console.error('Failed to initialize auth:', error);
-}
+// Auth user - only check on client to avoid hydration mismatch
+const user = import.meta.client ? useAuthUser() : null;
 
 let observer: IntersectionObserver | null = null;
 
@@ -113,22 +107,36 @@ onUnmounted(() => {
         </nav>
         <div class="flex items-center gap-3">
           <UColorModeButton aria-label="Toggle color mode" />
-          <template v-if="user">
-            <NuxtLink
-              to="/dashboard"
-              class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-sm font-semibold shadow-focus"
-            >Dashboard</NuxtLink>
-          </template>
-          <template v-else>
-            <NuxtLink
-              to="/auth/login"
-              class="hidden sm:inline-block px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm"
-            >Sign in</NuxtLink>
-            <NuxtLink
-              to="/auth/register"
-              class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-sm font-semibold shadow-focus"
-            >Start free</NuxtLink>
-          </template>
+          <ClientOnly>
+            <template #default>
+              <template v-if="user">
+                <NuxtLink
+                  to="/dashboard"
+                  class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-sm font-semibold shadow-focus"
+                >Dashboard</NuxtLink>
+              </template>
+              <template v-else>
+                <NuxtLink
+                  to="/auth/login"
+                  class="hidden sm:inline-block px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm"
+                >Sign in</NuxtLink>
+                <NuxtLink
+                  to="/auth/register"
+                  class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-sm font-semibold shadow-focus"
+                >Start free</NuxtLink>
+              </template>
+            </template>
+            <template #fallback>
+              <NuxtLink
+                to="/auth/login"
+                class="hidden sm:inline-block px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm"
+              >Sign in</NuxtLink>
+              <NuxtLink
+                to="/auth/register"
+                class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-sm font-semibold shadow-focus"
+              >Start free</NuxtLink>
+            </template>
+          </ClientOnly>
         </div>
       </div>
     </header>

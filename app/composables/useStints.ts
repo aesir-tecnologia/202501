@@ -757,7 +757,6 @@ export function useStartStint() {
           user_id: '',
           started_at: new Date().toISOString(),
           ended_at: null,
-          duration_minutes: null,
           actual_duration: null,
           completion_type: null,
           planned_duration: payload.plannedDurationMinutes || 50,
@@ -767,7 +766,6 @@ export function useStartStint() {
           notes: payload.notes || null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          is_completed: false,
         };
 
         queryClient.setQueryData<StintRow[]>(
