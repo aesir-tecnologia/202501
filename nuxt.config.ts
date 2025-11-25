@@ -96,6 +96,10 @@ export default defineNuxtConfig({
     serverBundle: {
       collections: ['lucide'],
     },
+    clientBundle: {
+      scan: true,
+      sizeLimitKb: 512,
+    },
     fallbackToApi: false,
   },
   supabase: {
