@@ -2,6 +2,7 @@
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
+import { resolveStintDuration } from '~/utils/stint-duration';
 
 const props = defineProps<{
   project: ProjectRow
