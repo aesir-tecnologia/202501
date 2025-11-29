@@ -759,7 +759,7 @@ export function useStartStint() {
           ended_at: null,
           actual_duration: null,
           completion_type: null,
-          planned_duration: payload.plannedDurationMinutes || 50,
+          planned_duration: payload.plannedDurationMinutes ?? 120,
           status: 'active' as const,
           paused_at: null,
           paused_duration: 0,

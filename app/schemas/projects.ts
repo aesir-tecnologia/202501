@@ -1,7 +1,9 @@
 import { z } from 'zod';
-import { PROJECT, type ProjectColor } from '~/constants';
 
-export type { ProjectColor };
+// Project colors from documentation
+export const PROJECT_COLORS = ['red', 'orange', 'amber', 'green', 'teal', 'blue', 'purple', 'pink'] as const;
+
+export type ProjectColor = (typeof PROJECT_COLORS)[number];
 
 export const projectIdentifierSchema = z.object({
   id: z.string().uuid(),
@@ -11,30 +13,30 @@ const projectBaseSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(PROJECT.NAME.MIN_LENGTH, `Project name must be at least ${PROJECT.NAME.MIN_LENGTH} characters`)
-    .max(PROJECT.NAME.MAX_LENGTH, `Project name must be ${PROJECT.NAME.MAX_LENGTH} characters or fewer`),
+    .min(1, 'Project name must be at least 1 character')
+    .max(100, 'Project name must be 100 characters or fewer'),
   expectedDailyStints: z
     .number({ invalid_type_error: 'Expected daily stints must be a number' })
     .int('Expected daily stints must be a whole number')
-    .min(PROJECT.DAILY_STINTS.MIN, `Expect at least ${PROJECT.DAILY_STINTS.MIN} stint${PROJECT.DAILY_STINTS.MIN === 1 ? '' : 's'} per day`)
-    .max(PROJECT.DAILY_STINTS.MAX, `Daily stint goal cannot exceed ${PROJECT.DAILY_STINTS.MAX} stints`)
+    .min(1, 'Expect at least 1 stint per day')
+    .max(8, 'Daily stint goal cannot exceed 8 stints')
     .optional(),
   customStintDuration: z
     .number({ invalid_type_error: 'Custom stint duration must be a number' })
     .int('Duration must be specified in whole minutes')
-    .min(PROJECT.CUSTOM_STINT_DURATION_MINUTES.MIN, `Duration must be at least ${PROJECT.CUSTOM_STINT_DURATION_MINUTES.MIN} minutes`)
-    .max(PROJECT.CUSTOM_STINT_DURATION_MINUTES.MAX, `Duration cannot exceed ${PROJECT.CUSTOM_STINT_DURATION_MINUTES.MAX} minutes`)
+    .min(5, 'Duration must be at least 5 minutes')
+    .max(480, 'Duration cannot exceed 480 minutes')
     .nullable()
     .optional(),
   colorTag: z
-    .enum(PROJECT.COLORS, { errorMap: () => ({ message: 'Invalid color selection' }) })
+    .enum(PROJECT_COLORS, { errorMap: () => ({ message: 'Invalid color selection' }) })
     .nullable()
     .optional(),
   isActive: z.boolean().optional(),
 });
 
 export const projectCreateSchema = projectBaseSchema.extend({
-  expectedDailyStints: projectBaseSchema.shape.expectedDailyStints.default(PROJECT.DAILY_STINTS.DEFAULT),
+  expectedDailyStints: projectBaseSchema.shape.expectedDailyStints.default(2),
 });
 
 export const projectUpdateSchema = projectBaseSchema.partial({
