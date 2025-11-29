@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { projectCreateSchema, projectUpdateSchema, type ProjectColor } from '~/schemas/projects';
-import { PROJECT } from '~/constants';
+import { projectCreateSchema, projectUpdateSchema, type ProjectColor, type ProjectCreatePayload } from '~/schemas/projects';
 import type { ProjectRow } from '~/lib/supabase/projects';
+import type { FormSubmitEvent } from '@nuxt/ui';
+import type { z } from 'zod';
 
 const props = defineProps<{
   project?: ProjectRow
@@ -9,54 +10,36 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  submit: [data: { name: string, expectedDailyStints: number, customStintDuration: number, colorTag: ProjectColor | null }]
+  submit: [data: { name: string, expectedDailyStints: number, customStintDuration: number | null, colorTag: ProjectColor | null }]
   cancel: []
 }>();
 
-// Form state
-const formData = ref({
+const schema = computed(() => props.mode === 'create' ? projectCreateSchema : projectUpdateSchema);
+
+const PROJECT_COLORS: ProjectColor[] = ['red', 'orange', 'amber', 'green', 'teal', 'blue', 'purple', 'pink'];
+
+// Form state - using Partial for update mode compatibility
+const state = reactive<Partial<ProjectCreatePayload>>({
   name: props.project?.name ?? '',
-  expectedDailyStints: props.project?.expected_daily_stints ?? 3,
-  customStintDuration: props.project?.custom_stint_duration ?? 45,
+  expectedDailyStints: props.project?.expected_daily_stints ?? 2,
+  customStintDuration: props.project?.custom_stint_duration ?? null,
   colorTag: (props.project?.color_tag as ProjectColor | null) ?? null,
 });
 
-// Validation state
-const errors = ref<Record<string, string>>({});
-
-// Validate form
-function validateForm() {
-  errors.value = {};
-
-  const schema = props.mode === 'create' ? projectCreateSchema : projectUpdateSchema;
-  const result = schema.safeParse(formData.value);
-
-  if (!result.success) {
-    result.error.issues.forEach((issue) => {
-      const field = issue.path[0] as string;
-      errors.value[field] = issue.message;
-    });
-    return false;
-  }
-
-  return true;
-}
-
 // Handle submit
-function handleSubmit() {
-  if (!validateForm()) return;
-
+async function onSubmit(event: FormSubmitEvent<z.infer<typeof schema.value>>) {
+  const data = event.data;
   emit('submit', {
-    name: formData.value.name.trim(),
-    expectedDailyStints: formData.value.expectedDailyStints,
-    customStintDuration: formData.value.customStintDuration,
-    colorTag: formData.value.colorTag,
+    name: (data.name ?? '').trim(),
+    expectedDailyStints: data.expectedDailyStints ?? 2,
+    customStintDuration: data.customStintDuration ?? null,
+    colorTag: data.colorTag ?? null,
   });
 }
 
 // Color selection helper
 function selectColor(color: ProjectColor | null) {
-  formData.value.colorTag = color;
+  state.colorTag = color;
 }
 
 // Get TailwindCSS classes for each color
@@ -81,54 +64,53 @@ function handleCancel() {
 </script>
 
 <template>
-  <form
+  <UForm
+    :schema="schema"
+    :state="state"
     class="space-y-4"
-    @submit.prevent="handleSubmit"
+    @submit="onSubmit"
   >
     <UFormField
+      name="name"
       label="Project Name"
-      :error="errors.name"
       required
     >
       <UInput
-        v-model="formData.name"
+        v-model="state.name"
         class="w-full"
         placeholder="e.g., Client Alpha"
-        @blur="validateForm"
       />
     </UFormField>
 
     <UFormField
+      name="expectedDailyStints"
       label="Expected Daily Stints"
-      :error="errors.expectedDailyStints"
       help="How many stints do you aim to complete per day?"
     >
       <UInput
-        v-model.number="formData.expectedDailyStints"
+        v-model.number="state.expectedDailyStints"
         type="number"
         min="1"
         max="100"
-        @blur="validateForm"
       />
     </UFormField>
 
     <UFormField
+      name="customStintDuration"
       label="Custom Stint Duration (minutes)"
-      :error="errors.customStintDuration"
       help="How long should each stint last?"
     >
       <UInput
-        v-model.number="formData.customStintDuration"
+        v-model.number="state.customStintDuration"
         type="number"
         min="1"
         max="1440"
-        @blur="validateForm"
       />
     </UFormField>
 
     <UFormField
+      name="colorTag"
       label="Color Tag (optional)"
-      :error="errors.colorTag"
       help="Choose a color to visually identify this project"
     >
       <div class="flex items-center gap-2">
@@ -137,33 +119,47 @@ function handleCancel() {
           type="button"
           :class="[
             'w-10 h-10 rounded-md border-2 motion-safe:transition-all flex items-center justify-center',
-            formData.colorTag === null
-              ? 'border-neutral-900 dark:border-neutral-100 ring-2 ring-neutral-900 dark:ring-neutral-100'
-              : 'border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600',
+            state.colorTag === null
+              ? 'border-neutral-900 dark:border-neutral-100 ring-2 ring-neutral-900 dark:ring-neutral-100 bg-neutral-100 dark:bg-neutral-800 scale-110 shadow-lg'
+              : 'border-neutral-300 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-600 hover:scale-105',
           ]"
+          aria-label="No color tag"
+          :aria-pressed="state.colorTag === null"
           @click="selectColor(null)"
         >
           <Icon
             name="i-lucide-x"
-            class="h-5 w-5 text-neutral-400"
+            :class="[
+              'h-5 w-5 motion-safe:transition-all',
+              state.colorTag === null
+                ? 'text-neutral-900 dark:text-neutral-100'
+                : 'text-neutral-400',
+            ]"
           />
         </button>
 
         <!-- Color options -->
         <button
-          v-for="color in PROJECT.COLORS"
+          v-for="color in PROJECT_COLORS"
           :key="color"
           type="button"
           :class="[
-            'w-10 h-10 rounded-md border-2 motion-safe:transition-all',
+            'w-10 h-10 rounded-md border-2 motion-safe:transition-all flex items-center justify-center relative',
             getColorClasses(color).bg,
-            formData.colorTag === color
-              ? `${getColorClasses(color).border} ring-2 ${getColorClasses(color).ring}`
-              : 'border-transparent hover:border-neutral-300 dark:hover:border-neutral-600',
+            state.colorTag === color
+              ? `${getColorClasses(color).border} ring-2 ${getColorClasses(color).ring} scale-110 shadow-lg`
+              : 'border-transparent hover:border-neutral-300 dark:hover:border-neutral-600 hover:scale-105',
           ]"
           :aria-label="`Select ${color} color`"
+          :aria-pressed="state.colorTag === color"
           @click="selectColor(color)"
-        />
+        >
+          <Icon
+            v-if="state.colorTag === color"
+            name="i-lucide-check"
+            class="h-5 w-5 text-white drop-shadow-sm"
+          />
+        </button>
       </div>
     </UFormField>
 
@@ -183,5 +179,5 @@ function handleCancel() {
         {{ mode === 'create' ? 'Create Project' : 'Save Changes' }}
       </UButton>
     </div>
-  </form>
+  </UForm>
 </template>

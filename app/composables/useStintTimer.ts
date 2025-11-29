@@ -29,7 +29,6 @@ type WorkerOutgoingMessage
 // Timer configuration constants
 const TIMER_DRIFT_THRESHOLD_SECONDS = 5;
 const TIMER_SYNC_INTERVAL_MS = 60000;
-const DEFAULT_PLANNED_DURATION_MINUTES = 50;
 const WORKER_RETRY_BASE_DELAY_MS = 1000;
 const NOTIFICATION_TIMEOUT_MS = 10000;
 
@@ -259,8 +258,9 @@ function startTimer(stint: StintRow): void {
     return;
   }
   const startedAt = startedAtDate.getTime();
-  const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000;
-  const endTime = startedAt + plannedDurationMs;
+  const plannedDurationMs = (stint.planned_duration || 120) * 60 * 1000;
+  const pausedDurationMs = (stint.paused_duration || 0) * 1000;
+  const endTime = startedAt + plannedDurationMs + pausedDurationMs;
 
   // Send start message to worker
   const message: WorkerOutgoingMessage = {
@@ -325,7 +325,7 @@ function resumeTimer(stint: StintRow): void {
     return;
   }
   const startedAt = startedAtDate.getTime();
-  const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000;
+  const plannedDurationMs = (stint.planned_duration || 120) * 60 * 1000;
   const pausedDurationMs = (stint.paused_duration || 0) * 1000;
   const endTime = startedAt + plannedDurationMs + pausedDurationMs;
 
@@ -378,7 +378,7 @@ function initializePausedState(stint: StintRow): void {
   const startedAt = startedAtDate.getTime();
   const pausedAtDate = stint.paused_at ? parseSafeDate(stint.paused_at) : null;
   const pausedAt = pausedAtDate ? pausedAtDate.getTime() : Date.now();
-  const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000;
+  const plannedDurationMs = (stint.planned_duration || 120) * 60 * 1000;
   const pausedDurationMs = (stint.paused_duration || 0) * 1000;
 
   // Calculate active duration (elapsed time minus paused time)

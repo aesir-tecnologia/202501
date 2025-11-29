@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { STINT } from '~/constants';
 
 export const stintIdentifierSchema = z.object({
   id: z.string().uuid(),
@@ -10,13 +9,13 @@ export const stintStartSchema = z.object({
   plannedDurationMinutes: z
     .number()
     .int()
-    .min(STINT.DURATION_MINUTES.MIN, `Stint duration must be at least ${STINT.DURATION_MINUTES.MIN} minutes`)
-    .max(STINT.DURATION_MINUTES.MAX, `Stint duration must be at most ${STINT.DURATION_MINUTES.MAX} minutes`)
+    .min(5, 'Stint duration must be at least 5 minutes')
+    .max(480, 'Stint duration must be at most 480 minutes')
     .optional(),
   notes: z
     .string()
     .trim()
-    .max(STINT.NOTES.MAX_LENGTH, `Notes must be ${STINT.NOTES.MAX_LENGTH} characters or fewer`)
+    .max(500, 'Notes must be 500 characters or fewer')
     .optional()
     .or(z.literal('').transform(() => undefined)),
 });
@@ -25,7 +24,7 @@ export const stintUpdateSchema = z.object({
   notes: z
     .string()
     .trim()
-    .max(STINT.NOTES.MAX_LENGTH, `Notes must be ${STINT.NOTES.MAX_LENGTH} characters or fewer`)
+    .max(500, 'Notes must be 500 characters or fewer')
     .optional()
     .or(z.literal('').transform(() => undefined)),
 });
@@ -51,7 +50,7 @@ export const stintInterruptSchema = z.object({
   reason: z
     .string()
     .trim()
-    .max(STINT.NOTES.MAX_LENGTH, `Reason must be ${STINT.NOTES.MAX_LENGTH} characters or fewer`)
+    .max(500, 'Reason must be 500 characters or fewer')
     .optional()
     .or(z.literal('').transform(() => undefined)),
 });
@@ -73,8 +72,17 @@ export interface SyncCheckOutput {
   driftSeconds?: number
 }
 
-// Export constants for contract compatibility
-export const STINT_SCHEMA_LIMITS = STINT;
+// Export constants for contract compatibility (from documentation)
+export const STINT_SCHEMA_LIMITS = {
+  DURATION_MINUTES: {
+    MIN: 5,
+    MAX: 480,
+    DEFAULT: 120,
+  },
+  NOTES: {
+    MAX_LENGTH: 500,
+  },
+};
 
 // Type aliases for contract naming conventions
 export type StartStintInput = StintStartPayload;

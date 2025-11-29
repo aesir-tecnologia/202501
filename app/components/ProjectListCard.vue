@@ -24,9 +24,7 @@ const emit = defineEmits<{
 }>();
 
 function formatDuration(minutes: number | null): string {
-  // TODO: When user_preferences is implemented, fall back to user's default_stint_duration before using global default
-  const GLOBAL_DEFAULT_DURATION = 45;
-  const duration = minutes ?? GLOBAL_DEFAULT_DURATION;
+  const duration = resolveStintDuration({ projectCustomDuration: minutes });
   if (duration < 60) return `${duration}m`;
   const hours = Math.floor(duration / 60);
   const mins = duration % 60;

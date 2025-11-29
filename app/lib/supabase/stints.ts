@@ -1,7 +1,6 @@
 import type { Database } from '~/types/database.types';
 import type { TypedSupabaseClient } from '~/utils/supabase';
 import type { SyncCheckOutput } from '~/schemas/stints';
-import { STINT } from '~/constants';
 
 /**
  * Data-access helpers for the Supabase `stints` table.
@@ -347,16 +346,17 @@ export async function startStint(
     return { data: null, error: new Error('Cannot start stint for archived project') };
   }
 
-  // Resolve planned duration: param → project custom → default 120
+  // Resolve planned duration: project custom → default (120 minutes from documentation)
+  // Note: plannedDurationMinutes param is for future user_preferences support
   const resolvedDuration = plannedDurationMinutes
     ?? project.custom_stint_duration
-    ?? STINT.DURATION_MINUTES.DEFAULT;
+    ?? 120;
 
-  // Validate duration bounds (5-480)
-  if (resolvedDuration < STINT.DURATION_MINUTES.MIN || resolvedDuration > STINT.DURATION_MINUTES.MAX) {
+  // Validate duration bounds (5-480 minutes from documentation)
+  if (resolvedDuration < 5 || resolvedDuration > 480) {
     return {
       data: null,
-      error: new Error(`Duration must be between ${STINT.DURATION_MINUTES.MIN} and ${STINT.DURATION_MINUTES.MAX} minutes`),
+      error: new Error('Duration must be between 5 and 480 minutes'),
     };
   }
 

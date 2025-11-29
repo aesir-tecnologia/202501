@@ -133,12 +133,12 @@
 - **Options:** 8 preset colors
   - `'red'`
   - `'orange'`
-  - `'yellow'`
+  - `'amber'`
   - `'green'`
+  - `'teal'`
   - `'blue'`
   - `'purple'`
   - `'pink'`
-  - `'gray'`
 - **Constraints:** Must be one of the 8 valid colors or null
 - **Usage:** Visual identifier in dashboard project cards
 - **Storage:** `projects.color_tag`
@@ -240,7 +240,7 @@
 
 ### Enum/Select Options
 - **Theme:** `'light'`, `'dark'`, `'system'` (default: `'system'`)
-- **Color Tags:** 8 colors: `'red'`, `'orange'`, `'yellow'`, `'green'`, `'blue'`, `'purple'`, `'pink'`, `'gray'`
+- **Color Tags:** 8 colors: `'red'`, `'orange'`, `'amber'`, `'green'`, `'teal'`, `'blue'`, `'purple'`, `'pink'`
 
 ### Required Fields
 - **Email:** Required, unique, verified

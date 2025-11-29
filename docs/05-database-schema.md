@@ -80,7 +80,7 @@ CREATE TABLE projects (
   CONSTRAINT valid_stint_duration CHECK (custom_stint_duration IS NULL OR
     (custom_stint_duration >= 5 AND custom_stint_duration <= 480)),
   CONSTRAINT valid_color CHECK (color_tag IS NULL OR color_tag IN 
-    ('red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'gray')),
+    ('red', 'orange', 'amber', 'green', 'teal', 'blue', 'purple', 'pink')),
   CONSTRAINT unique_name_per_user UNIQUE (user_id, name)
 );
 
