@@ -1,8 +1,8 @@
 # LifeStint - Development Roadmap
 
 **Product Name:** LifeStint  
-**Document Version:** 3.0  
-**Date:** October 24, 2025
+**Document Version:** 4.0
+**Date:** December 2, 2025
 
 ---
 
@@ -39,7 +39,7 @@
 
 **Tasks:**
 1. Create projects table with RLS policies
-2. Implement Project CRUD API (Edge Functions or direct Supabase client):
+2. Implement Project CRUD API (direct Supabase client with RLS):
    - Create project
    - Read projects (user's only)
    - Update project
@@ -85,12 +85,12 @@
    - Database function: `validate_stint_start()`
    - Check for existing active stints before insert
    - Return 409 Conflict if found
-4. Build stint API (Edge Functions):
-   - `POST /api/stints/start`: Create active stint
-   - `PATCH /api/stints/:id/pause`: Pause active stint
-   - `PATCH /api/stints/:id/resume`: Resume paused stint
-   - `PATCH /api/stints/:id/stop`: Complete stint manually
-   - `GET /api/stints/active`: Get user's active stint
+4. Build stint data layer (direct Supabase client):
+   - `startStint()`: Create active stint via database insert
+   - `pauseStint()`: Pause active stint via database update
+   - `resumeStint()`: Resume paused stint via database update
+   - `stopStint()`: Complete stint manually via database update
+   - `getActiveStint()`: Get user's active stint via database query
 5. Implement optimistic locking:
    - Add version field to users table
    - Increment on stint operations
@@ -138,9 +138,9 @@
    - Survives background tabs
    - Communicates with main thread via postMessage
 2. Build server-side auto-completion:
-   - Edge Function cron job (runs every 30 seconds)
+   - pg_cron job (runs every 30 seconds)
    - Query stints where `started_at + planned_duration <= now()` and `status = 'active'`
-   - Call `complete_stint()` function for matched stints
+   - Call `complete_stint()` database function for matched stints
    - Broadcast completion event via Realtime
 3. Implement timer sync:
    - Every 60 seconds, GET /api/stints/active
@@ -182,7 +182,7 @@
    - Display on project cards: "🔥 5 day streak"
    - Update in real-time when stint completed
 4. Build daily reset logic:
-   - Edge Function cron job (runs every hour)
+   - pg_cron job (runs every hour)
    - Query users whose local midnight passed in last hour
    - Reset daily progress counters to 0
    - Trigger daily summary aggregation
@@ -273,7 +273,7 @@
 1. Create daily_summaries table
 2. Implement aggregation function:
    - `aggregate_daily_summary()` SQL function
-   - Edge Function cron job (runs at midnight user time)
+   - pg_cron job (runs at midnight user time)
    - Pre-calculate daily stats for performance
 3. Build analytics page:
    - Daily summary section (today's stats)
@@ -286,11 +286,11 @@
    - Show longest streak all-time
    - Grace period logic (1 day)
 5. Build CSV export:
-   - Edge Function: `POST /api/export/csv`
-   - Query stints in date range
-   - Convert timestamps to user timezone
+   - Client-side generation using Supabase queries
+   - Query stints in date range via Supabase client
+   - Convert timestamps to user timezone in browser
    - Generate CSV with header and summary
-   - Return as downloadable file
+   - Trigger browser download
 6. Add export UI:
    - Date range picker (presets + custom)
    - "Export CSV" button

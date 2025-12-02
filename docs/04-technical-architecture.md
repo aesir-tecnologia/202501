@@ -1,8 +1,8 @@
 # LifeStint - Technical Architecture
 
 **Product Name:** LifeStint  
-**Document Version:** 3.0  
-**Date:** October 24, 2025
+**Document Version:** 4.0
+**Date:** December 2, 2025
 
 ---
 
@@ -12,8 +12,8 @@
 ┌─────────────────────────────────────────────────────┐
 │                    Client Layer                      │
 │  ┌──────────────┐  ┌──────────────┐  ┌───────────┐ │
-│  │ Vue 3 + Nuxt │  │   Pinia      │  │ Tailwind  │ │
-│  │  Components  │  │  (State)     │  │    CSS    │ │
+│  │ Vue 3 + Nuxt │  │ TanStack     │  │ Tailwind  │ │
+│  │  Components  │  │ Query        │  │    CSS    │ │
 │  └──────────────┘  └──────────────┘  └───────────┘ │
 │  ┌──────────────────────────────────────────────┐  │
 │  │        Supabase Client (JS SDK)               │  │
@@ -30,10 +30,10 @@
 │  │  + RLS       │  │   Server     │  │           │ │
 │  └──────────────┘  └──────────────┘  └───────────┘ │
 │  ┌──────────────────────────────────────────────┐  │
-│  │         Edge Functions (Server Logic)        │  │
-│  │  • Stint Completion Cron                     │  │
-│  │  • Daily Reset Scheduler                     │  │
-│  │  • CSV Export Generator                      │  │
+│  │      Database Functions & pg_cron             │  │
+│  │  • Auto-Complete Stint (pg_cron)             │  │
+│  │  • Daily Summary Aggregation (pg_cron)       │  │
+│  │  • Business Logic (PL/pgSQL Functions)       │  │
 │  └──────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────┘
                           │
@@ -166,11 +166,19 @@
 
 ### Server-Side Logic
 
-- **Supabase Edge Functions** (Deno runtime)
-  - `stint-completion-cron`: Auto-completes stints at planned end time (runs every 30 sec)
-  - `daily-reset-scheduler`: Resets daily progress at user's midnight (runs hourly)
-  - `csv-export-generator`: Generates Focus Ledger on demand
-  - `webhook-handlers`: Stripe payment webhooks (future)
+- **Direct Supabase Client Model**
+  - All CRUD operations via Supabase JS SDK with Row Level Security (RLS)
+  - Client calls database directly through Supabase PostgREST API
+  - No Edge Functions required for business logic
+  - Validation handled via Zod schemas on client, database constraints on server
+
+- **Scheduled Tasks via pg_cron**
+  - `auto_complete_stints`: Auto-completes stints at planned end time (runs every 30 sec)
+  - `aggregate_daily_stats`: Pre-calculates daily summaries (runs at midnight)
+
+- **CSV Export**
+  - Generated client-side using stint data from database queries
+  - No server-side processing required
 
 ### Database Functions
 
@@ -221,7 +229,7 @@
 
 - **Sentry**
   - Frontend errors (uncaught exceptions)
-  - Backend errors (Edge Function failures)
+  - Database query failures (via client error handling)
   - Performance monitoring
   - User feedback widget
   - Alert rules: >10 errors in 5 min → Slack notification
@@ -257,7 +265,7 @@
 
 - **Supabase Logs** (built-in)
   - Database query logs
-  - Edge Function logs
+  - pg_cron job execution logs
   - Auth event logs
   - Retention: 7 days free tier, 30 days Pro
 
@@ -269,7 +277,7 @@
 
 - **Supabase Cloud**
   - Database: AWS us-east-1 (primary), multi-AZ
-  - Edge Functions: Cloudflare Workers (global)
+  - Scheduled Jobs: pg_cron extension
   - Storage: AWS S3
   - CDN: Cloudflare
 
@@ -331,7 +339,7 @@
 - Row Level Security (RLS) on all tables
 - User can only access own data
 - API keys scoped per environment
-- Service role key only in Edge Functions
+- Service role key only used by pg_cron jobs (never exposed to client)
 
 ### Compliance
 

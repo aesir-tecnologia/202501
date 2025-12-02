@@ -1,8 +1,8 @@
 # LifeStint - Operations, Security & Compliance
 
 **Product Name:** LifeStint  
-**Document Version:** 3.0  
-**Date:** October 24, 2025
+**Document Version:** 4.0
+**Date:** December 2, 2025
 
 ---
 
@@ -54,10 +54,10 @@
 - **Impact:** Medium. Difficult to migrate if needed.
 - **Probability:** Low. Supabase is PostgreSQL-based (standard).
 - **Mitigation:**
-  - Use standard PostgreSQL features (avoid Supabase-specific extensions)
-  - Keep Edge Functions simple (easy to rewrite as AWS Lambda)
+  - Use standard PostgreSQL features (pg_cron, PL/pgSQL functions)
+  - Direct client model avoids serverless vendor lock-in
   - All data exportable as SQL dump
-- **Contingency:** Migration path to self-hosted PostgreSQL + Auth0 + AWS Lambda documented.
+- **Contingency:** Migration path to self-hosted PostgreSQL + Auth0 documented.
 
 ### Product Risks
 
@@ -210,11 +210,11 @@ LIMIT 10;
 - **Query time >5 seconds** → Warning
 - **Replication lag >1 minute** → Critical
 
-### Custom Alerts (Edge Function)
+### Custom Alerts (pg_cron Monitoring)
 
-- **Active stints >1 hour overdue for completion** → Warning (cron may be failing)
+- **Active stints >1 hour overdue for completion** → Warning (pg_cron may be failing)
 - **Daily reset not triggered for user in 25 hours** → Critical
-- **CSV export failures >10 in 1 hour** → Warning
+- **pg_cron job execution failures** → Warning
 
 ---
 
@@ -403,7 +403,7 @@ Storage uploads → 100 per hour
 
 **Row Level Security (RLS):** Database-level access control that enforces user data isolation.
 
-**Edge Function:** Serverless function running on Cloudflare Workers (via Supabase).
+**pg_cron:** PostgreSQL extension for scheduling database jobs, used for auto-completion and daily aggregation.
 
 **Service Worker:** Browser background script enabling PWA features (offline support, notifications).
 

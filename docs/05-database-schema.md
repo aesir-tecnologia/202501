@@ -1,8 +1,8 @@
 # LifeStint - Database Schema & Data Models
 
 **Product Name:** LifeStint  
-**Document Version:** 3.0  
-**Date:** October 24, 2025
+**Document Version:** 4.0
+**Date:** December 2, 2025
 
 ---
 
@@ -203,7 +203,7 @@ $$ LANGUAGE plpgsql;
 
 **Business Rules:**
 - Only one active/paused stint per user (enforced by unique partial index)
-- Auto-completion triggered by Edge Function when `started_at + planned_duration <= now()`
+- Auto-completion triggered by pg_cron job when `started_at + planned_duration <= now()`
 - Interrupted stints don't count toward daily progress but preserved in history
 
 **Relationships:**
@@ -382,7 +382,7 @@ CREATE TABLE audit_logs (
 CREATE INDEX idx_audit_logs_user ON audit_logs(user_id, created_at DESC);
 CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
 
--- No RLS (internal only, accessed via Edge Functions with service role key)
+-- No RLS (internal only, accessed via pg_cron jobs with service role)
 ```
 
 **Purpose:**
@@ -465,12 +465,12 @@ USING (auth.uid() = user_id);
 
 ### Service Role Bypass
 
-- Edge Functions use service role key (bypasses RLS)
+- pg_cron jobs run with service role privileges (bypasses RLS)
 - Used for:
-  - Auto-completing stints (cron job)
-  - Generating daily summaries (cron job)
+  - Auto-completing stints (scheduled job)
+  - Generating daily summaries (scheduled job)
   - System maintenance operations
-- Service role key stored in Supabase secrets, never exposed to frontend
+- Service role never exposed to frontend (only used server-side by pg_cron)
 
 ### Testing RLS
 

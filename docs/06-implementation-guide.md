@@ -1,8 +1,8 @@
 # LifeStint - Technical Implementation Guide
 
 **Product Name:** LifeStint  
-**Document Version:** 3.0  
-**Date:** October 24, 2025
+**Document Version:** 4.0
+**Date:** December 2, 2025
 
 ---
 
@@ -245,9 +245,9 @@ self.onmessage = (e) => {
 
 ### Auto-Completion Fallback
 
-- Edge Function runs every 30 seconds
+- pg_cron job runs every 30 seconds
 - Queries stints where `status = 'active' AND started_at + planned_duration <= now()`
-- Auto-completes matched stints
+- Auto-completes matched stints via database function
 - If browser closed during stint, server still completes on time
 
 ### Notification Handling
@@ -286,11 +286,11 @@ const dailyStintsSchema = z.number()
 ### Server-Side Validation (Authoritative)
 
 - All PostgreSQL constraints enforced (see [05-database-schema.md](./05-database-schema.md))
-- Edge Functions validate before database insert:
-  - Project name uniqueness (case-insensitive)
-  - Numeric ranges
-  - Foreign key existence
-  - Business rules (e.g., no active stint exists)
+- Database constraints and RLS policies validate all operations:
+  - Project name uniqueness (case-insensitive) via unique constraint
+  - Numeric ranges via CHECK constraints
+  - Foreign key existence via FK constraints
+  - Business rules (e.g., no active stint exists) via database functions
 
 ### Rate Limiting
 
@@ -361,12 +361,11 @@ Projects Worked On: 3
 ### Generation Process
 
 1. User clicks "Export CSV" button
-2. Frontend sends request to Edge Function: `POST /api/export/csv`
-3. Edge Function queries stints in date range
-4. Converts timestamps to user's timezone
-5. Generates CSV string in memory
-6. Returns CSV as downloadable file (no server storage)
-7. Frontend triggers browser download
+2. Frontend queries stints in date range via Supabase client
+3. Client converts timestamps to user's timezone
+4. Generates CSV string in browser memory
+5. Creates downloadable blob and triggers browser download
+6. No server-side processing required (fully client-side)
 
 ### Professional Formatting
 
