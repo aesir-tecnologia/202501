@@ -73,13 +73,21 @@
 
 ### State Management
 
-- **Pinia**
-  - User store (auth, preferences)
-  - Projects store (CRUD operations)
-  - Stints store (active stint tracking)
-  - Analytics store (cached stats)
-- **Composition API + Composables**
-  - useTimer (Web Worker wrapper)
+- **TanStack Query (Vue Query)**
+  - Pure query-based architecture (no Pinia/Vuex stores)
+  - All server state managed through TanStack Query cache
+  - Automatic caching with configurable stale times
+  - Background refetching and cache invalidation
+- **Query Key Factory Pattern**
+  - Centralized cache key organization
+  - Hierarchical keys for targeted invalidation
+  - Type-safe query key definitions
+- **Optimistic Updates**
+  - Immediate UI feedback before server response
+  - Automatic rollback on mutation failure
+  - Cache snapshot and restore on error
+- **Composables**
+  - useStintTimer (Web Worker singleton for accurate timing)
   - useRealtime (Supabase subscription wrapper)
   - useAuth (Auth state management)
 
