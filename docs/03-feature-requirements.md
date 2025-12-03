@@ -69,11 +69,18 @@
 ### Pause/Resume
 
 - "Pause" button visible during active stint
-- Pause records:
-  - `paused_at`: Server timestamp
-  - Total pause duration accumulated separately
-- Resume restores countdown from remaining time
-- Pause events broadcast in real-time
+- Pause action:
+  - Sets `paused_at` to server timestamp
+  - Sets `status` to "paused"
+  - Timer freezes; working time stops accumulating
+- Resume action:
+  - Calculates pause duration in seconds: `now() - paused_at`
+  - Adds to cumulative `paused_duration` (seconds)
+  - Clears `paused_at`
+  - Sets `status` to "active"
+  - Timer resumes from remaining working time
+- Pause/resume events broadcast in real-time
+- Paused stints do not auto-complete; user must manually resume or stop
 
 ### Stop Stint Manually
 
@@ -89,13 +96,17 @@
 
 ### Auto-Complete
 
-- Auto-complete when total stint duration is over 4 hours. Running or paused.
+- Triggers when working time reaches planned duration (active stints only)
+- Working time formula (in seconds): `(now - started_at) - paused_duration`
+- Comparison: `working_time_seconds >= planned_duration_minutes * 60`
 - Browser notification: "Stint auto-completed for [Project Name]! 🎉"
 - Auto-completes with:
-  - `ended_at`: started_at + planned_duration
+  - `ended_at`: Server timestamp
+  - `actual_duration`: Working time in seconds
   - `completion_type`: "auto"
   - Grace period: 30 seconds for user to add notes
 - If browser closed, server-side cron completes stint at planned end time
+- Paused stints do not auto-complete
 
 ### Interruption Handling
 
@@ -126,10 +137,9 @@
 
 ### Constraints
 
-- Only 1 active stint per user across all devices
+- Only 1 active or paused stint per user across all devices
 - Minimum stint duration: 5 minutes
 - Maximum stint duration: 480 minutes
-- Maximum total stint duration: 4 hours
 - Maximum 50 stints per project per day (anti-abuse)
 
 ---

@@ -191,10 +191,11 @@ $$ LANGUAGE plpgsql;
 
 **Field Descriptions:**
 - `user_id`: Denormalized for faster queries (no join needed)
-- `actual_duration`: Total seconds from start to end, minus pauses
-- `paused_duration`: Cumulative pause time in seconds
+- `planned_duration`: Stint length in **minutes** (5-480)
+- `actual_duration`: Total working time in **seconds**, calculated on completion
+- `paused_duration`: Cumulative pause time in **seconds**
 - `status`: Current state (active, paused, completed, interrupted)
-- `paused_at`: Timestamp of most recent pause (for calculating pause duration)
+- `paused_at`: Timestamp when current pause started; NULL when active or completed
 
 **Constraints:**
 - Planned duration: 5-480 minutes
@@ -203,7 +204,10 @@ $$ LANGUAGE plpgsql;
 
 **Business Rules:**
 - Only one active/paused stint per user (enforced by unique partial index)
-- Auto-completion triggered by pg_cron job when `started_at + planned_duration <= now()`
+- Auto-completion triggered when working time reaches planned duration (active stints only)
+- Working time (seconds): `EXTRACT(EPOCH FROM (now() - started_at)) - paused_duration`
+- Comparison: `working_time_seconds >= planned_duration_minutes * 60`
+- Paused stints do not auto-complete; working time is frozen while paused
 - Interrupted stints don't count toward daily progress but preserved in history
 
 **Relationships:**

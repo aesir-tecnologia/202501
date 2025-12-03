@@ -114,6 +114,71 @@
 
 ---
 
+## Pause/Resume Mechanics
+
+### Database Field Units
+
+| Field | Unit | Description |
+|-------|------|-------------|
+| `planned_duration` | minutes | User-configured stint length |
+| `paused_duration` | seconds | Cumulative time spent paused |
+| `actual_duration` | seconds | Total working time on completion |
+| `paused_at` | timestamp | When current pause started |
+
+### State Transitions
+
+```
+ACTIVE ──pause──▶ PAUSED ──resume──▶ ACTIVE
+   │                 │
+   └──stop──▶ COMPLETED ◀──stop──┘
+```
+
+### Pause Operation
+
+1. Validate stint is active
+2. Set `paused_at = now()`
+3. Set `status = 'paused'`
+4. Broadcast pause event via Realtime
+5. Frontend freezes timer display
+
+### Resume Operation
+
+1. Validate stint is paused
+2. Calculate pause duration in seconds: `pause_seconds = EXTRACT(EPOCH FROM (now() - paused_at))`
+3. Accumulate: `paused_duration = paused_duration + pause_seconds`
+4. Clear: `paused_at = NULL`
+5. Set `status = 'active'`
+6. Broadcast resume event via Realtime
+7. Frontend resumes timer from remaining working time
+
+### Stop While Paused
+
+If user stops a paused stint:
+1. Calculate final pause in seconds: `pause_seconds = EXTRACT(EPOCH FROM (now() - paused_at))`
+2. Accumulate: `paused_duration = paused_duration + pause_seconds`
+3. Calculate actual duration in seconds: `actual_duration = EXTRACT(EPOCH FROM (ended_at - started_at)) - paused_duration`
+4. Set `status = 'completed'`
+
+### Working Time Calculation
+
+At any moment, the elapsed working time in seconds is:
+
+```
+If status = 'active':
+  working_seconds = EXTRACT(EPOCH FROM (now() - started_at)) - paused_duration
+
+If status = 'paused':
+  current_pause_seconds = EXTRACT(EPOCH FROM (now() - paused_at))
+  working_seconds = EXTRACT(EPOCH FROM (now() - started_at)) - paused_duration - current_pause_seconds
+```
+
+Timer displays remaining time:
+```
+remaining_seconds = (planned_duration * 60) - working_seconds
+```
+
+---
+
 ## Real-Time Conflict Resolution
 
 ### Conflict Scenarios
@@ -246,9 +311,19 @@ self.onmessage = (e) => {
 ### Auto-Completion Fallback
 
 - pg_cron job runs every 30 seconds
-- Queries stints where `status = 'active' AND started_at + planned_duration <= now()`
-- Auto-completes matched stints via database function
+- Queries active stints where working time has reached planned duration:
+  ```sql
+  SELECT * FROM stints
+  WHERE status = 'active'
+    AND (EXTRACT(EPOCH FROM (now() - started_at)) - paused_duration)
+        >= (planned_duration * 60)
+  ```
+  - `EXTRACT(EPOCH FROM ...)` returns seconds
+  - `paused_duration` is stored in seconds
+  - `planned_duration` is stored in minutes, multiplied by 60 for comparison
+- Auto-completes matched stints by calling `complete_stint()` function
 - If browser closed during stint, server still completes on time
+- Paused stints are excluded; working time does not accumulate while paused
 
 ### Notification Handling
 
