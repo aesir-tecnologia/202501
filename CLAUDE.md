@@ -23,9 +23,9 @@ Project documentation is available in the `docs/` folder, including:
 
 ### Development
 ```bash
-npm run dev              # Start dev server (localhost:3000)
+npm run dev              # Start dev server (localhost:3005)
 npm run generate         # Generate static site (SSG)
-npm run serve            # Preview generated static site locally
+npm run serve            # Preview generated static site locally (localhost:3000)
 ```
 
 ### Code Quality
@@ -204,7 +204,7 @@ export const projectKeys = {
 
 ## Testing
 
-Tests run against the **local Supabase instance** for reliable integration testing.
+Tests are **co-located** with the files they test for better discoverability and maintainability.
 
 ### Running Tests
 
@@ -214,29 +214,29 @@ npm run test:ui          # Run with Vitest UI
 npm run test:run         # Run once in CI mode
 ```
 
-**Prerequisites:** Ensure local Supabase is running (`supabase start`) before running tests.
-
 ### Test Organization
 
+Tests live alongside their source files with a `.test.ts` suffix:
+
 ```
-tests/
-├── lib/                  # Unit tests for database layer
-├── composables/          # Unit tests for composables
-├── schemas/              # Schema validation tests
-├── setup.ts              # Global test setup
-└── README.md             # Detailed testing documentation
+app/
+├── lib/
+│   └── supabase/
+│       ├── projects.ts           # Source file
+│       ├── projects.test.ts      # Test file
+│       ├── stints.ts
+│       └── stints.test.ts
+├── composables/
+│   ├── useProjects.ts
+│   ├── useProjects.test.ts
+│   ├── useStints.ts
+│   └── useStints.test.ts
+├── schemas/
+│   ├── projects.ts
+│   ├── projects.test.ts
+│   ├── stints.ts
+│   └── stints.test.ts
 ```
-
-**See `tests/README.md` for comprehensive testing guide and examples.**
-
-### Test Users
-
-**Playwright E2E Test User** (for browser automation tests):
-- **Email:** `playwright-test@lifestint.test`
-- **Password:** `PlaywrightTest2025!`
-- **User ID:** `13a5b16a-3b36-4869-afbe-c2138d0ea426`
-- **Use Case:** Browser-based end-to-end tests with Playwright MCP
-- **Creation:** Run `node scripts/create-playwright-user.mjs` (idempotent - safe to re-run)
 
 ## Environment Variables
 
@@ -278,7 +278,7 @@ See `README.md` for detailed deployment instructions.
    - Update database layer (`app/lib/supabase/`)
    - Add/update Zod schema (`app/schemas/`)
    - Create/update composable with optimistic updates (`app/composables/`)
-   - Write tests in corresponding `tests/` subdirectory
+   - Write co-located tests (e.g., `projects.test.ts` alongside `projects.ts`)
 
 3. **Testing:**
    - Write tests alongside implementation

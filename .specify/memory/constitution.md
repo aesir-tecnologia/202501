@@ -1,14 +1,14 @@
 <!--
 Sync Impact Report:
-Version Change: 1.2.0 → 1.2.1 (PATCH - clarification to testing principles)
+Version Change: 1.2.1 → 1.2.2 (PATCH - switch to co-located tests)
 Modified Principles:
-  - Principle II (Test-Driven Development) - Clarified database mocking policy for rate-limit scenarios
+  - Development Workflow - Changed from tests/ directory to co-located tests alongside source files
 Added Sections: None
 Removed Sections: None
 Templates Requiring Updates:
-  ✅ plan-template.md - No changes required (testing section references constitution)
+  ✅ plan-template.md - No changes required (generic templates)
   ✅ spec-template.md - No changes required
-  ✅ tasks-template.md - No changes required (testing section references constitution)
+  ✅ tasks-template.md - No changes required (generic templates)
 Follow-up TODOs: None
 -->
 
@@ -202,7 +202,7 @@ export const entityKeys = {
    - Update database layer (`app/lib/supabase/`)
    - Add/update Zod schema (`app/schemas/`)
    - Create/update composable with optimistic updates (`app/composables/`)
-   - Write tests in corresponding `tests/` subdirectory
+   - Write co-located tests (e.g., `projects.test.ts` alongside `projects.ts`)
 
 3. **Testing**:
    - Write tests alongside implementation
@@ -256,4 +256,4 @@ export const entityKeys = {
 
 This constitution supersedes all other practices and conventions. When in doubt, refer to these principles. All team members and AI assistants MUST follow these guidelines.
 
-**Version**: 1.2.1 | **Ratified**: 2025-11-12 | **Last Amended**: 2025-11-14
+**Version**: 1.2.2 | **Ratified**: 2025-11-12 | **Last Amended**: 2025-12-03
