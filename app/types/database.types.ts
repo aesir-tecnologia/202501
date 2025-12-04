@@ -219,6 +219,7 @@ export type Database = {
         Args: never
         Returns: {
           completed_count: number
+          completed_stint_ids: string[]
           error_count: number
         }[]
       }

@@ -9,7 +9,9 @@ import type { Database } from '~/types/database.types';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useActiveStintQuery } from './useStints';
 import { parseSafeDate } from '~/utils/date-helpers';
-import { syncStintCheck as syncStintCheckDb } from '~/lib/supabase/stints';
+import { syncStintCheck as syncStintCheckDb, completeStint } from '~/lib/supabase/stints';
+import { stintKeys } from '~/composables/useStints';
+import { STINT } from '~/constants';
 
 type StintRow = Database['public']['Tables']['stints']['Row'];
 
@@ -29,7 +31,7 @@ type WorkerOutgoingMessage
 // Timer configuration constants
 const TIMER_DRIFT_THRESHOLD_SECONDS = 5;
 const TIMER_SYNC_INTERVAL_MS = 60000;
-const DEFAULT_PLANNED_DURATION_MINUTES = 50;
+const DEFAULT_PLANNED_DURATION_MINUTES = STINT.DURATION_MINUTES.DEFAULT;
 const WORKER_RETRY_BASE_DELAY_MS = 1000;
 const NOTIFICATION_TIMEOUT_MS = 10000;
 
@@ -452,16 +454,40 @@ async function syncWithServer(stintId: string): Promise<void> {
 }
 
 /**
- * Handle timer completion
+ * Handle timer completion - auto-completes stint in database
  */
 async function handleTimerComplete(): Promise<void> {
-  // Get active stint from stored ref (set up at composable level)
   const activeStint = globalTimerState.activeStintRef?.value;
-
   if (!activeStint) return;
 
-  // Fetch project details for notification
   const client = useSupabaseClient();
+
+  // Complete the stint in the database
+  const { data, error } = await completeStint(
+    client,
+    activeStint.id,
+    'auto',
+    null,
+  );
+
+  if (error || !data) {
+    console.error('Failed to auto-complete stint:', error);
+    globalTimerState.toast?.add({
+      title: 'Auto-Complete Failed',
+      description: error?.message || 'Failed to complete stint',
+      color: 'error',
+    });
+    return;
+  }
+
+  // Invalidate cache to update UI
+  if (globalTimerState.queryClient) {
+    await globalTimerState.queryClient.invalidateQueries({
+      queryKey: stintKeys.all,
+    });
+  }
+
+  // Fetch project name for notification
   const { data: project } = await client
     .from('projects')
     .select('name')
@@ -470,10 +496,8 @@ async function handleTimerComplete(): Promise<void> {
 
   const projectName = project?.name || 'Project';
 
-  // Show browser notification
+  // Show notifications
   showNotification(projectName);
-
-  // Show toast notification as fallback
   globalTimerState.toast?.add({
     title: 'Stint Completed!',
     description: `Your stint for ${projectName} has ended.`,
