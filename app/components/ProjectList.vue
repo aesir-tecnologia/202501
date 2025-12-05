@@ -10,11 +10,14 @@ import { parseSafeDate } from '~/utils/date-helpers';
 
 const props = defineProps<{
   projects: ProjectRow[]
+  isDraggable?: boolean
 }>();
 
 const emit = defineEmits<{
   edit: [project: ProjectRow]
 }>();
+
+const isDraggable = computed(() => props.isDraggable ?? false);
 
 const toast = useToast();
 const { mutate: reorderProjects, isError, error } = useReorderProjects();
@@ -26,7 +29,6 @@ const screenReaderAnnouncement = ref<string>('');
 const activeListRef = ref<HTMLElement | null>(null);
 const localProjects = ref<ProjectRow[]>([...props.projects]);
 const isDragging = ref(false);
-const showInactiveProjects = ref(false);
 
 // Stint management
 const { data: activeStint } = useActiveStintQuery();
@@ -98,10 +100,6 @@ const dailyProgressMap = computed(() => {
   return computeAllDailyProgress(props.projects, allStints.value);
 });
 
-// Separate active and inactive projects
-const activeProjects = computed(() => localProjects.value.filter(p => p.is_active));
-const inactiveProjects = computed(() => localProjects.value.filter(p => !p.is_active));
-
 // Update local projects when props change (but not during drag)
 watch(() => props.projects, (newProjects) => {
   if (!isDragging.value) {
@@ -120,29 +118,30 @@ watch(isError, (hasError) => {
   }
 });
 
-// Setup drag-and-drop for active projects only
-useSortable(activeListRef, activeProjects, {
+// Writable computed for sortable - allows useSortable to update the array
+const sortableProjects = computed({
+  get: () => localProjects.value,
+  set: (val) => { localProjects.value = val; },
+});
+
+// Setup drag-and-drop (only functional when isDraggable is true via handle visibility)
+useSortable(activeListRef, sortableProjects, {
   animation: 150,
   handle: '.drag-handle',
   onStart: () => {
     isDragging.value = true;
   },
   onEnd: (evt: { oldIndex?: number, newIndex?: number }) => {
-    // Manually update the array based on the drag event
     if (evt.oldIndex !== undefined && evt.newIndex !== undefined && evt.oldIndex !== evt.newIndex) {
-      const newOrder = [...activeProjects.value];
+      const newOrder = [...sortableProjects.value];
       const [movedItem] = newOrder.splice(evt.oldIndex, 1);
 
       if (movedItem) {
         newOrder.splice(evt.newIndex, 0, movedItem);
-
-        // Combine with inactive projects to maintain complete list
-        const completeOrder = [...newOrder, ...inactiveProjects.value];
-        localProjects.value = completeOrder;
+        localProjects.value = newOrder;
 
         isDragging.value = false;
-        // Reorder projects based on new order (debounced mutation)
-        reorderProjects(completeOrder);
+        reorderProjects(newOrder);
       }
       else {
         isDragging.value = false;
@@ -287,7 +286,7 @@ async function handleCompleteStint(stint: StintRow): Promise<void> {
       {{ screenReaderAnnouncement }}
     </div>
 
-    <!-- Empty state: No projects at all -->
+    <!-- Empty state -->
     <div
       v-if="projects.length === 0"
       class="text-center py-12"
@@ -297,152 +296,44 @@ async function handleCompleteStint(stint: StintRow): Promise<void> {
         class="h-12 w-12 mx-auto text-neutral-400 dark:text-neutral-600"
       />
       <h3 class="mt-4 text-xl font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
-        No projects yet
+        No projects
       </h3>
       <p class="mt-2 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
-        Get started by creating your first project
+        No projects in this category
       </p>
     </div>
 
-    <!-- Empty state: All projects inactive -->
-    <div
-      v-else-if="activeProjects.length === 0 && inactiveProjects.length > 0"
-      class="text-center py-12"
+    <!-- Projects List -->
+    <ul
+      v-else
+      ref="activeListRef"
+      class="space-y-2"
     >
-      <Icon
-        name="i-lucide-pause-circle"
-        class="h-12 w-12 mx-auto text-neutral-400 dark:text-neutral-600"
+      <ProjectListCard
+        v-for="project in sortableProjects"
+        :key="project.id"
+        :project="project"
+        :active-stint="activeStint ?? null"
+        :daily-progress="dailyProgressMap.get(project.id) ?? {
+          projectId: project.id,
+          completed: 0,
+          expected: project.expected_daily_stints ?? 0,
+          percentage: 0,
+          isOverAchieving: false,
+          isMet: false,
+        }"
+        :is-toggling="togglingProjectId === project.id"
+        :is-starting="isStarting"
+        :is-pausing="isPausing || isResuming"
+        :is-completing="isCompleting"
+        :is-draggable="isDraggable"
+        @edit="handleEdit"
+        @toggle-active="handleToggleActive"
+        @start-stint="handleStartStint"
+        @pause-stint="handlePauseStint"
+        @resume-stint="handleResumeStint"
+        @complete-stint="handleCompleteStint"
       />
-      <h3 class="mt-4 text-xl font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
-        All projects are inactive
-      </h3>
-      <p class="mt-2 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
-        Activate a project below to start tracking stints
-      </p>
-
-      <!-- Show inactive projects expanded -->
-      <div class="mt-8 max-w-2xl mx-auto">
-        <h4 class="text-sm font-medium leading-normal text-neutral-700 dark:text-neutral-300 mb-2 text-left">
-          Inactive Projects ({{ inactiveProjects.length }})
-        </h4>
-        <ul class="space-y-2">
-          <ProjectListCard
-            v-for="project in inactiveProjects"
-            :key="project.id"
-            :project="project"
-            :active-stint="activeStint ?? null"
-            :daily-progress="dailyProgressMap.get(project.id) ?? {
-              projectId: project.id,
-              completed: 0,
-              expected: project.expected_daily_stints ?? 0,
-              percentage: 0,
-              isOverAchieving: false,
-              isMet: false,
-            }"
-            :is-toggling="togglingProjectId === project.id"
-            :is-starting="false"
-            :is-pausing="isPausing || isResuming"
-            :is-completing="isCompleting"
-            :is-draggable="false"
-            @edit="handleEdit"
-            @toggle-active="handleToggleActive"
-            @start-stint="handleStartStint"
-            @pause-stint="handlePauseStint"
-            @resume-stint="handleResumeStint"
-            @complete-stint="handleCompleteStint"
-          />
-        </ul>
-      </div>
-    </div>
-
-    <!-- Active Projects Section -->
-    <div v-else>
-      <h3
-        v-if="inactiveProjects.length > 0"
-        class="text-sm font-medium leading-normal text-neutral-700 dark:text-neutral-300 mb-2"
-      >
-        Active Projects
-      </h3>
-
-      <ul
-        ref="activeListRef"
-        class="space-y-2"
-      >
-        <ProjectListCard
-          v-for="project in activeProjects"
-          :key="project.id"
-          :project="project"
-          :active-stint="activeStint ?? null"
-          :daily-progress="dailyProgressMap.get(project.id) ?? {
-            projectId: project.id,
-            completed: 0,
-            expected: project.expected_daily_stints ?? 0,
-            percentage: 0,
-            isOverAchieving: false,
-            isMet: false,
-          }"
-          :is-toggling="togglingProjectId === project.id"
-          :is-starting="isStarting"
-          :is-pausing="isPausing || isResuming"
-          :is-completing="isCompleting"
-          :is-draggable="true"
-          @edit="handleEdit"
-          @toggle-active="handleToggleActive"
-          @start-stint="handleStartStint"
-          @pause-stint="handlePauseStint"
-          @resume-stint="handleResumeStint"
-          @complete-stint="handleCompleteStint"
-        />
-      </ul>
-
-      <!-- Inactive Projects Section -->
-      <div
-        v-if="inactiveProjects.length > 0"
-        class="mt-6"
-      >
-        <button
-          type="button"
-          class="flex items-center gap-2 text-sm font-medium leading-normal text-neutral-700 dark:text-neutral-300 mb-2 hover:text-neutral-900 dark:hover:text-neutral-100"
-          @click="showInactiveProjects = !showInactiveProjects"
-        >
-          <Icon
-            :name="showInactiveProjects ? 'i-lucide-chevron-down' : 'i-lucide-chevron-right'"
-            class="h-4 w-4"
-          />
-          Inactive Projects ({{ inactiveProjects.length }})
-        </button>
-
-        <ul
-          v-if="showInactiveProjects"
-          class="space-y-2"
-        >
-          <ProjectListCard
-            v-for="project in inactiveProjects"
-            :key="project.id"
-            :project="project"
-            :active-stint="activeStint ?? null"
-            :daily-progress="dailyProgressMap.get(project.id) ?? {
-              projectId: project.id,
-              completed: 0,
-              expected: project.expected_daily_stints ?? 0,
-              percentage: 0,
-              isOverAchieving: false,
-              isMet: false,
-            }"
-            :is-toggling="togglingProjectId === project.id"
-            :is-starting="false"
-            :is-pausing="isPausing || isResuming"
-            :is-completing="isCompleting"
-            :is-draggable="false"
-            @edit="handleEdit"
-            @toggle-active="handleToggleActive"
-            @start-stint="handleStartStint"
-            @pause-stint="handlePauseStint"
-            @resume-stint="handleResumeStint"
-            @complete-stint="handleCompleteStint"
-          />
-        </ul>
-      </div>
-    </div>
+    </ul>
   </div>
 </template>
