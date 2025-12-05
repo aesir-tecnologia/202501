@@ -589,7 +589,8 @@ export function usePauseStint() {
 }
 
 /**
- * Resumes a paused stint with Zod validation and optimistic updates.
+ * Resumes a paused stint with Zod validation.
+ * No optimistic update - waits for DB response to get accurate paused_duration.
  * Auto-invalidates stint queries on success.
  *
  * @example
@@ -619,67 +620,8 @@ export function useResumeStint() {
 
       return data;
     },
-    onMutate: async (stintId) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
-      await queryClient.cancelQueries({ queryKey: stintKeys.detail(stintId) });
-      await queryClient.cancelQueries({ queryKey: stintKeys.active() });
-
-      // Snapshot previous values
-      const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
-      const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(stintId));
-      const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
-
-      // Optimistically update list
-      if (previousStints) {
-        queryClient.setQueryData<StintRow[]>(
-          stintKeys.list(undefined),
-          previousStints.map(s =>
-            s.id === stintId
-              ? {
-                  ...s,
-                  status: 'active' as const,
-                  updated_at: new Date().toISOString(),
-                }
-              : s,
-          ),
-        );
-      }
-
-      // Optimistically update detail
-      if (previousStint) {
-        queryClient.setQueryData<StintRow>(stintKeys.detail(stintId), {
-          ...previousStint,
-          status: 'active' as const,
-          updated_at: new Date().toISOString(),
-        });
-      }
-
-      // Optimistically update active stint
-      if (previousActiveStint && previousActiveStint.id === stintId) {
-        queryClient.setQueryData<StintRow | null>(stintKeys.active(), {
-          ...previousActiveStint,
-          status: 'active' as const,
-          updated_at: new Date().toISOString(),
-        });
-      }
-
-      return { previousStints, previousStint, previousActiveStint };
-    },
-    onError: (_err, stintId, context) => {
-      // Rollback on error
-      if (context?.previousStints) {
-        queryClient.setQueryData(stintKeys.list(undefined), context.previousStints);
-      }
-      if (context?.previousStint) {
-        queryClient.setQueryData(stintKeys.detail(stintId), context.previousStint);
-      }
-      if (context?.previousActiveStint !== undefined) {
-        queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
-      }
-    },
     onSuccess: (_data, stintId) => {
-      // Invalidate and refetch
+      // Invalidate and refetch to get accurate paused_duration from DB
       queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
       queryClient.invalidateQueries({ queryKey: stintKeys.detail(stintId) });
       queryClient.invalidateQueries({ queryKey: stintKeys.active() });
