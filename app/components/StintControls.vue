@@ -22,13 +22,6 @@ const completionNotes = ref('');
 async function handlePause(): Promise<void> {
   try {
     await pauseStint(props.stint.id);
-
-    toast.add({
-      title: 'Stint Paused',
-      description: 'Take a break! Resume when ready.',
-      color: 'warning',
-      icon: 'i-lucide-pause-circle',
-    });
   }
   catch (error) {
     console.error('Failed to pause stint:', error);
@@ -48,13 +41,6 @@ async function handlePause(): Promise<void> {
 async function handleResume(): Promise<void> {
   try {
     await resumeStint(props.stint.id);
-
-    toast.add({
-      title: 'Stint Resumed',
-      description: 'Back to work! Keep going.',
-      color: 'success',
-      icon: 'i-lucide-play-circle',
-    });
   }
   catch (error) {
     console.error('Failed to resume stint:', error);
@@ -86,13 +72,6 @@ async function handleStopConfirm(): Promise<void> {
       stintId: props.stint.id,
       completionType: 'manual',
       notes: completionNotes.value || undefined,
-    });
-
-    toast.add({
-      title: 'Stint Completed!',
-      description: 'Great work! Your progress has been saved.',
-      color: 'success',
-      icon: 'i-lucide-circle-check',
     });
 
     // Reset modal state

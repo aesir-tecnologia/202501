@@ -190,12 +190,6 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
     });
 
     screenReaderAnnouncement.value = `Started working on ${project.name}`;
-    toast.add({
-      title: 'Stint Started',
-      description: `Started working on ${project.name}`,
-      color: 'success',
-      icon: 'i-lucide-play-circle',
-    });
   }
   catch (error) {
     screenReaderAnnouncement.value = `Failed to start stint on ${project.name}`;
@@ -212,11 +206,6 @@ async function handlePauseStint(stint: StintRow): Promise<void> {
   try {
     await pauseStint(stint.id);
     screenReaderAnnouncement.value = 'Stint paused';
-    toast.add({
-      title: 'Stint Paused',
-      color: 'warning',
-      icon: 'i-lucide-pause-circle',
-    });
   }
   catch (error) {
     screenReaderAnnouncement.value = 'Failed to pause stint';
@@ -233,11 +222,6 @@ async function handleResumeStint(stint: StintRow): Promise<void> {
   try {
     await resumeStint(stint.id);
     screenReaderAnnouncement.value = 'Stint resumed';
-    toast.add({
-      title: 'Stint Resumed',
-      color: 'success',
-      icon: 'i-lucide-play-circle',
-    });
   }
   catch (error) {
     screenReaderAnnouncement.value = 'Failed to resume stint';
@@ -257,11 +241,6 @@ async function handleCompleteStint(stint: StintRow): Promise<void> {
       completionType: 'manual',
     });
     screenReaderAnnouncement.value = 'Stint completed';
-    toast.add({
-      title: 'Stint Completed',
-      color: 'success',
-      icon: 'i-lucide-check-circle',
-    });
   }
   catch (error) {
     screenReaderAnnouncement.value = 'Failed to complete stint';
