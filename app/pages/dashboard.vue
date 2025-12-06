@@ -97,7 +97,7 @@ function openArchiveModal(project: ProjectRow) {
                 class="motion-safe:transition-all motion-safe:duration-200"
                 @click="openCreateModal"
               >
-                Create Project
+                New Project
               </UButton>
             </div>
           </template>

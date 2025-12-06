@@ -9,15 +9,15 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  submit: [data: { name: string, expectedDailyStints: number, customStintDuration: number, colorTag: ProjectColor | null }]
+  submit: [data: { name: string, expectedDailyStints: number, customStintDuration: number | null, colorTag: ProjectColor | null }]
   cancel: []
 }>();
 
 // Form state
 const formData = ref({
   name: props.project?.name ?? '',
-  expectedDailyStints: props.project?.expected_daily_stints ?? 3,
-  customStintDuration: props.project?.custom_stint_duration ?? 45,
+  expectedDailyStints: props.project?.expected_daily_stints ?? PROJECT.DAILY_STINTS.DEFAULT,
+  customStintDuration: props.project?.custom_stint_duration ?? null,
   colorTag: (props.project?.color_tag as ProjectColor | null) ?? null,
 });
 
@@ -180,7 +180,7 @@ function handleCancel() {
         type="submit"
         color="primary"
       >
-        {{ mode === 'create' ? 'Create Project' : 'Save Changes' }}
+        {{ mode === 'create' ? 'New Project' : 'Save Changes' }}
       </UButton>
     </div>
   </form>

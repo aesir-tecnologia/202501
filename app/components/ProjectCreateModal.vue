@@ -11,7 +11,7 @@ function closeModal() {
   isOpen.value = false;
 }
 
-async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number, colorTag: ProjectColor | null }) {
+async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number | null, colorTag: ProjectColor | null }) {
   try {
     await createProject(data);
 
@@ -36,14 +36,14 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
 <template>
   <UModal
     v-model:open="isOpen"
-    title="Create New Project"
+    title="New Project"
     description="Fill out the form below to create a new project"
   >
     <template #content>
       <UCard>
         <template #header>
           <h3 class="text-lg font-semibold">
-            Create New Project
+            New Project
           </h3>
         </template>
 

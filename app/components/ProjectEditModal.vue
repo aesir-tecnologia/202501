@@ -25,7 +25,7 @@ function handleArchiveClick() {
   emit('archive', props.project);
 }
 
-async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number, colorTag: ProjectColor | null }) {
+async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number | null, colorTag: ProjectColor | null }) {
   try {
     await updateProject({ id: props.project.id, data });
 
