@@ -190,40 +190,34 @@ function handleCompleteStint() {
     <!-- Actions Section -->
     <div class="flex items-stretch border-t md:border-t-0 md:border-l border-white/5 bg-transparent z-10">
       <!-- Left Action Group: Toggle & Settings -->
-      <div class="flex items-center gap-4 px-6 py-4 md:py-0">
-        <UTooltip :text="project.is_active ? 'Deactivate project' : 'Activate project'">
-          <USwitch
-            :model-value="project.is_active ?? true"
-            :loading="isToggling"
-            :disabled="isToggling"
-            size="lg"
-            :ui="{
-              container: 'w-12 h-7',
-              wrapper: project.is_active ? 'bg-primary-500 dark:bg-primary-500' : 'bg-slate-300 dark:bg-slate-700',
-              thumb: 'group-hover:bg-white',
-            }"
-            @update:model-value="handleToggleActive"
-          >
-            <template #icon-on>
-              <UIcon
-                name="i-lucide-check"
-                class="w-3 h-3 text-primary-500"
-              />
-            </template>
-          </USwitch>
-        </UTooltip>
+      <div class="flex items-center gap-3 px-6 py-4 md:py-0 md:bg-gray-50/50 md:dark:bg-white/[0.02] md:border-r border-slate-200 dark:border-white/5">
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider md:hidden">Status</span>
+          <UTooltip :text="project.is_active ? 'Deactivate project' : 'Activate project'">
+            <USwitch
+              :model-value="project.is_active ?? true"
+              :loading="isToggling"
+              :disabled="isToggling"
+              size="lg"
+              checked-icon="i-lucide-check"
+              unchecked-icon="i-lucide-power"
+              @update:model-value="handleToggleActive"
+            />
+          </UTooltip>
+        </div>
+
+        <div class="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-1 hidden md:block" />
 
         <UTooltip text="Settings">
-          <button
+          <UButton
+            icon="i-lucide-settings-2"
+            color="neutral"
+            variant="ghost"
+            size="sm"
+            class="text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 transition-colors rounded-full"
             aria-label="Edit project settings"
-            class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors flex items-center justify-center"
             @click="handleEdit"
-          >
-            <UIcon
-              name="i-lucide-settings"
-              class="w-5 h-5"
-            />
-          </button>
+          />
         </UTooltip>
       </div>
 
