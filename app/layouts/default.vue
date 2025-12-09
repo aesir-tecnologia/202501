@@ -97,27 +97,29 @@ const formattedTime = computed(() => {
       </nav>
 
       <div class="flex items-center gap-3">
-        <!-- Global Timer -->
-        <div
-          v-if="activeStint && activeStint.status !== 'completed'"
-          class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
-          :class="isPaused
-            ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
-            : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]'"
-        >
+        <!-- Global Timer (client-only to prevent hydration mismatch) -->
+        <ClientOnly>
           <div
-            v-if="!isPaused"
-            class="relative flex h-2 w-2 mr-0.5"
+            v-if="activeStint && activeStint.status !== 'completed'"
+            class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
+            :class="isPaused
+              ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
+              : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]'"
           >
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            <div
+              v-if="!isPaused"
+              class="relative flex h-2 w-2 mr-0.5"
+            >
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </div>
+            <UIcon
+              :name="isPaused ? 'i-lucide-pause' : 'i-lucide-clock'"
+              class="w-4 h-4"
+            />
+            <span class="font-mono font-bold tabular-nums text-sm">{{ formattedTime }}</span>
           </div>
-          <UIcon
-            :name="isPaused ? 'i-lucide-pause' : 'i-lucide-clock'"
-            class="w-4 h-4"
-          />
-          <span class="font-mono font-bold tabular-nums text-sm">{{ formattedTime }}</span>
-        </div>
+        </ClientOnly>
 
         <div class="h-6 w-px bg-gray-200 dark:bg-white/10 mx-2 hidden sm:block" />
         <button
