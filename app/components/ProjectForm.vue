@@ -120,8 +120,8 @@ function handleCancel() {
       <UInput
         v-model.number="formData.customStintDuration"
         type="number"
-        min="1"
-        max="1440"
+        :min="PROJECT.CUSTOM_STINT_DURATION_MINUTES.MIN"
+        :max="PROJECT.CUSTOM_STINT_DURATION_MINUTES.MAX"
         @blur="validateForm"
       />
     </UFormField>
