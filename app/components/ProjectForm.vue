@@ -24,12 +24,25 @@ const formData = ref({
 // Validation state
 const errors = ref<Record<string, string>>({});
 
+function normalizeNumberInput(value: unknown): number | null {
+  if (value === '' || value === null || value === undefined || Number.isNaN(value)) {
+    return null;
+  }
+  return typeof value === 'number' ? value : null;
+}
+
 // Validate form
 function validateForm() {
   errors.value = {};
 
+  const normalizedData = {
+    ...formData.value,
+    expectedDailyStints: normalizeNumberInput(formData.value.expectedDailyStints) ?? PROJECT.DAILY_STINTS.DEFAULT,
+    customStintDuration: normalizeNumberInput(formData.value.customStintDuration),
+  };
+
   const schema = props.mode === 'create' ? projectCreateSchema : projectUpdateSchema;
-  const result = schema.safeParse(formData.value);
+  const result = schema.safeParse(normalizedData);
 
   if (!result.success) {
     result.error.issues.forEach((issue) => {
@@ -48,8 +61,8 @@ function handleSubmit() {
 
   emit('submit', {
     name: formData.value.name.trim(),
-    expectedDailyStints: formData.value.expectedDailyStints,
-    customStintDuration: formData.value.customStintDuration,
+    expectedDailyStints: normalizeNumberInput(formData.value.expectedDailyStints) ?? PROJECT.DAILY_STINTS.DEFAULT,
+    customStintDuration: normalizeNumberInput(formData.value.customStintDuration),
     colorTag: formData.value.colorTag,
   });
 }
