@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import type { NavigationMenuItem } from '#ui/components/NavigationMenu.vue';
-
 const appConfig = useAppConfig();
 const route = useRoute();
 const supabase = useSupabaseClient();
 const toast = useToast();
+const colorMode = useColorMode();
 
-const items = computed<NavigationMenuItem[]>(() => [
+const isDark = computed(() => colorMode.value === 'dark');
+
+function toggleDarkMode() {
+  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
+}
+
+const items = computed(() => [
   {
     label: 'Dashboard',
     to: '/dashboard',
@@ -44,28 +49,104 @@ const signOut = async () => {
   navigateTo(appConfig.auth.home);
 };
 
-useStintTimer();
+const { secondsRemaining, isPaused } = useStintTimer();
+const { data: activeStint } = useActiveStintQuery();
+
+const formattedTime = computed(() => {
+  const mins = Math.floor(secondsRemaining.value / 60);
+  const secs = secondsRemaining.value % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+});
 </script>
 
 <template>
   <div>
-    <UHeader to="/">
-      <template #title>
-        LifeStint
-      </template>
+    <header class="flex items-center justify-between px-6 lg:px-10 py-4 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-50 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60">
+      <div
+        class="flex items-center gap-3 group cursor-pointer"
+        @click="navigateTo('/')"
+      >
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+          LifeStint
+        </h1>
+      </div>
 
-      <UNavigationMenu :items="items" />
+      <nav class="hidden md:flex items-center gap-1 bg-gray-100/50 dark:bg-gray-800/40 p-1.5 rounded-full border border-gray-200 dark:border-white/5 shadow-inner relative">
+        <div
+          v-for="item in items"
+          :key="item.to"
+          class="relative z-10"
+        >
+          <NuxtLink
+            :to="item.to"
+            class="px-5 py-1.5 text-sm font-medium rounded-full transition-colors duration-300 block relative"
+            :class="[
+              item.active
+                ? 'text-primary-600 dark:text-white'
+                : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white',
+            ]"
+          >
+            {{ item.label }}
+            <span
+              v-if="item.active"
+              class="absolute inset-0 bg-primary-50 dark:bg-primary-500/20 rounded-full shadow-sm ring-1 ring-primary-100 dark:ring-primary-500/30 -z-10"
+              style="view-transition-name: nav-item-active"
+            />
+          </NuxtLink>
+        </div>
+      </nav>
 
-      <template #right>
-        <UColorModeButton />
-        <UButton
-          icon="i-lucide-log-out"
-          variant="ghost"
-          color="neutral"
+      <div class="flex items-center gap-3">
+        <!-- Global Timer (client-only to prevent hydration mismatch) -->
+        <ClientOnly>
+          <div
+            v-if="activeStint && activeStint.status !== 'completed'"
+            class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
+            :class="isPaused
+              ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
+              : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]'"
+          >
+            <div
+              v-if="!isPaused"
+              class="relative flex h-2 w-2 mr-0.5"
+            >
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </div>
+            <UIcon
+              :name="isPaused ? 'i-lucide-pause' : 'i-lucide-clock'"
+              class="w-4 h-4"
+            />
+            <span class="font-mono font-bold tabular-nums text-sm">{{ formattedTime }}</span>
+          </div>
+        </ClientOnly>
+
+        <div class="h-6 w-px bg-gray-200 dark:bg-white/10 mx-2 hidden sm:block" />
+        <button
+          class="text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors p-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center"
+          aria-label="Toggle dark mode"
+          @click="toggleDarkMode"
+        >
+          <UIcon
+            :name="isDark ? 'i-lucide-moon' : 'i-lucide-sun'"
+            class="w-[18px] h-[18px]"
+          />
+        </button>
+        <button
+          aria-label="Sign out"
+          class="text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors p-2.5 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center"
           @click="signOut"
-        />
-      </template>
-    </UHeader>
+        >
+          <UIcon
+            name="i-lucide-log-out"
+            class="w-[18px] h-[18px]"
+          />
+        </button>
+        <div class="hidden sm:block">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-purple-500 ring-2 ring-white/10 cursor-pointer" />
+        </div>
+      </div>
+    </header>
 
     <UMain class="pt-6">
       <slot />

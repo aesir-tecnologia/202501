@@ -9,27 +9,40 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  submit: [data: { name: string, expectedDailyStints: number, customStintDuration: number, colorTag: ProjectColor | null }]
+  submit: [data: { name: string, expectedDailyStints: number, customStintDuration: number | null, colorTag: ProjectColor | null }]
   cancel: []
 }>();
 
 // Form state
 const formData = ref({
   name: props.project?.name ?? '',
-  expectedDailyStints: props.project?.expected_daily_stints ?? 3,
-  customStintDuration: props.project?.custom_stint_duration ?? 45,
+  expectedDailyStints: props.project?.expected_daily_stints ?? PROJECT.DAILY_STINTS.DEFAULT,
+  customStintDuration: props.project?.custom_stint_duration ?? null,
   colorTag: (props.project?.color_tag as ProjectColor | null) ?? null,
 });
 
 // Validation state
 const errors = ref<Record<string, string>>({});
 
+function normalizeNumberInput(value: unknown): number | null {
+  if (value === '' || value === null || value === undefined || Number.isNaN(value)) {
+    return null;
+  }
+  return typeof value === 'number' ? value : null;
+}
+
 // Validate form
 function validateForm() {
   errors.value = {};
 
+  const normalizedData = {
+    ...formData.value,
+    expectedDailyStints: normalizeNumberInput(formData.value.expectedDailyStints) ?? PROJECT.DAILY_STINTS.DEFAULT,
+    customStintDuration: normalizeNumberInput(formData.value.customStintDuration),
+  };
+
   const schema = props.mode === 'create' ? projectCreateSchema : projectUpdateSchema;
-  const result = schema.safeParse(formData.value);
+  const result = schema.safeParse(normalizedData);
 
   if (!result.success) {
     result.error.issues.forEach((issue) => {
@@ -48,8 +61,8 @@ function handleSubmit() {
 
   emit('submit', {
     name: formData.value.name.trim(),
-    expectedDailyStints: formData.value.expectedDailyStints,
-    customStintDuration: formData.value.customStintDuration,
+    expectedDailyStints: normalizeNumberInput(formData.value.expectedDailyStints) ?? PROJECT.DAILY_STINTS.DEFAULT,
+    customStintDuration: normalizeNumberInput(formData.value.customStintDuration),
     colorTag: formData.value.colorTag,
   });
 }
@@ -120,8 +133,8 @@ function handleCancel() {
       <UInput
         v-model.number="formData.customStintDuration"
         type="number"
-        min="1"
-        max="1440"
+        :min="PROJECT.CUSTOM_STINT_DURATION_MINUTES.MIN"
+        :max="PROJECT.CUSTOM_STINT_DURATION_MINUTES.MAX"
         @blur="validateForm"
       />
     </UFormField>
@@ -180,7 +193,7 @@ function handleCancel() {
         type="submit"
         color="primary"
       >
-        {{ mode === 'create' ? 'Create Project' : 'Save Changes' }}
+        {{ mode === 'create' ? 'New Project' : 'Save Changes' }}
       </UButton>
     </div>
   </form>

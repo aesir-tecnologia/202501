@@ -59,6 +59,11 @@ function resumeTimer(newEndTime: number): void {
   endTime = newEndTime;
   isPaused = false;
 
+  // Start interval if not already running (handles page refresh scenario)
+  if (!intervalId) {
+    intervalId = setInterval(tick, 1000);
+  }
+
   // Immediate tick to update UI
   tick();
 }

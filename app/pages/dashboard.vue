@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useProjectsQuery } from '~/composables/useProjects';
+import { useProjectsQuery, useArchivedProjectsQuery } from '~/composables/useProjects';
 import type { ProjectRow } from '~/lib/supabase/projects';
 
 definePageMeta({
@@ -12,16 +12,35 @@ useSeoMeta({
   description: 'Review your focus progress and personalized insights.',
 });
 
-const { data: projectsData, isLoading } = useProjectsQuery({
+const { data: projectsData, isLoading: isLoadingProjects } = useProjectsQuery({
   includeInactive: true,
 });
+const { data: archivedProjectsData, isLoading: isLoadingArchived } = useArchivedProjectsQuery();
 
 const projects = computed(() => projectsData.value ?? []);
+const archivedProjects = computed(() => archivedProjectsData.value ?? []);
+
+const selectedTab = ref<'active' | 'inactive' | 'archived'>('active');
+
+const tabItems = [
+  { label: 'Active', value: 'active', icon: 'i-lucide-circle-dot', slot: 'active' },
+  { label: 'Inactive', value: 'inactive', icon: 'i-lucide-pause-circle', slot: 'inactive' },
+  { label: 'Archived', value: 'archived', icon: 'i-lucide-archive', slot: 'archived' },
+];
+
+const activeProjects = computed(() => projects.value.filter(p => p.is_active));
+const inactiveProjects = computed(() => projects.value.filter(p => !p.is_active));
+
+const isLoading = computed(() => {
+  if (selectedTab.value === 'archived') {
+    return isLoadingArchived.value;
+  }
+  return isLoadingProjects.value;
+});
 
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showArchiveModal = ref(false);
-const showArchivedProjectsModal = ref(false);
 const selectedProject = ref<ProjectRow | null>(null);
 
 function openCreateModal() {
@@ -36,10 +55,6 @@ function openEditModal(project: ProjectRow) {
 function openArchiveModal(project: ProjectRow) {
   selectedProject.value = project;
   showArchiveModal.value = true;
-}
-
-function openArchivedProjectsModal() {
-  showArchivedProjectsModal.value = true;
 }
 </script>
 
@@ -70,40 +85,54 @@ function openArchivedProjectsModal() {
         v-else
         class="space-y-6"
       >
-        <!-- Projects Section -->
+        <!-- Projects Section with Tabs -->
         <UCard>
           <template #header>
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <h2 class="text-lg font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
-                  Your Projects
-                </h2>
-              </div>
-              <div class="flex items-center gap-2">
-                <UButton
-                  icon="i-lucide-archive"
-                  color="neutral"
-                  class="motion-safe:transition-all motion-safe:duration-200"
-                  @click="openArchivedProjectsModal"
-                >
-                  View Archived
-                </UButton>
-                <UButton
-                  icon="i-lucide-plus"
-                  class="motion-safe:transition-all motion-safe:duration-200"
-                  @click="openCreateModal"
-                >
-                  Create Project
-                </UButton>
-              </div>
+              <h2 class="text-lg font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
+                Your Projects
+              </h2>
+              <UButton
+                icon="i-lucide-plus"
+                class="motion-safe:transition-all motion-safe:duration-200"
+                @click="openCreateModal"
+              >
+                New Project
+              </UButton>
             </div>
           </template>
 
-          <ProjectList
-            :projects="projects"
-            @edit="openEditModal"
-            @archive="openArchiveModal"
-          />
+          <UTabs
+            v-model="selectedTab"
+            :items="tabItems"
+            class="w-full"
+          >
+            <template #active>
+              <div class="pt-4">
+                <ProjectList
+                  :projects="activeProjects"
+                  :is-draggable="true"
+                  @edit="openEditModal"
+                />
+              </div>
+            </template>
+
+            <template #inactive>
+              <div class="pt-4">
+                <ProjectList
+                  :projects="inactiveProjects"
+                  :is-draggable="false"
+                  @edit="openEditModal"
+                />
+              </div>
+            </template>
+
+            <template #archived>
+              <div class="pt-4">
+                <ArchivedProjectsList :projects="archivedProjects" />
+              </div>
+            </template>
+          </UTabs>
         </UCard>
       </div>
     </UPage>
@@ -124,10 +153,6 @@ function openArchivedProjectsModal() {
       v-if="selectedProject"
       v-model:open="showArchiveModal"
       :project="selectedProject"
-    />
-
-    <ArchivedProjectsModal
-      v-model:open="showArchivedProjectsModal"
     />
   </UContainer>
 </template>

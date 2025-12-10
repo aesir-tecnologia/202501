@@ -2,6 +2,7 @@
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
+import { STINT } from '~/constants';
 
 const props = defineProps<{
   project: ProjectRow
@@ -24,30 +25,11 @@ const emit = defineEmits<{
 }>();
 
 function formatDuration(minutes: number | null): string {
-  // TODO: When user_preferences is implemented, fall back to user's default_stint_duration before using global default
-  const GLOBAL_DEFAULT_DURATION = 45;
-  const duration = minutes ?? GLOBAL_DEFAULT_DURATION;
+  const duration = minutes ?? STINT.DURATION_MINUTES.DEFAULT;
   if (duration < 60) return `${duration}m`;
   const hours = Math.floor(duration / 60);
   const mins = duration % 60;
   return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-}
-
-function getColorBorderClass(colorTag: string | null): string {
-  if (!colorTag) return '';
-
-  const colorMap: Record<string, string> = {
-    red: 'border-l-red-500',
-    orange: 'border-l-orange-500',
-    amber: 'border-l-amber-500',
-    green: 'border-l-green-500',
-    teal: 'border-l-teal-500',
-    blue: 'border-l-blue-500',
-    purple: 'border-l-purple-500',
-    pink: 'border-l-pink-500',
-  };
-
-  return colorMap[colorTag] || '';
 }
 
 const hasActiveStint = computed(() => {
@@ -60,43 +42,10 @@ const canStartStint = computed(() => {
   return true;
 });
 
-const isCheckingCanStart = computed(() => false);
-
-const disabledReason = computed(() => {
-  if (!props.project.is_active) return 'Project is inactive';
-  if (props.activeStint) return 'Stop current stint to start new one';
-  return '';
-});
-
-// Computed: Progress text display
-const progressText = computed(() => {
-  const progress = props.dailyProgress;
-
-  if (progress.expected === 0) {
-    return '0 stints/day';
-  }
-
-  if (progress.isOverAchieving) {
-    return `${progress.completed}/${progress.expected} 🔥`;
-  }
-
-  return `${progress.completed}/${progress.expected} stints`;
-});
-
-// Computed: Progress bar color
-const progressBarColor = computed(() => {
-  const progress = props.dailyProgress;
-  if (progress.isMet) return 'success';
-  return 'primary';
-});
-
 // Timer state (from singleton)
-const { secondsRemaining, isPaused } = useStintTimer();
+const { isPaused, secondsRemaining } = useStintTimer();
 
-// Computed: Timer text display
-const timerText = computed(() => {
-  if (!hasActiveStint.value) return '';
-
+const formattedTime = computed(() => {
   const mins = Math.floor(secondsRemaining.value / 60);
   const secs = secondsRemaining.value % 60;
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -137,220 +86,215 @@ function handleCompleteStint() {
 <template>
   <li
     :class="[
-      'grid grid-cols-[40px_1fr_auto_auto_96px] items-center gap-3 p-4 rounded-lg border-2 motion-safe:transition-all border-l-4',
-      'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-neutral-300 dark:hover:border-neutral-700',
-      getColorBorderClass(project.color_tag),
+      'group relative flex flex-col md:flex-row items-stretch rounded-2xl transition-all duration-300 ease-out border overflow-hidden min-h-[120px]',
+      project.is_active
+        ? 'bg-white/80 dark:bg-slate-800/80 border-primary-500/30 shadow-lg hover:border-primary-500/50 hover:shadow-xl hover:-translate-y-1'
+        : 'bg-white/40 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-white/60 dark:hover:bg-slate-800/60 hover:-translate-y-0.5 opacity-80',
     ]"
   >
-    <!-- Drag handle (always reserves space, visible only for active projects) -->
-    <div :class="{ invisible: !isDraggable }">
-      <UTooltip
-        text="Reorder project"
-        :disabled="!isDraggable"
-      >
-        <button
-          type="button"
-          class="drag-handle cursor-move p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded motion-safe:transition-all motion-safe:duration-200"
-          :aria-label="isDraggable ? 'Reorder project' : undefined"
-          :disabled="!isDraggable"
-          :tabindex="isDraggable ? 0 : -1"
+    <!-- Background Progress Tint for Active Projects -->
+    <div
+      v-if="project.is_active"
+      class="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary-500 to-transparent opacity-20 transition-all duration-1000 z-0"
+      :style="{ width: `${Math.max(5, dailyProgress.percentage)}%` }"
+    />
+
+    <!-- Main Content Area -->
+    <div class="flex-1 p-5 md:p-6 flex flex-col justify-center gap-4 z-10">
+      <div class="flex items-start gap-4">
+        <!-- Drag Handle -->
+        <div
+          v-if="isDraggable"
+          class="drag-handle hidden md:flex items-center text-slate-400 dark:text-slate-600 cursor-grab active:cursor-grabbing hover:text-slate-600 dark:hover:text-slate-400 mt-1"
         >
-          <Icon
+          <UIcon
             name="i-lucide-grip-vertical"
-            class="h-5 w-5 text-neutral-400 dark:text-neutral-500"
+            class="w-5 h-5"
           />
-        </button>
-      </UTooltip>
-    </div>
+        </div>
 
-    <!-- Project Info Block -->
-    <div class="min-w-0">
-      <!-- Row 1: Name + Badges -->
-      <div class="flex items-center gap-2">
-        <h3 class="text-base font-medium leading-normal text-neutral-900 dark:text-neutral-50 truncate">
-          {{ project.name }}
-        </h3>
-        <!-- Inactive badge (only for inactive projects) -->
-        <UBadge
-          v-if="!project.is_active"
-          color="neutral"
-          variant="subtle"
-          size="sm"
-        >
-          Inactive
-        </UBadge>
-        <!-- Goal met celebration badge -->
-        <UBadge
-          v-if="project.is_active && dailyProgress.isMet"
-          color="success"
-          variant="subtle"
-          size="sm"
-        >
-          <Icon
-            name="i-lucide-check-circle"
-            class="h-3 w-3"
-          />
-        </UBadge>
+        <div class="flex-1 space-y-1">
+          <div class="flex items-center justify-between">
+            <h3
+              class="text-xl font-bold tracking-tight transition-colors"
+              :class="project.is_active ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'"
+            >
+              {{ project.name }}
+            </h3>
+
+            <!-- Numeric Badge (Mobile Only) -->
+            <div class="md:hidden flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300">
+              <span :class="{ 'text-primary-600 dark:text-primary-400': dailyProgress.completed > 0 }">{{ dailyProgress.completed }}</span>
+              <span class="text-slate-400 dark:text-slate-600">/</span>
+              <span>{{ dailyProgress.expected }}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+            <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/50 px-2 py-0.5 rounded text-xs font-medium border border-slate-200 dark:border-slate-700/50">
+              <UIcon
+                name="i-lucide-clock"
+                class="w-3 h-3 text-slate-500"
+              />
+              <span>{{ formatDuration(project.custom_stint_duration) }} / stint</span>
+            </div>
+
+            <div
+              v-if="hasActiveStint"
+              class="flex items-center gap-1.5 text-xs font-bold px-2 py-0.5 rounded border"
+              :class="isPaused ? 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' : 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20'"
+            >
+              <span
+                v-if="!isPaused"
+                class="relative flex h-2 w-2"
+              >
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <UIcon
+                v-else
+                name="i-lucide-pause"
+                class="w-3 h-3"
+              />
+              <span class="tabular-nums">{{ formattedTime }}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Row 2: Metadata icons (stints/day | duration | progress | timer) -->
-      <div class="mt-1 flex items-center gap-4 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
-        <span class="flex items-center gap-1">
-          <Icon
-            name="i-lucide-repeat"
-            class="h-4 w-4"
+      <!-- Visual Indicator: Segmented Progress Pills -->
+      <div class="md:pl-9 space-y-2">
+        <div class="flex justify-between items-end text-xs mb-1.5">
+          <span class="text-slate-500 font-medium uppercase tracking-wider">Daily Progress</span>
+          <span class="hidden md:block text-slate-400 font-medium">
+            <span class="text-slate-900 dark:text-white">{{ dailyProgress.completed }}</span> of {{ dailyProgress.expected }} completed
+          </span>
+        </div>
+        <div class="flex gap-1.5 h-2.5 w-full">
+          <div
+            v-for="index in Math.max(1, dailyProgress.expected)"
+            :key="index"
+            class="h-full flex-1 rounded-full transition-all duration-500 ease-out border border-transparent"
+            :class="[
+              index <= dailyProgress.completed
+                ? 'bg-gradient-to-r from-primary-500 to-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.4)]'
+                : 'bg-slate-200 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700',
+            ]"
+            :title="`Stint ${index}`"
           />
-          {{ project.expected_daily_stints }} stints/day
-        </span>
-        <span class="flex items-center gap-1">
-          <Icon
-            name="i-lucide-timer"
-            class="h-4 w-4"
-          />
-          {{ formatDuration(project.custom_stint_duration) }} per stint
-        </span>
-        <!-- Progress text (inline) -->
-        <span
-          v-if="project.is_active"
-          :class="[
-            'flex items-center gap-1 font-medium',
-            dailyProgress.isMet ? 'text-success-600 dark:text-success-400' : 'text-neutral-700 dark:text-neutral-300',
-          ]"
-          :aria-label="`Daily progress: ${dailyProgress.completed} of ${dailyProgress.expected} stints completed`"
-        >
-          {{ progressText }}
-        </span>
-        <!-- Timer display (when active stint) -->
-        <span
-          v-if="hasActiveStint && timerText"
-          class="flex items-center gap-1 font-mono font-semibold tabular-nums"
-          :class="isPaused ? 'text-warning-600 dark:text-warning-400' : 'text-success-600 dark:text-success-400'"
-        >
-          <Icon
-            :name="isPaused ? 'i-lucide-pause-circle' : 'i-lucide-play-circle'"
-            class="h-4 w-4"
-          />
-          {{ timerText }}
-        </span>
-      </div>
-
-      <!-- Row 3: Progress bar (if active project) -->
-      <div
-        v-if="project.is_active && dailyProgress.expected > 0"
-        class="mt-2"
-      >
-        <UProgress
-          :model-value="dailyProgress.percentage"
-          :color="progressBarColor"
-          size="sm"
-        />
+        </div>
       </div>
     </div>
 
-    <!-- Toggle Switch -->
-    <UTooltip :text="project.is_active ? 'Deactivate project' : 'Activate project'">
-      <span>
-        <USwitch
-          :model-value="project.is_active ?? true"
-          :loading="isToggling"
-          :disabled="isToggling"
-          aria-label="Toggle project active status"
-          @update:model-value="handleToggleActive"
-        />
-      </span>
-    </UTooltip>
+    <!-- Actions Section -->
+    <div class="flex items-stretch border-t md:border-t-0 md:border-l border-white/5 bg-transparent z-10">
+      <!-- Left Action Group: Toggle & Settings -->
+      <div class="flex items-center gap-3 px-6 py-4 md:py-0 md:bg-gray-50/50 md:dark:bg-white/[0.02] md:border-r border-slate-200 dark:border-white/5">
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider md:hidden">Status</span>
+          <UTooltip :text="project.is_active ? 'Deactivate project' : 'Activate project'">
+            <USwitch
+              :model-value="project.is_active ?? true"
+              :loading="isToggling"
+              :disabled="isToggling"
+              size="lg"
+              checked-icon="i-lucide-check"
+              unchecked-icon="i-lucide-power"
+              @update:model-value="handleToggleActive"
+            />
+          </UTooltip>
+        </div>
 
-    <!-- Settings Button -->
-    <UTooltip text="Edit project">
-      <span>
-        <UButton
-          icon="i-lucide-settings"
-          color="neutral"
-          variant="ghost"
-          size="sm"
-          aria-label="Edit project"
-          class="motion-safe:transition-all motion-safe:duration-200"
-          @click="handleEdit"
-        />
-      </span>
-    </UTooltip>
+        <div class="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-1 hidden md:block" />
 
-    <!-- Action Buttons -->
-    <div class="flex flex-col items-stretch gap-2 w-24">
-      <!-- Play button (when no active stint and project is active) -->
-      <UTooltip
-        v-if="canStartStint"
-        text="Start stint"
-      >
-        <span>
+        <UTooltip text="Settings">
           <UButton
-            icon="i-lucide-play"
+            icon="i-lucide-settings-2"
             color="neutral"
             variant="ghost"
-            size="md"
-            :loading="isStarting || isCheckingCanStart"
-            :disabled="isStarting || isCheckingCanStart"
-            aria-label="Start stint"
-            @click="handleStartStint"
+            size="sm"
+            class="text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-200 transition-colors rounded-full"
+            aria-label="Edit project settings"
+            @click="handleEdit"
           />
-        </span>
-      </UTooltip>
+        </UTooltip>
+      </div>
 
-      <!-- Pause/Resume button (when stint is active on this project) -->
-      <UTooltip
-        v-if="hasActiveStint"
-        :text="isPaused ? 'Resume stint' : 'Pause stint'"
-      >
-        <span>
-          <UButton
-            :icon="isPaused ? 'i-lucide-play' : 'i-lucide-pause'"
-            color="warning"
-            variant="ghost"
-            size="md"
-            :loading="isPausing"
-            :disabled="isPausing || isCompleting"
-            :aria-label="isPaused ? 'Resume stint' : 'Pause stint'"
-            @click="isPaused ? handleResumeStint() : handlePauseStint()"
-          />
-        </span>
-      </UTooltip>
+      <!-- Right Action Group: Play/Pause/Stop (Dark Panel) -->
+      <div class="w-20 bg-gray-100/50 dark:bg-[#0B1120] border-l border-slate-200 dark:border-white/5 flex flex-col items-center justify-center gap-4 py-4 md:py-0 transition-colors hover:bg-gray-200/50 dark:hover:bg-black/40">
+        <div
+          v-if="hasActiveStint"
+          class="flex flex-col gap-3"
+        >
+          <UTooltip :text="isPaused ? 'Resume' : 'Pause'">
+            <button
+              :disabled="isPausing || isCompleting"
+              :aria-label="isPaused ? 'Resume stint' : 'Pause stint'"
+              class="group/btn p-1.5 rounded-lg border border-yellow-500/30 hover:border-yellow-500 hover:bg-yellow-500/10 transition-all text-yellow-600 dark:text-yellow-500 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-yellow-500/30 disabled:hover:bg-transparent"
+              @click="isPaused ? handleResumeStint() : handlePauseStint()"
+            >
+              <UIcon
+                v-if="isPausing"
+                name="i-lucide-loader-2"
+                class="w-[18px] h-[18px] animate-spin"
+              />
+              <UIcon
+                v-else
+                :name="isPaused ? 'i-lucide-play' : 'i-lucide-pause'"
+                class="w-[18px] h-[18px] opacity-80 group-hover/btn:opacity-100 fill-current"
+              />
+            </button>
+          </UTooltip>
 
-      <!-- Stop button (when stint is active on this project) -->
-      <UTooltip
-        v-if="hasActiveStint"
-        text="Stop stint"
-      >
-        <span>
-          <UButton
-            icon="i-lucide-square"
-            color="error"
-            variant="ghost"
-            size="md"
-            :loading="isCompleting"
-            :disabled="isPausing || isCompleting"
-            aria-label="Stop stint"
-            @click="handleCompleteStint"
-          />
-        </span>
-      </UTooltip>
+          <UTooltip text="Stop">
+            <button
+              :disabled="isPausing || isCompleting"
+              aria-label="Stop stint"
+              class="group/btn p-1.5 rounded-lg border border-red-500/30 hover:border-red-500 hover:bg-red-500/10 transition-all text-red-600 dark:text-red-500 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-red-500/30 disabled:hover:bg-transparent"
+              @click="handleCompleteStint"
+            >
+              <UIcon
+                v-if="isCompleting"
+                name="i-lucide-loader-2"
+                class="w-[18px] h-[18px] animate-spin"
+              />
+              <UIcon
+                v-else
+                name="i-lucide-square"
+                class="w-[18px] h-[18px] opacity-80 group-hover/btn:opacity-100 fill-current"
+              />
+            </button>
+          </UTooltip>
+        </div>
 
-      <!-- Disabled play button with tooltip (when can't start) -->
-      <UTooltip
-        v-if="!canStartStint && !hasActiveStint"
-        :text="disabledReason || 'Cannot start stint'"
-      >
-        <span>
-          <UButton
-            icon="i-lucide-play"
-            color="neutral"
-            variant="ghost"
-            size="md"
-            :loading="isCheckingCanStart"
-            :disabled="true"
-            aria-label="Start stint (disabled)"
-          />
-        </span>
-      </UTooltip>
+        <div v-else>
+          <UTooltip :text="project.is_active ? 'Start Session' : 'Activate project to start'">
+            <button
+              :disabled="!canStartStint || isStarting"
+              aria-label="Start stint"
+              class="group/play p-3 rounded-xl border transition-all duration-300 flex items-center justify-center"
+              :class="[
+                canStartStint && !isStarting
+                  ? 'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-white hover:bg-white/5 hover:scale-110 shadow-lg'
+                  : 'border-slate-200 dark:border-slate-800 text-slate-300 dark:text-slate-700 cursor-not-allowed opacity-50',
+              ]"
+              @click="handleStartStint"
+            >
+              <UIcon
+                v-if="isStarting"
+                name="i-lucide-loader-2"
+                class="w-6 h-6 animate-spin"
+              />
+              <UIcon
+                v-else
+                name="i-lucide-play"
+                class="w-6 h-6 fill-current"
+                :class="{ 'ml-0.5': canStartStint }"
+              />
+            </button>
+          </UTooltip>
+        </div>
+      </div>
     </div>
   </li>
 </template>

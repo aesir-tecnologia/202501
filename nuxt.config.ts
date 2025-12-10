@@ -27,6 +27,7 @@ export default defineNuxtConfig({
         // },
       ],
     },
+    viewTransition: true,
   },
   css: ['~/assets/css/main.css'],
   colorMode: {

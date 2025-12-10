@@ -262,7 +262,8 @@ function startTimer(stint: StintRow): void {
   }
   const startedAt = startedAtDate.getTime();
   const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000;
-  const endTime = startedAt + plannedDurationMs;
+  const pausedDurationMs = (stint.paused_duration || 0) * 1000;
+  const endTime = startedAt + plannedDurationMs + pausedDurationMs;
 
   // Send start message to worker
   const message: WorkerOutgoingMessage = {
@@ -498,11 +499,6 @@ async function handleTimerComplete(): Promise<void> {
 
   // Show notifications
   showNotification(projectName);
-  globalTimerState.toast?.add({
-    title: 'Stint Completed!',
-    description: `Your stint for ${projectName} has ended.`,
-    color: 'success',
-  });
 }
 
 /**
