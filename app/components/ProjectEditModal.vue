@@ -65,27 +65,11 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
           :project="project"
           mode="edit"
           :loading="isPending"
+          show-archive
           @submit="handleSubmit"
           @cancel="closeModal"
+          @archive="handleArchiveClick"
         />
-
-        <template #footer>
-          <div class="flex justify-between items-center pt-4 border-t border-neutral-200 dark:border-neutral-800">
-            <UTooltip text="Archive this project">
-              <span>
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  icon="i-lucide-archive"
-                  class="transition-all duration-200"
-                  @click="handleArchiveClick"
-                >
-                  Archive Project
-                </UButton>
-              </span>
-            </UTooltip>
-          </div>
-        </template>
       </UCard>
     </template>
   </UModal>
