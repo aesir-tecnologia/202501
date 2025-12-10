@@ -6,11 +6,13 @@ import type { ProjectRow } from '~/lib/supabase/projects';
 const props = defineProps<{
   project?: ProjectRow
   mode: 'create' | 'edit'
+  showArchive?: boolean
 }>();
 
 const emit = defineEmits<{
   submit: [data: { name: string, expectedDailyStints: number, customStintDuration: number | null, colorTag: ProjectColor | null }]
   cancel: []
+  archive: []
 }>();
 
 // Form state
@@ -168,33 +170,54 @@ function handleCancel() {
           :key="color"
           type="button"
           :class="[
-            'w-10 h-10 rounded-md border-2 motion-safe:transition-all',
+            'w-10 h-10 rounded-md border-2 motion-safe:transition-all flex items-center justify-center',
             getColorClasses(color).bg,
             formData.colorTag === color
-              ? `${getColorClasses(color).border} ring-2 ${getColorClasses(color).ring}`
+              ? 'ring-2 ring-offset-2 ring-neutral-900 dark:ring-white border-transparent'
               : 'border-transparent hover:border-neutral-300 dark:hover:border-neutral-600',
           ]"
           :aria-label="`Select ${color} color`"
           @click="selectColor(color)"
-        />
+        >
+          <Icon
+            v-if="formData.colorTag === color"
+            name="i-lucide-check"
+            class="h-5 w-5 text-white"
+          />
+        </button>
       </div>
     </UFormField>
 
-    <div class="flex justify-end gap-2 pt-4">
+    <div
+      class="flex items-center pt-4"
+      :class="props.showArchive ? 'justify-between' : 'justify-end'"
+    >
       <UButton
+        v-if="props.showArchive"
         type="button"
         color="neutral"
         variant="ghost"
-        @click="handleCancel"
+        icon="i-lucide-archive"
+        @click="emit('archive')"
       >
-        Cancel
+        Archive Project
       </UButton>
-      <UButton
-        type="submit"
-        color="primary"
-      >
-        {{ mode === 'create' ? 'New Project' : 'Save Changes' }}
-      </UButton>
+      <div class="flex gap-2">
+        <UButton
+          type="button"
+          color="neutral"
+          variant="ghost"
+          @click="handleCancel"
+        >
+          Cancel
+        </UButton>
+        <UButton
+          type="submit"
+          color="primary"
+        >
+          {{ mode === 'create' ? 'New Project' : 'Save Changes' }}
+        </UButton>
+      </div>
     </div>
   </form>
 </template>
