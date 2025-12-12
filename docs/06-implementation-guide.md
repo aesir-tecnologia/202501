@@ -11,16 +11,16 @@
 ### User Timezone Storage
 
 - Captured during registration (browser timezone detected via Intl.DateTimeFormat)
-- Stored in `users.timezone` as IANA timezone string (e.g., "America/New_York")
+- Stored in `user_profiles.timezone` as IANA timezone string (e.g., "America/New_York")
 - User can change in settings (dropdown of common timezones)
 
 ### Daily Reset Logic
 
 - Scheduled task runs every hour at :00
-- Queries users whose local midnight occurred in the last hour: 
+- Queries users whose local midnight occurred in the last hour:
   ```sql
-  SELECT * FROM users 
-  WHERE EXTRACT(HOUR FROM now() AT TIME ZONE timezone) = 0 
+  SELECT * FROM user_profiles
+  WHERE EXTRACT(HOUR FROM now() AT TIME ZONE timezone) = 0
     AND EXTRACT(MINUTE FROM now() AT TIME ZONE timezone) < 10
   ```
 - Resets daily progress counters for matched users
@@ -48,19 +48,21 @@
 
 ## Offline Sync Strategy
 
-### Offline Capabilities
+> **Note:** Offline capabilities are planned for a future release. The architecture below describes the intended implementation.
+
+### Offline Capabilities (Future)
 
 - Start/pause/resume/stop stints (queued locally)
 - View cached dashboard data
 - Timer continues in Web Worker using local system clock
 
-### Offline Storage
+### Offline Storage (Future)
 
 - IndexedDB for queued operations (via Dexie.js)
 - LocalStorage for last known dashboard state
 - Service Worker for app shell caching (PWA)
 
-### Online Reconciliation
+### Online Reconciliation (Future)
 
 **1. Detecting Offline State:**
 - `navigator.onLine` event listener
@@ -165,11 +167,11 @@ At any moment, the elapsed working time in seconds is:
 
 ```
 If status = 'active':
-  working_seconds = EXTRACT(EPOCH FROM (now() - started_at)) - paused_duration
+  working_seconds = EXTRACT(EPOCH FROM (now() - started_at)) - COALESCE(paused_duration, 0)
 
 If status = 'paused':
   current_pause_seconds = EXTRACT(EPOCH FROM (now() - paused_at))
-  working_seconds = EXTRACT(EPOCH FROM (now() - started_at)) - paused_duration - current_pause_seconds
+  working_seconds = EXTRACT(EPOCH FROM (now() - started_at)) - COALESCE(paused_duration, 0) - current_pause_seconds
 ```
 
 Timer displays remaining time:
@@ -189,7 +191,7 @@ remaining_seconds = (planned_duration * 60) - working_seconds
 - Both requests reach server
 
 **Resolution:**
-- Server uses optimistic locking on `users.version` field
+- Server uses optimistic locking on `user_profiles.version` field
 - First request increments version, succeeds
 - Second request fails with 409 Conflict (version mismatch)
 - Device B shows: "You already started a stint on another device. View it?"
@@ -200,7 +202,7 @@ remaining_seconds = (planned_duration * 60) - working_seconds
 - Before real-time event propagates, user resumes on Device B
 
 **Resolution:**
-- Each pause/resume increments stint's `version` field
+- Each pause/resume increments `user_profiles.version` via database trigger
 - Server rejects stale operation with 409 Conflict
 - Frontend refetches latest stint state
 - UI updates to show current state
@@ -232,25 +234,34 @@ remaining_seconds = (planned_duration * 60) - working_seconds
 ### Implementation
 
 ```sql
--- Optimistic locking check before stint start
-CREATE FUNCTION start_stint(p_user_id UUID, p_project_id UUID, p_version INTEGER) 
-RETURNS SETOF stints AS $$
+-- Optimistic locking validation before stint start
+CREATE FUNCTION validate_stint_start(p_user_id UUID, p_project_id UUID, p_version INTEGER)
+RETURNS TABLE(can_start BOOLEAN, existing_stint_id UUID, conflict_message TEXT) AS $$
+DECLARE
+  v_current_version INTEGER;
 BEGIN
-  -- Check version matches (no concurrent operations)
-  IF (SELECT version FROM users WHERE id = p_user_id) != p_version THEN
-    RAISE EXCEPTION 'Conflict: User version mismatch';
+  -- Check version matches (optimistic locking)
+  SELECT version INTO v_current_version
+  FROM user_profiles WHERE id = p_user_id;
+
+  IF v_current_version IS NULL THEN
+    RETURN QUERY SELECT false, NULL::UUID, 'User not found'::TEXT;
+    RETURN;
   END IF;
-  
+
+  IF v_current_version != p_version THEN
+    RETURN QUERY SELECT false, NULL::UUID, 'Version mismatch - concurrent operation detected'::TEXT;
+    RETURN;
+  END IF;
+
   -- Check no active stints
   IF EXISTS (SELECT 1 FROM stints WHERE user_id = p_user_id AND status IN ('active', 'paused')) THEN
-    RAISE EXCEPTION 'Conflict: Active stint exists';
+    RETURN QUERY SELECT false, NULL::UUID, 'Active stint exists'::TEXT;
+    RETURN;
   END IF;
-  
-  -- Increment version
-  UPDATE users SET version = version + 1 WHERE id = p_user_id;
-  
-  -- Create stint
-  RETURN QUERY INSERT INTO stints (...) VALUES (...) RETURNING *;
+
+  -- Can start (caller creates stint via INSERT, trigger increments version)
+  RETURN QUERY SELECT true, NULL::UUID, NULL::TEXT;
 END;
 $$ LANGUAGE plpgsql;
 ```
@@ -310,16 +321,16 @@ self.onmessage = (e) => {
 
 ### Auto-Completion Fallback
 
-- pg_cron job runs every 30 seconds
+- pg_cron job runs every 2 minutes (`*/2 * * * *`)
 - Queries active stints where working time has reached planned duration:
   ```sql
   SELECT * FROM stints
   WHERE status = 'active'
-    AND (EXTRACT(EPOCH FROM (now() - started_at)) - paused_duration)
+    AND (EXTRACT(EPOCH FROM (now() - started_at)) - COALESCE(paused_duration, 0))
         >= (planned_duration * 60)
   ```
   - `EXTRACT(EPOCH FROM ...)` returns seconds
-  - `paused_duration` is stored in seconds
+  - `paused_duration` is stored in seconds (COALESCE handles NULL safety)
   - `planned_duration` is stored in minutes, multiplied by 60 for comparison
 - Auto-completes matched stints by calling `complete_stint()` function
 - If browser closed during stint, server still completes on time
