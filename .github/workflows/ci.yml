@@ -72,8 +72,8 @@ jobs:
       - name: Get Supabase credentials
         id: supabase
         run: |
-          echo "anon_key=$(supabase status -o env | grep ANON_KEY | cut -d '=' -f2)" >> $GITHUB_OUTPUT
-          echo "service_role_key=$(supabase status -o env | grep SERVICE_ROLE_KEY | cut -d '=' -f2)" >> $GITHUB_OUTPUT
+          echo "anon_key=$(supabase status -o env | grep '^ANON_KEY=' | cut -d '=' -f2 | tr -d '\"')" >> $GITHUB_OUTPUT
+          echo "service_role_key=$(supabase status -o env | grep '^SERVICE_ROLE_KEY=' | cut -d '=' -f2 | tr -d '\"')" >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         run: npm ci
