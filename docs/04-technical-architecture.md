@@ -57,7 +57,7 @@
   - Reactive state management
   - Component-based architecture
   - TypeScript support
-- **Nuxt 3** (Vue meta-framework)
+- **Nuxt 4** (Vue meta-framework)
   - File-based routing
   - SSR/SSG capabilities (for marketing pages)
   - Auto-imports for components
@@ -88,12 +88,45 @@
   - Cache snapshot and restore on error
 - **Composables**
   - useStintTimer (Web Worker singleton for accurate timing)
-  - useRealtime (Supabase subscription wrapper)
-  - useAuth (Auth state management)
+  - useProjects / useStints (TanStack Query data access)
+  - useAuthUser (Auth state management)
+
+### Data Layer Architecture
+
+The codebase follows a strict three-layer data access pattern:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                  Component Layer                         │
+│    Uses composables, handles UI state and errors        │
+└────────────────────────┬────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────┐
+│               Composable Layer (app/composables/)        │
+│  • TanStack Query hooks for caching & mutations         │
+│  • Zod validation before mutations                      │
+│  • Optimistic updates with automatic rollback           │
+│  • camelCase → snake_case transformation                │
+└────────────────────────┬────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────┐
+│                Schema Layer (app/schemas/)               │
+│  • Zod schemas for validation                           │
+│  • Type inference for TypeScript                        │
+│  • Shared constants and limits                          │
+└────────────────────────┬────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────┐
+│              Database Layer (app/lib/supabase/)          │
+│  • Direct Supabase queries with type safety             │
+│  • User authentication enforcement                      │
+│  • Result<T> return pattern for error handling          │
+└─────────────────────────────────────────────────────────┘
+```
 
 ### Styling
 
-- **Tailwind CSS 3** (via Nuxt UI)
+- **Tailwind CSS 4** (via Nuxt UI)
   - Utility-first styling
   - Responsive design system
   - Dark mode variants
@@ -113,6 +146,17 @@
   - Automatic reconnection
   - Subscription management
   - Broadcast events for stint updates
+
+### Utility Libraries
+
+- **VueUse** (@vueuse/core, @vueuse/integrations)
+  - Composition API utilities
+  - Browser API wrappers (useStorage, useEventListener)
+  - Third-party integrations
+- **SortableJS**
+  - Drag-and-drop for project reordering
+  - Touch-friendly interactions
+  - Integrated via VueUse's useSortable
 
 ### Background Processing
 
@@ -173,7 +217,7 @@
   - Validation handled via Zod schemas on client, database constraints on server
 
 - **Scheduled Tasks via pg_cron**
-  - `auto_complete_stints`: Auto-completes stints at planned end time (runs every 30 sec)
+  - `auto_complete_stints`: Auto-completes stints at planned end time (runs every 2 min)
   - `aggregate_daily_stats`: Pre-calculates daily summaries (runs at midnight)
 
 - **CSV Export**
