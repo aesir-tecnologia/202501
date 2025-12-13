@@ -87,6 +87,22 @@ export default defineNuxtConfig({
     build: {
       sourcemap: false,
     },
+    resolve: {
+      alias: {
+        // Force ESM resolution for supabase-js to avoid CommonJS "exports is not defined" error
+        '@supabase/supabase-js': '@supabase/supabase-js/dist/module/index.js',
+      },
+    },
+    optimizeDeps: {
+      include: [
+        '@supabase/supabase-js',
+        '@supabase/auth-js',
+        '@supabase/postgrest-js',
+        '@supabase/realtime-js',
+        '@supabase/storage-js',
+        '@supabase/functions-js',
+      ],
+    },
   },
   eslint: {
     config: {
