@@ -55,23 +55,29 @@ async function handleResume(): Promise<void> {
 }
 
 /**
- * Stop the stint (show notes modal first - placeholder for Task 10)
+ * Stop the stint (show notes modal first)
  */
 function handleStopClick(): void {
-  // TODO: Task 10 - Show StintCompletionModal instead
-  // For now, complete immediately without notes
-  handleStopConfirm();
+  showNotesModal.value = true;
 }
 
 /**
- * Confirm stop and complete the stint
+ * Cancel the stop action
  */
-async function handleStopConfirm(): Promise<void> {
+function handleStopCancel(): void {
+  showNotesModal.value = false;
+  completionNotes.value = '';
+}
+
+/**
+ * Confirm stop and complete the stint with optional notes
+ */
+async function handleStopConfirm(notes: string): Promise<void> {
   try {
     await completeStint({
       stintId: props.stint.id,
       completionType: 'manual',
-      notes: completionNotes.value || undefined,
+      notes: notes || undefined,
     });
 
     // Reset modal state
@@ -134,5 +140,13 @@ const isAnyPending = computed(() => isPausing.value || isResuming.value || isCom
     >
       Stop
     </UButton>
+
+    <!-- Stint Completion Modal -->
+    <StintCompletionModal
+      v-model:open="showNotesModal"
+      :stint-id="stint.id"
+      @cancel="handleStopCancel"
+      @confirm="handleStopConfirm"
+    />
   </div>
 </template>
