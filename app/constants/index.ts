@@ -14,6 +14,11 @@ export const PROJECT = {
     MIN: 5,
     MAX: 480,
   },
+  PROGRESS_BAR: {
+    // Maximum visual segments before switching to proportional display.
+    // Prevents overcrowding on mobile devices when expectedDailyStints > 10.
+    MAX_SEGMENTS: 10,
+  },
 } as const;
 
 // Stint Constants

@@ -123,18 +123,16 @@ const formattedTime = computed(() => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 });
 
-const MAX_PROGRESS_SEGMENTS = 10;
-
 const progressSegmentsCount = computed(() => {
   const expected = Math.max(0, props.dailyProgress.expected);
-  return Math.max(1, Math.min(expected, MAX_PROGRESS_SEGMENTS));
+  return Math.max(1, Math.min(expected, PROJECT.PROGRESS_BAR.MAX_SEGMENTS));
 });
 
 const filledSegmentsCount = computed(() => {
   const expected = Math.max(0, props.dailyProgress.expected);
   const completed = Math.max(0, props.dailyProgress.completed);
 
-  if (expected <= MAX_PROGRESS_SEGMENTS) return Math.min(completed, progressSegmentsCount.value);
+  if (expected <= PROJECT.PROGRESS_BAR.MAX_SEGMENTS) return Math.min(completed, progressSegmentsCount.value);
   if (expected === 0) return 0;
 
   const ratio = Math.min(completed / expected, 1);
@@ -347,12 +345,12 @@ function handleCompleteStint() {
                 ? [projectColor?.bg ?? 'bg-gradient-to-r from-primary-500 to-indigo-400', 'shadow-[0_0_10px_rgba(99,102,241,0.35)] ring-1 ring-inset ring-white/25']
                 : 'bg-slate-200/90 dark:bg-slate-800/80 hover:bg-slate-300/90 dark:hover:bg-slate-700/80 ring-1 ring-inset ring-slate-200/60 dark:ring-slate-700/30',
             ]"
-            :title="dailyProgress.expected <= MAX_PROGRESS_SEGMENTS ? `Stint ${index}` : `Progress segment ${index} of ${progressSegmentsCount}`"
+            :title="dailyProgress.expected <= PROJECT.PROGRESS_BAR.MAX_SEGMENTS ? `Stint ${index}` : `Progress segment ${index} of ${progressSegmentsCount}`"
           />
         </div>
 
         <p
-          v-if="dailyProgress.expected > MAX_PROGRESS_SEGMENTS"
+          v-if="dailyProgress.expected > PROJECT.PROGRESS_BAR.MAX_SEGMENTS"
           class="text-[11px] leading-tight text-slate-400 dark:text-slate-500"
         >
           Showing {{ progressSegmentsCount }} segments (goal is {{ dailyProgress.expected }} stints).
