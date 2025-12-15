@@ -37,6 +37,10 @@ const { mutateAsync: pauseStint, isPending: isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint();
 const { mutateAsync: completeStint, isPending: isCompleting } = useCompleteStint();
 
+// Completion modal state
+const showCompletionModal = ref(false);
+const stintToComplete = ref<StintRow | null>(null);
+
 // Query all stints for daily progress calculation
 const { data: allStints } = useStintsQuery();
 
@@ -234,11 +238,24 @@ async function handleResumeStint(stint: StintRow): Promise<void> {
   }
 }
 
-async function handleCompleteStint(stint: StintRow): Promise<void> {
+function handleCompleteStint(stint: StintRow): void {
+  stintToComplete.value = stint;
+  showCompletionModal.value = true;
+}
+
+function handleCompletionCancel(): void {
+  showCompletionModal.value = false;
+  stintToComplete.value = null;
+}
+
+async function handleCompletionConfirm(notes: string): Promise<void> {
+  if (!stintToComplete.value) return;
+
   try {
     await completeStint({
-      stintId: stint.id,
+      stintId: stintToComplete.value.id,
       completionType: 'manual',
+      notes: notes || undefined,
     });
     screenReaderAnnouncement.value = 'Stint completed';
   }
@@ -250,6 +267,10 @@ async function handleCompleteStint(stint: StintRow): Promise<void> {
       color: 'error',
       icon: 'i-lucide-alert-circle',
     });
+  }
+  finally {
+    showCompletionModal.value = false;
+    stintToComplete.value = null;
   }
 }
 </script>
@@ -314,5 +335,13 @@ async function handleCompleteStint(stint: StintRow): Promise<void> {
         @complete-stint="handleCompleteStint"
       />
     </ul>
+
+    <!-- Stint Completion Modal -->
+    <StintCompletionModal
+      v-model:open="showCompletionModal"
+      :stint-id="stintToComplete?.id ?? ''"
+      @cancel="handleCompletionCancel"
+      @confirm="handleCompletionConfirm"
+    />
   </div>
 </template>
