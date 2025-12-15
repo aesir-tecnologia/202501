@@ -41,7 +41,7 @@ watch(isOpen, (open) => {
   <UModal
     v-model:open="isOpen"
     title="Complete Stint"
-    description="Add optional notes about what you accomplished"
+    description="Add optional notes about what you accomplished during this stint."
   >
     <template #content>
       <UCard>

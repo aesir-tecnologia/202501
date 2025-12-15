@@ -2,6 +2,7 @@
 import { projectCreateSchema, projectUpdateSchema, type ProjectColor } from '~/schemas/projects';
 import { PROJECT } from '~/constants';
 import type { ProjectRow } from '~/lib/supabase/projects';
+import { getColorClasses } from '~/utils/project-colors';
 
 const props = defineProps<{
   project?: ProjectRow
@@ -70,21 +71,6 @@ function handleSubmit() {
 // Color selection helper
 function selectColor(color: ProjectColor | null) {
   formData.value.colorTag = color;
-}
-
-// Get TailwindCSS classes for each color
-function getColorClasses(color: ProjectColor) {
-  const colorMap: Record<ProjectColor, { bg: string, ring: string, border: string }> = {
-    red: { bg: 'bg-red-500', ring: 'ring-red-500', border: 'border-red-500' },
-    orange: { bg: 'bg-orange-500', ring: 'ring-orange-500', border: 'border-orange-500' },
-    amber: { bg: 'bg-amber-500', ring: 'ring-amber-500', border: 'border-amber-500' },
-    green: { bg: 'bg-green-500', ring: 'ring-green-500', border: 'border-green-500' },
-    teal: { bg: 'bg-teal-500', ring: 'ring-teal-500', border: 'border-teal-500' },
-    blue: { bg: 'bg-blue-500', ring: 'ring-blue-500', border: 'border-blue-500' },
-    purple: { bg: 'bg-purple-500', ring: 'ring-purple-500', border: 'border-purple-500' },
-    pink: { bg: 'bg-pink-500', ring: 'ring-pink-500', border: 'border-pink-500' },
-  };
-  return colorMap[color];
 }
 
 // Handle cancel
