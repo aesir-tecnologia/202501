@@ -118,6 +118,31 @@ describe('streaks.ts - Integration Tests', () => {
       expect(result.data!.currentStreak).toBe(1);
     });
 
+    it('should break streak with exactly 2-day gap (edge case for 1-day grace period)', async () => {
+      // Stint today and 2 days ago (no stint yesterday)
+      // With 1-day grace period, this should NOT count as consecutive
+      await createCompletedStintOnDate(
+        serviceClient,
+        testProject.id,
+        testUserId,
+        getDateDaysAgoUTC(0),
+      );
+      await createCompletedStintOnDate(
+        serviceClient,
+        testProject.id,
+        testUserId,
+        getDateDaysAgoUTC(2),
+      );
+
+      const result = await getStreak(authenticatedClient, TEST_TIMEZONE);
+
+      expect(result.error).toBeNull();
+      // Current streak should be 1 (only today counts, 2-day-old stint breaks the chain)
+      expect(result.data!.currentStreak).toBe(1);
+      // Both days should still contribute to longest_streak calculation separately
+      expect(result.data!.longestStreak).toBe(1);
+    });
+
     it('should mark as at-risk when last stint was yesterday and no stint today', async () => {
       await createCompletedStintOnDate(
         serviceClient,

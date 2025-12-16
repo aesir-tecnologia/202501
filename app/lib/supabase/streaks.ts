@@ -124,22 +124,13 @@ export async function updateStreakAfterCompletion(
 
   const result = data[0]!;
 
-  // Note: update_user_streak doesn't return is_at_risk, so we calculate it here
-  // If last_stint_date is today, not at risk. Otherwise, we need to fetch fresh data.
-  // For simplicity, we'll call getStreak to get the is_at_risk status
-  const freshData = await getStreak(client, timezone);
-  if (freshData.error) {
-    // Return update result without is_at_risk if we can't fetch it
-    return {
-      data: {
-        currentStreak: result.current_streak,
-        longestStreak: result.longest_streak,
-        lastStintDate: result.last_stint_date,
-        isAtRisk: false, // Default to false if we can't determine
-      },
-      error: null,
-    };
-  }
-
-  return freshData;
+  return {
+    data: {
+      currentStreak: result.current_streak,
+      longestStreak: result.longest_streak,
+      lastStintDate: result.last_stint_date,
+      isAtRisk: result.is_at_risk,
+    },
+    error: null,
+  };
 }

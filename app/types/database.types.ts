@@ -350,6 +350,7 @@ export type Database = {
         Args: { p_timezone?: string; p_user_id: string }
         Returns: {
           current_streak: number
+          is_at_risk: boolean
           last_stint_date: string
           longest_streak: number
         }[]
