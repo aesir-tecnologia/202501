@@ -74,7 +74,7 @@
 
 ---
 
-## Phase 3: Stint Management Core (Weeks 5-7) `PARTIAL`
+## Phase 3: Stint Management Core (Weeks 5-7) `COMPLETED`
 
 **Goal:** Implement start/stop/pause/resume with single active stint enforcement.
 
@@ -103,8 +103,8 @@
    - Show Start/Stop/Pause/Resume buttons based on state
    - Display countdown timer during active stint
    - Highlight active project card
-8. Implement completion logic: `PARTIAL`
-   - Manual stop with optional notes modal *(notes modal not implemented)*
+8. Implement completion logic: `COMPLETED`
+   - Manual stop with optional notes modal `COMPLETED`
    - Auto-complete when timer reaches 0 `COMPLETED`
    - Browser notification on completion `COMPLETED`
 9. Handle interruptions: `PARTIAL`
