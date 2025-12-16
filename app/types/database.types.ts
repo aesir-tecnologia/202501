@@ -232,6 +232,15 @@ export type Database = {
         Returns: number
       }
       calculate_streak: { Args: { p_user_id: string }; Returns: number }
+      calculate_streak_with_tz: {
+        Args: { p_timezone?: string; p_user_id: string }
+        Returns: {
+          current_streak: number
+          is_at_risk: boolean
+          last_stint_date: string
+          longest_streak: number
+        }[]
+      }
       complete_stint: {
         Args: {
           p_completion_type: Database["public"]["Enums"]["completion_type"]
@@ -336,6 +345,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      update_user_streak: {
+        Args: { p_timezone?: string; p_user_id: string }
+        Returns: {
+          current_streak: number
+          last_stint_date: string
+          longest_streak: number
+        }[]
       }
       validate_stint_start: {
         Args: { p_project_id: string; p_user_id: string; p_version: number }

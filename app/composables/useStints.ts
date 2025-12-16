@@ -28,6 +28,7 @@ import {
   type StintInterruptPayload,
   type SyncCheckOutput,
 } from '~/schemas/stints';
+import { streakKeys } from '~/composables/useStreaks';
 
 // ============================================================================
 // Query Key Factory
@@ -416,10 +417,13 @@ export function useCompleteStint() {
       }
     },
     onSuccess: (_data, payload) => {
-      // Invalidate and refetch
+      // Invalidate and refetch stint queries
       queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
       queryClient.invalidateQueries({ queryKey: stintKeys.detail(payload.stintId) });
       queryClient.invalidateQueries({ queryKey: stintKeys.active() });
+
+      // Invalidate streak cache to trigger refetch and update UI
+      queryClient.invalidateQueries({ queryKey: streakKeys.all });
     },
   });
 }
