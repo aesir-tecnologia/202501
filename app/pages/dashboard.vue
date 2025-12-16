@@ -66,6 +66,9 @@ function openArchiveModal(project: ProjectRow) {
         description="Manage your projects and start focused work sessions"
       />
 
+      <!-- Streak Banner -->
+      <StreakBanner />
+
       <!-- Loading State -->
       <div
         v-if="isLoading"

@@ -28,6 +28,8 @@ import {
   type StintInterruptPayload,
   type SyncCheckOutput,
 } from '~/schemas/stints';
+import { streakKeys, getBrowserTimezone } from '~/composables/useStreaks';
+import { updateStreakAfterCompletion } from '~/lib/supabase/streaks';
 
 // ============================================================================
 // Query Key Factory
@@ -415,11 +417,22 @@ export function useCompleteStint() {
         queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
     },
-    onSuccess: (_data, payload) => {
-      // Invalidate and refetch
+    onSuccess: async (_data, payload) => {
+      // Invalidate and refetch stint queries
       queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
       queryClient.invalidateQueries({ queryKey: stintKeys.detail(payload.stintId) });
       queryClient.invalidateQueries({ queryKey: stintKeys.active() });
+
+      // Update the user_streaks materialized cache table (fire-and-forget)
+      // This keeps the cache in sync for faster reads; errors don't block UI
+      // as calculate_streak_with_tz RPC still works without it
+      const timezone = getBrowserTimezone();
+      updateStreakAfterCompletion(client, timezone).catch((err) => {
+        console.warn('[Streak] Failed to update streak cache:', err);
+      });
+
+      // Invalidate streak cache to trigger refetch and update UI
+      queryClient.invalidateQueries({ queryKey: streakKeys.all });
     },
   });
 }
@@ -838,6 +851,9 @@ export function useInterruptStint() {
       queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
       queryClient.invalidateQueries({ queryKey: stintKeys.detail(payload.stintId) });
       queryClient.invalidateQueries({ queryKey: stintKeys.active() });
+
+      // Note: No streak cache update here - interrupted stints don't count toward streaks
+      // per spec: "Only completed stints count toward streaks; interrupted stints do not"
     },
   });
 }

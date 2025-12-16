@@ -11,6 +11,7 @@ import { useActiveStintQuery } from './useStints';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { syncStintCheck as syncStintCheckDb, completeStint } from '~/lib/supabase/stints';
 import { stintKeys } from '~/composables/useStints';
+import { streakKeys } from '~/composables/useStreaks';
 import { STINT } from '~/constants';
 
 type StintRow = Database['public']['Tables']['stints']['Row'];
@@ -485,6 +486,11 @@ async function handleTimerComplete(): Promise<void> {
   if (globalTimerState.queryClient) {
     await globalTimerState.queryClient.invalidateQueries({
       queryKey: stintKeys.all,
+    });
+
+    // Invalidate streak cache to trigger refetch and update dashboard banner
+    await globalTimerState.queryClient.invalidateQueries({
+      queryKey: streakKeys.all,
     });
   }
 

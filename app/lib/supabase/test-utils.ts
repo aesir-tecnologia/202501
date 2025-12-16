@@ -43,6 +43,7 @@ export async function deleteTestUser(client: TypedSupabaseClient, userId: string
 export async function cleanupTestData(client: TypedSupabaseClient, userId: string): Promise<void> {
   await client.from('stints').delete().eq('user_id', userId);
   await client.from('projects').delete().eq('user_id', userId);
+  await client.from('user_streaks').delete().eq('user_id', userId);
 }
 
 export async function createTestProject(
@@ -134,4 +135,53 @@ export async function createCompletedStint(
     .single();
   if (error) throw error;
   return data;
+}
+
+/**
+ * Creates a completed stint that ended on a specific date.
+ * Useful for testing streak scenarios.
+ */
+export async function createCompletedStintOnDate(
+  client: TypedSupabaseClient,
+  projectId: string,
+  userId: string,
+  endedAt: Date,
+  overrides?: Partial<StintInsert>,
+): Promise<StintRow> {
+  const startedAt = new Date(endedAt.getTime() - 30 * 60 * 1000);
+  const { data, error } = await client
+    .from('stints')
+    .insert({
+      project_id: projectId,
+      user_id: userId,
+      planned_duration: 25,
+      status: 'completed',
+      started_at: startedAt.toISOString(),
+      ended_at: endedAt.toISOString(),
+      actual_duration: 25 * 60,
+      completion_type: 'manual',
+      ...overrides,
+    })
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Gets a UTC date N days ago at a specific hour (defaults to noon UTC).
+ * Uses UTC methods to ensure consistent behavior across timezones.
+ */
+export function getDateDaysAgoUTC(daysAgo: number, hour: number = 12): Date {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() - daysAgo);
+  date.setUTCHours(hour, 0, 0, 0);
+  return date;
+}
+
+/**
+ * Gets today's date at a specific hour in UTC.
+ */
+export function getTodayUTC(hour: number = 12): Date {
+  return getDateDaysAgoUTC(0, hour);
 }

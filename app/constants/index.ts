@@ -33,5 +33,11 @@ export const STINT = {
   },
 } as const;
 
+// Streak Constants
+export const STREAK = {
+  // Grace period in days - allows 1 day gap without breaking streak
+  GRACE_PERIOD_DAYS: 1,
+} as const;
+
 // Type Exports
 export type ProjectColor = typeof PROJECT.COLORS[number];
