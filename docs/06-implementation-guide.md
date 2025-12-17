@@ -35,7 +35,8 @@
 ### Streak Calculation
 
 - Uses user's timezone to determine "today" and "yesterday"
-- Query: `DATE(started_at AT TIME ZONE v_timezone)`
+- Query: `DATE(ended_at AT TIME ZONE v_timezone)`
+- **Note:** Stints count towards the day they are completed (ended_at), not when they started
 - Grace period: 1 day (can miss 1 day without breaking streak)
 
 ### Edge Cases
@@ -43,6 +44,7 @@
 - **Timezone change:** Daily reset recalculates based on new timezone immediately
 - **DST transitions:** PostgreSQL handles automatically with AT TIME ZONE
 - **Traveling users:** Timezone can be manually changed in settings
+- **Stint spanning midnight:** A stint that starts at 23:30 and ends at 00:30 the next day counts towards the next day (based on ended_at timestamp)
 
 ---
 

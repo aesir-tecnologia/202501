@@ -34,6 +34,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_summaries: {
+        Row: {
+          completed_at: string
+          date: string
+          id: string
+          project_breakdown: Json
+          total_focus_seconds: number
+          total_pause_seconds: number
+          total_stints: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          date: string
+          id?: string
+          project_breakdown?: Json
+          total_focus_seconds?: number
+          total_pause_seconds?: number
+          total_stints?: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          date?: string
+          id?: string
+          project_breakdown?: Json
+          total_focus_seconds?: number
+          total_pause_seconds?: number
+          total_stints?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_summaries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           archived_at: string | null
@@ -159,6 +200,7 @@ export type Database = {
           created_at: string | null
           email: string
           id: string
+          timezone: string
           updated_at: string | null
           version: number
         }
@@ -166,6 +208,7 @@ export type Database = {
           created_at?: string | null
           email: string
           id: string
+          timezone?: string
           updated_at?: string | null
           version?: number
         }
@@ -173,6 +216,7 @@ export type Database = {
           created_at?: string | null
           email?: string
           id?: string
+          timezone?: string
           updated_at?: string | null
           version?: number
         }
@@ -215,6 +259,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aggregate_daily_summary: {
+        Args: { p_date: string; p_user_id: string }
+        Returns: Json
+      }
       auto_complete_expired_stints: {
         Args: never
         Returns: {
@@ -295,6 +343,18 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_daily_summaries: {
+        Args: { p_end_date: string; p_start_date: string; p_user_id: string }
+        Returns: {
+          completed_at: string
+          date: string
+          id: string
+          project_breakdown: Json
+          total_focus_seconds: number
+          total_pause_seconds: number
+          total_stints: number
+        }[]
+      }
       increment_user_version: { Args: { p_user_id: string }; Returns: number }
       pause_stint: {
         Args: { p_stint_id: string }
@@ -320,6 +380,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      process_daily_reset: {
+        Args: never
+        Returns: {
+          errors: Json
+          streaks_updated: number
+          summaries_created: number
+          users_processed: number
+        }[]
       }
       resume_stint: {
         Args: { p_stint_id: string }

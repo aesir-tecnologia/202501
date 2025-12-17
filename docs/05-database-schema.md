@@ -152,7 +152,7 @@ CREATE TABLE stints (
 CREATE INDEX idx_stints_user_date ON stints(user_id, started_at DESC);
 CREATE INDEX idx_stints_project_date ON stints(project_id, started_at DESC);
 CREATE INDEX idx_stints_active ON stints(user_id) WHERE status IN ('active', 'paused');
-CREATE INDEX idx_stints_completed_date ON stints(user_id, DATE(started_at AT TIME ZONE (SELECT timezone FROM users WHERE id = stints.user_id)));
+CREATE INDEX idx_stints_completed_date ON stints(user_id, DATE(ended_at AT TIME ZONE (SELECT timezone FROM users WHERE id = stints.user_id)));
 
 -- RLS Policies
 ALTER TABLE stints ENABLE ROW LEVEL SECURITY;
@@ -209,6 +209,7 @@ $$ LANGUAGE plpgsql;
 - Comparison: `working_time_seconds >= planned_duration_minutes * 60`
 - Paused stints do not auto-complete; working time is frozen while paused
 - Interrupted stints don't count toward daily progress but preserved in history
+- **Daily counting uses `ended_at`**: A stint counts towards the calendar day it was completed, not when it was started. A stint starting at 23:30 and ending at 00:30 the next day counts towards the next day.
 
 **Relationships:**
 - Many-to-one with `projects` (CASCADE on delete)
@@ -293,9 +294,9 @@ BEGIN
       'stint_count', COUNT(*)
     )) as projects_worked
   FROM stints
-  WHERE user_id = p_user_id 
+  WHERE user_id = p_user_id
     AND status = 'completed'
-    AND DATE(started_at AT TIME ZONE v_timezone) = p_date
+    AND DATE(ended_at AT TIME ZONE v_timezone) = p_date
   GROUP BY user_id
   ON CONFLICT (user_id, date) DO UPDATE SET
     total_stints = EXCLUDED.total_stints,
@@ -347,8 +348,9 @@ BEGIN
   -- If last stint was today or yesterday, count streak
   IF v_last_date IS NOT NULL AND v_last_date >= v_current_date - INTERVAL '1 day' THEN
     -- Count consecutive days with stints going backwards from last_date
+    -- Note: Uses ended_at because stints count towards the day they complete
     SELECT COUNT(*) INTO v_streak FROM (
-      SELECT DISTINCT DATE(started_at AT TIME ZONE v_timezone) as stint_date
+      SELECT DISTINCT DATE(ended_at AT TIME ZONE v_timezone) as stint_date
       FROM stints
       WHERE user_id = p_user_id AND status = 'completed'
       ORDER BY stint_date DESC
