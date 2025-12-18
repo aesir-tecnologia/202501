@@ -34,16 +34,32 @@ export const dailySummaryKeys = {
 // Transformation Utilities
 // ============================================================================
 
-function transformProjectBreakdown(
-  breakdown: DbProjectBreakdown[] | null,
-): ProjectBreakdownItem[] {
-  if (!breakdown) return [];
-  return breakdown.map(item => ({
-    projectId: item.project_id,
-    projectName: item.project_name,
-    stintCount: item.stint_count,
-    focusSeconds: item.focus_seconds,
-  }));
+function isValidProjectBreakdownItem(item: unknown): item is DbProjectBreakdown {
+  return (
+    item !== null
+    && typeof item === 'object'
+    && 'project_id' in item
+    && typeof (item as DbProjectBreakdown).project_id === 'string'
+    && 'project_name' in item
+    && typeof (item as DbProjectBreakdown).project_name === 'string'
+    && 'stint_count' in item
+    && typeof (item as DbProjectBreakdown).stint_count === 'number'
+    && 'focus_seconds' in item
+    && typeof (item as DbProjectBreakdown).focus_seconds === 'number'
+  );
+}
+
+function transformProjectBreakdown(breakdown: unknown): ProjectBreakdownItem[] {
+  if (!breakdown || !Array.isArray(breakdown)) return [];
+
+  return breakdown
+    .filter(isValidProjectBreakdownItem)
+    .map(item => ({
+      projectId: item.project_id,
+      projectName: item.project_name,
+      stintCount: item.stint_count,
+      focusSeconds: item.focus_seconds,
+    }));
 }
 
 function transformDailySummary(row: DailySummaryResult): DailySummary {
@@ -54,7 +70,7 @@ function transformDailySummary(row: DailySummaryResult): DailySummary {
     totalStints: row.total_stints,
     totalFocusSeconds: row.total_focus_seconds,
     totalPauseSeconds: row.total_pause_seconds,
-    projectBreakdown: transformProjectBreakdown(row.project_breakdown as DbProjectBreakdown[] | null),
+    projectBreakdown: transformProjectBreakdown(row.project_breakdown),
     completedAt: row.completed_at,
   };
 }

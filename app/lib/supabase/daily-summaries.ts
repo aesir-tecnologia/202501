@@ -41,6 +41,26 @@ export type Result<T> = {
   error: Error | null
 };
 
+function isValidProjectBreakdownItem(item: unknown): item is ProjectBreakdownItem {
+  return (
+    item !== null
+    && typeof item === 'object'
+    && 'project_id' in item
+    && typeof (item as ProjectBreakdownItem).project_id === 'string'
+    && 'project_name' in item
+    && typeof (item as ProjectBreakdownItem).project_name === 'string'
+    && 'stint_count' in item
+    && typeof (item as ProjectBreakdownItem).stint_count === 'number'
+    && 'focus_seconds' in item
+    && typeof (item as ProjectBreakdownItem).focus_seconds === 'number'
+  );
+}
+
+function parseProjectBreakdown(breakdown: Json): ProjectBreakdownItem[] {
+  if (!breakdown || !Array.isArray(breakdown)) return [];
+  return (breakdown as unknown[]).filter(isValidProjectBreakdownItem);
+}
+
 async function requireUserId(client: TypedSupabaseClient): Promise<Result<string>> {
   const { data, error } = await client.auth.getUser();
 
@@ -131,17 +151,15 @@ export async function getWeeklyStats(
     totalFocusSeconds += summary.total_focus_seconds;
     totalPauseSeconds += summary.total_pause_seconds;
 
-    const breakdown = summary.project_breakdown as ProjectBreakdownItem[] | null;
-    if (breakdown) {
-      for (const project of breakdown) {
-        const existing = projectTotals.get(project.project_id);
-        if (existing) {
-          existing.stint_count += project.stint_count;
-          existing.focus_seconds += project.focus_seconds;
-        }
-        else {
-          projectTotals.set(project.project_id, { ...project });
-        }
+    const breakdown = parseProjectBreakdown(summary.project_breakdown);
+    for (const project of breakdown) {
+      const existing = projectTotals.get(project.project_id);
+      if (existing) {
+        existing.stint_count += project.stint_count;
+        existing.focus_seconds += project.focus_seconds;
+      }
+      else {
+        projectTotals.set(project.project_id, { ...project });
       }
     }
   }
