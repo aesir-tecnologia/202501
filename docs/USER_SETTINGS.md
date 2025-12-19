@@ -2,8 +2,8 @@
 
 **Purpose:** Complete list of all user-configurable settings for the settings page implementation.
 
-**Document Version:** 1.0  
-**Date:** January 2025
+**Document Version:** 1.1
+**Date:** December 19, 2025
 
 ---
 
@@ -200,7 +200,7 @@
 - **Type:** Read-only display
 - **Options:**
   - Free Tier: 2 active projects, 90-day analytics history, 10 CSV exports/month
-  - Pro Tier ($12/month): Unlimited projects, unlimited history, unlimited exports, custom branding
+  - Pro Tier ($1.99/month): Unlimited projects, unlimited history, unlimited exports, custom branding
 - **Actions:** Upgrade to Pro, Manage billing, Cancel subscription
 
 ### CSV Export Limits

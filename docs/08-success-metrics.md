@@ -1,8 +1,8 @@
 # LifeStint - Success Metrics & Analytics
 
 **Product Name:** LifeStint  
-**Document Version:** 4.0
-**Date:** December 2, 2025
+**Document Version:** 4.1
+**Date:** December 19, 2025
 
 ---
 
@@ -116,15 +116,15 @@
   - Measures willingness to pay
 
 - **Monthly recurring revenue (MRR)**
-  - Target: $5K MRR by month 6
+  - Target: $4K MRR by month 6
   - Business sustainability metric
 
 - **Average revenue per user (ARPU)**
-  - Target: $10/month (40% free, 60% Pro)
+  - Target: $1.20/month (40% free, 60% Pro)
   - Revenue efficiency
 
 - **Customer lifetime value (CLV)**
-  - Target: $240 (24-month avg retention)
+  - Target: $29 (24-month avg retention)
   - Long-term value
 
 - **Churn rate**
