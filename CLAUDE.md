@@ -19,6 +19,18 @@ Project documentation is available in the `docs/` folder, including:
 - Success metrics
 - Operations and compliance
 
+## GitHub Operations
+
+For GitHub CLI commands, issue types, and API usage, see **`.claude/GITHUB.md`**.
+
+Key commands:
+```bash
+# Set issue type (gh CLI doesn't support --type flag yet)
+gh api repos/aesir-tecnologia/202501/issues/{NUMBER} -X PATCH -f type="Bug"
+gh api repos/aesir-tecnologia/202501/issues/{NUMBER} -X PATCH -f type="Feature"
+gh api repos/aesir-tecnologia/202501/issues/{NUMBER} -X PATCH -f type="Task"
+```
+
 ## Key Commands
 
 ### Development
