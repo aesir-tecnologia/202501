@@ -138,7 +138,7 @@
    - Survives background tabs
    - Communicates with main thread via postMessage
 2. Build server-side auto-completion: `COMPLETED`
-   - pg_cron job (runs every 30 seconds)
+   - pg_cron job (runs every 1 minute, minimum interval supported by pg_cron)
    - Query stints where `started_at + planned_duration <= now()` and `status = 'active'`
    - Call `complete_stint()` database function for matched stints
    - Broadcast completion event via Realtime *(not implemented)*

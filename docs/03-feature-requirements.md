@@ -80,18 +80,33 @@
   - Timer resumes from remaining working time
 - Pause/resume events broadcast in real-time
 - Paused stints do not auto-complete; user must manually resume or stop
+- **Stale paused stint handling:** Paused stints older than 24 hours are automatically completed:
+  - `ended_at`: The original `paused_at` timestamp (when user last paused)
+  - `actual_duration`: Working time before pause (`paused_at - started_at - paused_duration`)
+  - `completion_type`: "auto_stale"
+  - `excluded`: false (time counts toward daily progress)
+  - This prevents indefinitely paused stints from blocking new work while preserving valid work time
 
 ### Stop Stint Manually
 
 - "Stop" button visible during active stint
-- Optional notes modal: "Add notes about this stint?" (0-500 characters)
+- Completion modal appears with:
+  - Notes field: "Add notes about this stint?" (0-500 characters, optional)
+  - Two action buttons:
+    - **"Complete"** (primary): Counts toward daily progress
+    - **"Discard"**: Excludes from daily progress, preserved for analytics
 - Creates completion record:
   - `ended_at`: Server timestamp
   - `actual_duration`: Calculated from started_at to ended_at minus pause duration
   - `completion_type`: "manual"
+  - `excluded`: Boolean (true if user clicked "Discard")
   - `notes`: User input (optional)
-- Progress updates on dashboard immediately
-- Celebration animation if daily goal reached
+- If completed (not excluded):
+  - Progress updates on dashboard immediately
+  - Celebration animation if daily goal reached
+- If discarded (excluded):
+  - Toast confirmation: "Stint saved but excluded from today's count"
+  - Data preserved in analytics for historical context
 
 ### Auto-Complete
 
@@ -103,18 +118,19 @@
   - `ended_at`: Server timestamp
   - `actual_duration`: Working time in seconds
   - `completion_type`: "auto"
-  - Grace period: 30 seconds for user to add notes
+  - `excluded`: false (auto-completed stints always count)
 - If browser closed, server-side cron completes stint at planned end time
 - Paused stints do not auto-complete
 
-### Interruption Handling
+### Offline & Reconnection Handling
 
 - If network drops during active stint, local timer continues
 - On reconnect, syncs with server state:
-  - If server has no active stint: marks local stint as "interrupted", preserves data
+  - If server stint still active: resumes real-time sync normally
+  - If server stint was auto-completed (timer expired or cron): shows completion notification
   - If server has different active stint: shows conflict resolution dialog
-- User can manually mark stint as "interrupted" with reason (0-200 characters)
-- Interrupted stints don't count toward daily progress but preserved in analytics
+- All recorded time counts toward daily progress (network issues don't invalidate work)
+- User can exclude any completed stint from daily progress via the completion modal or stint history
 
 ### Single Active Stint Enforcement
 
@@ -126,20 +142,64 @@
   - Option 3: "Cancel"
 - Race condition handling: Server uses optimistic locking (version field on user record)
 - Cross-device: Real-time broadcasts ensure all devices show same active stint
+- **Conflict resolution completion:** When ending a stint via "End current stint and start new one":
+  - Shows quick completion modal with "Complete" and "Discard" options
+  - `completion_type`: "conflict_resolution"
+  - `excluded`: Based on user choice (defaults to false)
 
 ### Timer Accuracy
 
 - Frontend: Countdown timer in Web Worker (continues in background tabs)
-- Backend: Server-side scheduled task checks for auto-completions every 30 seconds
+- Backend: Server-side scheduled task checks for auto-completions every 1 minute (pg_cron minimum interval)
 - Sync: Every 60 seconds, frontend syncs with server to correct drift
 - Offline: Local timer continues, reconciles on reconnect with server-authoritative time
+
+### Midnight Boundary Behavior
+
+- Stints that span midnight are attributed to their **start date**
+- Example: Stint started at 11:30 PM, ends 12:30 AM → counts toward the start date
+- Daily progress ("X of Y stints today") uses `DATE(started_at)` in user's timezone
+- Streak calculation uses start date: a stint started before midnight counts for that day
+- This ensures predictable behavior for users working late-night sessions
+
+### Time Unit Standardization
+
+> **Note:** Duration fields require standardization. See [Issue #28](https://github.com/aesir-tecnologia/202501/issues/28) for tracking.
+
+All duration fields in the database use **seconds** as the base unit:
+- `planned_duration`: Stored in seconds (e.g., 7200 for 2 hours)
+- `paused_duration`: Stored in seconds
+- `actual_duration`: Stored in seconds
+
+User-facing display converts to minutes/hours as appropriate.
+
+### Completion Types & Exclusion
+
+**Completion Types** (stored in `completion_type` field):
+- `manual`: User clicked "Stop" and completed normally
+- `auto`: Timer reached planned duration
+- `auto_stale`: Stale paused stint (>24 hours) auto-completed with time worked before pause
+- `conflict_resolution`: Ended via conflict dialog to start new stint on different project
+
+**Exclusion** (stored in `excluded` boolean field):
+- `false` (default): Stint counts toward daily progress and streaks
+- `true`: Stint preserved in analytics but excluded from all counting metrics
+- User sets exclusion via "Discard" button in completion modal
+- Excluded stints:
+  - Don't count toward daily progress ("X of Y stints today")
+  - Don't count toward streak maintenance
+  - Still appear in Focus Ledger exports (with "Excluded" column)
+  - Still visible in historical analytics for context
 
 ### Constraints
 
 - Only 1 active or paused stint per user across all devices
-- Minimum stint duration: 5 minutes
-- Maximum stint duration: 480 minutes
+- Minimum stint duration: 5 minutes (300 seconds)
+- Maximum stint duration: 480 minutes (28,800 seconds)
+- **Minimum working time for completion:** 1 minute (60 seconds) - stints stopped before 1 minute of actual working time are discarded to prevent accidental micro-stints from polluting analytics
 - Maximum 50 stints per project per day (anti-abuse)
+- **Global daily limit:** Maximum 200 stints per user per day across all projects (anti-abuse)
+- **Cooldown period:** Minimum 10 seconds between stint completions (prevents rapid-fire stint creation)
 
 ---
 
@@ -236,7 +296,7 @@
 **Streak Tracking:**
 - Current streak: "🔥 12 day streak! Keep it going!"
 - Longest streak all-time
-- Streak definition: At least 1 completed stint per day (not interrupted)
+- Streak definition: At least 1 non-excluded completed stint per day
 - Grace period: 1 day (can miss 1 day without breaking streak)
 - Timezone-aware: Streak calculated using user's timezone
 
@@ -251,6 +311,7 @@
   - Actual Duration (minutes)
   - Pause Duration (minutes)
   - Completion Type
+  - Excluded (Yes/No)
   - Notes
 - Filename: `LifeStint-Focus-Ledger-[StartDate]-[EndDate].csv`
 - Date range selector: Last 7 days, Last 30 days, Last 90 days, Custom
