@@ -15,8 +15,8 @@
 **Create Project:**
 - Click "+ New Project" button on dashboard
 - Modal appears with fields:
-  - Project Name (required, 1-100 characters)
-  - Expected Daily Stints (default: 2, range: 1-8)
+  - Project Name (required, 2-60 characters)
+  - Expected Daily Stints (default: 2, range: 1-12)
   - Custom Stint Duration (optional, default: 120 minutes, range: 5-480 minutes)
   - Color Tag (optional, 8 preset colors)
 - Validation: No duplicate names within user account

@@ -104,7 +104,7 @@
 - **Type:** Text
 - **Default:** None (required)
 - **Constraints:**
-  - Length: 1-100 characters
+  - Length: 2-60 characters
   - Must be unique within user's projects (case-insensitive)
 - **Storage:** `projects.name`
 
@@ -112,7 +112,7 @@
 - **Type:** Number (integer)
 - **Default:** `2` stints per day
 - **Constraints:**
-  - Range: 1-8 stints per day
+  - Range: 1-12 stints per day
   - Integer only
 - **Usage:** Used to calculate daily progress ("X of Y stints today")
 - **Storage:** `projects.expected_daily_stints`
@@ -133,12 +133,12 @@
 - **Options:** 8 preset colors
   - `'red'`
   - `'orange'`
-  - `'yellow'`
+  - `'amber'`
   - `'green'`
+  - `'teal'`
   - `'blue'`
   - `'purple'`
   - `'pink'`
-  - `'gray'`
 - **Constraints:** Must be one of the 8 valid colors or null
 - **Usage:** Visual identifier in dashboard project cards
 - **Storage:** `projects.color_tag`
@@ -228,8 +228,8 @@
 ### Numeric Ranges
 - **Default Stint Duration:** 5-480 minutes
 - **Custom Stint Duration:** 5-480 minutes (optional)
-- **Expected Daily Stints:** 1-8 per day
-- **Project Name Length:** 1-100 characters
+- **Expected Daily Stints:** 1-12 per day
+- **Project Name Length:** 2-60 characters
 
 ### Boolean Defaults
 - **Celebration Sound:** `true`
@@ -240,12 +240,12 @@
 
 ### Enum/Select Options
 - **Theme:** `'light'`, `'dark'`, `'system'` (default: `'system'`)
-- **Color Tags:** 8 colors: `'red'`, `'orange'`, `'yellow'`, `'green'`, `'blue'`, `'purple'`, `'pink'`, `'gray'`
+- **Color Tags:** 8 colors: `'red'`, `'orange'`, `'amber'`, `'green'`, `'teal'`, `'blue'`, `'purple'`, `'pink'`
 
 ### Required Fields
 - **Email:** Required, unique, verified
 - **Timezone:** Required, defaults to UTC
-- **Project Name:** Required (1-100 chars), unique per user
+- **Project Name:** Required (2-60 chars), unique per user
 - **Expected Daily Stints:** Required, defaults to 2
 
 ### Optional Fields
@@ -303,8 +303,8 @@
 - `theme` (TEXT, NOT NULL, DEFAULT 'system', CHECK: 'light'|'dark'|'system')
 
 ### `projects` Table (Project Settings)
-- `name` (TEXT, NOT NULL, CHECK: length 1-100, UNIQUE per user)
-- `expected_daily_stints` (INTEGER, NOT NULL, DEFAULT 2, CHECK: 1-8)
+- `name` (TEXT, NOT NULL, CHECK: length 2-60, UNIQUE per user)
+- `expected_daily_stints` (INTEGER, NOT NULL, DEFAULT 2, CHECK: 1-12)
 - `custom_stint_duration` (INTEGER, nullable, CHECK: 5-480 if not null)
 - `color_tag` (TEXT, nullable, CHECK: one of 8 colors or null)
 - `is_active` (BOOLEAN, NOT NULL, DEFAULT true)

@@ -75,12 +75,12 @@ CREATE TABLE projects (
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT valid_name CHECK (length(name) >= 1 AND length(name) <= 100),
-  CONSTRAINT valid_daily_stints CHECK (expected_daily_stints >= 1 AND expected_daily_stints <= 8),
+  CONSTRAINT valid_name CHECK (length(name) >= 2 AND length(name) <= 60),
+  CONSTRAINT valid_daily_stints CHECK (expected_daily_stints >= 1 AND expected_daily_stints <= 12),
   CONSTRAINT valid_stint_duration CHECK (custom_stint_duration IS NULL OR
     (custom_stint_duration >= 5 AND custom_stint_duration <= 480)),
-  CONSTRAINT valid_color CHECK (color_tag IS NULL OR color_tag IN 
-    ('red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'gray')),
+  CONSTRAINT valid_color CHECK (color_tag IS NULL OR color_tag IN
+    ('red', 'orange', 'amber', 'green', 'teal', 'blue', 'purple', 'pink')),
   CONSTRAINT unique_name_per_user UNIQUE (user_id, name)
 );
 
@@ -111,7 +111,7 @@ $$ LANGUAGE SQL STABLE;
 
 **Constraints:**
 - Project names must be unique per user
-- Expected daily stints: 1-8
+- Expected daily stints: 1-12
 - Custom stint duration: 5-480 minutes if specified
 - Maximum 25 active projects per user (enforced in application logic)
 
