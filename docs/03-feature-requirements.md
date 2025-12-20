@@ -44,7 +44,6 @@
 
 ### Constraints
 
-- Maximum 25 active projects per user (free tier: 2)
 - Project names must be unique within user account
 - Projects with active stints cannot be archived
 

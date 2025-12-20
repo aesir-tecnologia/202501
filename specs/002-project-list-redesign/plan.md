@@ -7,7 +7,7 @@
 
 ## Summary
 
-Redesign the ProjectList component to provide rapid stint initiation, at-a-glance progress monitoring, efficient project management, and improved visual hierarchy. The redesign targets independent professionals managing 2-25 active client projects with a focus on reducing cognitive load and enabling 90% of users to start stints within 3 seconds. Implementation will use horizontal card layouts with drag-and-drop reordering, inline progress indicators, active/inactive project separation, and strict adherence to the Nuxt UI 4 + Tailwind CSS v4 design system.
+Redesign the ProjectList component to provide rapid stint initiation, at-a-glance progress monitoring, efficient project management, and improved visual hierarchy. The redesign targets independent professionals managing multiple active client projects with a focus on reducing cognitive load and enabling 90% of users to start stints within 3 seconds. Implementation will use horizontal card layouts with drag-and-drop reordering, inline progress indicators, active/inactive project separation, and strict adherence to the Nuxt UI 4 + Tailwind CSS v4 design system.
 
 ## Technical Context
 
@@ -17,9 +17,9 @@ Redesign the ProjectList component to provide rapid stint initiation, at-a-glanc
 **Testing**: Vitest with dual-mode testing (mocked Supabase by default, optional real Supabase integration tests)
 **Target Platform**: Static site deployment (Vercel) with client-side rendering for protected routes, supports Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 **Project Type**: Web application (SSG with client-side auth)
-**Performance Goals**: Core Web Vitals compliance (LCP < 2.5s, CLS < 0.1, FID < 100ms), 60fps scrolling with up to 25 projects, component bundle < 50KB compressed
+**Performance Goals**: Core Web Vitals compliance (LCP < 2.5s, CLS < 0.1, FID < 100ms), 60fps scrolling, component bundle < 50KB compressed
 **Constraints**: Client-side only rendering (`ssr: false`), strict design system adherence (Nuxt UI 4 components + Tailwind v4 tokens only), no custom CSS outside design system, must work on 320px-2560px viewports
-**Scale/Scope**: Single component redesign affecting 1 primary view (dashboard), supports 2-25 active projects per user, expected to handle ~10k users
+**Scale/Scope**: Single component redesign affecting 1 primary view (dashboard), supports multiple active projects per user, expected to handle ~10k users
 
 ## Constitution Check
 

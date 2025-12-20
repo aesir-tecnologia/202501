@@ -113,7 +113,6 @@ $$ LANGUAGE SQL STABLE;
 - Project names must be unique per user
 - Expected daily stints: 1-12
 - Custom stint duration: 5-480 minutes if specified
-- Maximum 25 active projects per user (enforced in application logic)
 
 **Business Rules:**
 - Archiving a project with active stint is prevented by application logic

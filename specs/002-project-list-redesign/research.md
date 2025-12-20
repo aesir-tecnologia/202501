@@ -223,7 +223,7 @@ const progress = computed(() => allStints.value.filter(s => s.project_id === pro
 
 ### Decision: Virtual Scrolling NOT Required, Optimize Rendering Instead
 
-**Rationale**: Spec states "Project list remains performant (60fps scrolling) with up to 25 active projects". This is well within Vue 3's rendering capabilities without virtualization.
+**Rationale**: Project list should remain performant (60fps scrolling) for typical usage. This is well within Vue 3's rendering capabilities without virtualization.
 
 **Optimization Strategy**:
 1. **Lazy load inactive projects** (already collapsed by default ✅)
