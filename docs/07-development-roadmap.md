@@ -57,7 +57,7 @@
 6. Add project list to dashboard: `COMPLETED`
    - Grid layout (responsive)
    - Active projects first, sorted by last stint time
-   - "Inactive Projects" collapsible section
+   - Tab navigation (Active/Inactive/Archived)
 7. Handle edge cases: `COMPLETED`
    - Empty state (no projects)
    - Maximum projects limit (25 active)

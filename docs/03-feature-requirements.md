@@ -32,7 +32,7 @@
 **Activate/Deactivate:**
 - Toggle switch on project card
 - Active projects shown first in dashboard
-- Inactive projects collapsed in "Inactive Projects" section
+- Inactive projects accessible via "Inactive" tab in dashboard
 - Cannot deactivate project with active stint
 - Deactivated projects excluded from daily totals and streaks
 
@@ -209,30 +209,42 @@ User-facing display converts to minutes/hours as appropriate.
 
 ### Layout
 
-- Grid of project cards (1 on mobile and desktop)
-- "Inactive Projects" collapsible section below
-- "+ New Project" button in top right
+- Grid of project cards (1 column on mobile and desktop)
+- Tab navigation: Active (default), Inactive, Archived
+- "+ New Project" button in section header
 
 ### Project Card Contents
 
-- Project name with color indicator
-- Daily progress badge: "X of Y stints today" with visual progress bar
-- Current streak: "🔥 5 day streak" (if >0)
-- Last stint time: "2 hours ago" (relative)
+- Project name with color accent bar (left edge, uses project color tag)
+- Status pill indicating current state:
+  - "Ready" (active project, can start stint)
+  - "Running" (this project has active stint)
+  - "Paused" (this project's stint is paused)
+  - "Busy" (another project has active stint)
+  - "Inactive" (project is deactivated)
+- Stint duration badge: "Xh Ym / stint" showing configured stint length
+- Daily progress section:
+  - Label: "Daily progress"
+  - Segmented progress bar (visual representation)
+  - Text: "X/Y today" showing completed vs expected stints
+  - "+X extra" badge when exceeding daily goal
+  - "Met" badge when daily goal is reached
+- Last stint time: "2 hours ago" (relative) - *See [Issue #30](https://github.com/aesir-tecnologia/202501/issues/30)*
+- Drag handle for reordering projects (desktop only)
 - Action buttons:
-  - "Start" (if no active stint)
-  - "Stop" + "Pause" + timer (if this project has active stint)
-  - "Resume" + paused time (if this project paused)
-  - Edit icon
-  - Activate/deactivate toggle
+  - "Start" play button (if no active stint)
+  - "Stop" + "Pause" buttons + countdown timer (if this project has active stint)
+  - "Resume" + countdown timer (if this project's stint is paused)
+  - Settings icon (opens edit modal)
+  - Activate/deactivate toggle switch
 
 ### Active Stint Highlighting
 
-- Card expands vertically
-- Pulsing green border animation
-- Large countdown timer (MM:SS format)
+- Pulsing green dot indicator next to countdown timer
+- Countdown timer displayed in MM:SS format
 - Pause/Stop buttons prominently displayed
-- All other cards show "Stop current stint to start new one" instead of Start button
+- Timer badge shows "Running" or "Paused" state with color coding
+- Other project cards show disabled Start button with "Busy" status pill
 
 ### Real-Time Updates
 
