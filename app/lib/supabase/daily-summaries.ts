@@ -57,8 +57,30 @@ function isValidProjectBreakdownItem(item: unknown): item is ProjectBreakdownIte
 }
 
 function parseProjectBreakdown(breakdown: Json): ProjectBreakdownItem[] {
-  if (!breakdown || !Array.isArray(breakdown)) return [];
-  return (breakdown as unknown[]).filter(isValidProjectBreakdownItem);
+  if (!breakdown || !Array.isArray(breakdown)) {
+    if (breakdown !== null && breakdown !== undefined) {
+      console.warn('[daily-summaries] project_breakdown is not an array:', typeof breakdown);
+    }
+    return [];
+  }
+
+  const validItems: ProjectBreakdownItem[] = [];
+  const invalidItems: unknown[] = [];
+
+  for (const item of breakdown as unknown[]) {
+    if (isValidProjectBreakdownItem(item)) {
+      validItems.push(item);
+    }
+    else {
+      invalidItems.push(item);
+    }
+  }
+
+  if (invalidItems.length > 0) {
+    console.error('[daily-summaries] Filtered invalid project breakdown items:', invalidItems);
+  }
+
+  return validItems;
 }
 
 async function requireUserId(client: TypedSupabaseClient): Promise<Result<string>> {

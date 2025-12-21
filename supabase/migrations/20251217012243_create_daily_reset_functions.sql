@@ -18,6 +18,7 @@ CREATE OR REPLACE FUNCTION aggregate_daily_summary(
 ) RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_timezone TEXT;
@@ -146,6 +147,7 @@ RETURNS TABLE(
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_user RECORD;

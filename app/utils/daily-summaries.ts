@@ -1,16 +1,53 @@
 import type { DailySummaryResult, ProjectBreakdownItem as DbProjectBreakdown } from '~/lib/supabase/daily-summaries';
 import type { DailySummary, ProjectBreakdownItem, DailySummaryFilters } from '~/schemas/daily-summaries';
 
+export function isValidDbProjectBreakdownItem(item: unknown): item is DbProjectBreakdown {
+  return (
+    item !== null
+    && typeof item === 'object'
+    && 'project_id' in item
+    && typeof (item as DbProjectBreakdown).project_id === 'string'
+    && 'project_name' in item
+    && typeof (item as DbProjectBreakdown).project_name === 'string'
+    && 'stint_count' in item
+    && typeof (item as DbProjectBreakdown).stint_count === 'number'
+    && 'focus_seconds' in item
+    && typeof (item as DbProjectBreakdown).focus_seconds === 'number'
+  );
+}
+
 export function transformProjectBreakdown(
   breakdown: unknown,
 ): ProjectBreakdownItem[] {
-  if (!breakdown || !Array.isArray(breakdown)) return [];
-  return breakdown.map((item: DbProjectBreakdown) => ({
-    projectId: item.project_id,
-    projectName: item.project_name,
-    stintCount: item.stint_count,
-    focusSeconds: item.focus_seconds,
-  }));
+  if (!breakdown || !Array.isArray(breakdown)) {
+    if (breakdown !== null && breakdown !== undefined) {
+      console.warn('[daily-summaries] project_breakdown is not an array:', typeof breakdown);
+    }
+    return [];
+  }
+
+  const validItems: ProjectBreakdownItem[] = [];
+  const invalidItems: unknown[] = [];
+
+  for (const item of breakdown) {
+    if (isValidDbProjectBreakdownItem(item)) {
+      validItems.push({
+        projectId: item.project_id,
+        projectName: item.project_name,
+        stintCount: item.stint_count,
+        focusSeconds: item.focus_seconds,
+      });
+    }
+    else {
+      invalidItems.push(item);
+    }
+  }
+
+  if (invalidItems.length > 0) {
+    console.error('[daily-summaries] Filtered invalid project breakdown items:', invalidItems);
+  }
+
+  return validItems;
 }
 
 export function transformDailySummary(row: DailySummaryResult): DailySummary {
