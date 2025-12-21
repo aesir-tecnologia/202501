@@ -10,53 +10,60 @@
 
 ---
 
-## Users Table
+## User Profiles Table
+
+> **Note:** This table extends Supabase's built-in `auth.users` table. User authentication (email/password, email verification, sessions) is handled by Supabase Auth. This `user_profiles` table stores application-specific profile data.
 
 ```sql
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE user_profiles (
+  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
-  full_name TEXT,
-  timezone TEXT NOT NULL DEFAULT 'UTC',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  email_verified BOOLEAN NOT NULL DEFAULT false,
-  last_active TIMESTAMPTZ,
-  version INTEGER NOT NULL DEFAULT 1, -- Optimistic locking
-  CONSTRAINT valid_email CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'),
-  CONSTRAINT valid_timezone CHECK (timezone IN (SELECT name FROM pg_timezone_names))
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  version INTEGER NOT NULL DEFAULT 1 -- Optimistic locking
 );
 
--- Indexes
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_last_active ON users(last_active);
+-- Index for email lookups
+CREATE INDEX idx_user_profiles_email ON user_profiles(email);
 
 -- RLS Policies
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can read own data" ON users FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Users can update own data" ON users FOR UPDATE USING (auth.uid() = id);
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view own profile" ON user_profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON user_profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can insert own profile" ON user_profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- Trigger for updated_at
-CREATE TRIGGER set_users_updated_at BEFORE UPDATE ON users
+CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Auto-create profile on user signup
+CREATE FUNCTION handle_new_user() RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO user_profiles (id, email)
+  VALUES (NEW.id, NEW.email)
+  ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 ```
 
 **Field Descriptions:**
-- `timezone`: IANA timezone (e.g., "America/New_York") for daily reset and exports
+- `id`: References `auth.users(id)` - the Supabase Auth user ID
+- `email`: Synced from `auth.users.email` on profile creation
 - `version`: Incremented on every update for optimistic locking (prevents race conditions)
-- `email_verified`: Must be true to access dashboard
-- `last_active`: Updated on each API request, used for inactive user cleanup
 
-**Constraints:**
-- Email must be valid format and unique
-- Timezone must be valid IANA timezone
+**Note on Authentication:**
+- Email verification is handled by Supabase Auth (`auth.users.email_confirmed_at`)
+- User timezone is not currently stored; future implementation may add this field
 
 **Relationships:**
 - One-to-many with `projects` (CASCADE on delete)
 - One-to-many with `stints` (CASCADE on delete)
-- One-to-one with `user_preferences` (CASCADE on delete)
 - One-to-one with `user_streaks` (CASCADE on delete)
-- One-to-many with `daily_summaries` (CASCADE on delete)
 
 ---
 
@@ -65,7 +72,7 @@ CREATE TRIGGER set_users_updated_at BEFORE UPDATE ON users
 ```sql
 CREATE TABLE projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   expected_daily_stints INTEGER NOT NULL DEFAULT 2,
   custom_stint_duration INTEGER, -- Minutes, NULL means use default (120)
@@ -119,7 +126,7 @@ $$ LANGUAGE SQL STABLE;
 - Archived projects excluded from daily totals and streak calculations
 
 **Relationships:**
-- Many-to-one with `users` (CASCADE on delete)
+- Many-to-one with `user_profiles` (CASCADE on delete)
 - One-to-many with `stints` (CASCADE on delete)
 
 ---
@@ -130,7 +137,7 @@ $$ LANGUAGE SQL STABLE;
 CREATE TABLE stints (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Denormalized for query performance
+  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE, -- Denormalized for query performance
   started_at TIMESTAMPTZ NOT NULL,
   ended_at TIMESTAMPTZ,
   planned_duration INTEGER NOT NULL, -- Minutes
@@ -151,7 +158,7 @@ CREATE TABLE stints (
 CREATE INDEX idx_stints_user_date ON stints(user_id, started_at DESC);
 CREATE INDEX idx_stints_project_date ON stints(project_id, started_at DESC);
 CREATE INDEX idx_stints_active ON stints(user_id) WHERE status IN ('active', 'paused');
-CREATE INDEX idx_stints_completed_date ON stints(user_id, DATE(started_at AT TIME ZONE (SELECT timezone FROM users WHERE id = stints.user_id)));
+CREATE INDEX idx_stints_completed_date ON stints(user_id, DATE(started_at));
 
 -- RLS Policies
 ALTER TABLE stints ENABLE ROW LEVEL SECURITY;
@@ -211,15 +218,17 @@ $$ LANGUAGE plpgsql;
 
 **Relationships:**
 - Many-to-one with `projects` (CASCADE on delete)
-- Many-to-one with `users` (CASCADE on delete)
+- Many-to-one with `user_profiles` (CASCADE on delete)
 
 ---
 
-## User Preferences Table
+## User Preferences Table (Future)
+
+> **Note:** This table is planned for a future release. User preferences are not currently implemented.
 
 ```sql
 CREATE TABLE user_preferences (
-  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID PRIMARY KEY REFERENCES user_profiles(id) ON DELETE CASCADE,
   default_stint_duration INTEGER NOT NULL DEFAULT 120,
   celebration_sound BOOLEAN NOT NULL DEFAULT true,
   celebration_animation BOOLEAN NOT NULL DEFAULT true,
@@ -246,16 +255,18 @@ CREATE TRIGGER set_preferences_updated_at BEFORE UPDATE ON user_preferences
 - `theme`: UI theme preference
 
 **Relationships:**
-- One-to-one with `users` (CASCADE on delete)
+- One-to-one with `user_profiles` (CASCADE on delete)
 
 ---
 
-## Daily Summaries Table (Pre-Aggregated for Performance)
+## Daily Summaries Table (Future)
+
+> **Note:** This table is planned for a future release to optimize analytics queries.
 
 ```sql
 CREATE TABLE daily_summaries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   date DATE NOT NULL,
   total_stints INTEGER NOT NULL DEFAULT 0,
   total_focus_seconds INTEGER NOT NULL DEFAULT 0,
@@ -277,7 +288,7 @@ CREATE FUNCTION aggregate_daily_summary(p_user_id UUID, p_date DATE) RETURNS VOI
 DECLARE
   v_timezone TEXT;
 BEGIN
-  SELECT timezone INTO v_timezone FROM users WHERE id = p_user_id;
+  SELECT timezone INTO v_timezone FROM user_profiles WHERE id = p_user_id;
   
   INSERT INTO daily_summaries (user_id, date, total_stints, total_focus_seconds, total_pause_seconds, projects_worked)
   SELECT 
@@ -312,7 +323,7 @@ $$ LANGUAGE plpgsql;
 - Generated nightly by scheduled task
 
 **Relationships:**
-- Many-to-one with `users` (CASCADE on delete)
+- Many-to-one with `user_profiles` (CASCADE on delete)
 
 ---
 
@@ -320,7 +331,7 @@ $$ LANGUAGE plpgsql;
 
 ```sql
 CREATE TABLE user_streaks (
-  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID PRIMARY KEY REFERENCES user_profiles(id) ON DELETE CASCADE,
   current_streak INTEGER NOT NULL DEFAULT 0,
   longest_streak INTEGER NOT NULL DEFAULT 0,
   last_stint_date DATE,
@@ -339,7 +350,7 @@ DECLARE
   v_timezone TEXT;
   v_last_date DATE;
 BEGIN
-  SELECT timezone INTO v_timezone FROM users WHERE id = p_user_id;
+  SELECT timezone INTO v_timezone FROM user_profiles WHERE id = p_user_id;
   SELECT DATE(now() AT TIME ZONE v_timezone) INTO v_current_date;
   SELECT last_stint_date INTO v_last_date FROM user_streaks WHERE user_id = p_user_id;
   
@@ -361,16 +372,18 @@ $$ LANGUAGE plpgsql;
 ```
 
 **Relationships:**
-- One-to-one with `users` (CASCADE on delete)
+- One-to-one with `user_profiles` (CASCADE on delete)
 
 ---
 
-## Audit Log Table (For Support & Debugging)
+## Audit Log Table (Future)
+
+> **Note:** This table is planned for a future release for support and debugging purposes.
 
 ```sql
 CREATE TABLE audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  user_id UUID REFERENCES user_profiles(id) ON DELETE SET NULL,
   action TEXT NOT NULL,
   entity_type TEXT NOT NULL, -- 'project', 'stint', 'user_preferences'
   entity_id UUID,
@@ -400,17 +413,21 @@ CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
 
 ## Row Level Security (RLS) Policies
 
-### Users Table
+### User Profiles Table
 
 ```sql
 -- Users can read own profile
-CREATE POLICY "users_select_own" ON users FOR SELECT 
+CREATE POLICY "users_select_own" ON user_profiles FOR SELECT
 USING (auth.uid() = id);
 
 -- Users can update own profile (except id, created_at)
-CREATE POLICY "users_update_own" ON users FOR UPDATE 
+CREATE POLICY "users_update_own" ON user_profiles FOR UPDATE
 USING (auth.uid() = id)
-WITH CHECK (id = auth.uid() AND created_at = (SELECT created_at FROM users WHERE id = auth.uid()));
+WITH CHECK (id = auth.uid() AND created_at = (SELECT created_at FROM user_profiles WHERE id = auth.uid()));
+
+-- Users can insert own profile (used by auto-create trigger)
+CREATE POLICY "users_insert_own" ON user_profiles FOR INSERT
+WITH CHECK (auth.uid() = id);
 ```
 
 ### Projects Table
@@ -526,7 +543,7 @@ INSERT INTO projects (user_id, name) VALUES ('other-user-uuid', 'Test');
 ## Indexes Summary
 
 **Performance-Critical Indexes:**
-- `idx_users_email`: Fast user lookup by email
+- `idx_user_profiles_email`: Fast user lookup by email
 - `idx_projects_user_active`: Fast active project queries
 - `idx_stints_user_date`: Fast stint history queries
 - `idx_stints_active`: Fast active stint lookup

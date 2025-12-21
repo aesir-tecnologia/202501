@@ -92,7 +92,7 @@
    - `stopStint()`: Complete stint manually via database update
    - `getActiveStint()`: Get user's active stint via database query
 5. Implement optimistic locking: `COMPLETED`
-   - Add version field to users table
+   - Add version field to user_profiles table
    - Increment on stint operations
    - Reject stale operations with 409
 6. Build timer system: `COMPLETED`
@@ -183,7 +183,7 @@
    - Update in real-time when stint completed *(not implemented)*
 4. Build daily reset logic: *(not implemented)*
    - pg_cron job (runs every hour)
-   - Query users whose local midnight passed in last hour
+   - Query user_profiles whose local midnight passed in last hour
    - Reset daily progress counters to 0
    - Trigger daily summary aggregation
    - Broadcast reset event via Realtime

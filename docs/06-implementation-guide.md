@@ -6,18 +6,20 @@
 
 ---
 
-## Timezone Handling
+## Timezone Handling (Future Feature)
+
+> **Note:** Timezone support is planned but not currently implemented. The `user_profiles.timezone` field does not exist yet. The following describes the intended implementation.
 
 ### User Timezone Storage
 
 - Captured during registration (browser timezone detected via Intl.DateTimeFormat)
-- Stored in `user_profiles.timezone` as IANA timezone string (e.g., "America/New_York")
+- Will be stored in `user_profiles.timezone` as IANA timezone string (e.g., "America/New_York")
 - User can change in settings (dropdown of common timezones)
 
 ### Daily Reset Logic
 
 - Scheduled task runs every hour at :00
-- Queries users whose local midnight occurred in the last hour:
+- Queries user_profiles whose local midnight occurred in the last hour:
   ```sql
   SELECT * FROM user_profiles
   WHERE EXTRACT(HOUR FROM now() AT TIME ZONE timezone) = 0

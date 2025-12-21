@@ -260,7 +260,7 @@ The codebase follows a strict three-layer data access pattern:
 
 ### Conflict Prevention
 
-- Optimistic locking via `users.version` field
+- Optimistic locking via `user_profiles.version` field
 - Server-authoritative timestamps
 - Real-time events prevent stale state
 - See [06-implementation-guide.md](./06-implementation-guide.md) for detailed conflict resolution

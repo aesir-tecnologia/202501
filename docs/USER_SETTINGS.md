@@ -17,14 +17,14 @@
   - Must be unique across all users
   - Email verification required after change
 - **Validation:** Server-side email format validation
-- **Storage:** `users.email`
+- **Storage:** `user_profiles.email` (synced from `auth.users` on signup)
 
-### Full Name
+### Full Name (Future)
 - **Type:** Text
 - **Default:** `null` (optional)
 - **Constraints:**
   - No length limit specified (reasonable limit: 100 characters)
-- **Storage:** `users.full_name`
+- **Note:** Not currently implemented. Will require schema migration to add `user_profiles.full_name` field.
 
 ### Password
 - **Type:** Password
@@ -39,14 +39,14 @@
 - **Validation:** Client-side and server-side validation
 - **Change Flow:** Requires current password verification
 
-### Timezone
+### Timezone (Future)
 - **Type:** Select (dropdown)
 - **Default:** `'UTC'` (detected from browser on registration)
 - **Constraints:**
   - Must be valid IANA timezone (e.g., "America/New_York", "Europe/London")
   - Validated against PostgreSQL `pg_timezone_names` table
 - **Impact:** Affects daily reset timing, CSV export timestamps, streak calculations
-- **Storage:** `users.timezone`
+- **Note:** Not currently implemented. Will require schema migration to add `user_profiles.timezone` field.
 
 ---
 
@@ -289,10 +289,13 @@
 
 ## Database Schema References
 
-### `users` Table
+### `user_profiles` Table (Current Implementation)
+- `id` (UUID, PRIMARY KEY, references `auth.users(id)`)
 - `email` (TEXT, UNIQUE, NOT NULL)
-- `full_name` (TEXT, nullable)
-- `timezone` (TEXT, NOT NULL, DEFAULT 'UTC')
+- `version` (INTEGER, NOT NULL, DEFAULT 1) - for optimistic locking
+- `created_at`, `updated_at` (TIMESTAMPTZ)
+
+> **Note:** Additional fields like `full_name` and `timezone` are planned for future implementation.
 
 ### `user_preferences` Table
 - `default_stint_duration` (INTEGER, NOT NULL, DEFAULT 120, CHECK: 5-480)
