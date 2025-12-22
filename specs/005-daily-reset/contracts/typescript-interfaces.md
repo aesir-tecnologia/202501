@@ -47,7 +47,7 @@ export async function getWeeklyStats(
 // Result type pattern (per constitution)
 export interface Result<T> {
   data: T | null;
-  error: string | null;
+  error: Error | null;
 }
 
 // Aggregated weekly stats
@@ -141,7 +141,6 @@ export function useWeeklyStatsQuery(): UseQueryReturnType<WeeklyStats, Error>;
 export interface DailySummaryWithComputed extends DailySummary {
   focusHours: number;       // totalFocusSeconds / 3600
   pauseHours: number;       // totalPauseSeconds / 3600
-  completionRate: number;   // (manual + auto) / total
 }
 ```
 
@@ -245,7 +244,11 @@ export interface GetDailySummariesResponse {
 
 ## Error Types
 
+> **Note**: These typed error discriminants are documented for future enhancement.
+> Current implementation uses standard `Error` objects via the `Result<T>` pattern.
+
 ```typescript
+// FUTURE: Typed error discriminants for more granular error handling
 export type DailySummaryError =
   | { code: 'NOT_FOUND'; message: 'No summary found for this date' }
   | { code: 'INVALID_DATE_RANGE'; message: 'Invalid date range specified' }

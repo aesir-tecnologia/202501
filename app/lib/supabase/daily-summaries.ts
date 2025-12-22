@@ -1,5 +1,6 @@
 import type { Database, Json } from '~/types/database.types';
 import type { TypedSupabaseClient } from '~/utils/supabase';
+import { isValidDbProjectBreakdownItem } from '~/utils/daily-summaries';
 
 export type DailySummaryRow = Database['public']['Tables']['daily_summaries']['Row'];
 
@@ -41,25 +42,21 @@ export type Result<T> = {
   error: Error | null
 };
 
-function isValidProjectBreakdownItem(item: unknown): item is ProjectBreakdownItem {
-  return (
-    item !== null
-    && typeof item === 'object'
-    && 'project_id' in item
-    && typeof (item as ProjectBreakdownItem).project_id === 'string'
-    && 'project_name' in item
-    && typeof (item as ProjectBreakdownItem).project_name === 'string'
-    && 'stint_count' in item
-    && typeof (item as ProjectBreakdownItem).stint_count === 'number'
-    && 'focus_seconds' in item
-    && typeof (item as ProjectBreakdownItem).focus_seconds === 'number'
-  );
+interface ParseContext {
+  summaryId?: string
+  date?: string
 }
 
-function parseProjectBreakdown(breakdown: Json): ProjectBreakdownItem[] {
+function parseProjectBreakdown(
+  breakdown: Json,
+  context?: ParseContext,
+): ProjectBreakdownItem[] {
   if (!breakdown || !Array.isArray(breakdown)) {
     if (breakdown !== null && breakdown !== undefined) {
-      console.warn('[daily-summaries] project_breakdown is not an array:', typeof breakdown);
+      console.warn('[daily-summaries] project_breakdown is not an array:', {
+        type: typeof breakdown,
+        context,
+      });
     }
     return [];
   }
@@ -68,7 +65,7 @@ function parseProjectBreakdown(breakdown: Json): ProjectBreakdownItem[] {
   const invalidItems: unknown[] = [];
 
   for (const item of breakdown as unknown[]) {
-    if (isValidProjectBreakdownItem(item)) {
+    if (isValidDbProjectBreakdownItem(item)) {
       validItems.push(item);
     }
     else {
@@ -77,7 +74,12 @@ function parseProjectBreakdown(breakdown: Json): ProjectBreakdownItem[] {
   }
 
   if (invalidItems.length > 0) {
-    console.error('[daily-summaries] Filtered invalid project breakdown items:', invalidItems);
+    console.error('[daily-summaries] Filtered invalid project breakdown items:', {
+      invalidCount: invalidItems.length,
+      validCount: validItems.length,
+      context,
+      samples: invalidItems.slice(0, 3),
+    });
   }
 
   return validItems;
@@ -173,7 +175,10 @@ export async function getWeeklyStats(
     totalFocusSeconds += summary.total_focus_seconds;
     totalPauseSeconds += summary.total_pause_seconds;
 
-    const breakdown = parseProjectBreakdown(summary.project_breakdown);
+    const breakdown = parseProjectBreakdown(summary.project_breakdown, {
+      summaryId: summary.id,
+      date: summary.date,
+    });
     for (const project of breakdown) {
       const existing = projectTotals.get(project.project_id);
       if (existing) {

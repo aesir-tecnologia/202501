@@ -9,18 +9,18 @@ export const DAILY_SUMMARY_SCHEMA_LIMITS = {
 export const projectBreakdownItemSchema = z.object({
   projectId: z.string().uuid(),
   projectName: z.string().min(1).max(100),
-  stintCount: z.number().int().nonnegative(),
-  focusSeconds: z.number().int().nonnegative(),
+  stintCount: z.number().int().nonnegative().max(DAILY_SUMMARY_SCHEMA_LIMITS.MAX_STINTS_PER_DAY),
+  focusSeconds: z.number().int().nonnegative().max(DAILY_SUMMARY_SCHEMA_LIMITS.MAX_FOCUS_SECONDS),
 });
 
 export const dailySummarySchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (expected YYYY-MM-DD)'),
-  totalStints: z.number().int().nonnegative(),
-  totalFocusSeconds: z.number().int().nonnegative(),
-  totalPauseSeconds: z.number().int().nonnegative(),
-  projectBreakdown: z.array(projectBreakdownItemSchema),
+  totalStints: z.number().int().nonnegative().max(DAILY_SUMMARY_SCHEMA_LIMITS.MAX_STINTS_PER_DAY),
+  totalFocusSeconds: z.number().int().nonnegative().max(DAILY_SUMMARY_SCHEMA_LIMITS.MAX_FOCUS_SECONDS),
+  totalPauseSeconds: z.number().int().nonnegative().max(DAILY_SUMMARY_SCHEMA_LIMITS.MAX_FOCUS_SECONDS),
+  projectBreakdown: z.array(projectBreakdownItemSchema).max(DAILY_SUMMARY_SCHEMA_LIMITS.MAX_PROJECTS_IN_BREAKDOWN),
   completedAt: z.string().datetime(),
 });
 

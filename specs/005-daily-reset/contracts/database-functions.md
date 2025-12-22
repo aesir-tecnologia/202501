@@ -52,7 +52,7 @@ SECURITY DEFINER
 
 ### Behavior
 
-1. Look up user's timezone from users table
+1. Look up user's timezone from user_profiles table
 2. Query completed stints where `DATE(ended_at AT TIME ZONE timezone) = p_date`
 3. Calculate totals (stint count, focus seconds, pause seconds)
 4. Build project_breakdown JSONB array
@@ -66,7 +66,7 @@ SECURITY DEFINER
 | No stints for date | Creates summary with total_stints=0, empty breakdown |
 | Summary already exists | Updates existing record (UPSERT) |
 | User not found | Returns error: "User not found" |
-| Invalid date | Returns error: "Invalid date" |
+| No timezone set | Logs warning and defaults to UTC |
 
 ### Example Usage
 
@@ -217,10 +217,9 @@ SELECT * FROM get_daily_summaries(
 
 | Code | Function | Description |
 |------|----------|-------------|
-| `USER_NOT_FOUND` | aggregate_daily_summary | User ID doesn't exist |
-| `INVALID_DATE` | aggregate_daily_summary | Date format is invalid |
-| `AGGREGATION_FAILED` | aggregate_daily_summary | Database error during aggregation |
-| `STREAK_UPDATE_FAILED` | process_daily_reset | Error updating user streak |
+| `USER_NOT_FOUND` | aggregate_daily_summary | User ID doesn't exist in user_profiles |
+| `AGGREGATION_FAILED` | process_daily_reset | Database error during aggregation (includes SQLSTATE) |
+| `STREAK_UPDATE_FAILED` | process_daily_reset | Error updating user streak (includes SQLSTATE) |
 
 ---
 

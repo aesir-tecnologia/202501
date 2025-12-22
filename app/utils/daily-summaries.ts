@@ -51,6 +51,13 @@ export function transformProjectBreakdown(
 }
 
 export function transformDailySummary(row: DailySummaryResult): DailySummary {
+  if (!row.user_id) {
+    console.warn('[daily-summaries] Missing user_id in daily summary row:', {
+      summaryId: row.id,
+      date: row.date,
+    });
+  }
+
   return {
     id: row.id,
     userId: row.user_id || '',
