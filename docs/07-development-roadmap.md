@@ -57,7 +57,7 @@
 6. Add project list to dashboard: `COMPLETED`
    - Grid layout (responsive)
    - Active projects first, sorted by last stint time
-   - "Inactive Projects" collapsible section
+   - Tab navigation (Active/Inactive/Archived)
 7. Handle edge cases: `COMPLETED`
    - Empty state (no projects)
    - Maximum projects limit (25 active)
@@ -92,7 +92,7 @@
    - `stopStint()`: Complete stint manually via database update
    - `getActiveStint()`: Get user's active stint via database query
 5. Implement optimistic locking: `COMPLETED`
-   - Add version field to users table
+   - Add version field to user_profiles table
    - Increment on stint operations
    - Reject stale operations with 409
 6. Build timer system: `COMPLETED`
@@ -138,7 +138,7 @@
    - Survives background tabs
    - Communicates with main thread via postMessage
 2. Build server-side auto-completion: `COMPLETED`
-   - pg_cron job (runs every 30 seconds)
+   - pg_cron job (runs every 1 minute, minimum interval supported by pg_cron)
    - Query stints where `started_at + planned_duration <= now()` and `status = 'active'`
    - Call `complete_stint()` database function for matched stints
    - Broadcast completion event via Realtime *(not implemented)*
@@ -183,7 +183,7 @@
    - Update in real-time when stint completed *(not implemented)*
 4. Build daily reset logic: *(not implemented)*
    - pg_cron job (runs every hour)
-   - Query users whose local midnight passed in last hour
+   - Query user_profiles whose local midnight passed in last hour
    - Reset daily progress counters to 0
    - Trigger daily summary aggregation
    - Broadcast reset event via Realtime

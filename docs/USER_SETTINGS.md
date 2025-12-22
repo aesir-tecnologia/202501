@@ -2,8 +2,8 @@
 
 **Purpose:** Complete list of all user-configurable settings for the settings page implementation.
 
-**Document Version:** 1.0  
-**Date:** January 2025
+**Document Version:** 1.1
+**Date:** December 19, 2025
 
 ---
 
@@ -17,14 +17,14 @@
   - Must be unique across all users
   - Email verification required after change
 - **Validation:** Server-side email format validation
-- **Storage:** `users.email`
+- **Storage:** `user_profiles.email` (synced from `auth.users` on signup)
 
-### Full Name
+### Full Name (Future)
 - **Type:** Text
 - **Default:** `null` (optional)
 - **Constraints:**
   - No length limit specified (reasonable limit: 100 characters)
-- **Storage:** `users.full_name`
+- **Note:** Not currently implemented. Will require schema migration to add `user_profiles.full_name` field.
 
 ### Password
 - **Type:** Password
@@ -39,14 +39,14 @@
 - **Validation:** Client-side and server-side validation
 - **Change Flow:** Requires current password verification
 
-### Timezone
+### Timezone (Future)
 - **Type:** Select (dropdown)
 - **Default:** `'UTC'` (detected from browser on registration)
 - **Constraints:**
   - Must be valid IANA timezone (e.g., "America/New_York", "Europe/London")
   - Validated against PostgreSQL `pg_timezone_names` table
 - **Impact:** Affects daily reset timing, CSV export timestamps, streak calculations
-- **Storage:** `users.timezone`
+- **Note:** Not currently implemented. Will require schema migration to add `user_profiles.timezone` field.
 
 ---
 
@@ -104,7 +104,7 @@
 - **Type:** Text
 - **Default:** None (required)
 - **Constraints:**
-  - Length: 1-100 characters
+  - Length: 2-60 characters
   - Must be unique within user's projects (case-insensitive)
 - **Storage:** `projects.name`
 
@@ -112,7 +112,7 @@
 - **Type:** Number (integer)
 - **Default:** `2` stints per day
 - **Constraints:**
-  - Range: 1-8 stints per day
+  - Range: 1-12 stints per day
   - Integer only
 - **Usage:** Used to calculate daily progress ("X of Y stints today")
 - **Storage:** `projects.expected_daily_stints`
@@ -133,12 +133,12 @@
 - **Options:** 8 preset colors
   - `'red'`
   - `'orange'`
-  - `'yellow'`
+  - `'amber'`
   - `'green'`
+  - `'teal'`
   - `'blue'`
   - `'purple'`
   - `'pink'`
-  - `'gray'`
 - **Constraints:** Must be one of the 8 valid colors or null
 - **Usage:** Visual identifier in dashboard project cards
 - **Storage:** `projects.color_tag`
@@ -200,7 +200,7 @@
 - **Type:** Read-only display
 - **Options:**
   - Free Tier: 2 active projects, 90-day analytics history, 10 CSV exports/month
-  - Pro Tier ($12/month): Unlimited projects, unlimited history, unlimited exports, custom branding
+  - Pro Tier ($1.99/month): Unlimited projects, unlimited history, unlimited exports, custom branding
 - **Actions:** Upgrade to Pro, Manage billing, Cancel subscription
 
 ### CSV Export Limits
@@ -228,8 +228,8 @@
 ### Numeric Ranges
 - **Default Stint Duration:** 5-480 minutes
 - **Custom Stint Duration:** 5-480 minutes (optional)
-- **Expected Daily Stints:** 1-8 per day
-- **Project Name Length:** 1-100 characters
+- **Expected Daily Stints:** 1-12 per day
+- **Project Name Length:** 2-60 characters
 
 ### Boolean Defaults
 - **Celebration Sound:** `true`
@@ -240,12 +240,12 @@
 
 ### Enum/Select Options
 - **Theme:** `'light'`, `'dark'`, `'system'` (default: `'system'`)
-- **Color Tags:** 8 colors: `'red'`, `'orange'`, `'yellow'`, `'green'`, `'blue'`, `'purple'`, `'pink'`, `'gray'`
+- **Color Tags:** 8 colors: `'red'`, `'orange'`, `'amber'`, `'green'`, `'teal'`, `'blue'`, `'purple'`, `'pink'`
 
 ### Required Fields
 - **Email:** Required, unique, verified
 - **Timezone:** Required, defaults to UTC
-- **Project Name:** Required (1-100 chars), unique per user
+- **Project Name:** Required (2-60 chars), unique per user
 - **Expected Daily Stints:** Required, defaults to 2
 
 ### Optional Fields
@@ -289,10 +289,13 @@
 
 ## Database Schema References
 
-### `users` Table
+### `user_profiles` Table (Current Implementation)
+- `id` (UUID, PRIMARY KEY, references `auth.users(id)`)
 - `email` (TEXT, UNIQUE, NOT NULL)
-- `full_name` (TEXT, nullable)
-- `timezone` (TEXT, NOT NULL, DEFAULT 'UTC')
+- `version` (INTEGER, NOT NULL, DEFAULT 1) - for optimistic locking
+- `created_at`, `updated_at` (TIMESTAMPTZ)
+
+> **Note:** Additional fields like `full_name` and `timezone` are planned for future implementation.
 
 ### `user_preferences` Table
 - `default_stint_duration` (INTEGER, NOT NULL, DEFAULT 120, CHECK: 5-480)
@@ -303,8 +306,8 @@
 - `theme` (TEXT, NOT NULL, DEFAULT 'system', CHECK: 'light'|'dark'|'system')
 
 ### `projects` Table (Project Settings)
-- `name` (TEXT, NOT NULL, CHECK: length 1-100, UNIQUE per user)
-- `expected_daily_stints` (INTEGER, NOT NULL, DEFAULT 2, CHECK: 1-8)
+- `name` (TEXT, NOT NULL, CHECK: length 2-60, UNIQUE per user)
+- `expected_daily_stints` (INTEGER, NOT NULL, DEFAULT 2, CHECK: 1-12)
 - `custom_stint_duration` (INTEGER, nullable, CHECK: 5-480 if not null)
 - `color_tag` (TEXT, nullable, CHECK: one of 8 colors or null)
 - `is_active` (BOOLEAN, NOT NULL, DEFAULT true)

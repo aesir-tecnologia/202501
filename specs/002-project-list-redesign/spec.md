@@ -77,7 +77,7 @@ Users need clear visual hierarchy that guides attention to actionable items (Sta
 
 ### Edge Cases
 
-- What happens when user has 25 active projects (free tier limit)? Project list should remain scannable with optimized rendering (v-memo)
+- What happens when user has many active projects? Project list should remain scannable with optimized rendering (v-memo)
 - How does the interface handle projects with very long names (80+ characters)? Text should truncate with ellipsis and show full name on hover
 - What happens when user has 0 active projects but 15 inactive projects? Interface should encourage activating projects rather than showing empty state
 - How does layout adapt on narrow mobile devices (320px width)? Cards should stack vertically with critical information (name, progress, Start button) always visible
@@ -126,7 +126,7 @@ Users need clear visual hierarchy that guides attention to actionable items (Sta
 - **SC-003**: Users complete common management tasks (reorder, toggle active, edit) in 2 clicks or fewer (verified through manual testing and interaction flow analysis)
 - **SC-004**: Active stint project is immediately identifiable through clear visual distinction
 - **SC-005**: Mobile users can view all critical project information (name, progress, actions) without horizontal scrolling on 375px viewport
-- **SC-006**: Project list remains performant (60fps scrolling) with up to 25 active projects
+- **SC-006**: Project list remains performant (60fps scrolling) with many active projects
 - **SC-007**: Keyboard-only users can navigate entire project list and perform all actions without mouse input
 - **SC-008**: Screen reader users receive clear announcements for all state changes (tested via accessibility audit)
 - **SC-009**: Users experience reduced cognitive load when managing multiple projects compared to current design

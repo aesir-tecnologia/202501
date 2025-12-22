@@ -2,8 +2,8 @@
 
 **Product Name:** LifeStint  
 **Tagline:** Small sprints. Big results.  
-**Document Version:** 3.0  
-**Date:** October 24, 2025  
+**Document Version:** 3.1
+**Date:** December 19, 2025  
 **Status:** Ready for Development
 
 ---
@@ -22,7 +22,7 @@ LifeStint is a productivity tracking application that helps busy professionals m
 
 **Target Market:** Independent professionals—freelancers, consultants, and remote workers managing 2-6 active projects who need to justify billing rates and demonstrate productivity to clients.
 
-**Business Model:** Freemium SaaS with free tier (2 projects, basic analytics) and Pro tier ($12/month for unlimited projects, advanced analytics, and custom branding on exports).
+**Business Model:** Freemium SaaS with free tier (2 projects, basic analytics) and Pro tier (unlimited projects, advanced analytics, and custom branding on exports).
 
 ---
 
@@ -195,7 +195,7 @@ A **stint** is a predetermined focused work session (default 120 minutes, custom
 
 | Product | Free Tier | Paid Tier | Notes |
 |---------|-----------|-----------|-------|
-| **LifeStint** | 2 projects, 90-day history | $12/month (unlimited) | Focus on individuals |
+| **LifeStint** | 2 projects, 90-day history | $1.99/month (unlimited) | Focus on individuals |
 | Toggl Track | 5 users, basic reports | $9-18/user/month | Team-focused pricing |
 | Harvest | 1 user, 2 projects | $12/user/month | No free tier for teams |
 | RescueTime | Limited features | $12/month | No free tier |
@@ -204,7 +204,7 @@ A **stint** is a predetermined focused work session (default 120 minutes, custom
 
 **LifeStint's Pricing Strategy:**
 - **Free Tier:** Generous enough for casual users (2 projects covers most)
-- **Pro Tier:** $12/month competitive with RescueTime/Harvest, higher than Toggl but more value for individuals
+- **Pro Tier:** $1.99/month significantly undercuts competitors while maintaining value for individuals
 - **No Team Pricing:** MVP focuses on individuals (teams later)
 
 ---
@@ -219,10 +219,10 @@ A **stint** is a predetermined focused work session (default 120 minutes, custom
 
 ### Unit Economics (Projected)
 
-- **Average Revenue Per User (ARPU):** $10/month (assumes 40% on free tier, 60% on Pro)
+- **Average Revenue Per User (ARPU):** $1.20/month (assumes 40% on free tier, 60% on Pro)
 - **Customer Acquisition Cost (CAC):** $30 (organic + referrals)
-- **Lifetime Value (LTV):** $240 (24-month avg retention)
-- **LTV:CAC Ratio:** 8:1 (healthy)
+- **Lifetime Value (LTV):** $29 (24-month avg retention)
+- **LTV:CAC Ratio:** ~1:1 (volume-focused strategy)
 
 ### Go-to-Market Strategy
 
@@ -244,7 +244,7 @@ A **stint** is a predetermined focused work session (default 120 minutes, custom
 - Basic CSV exports (10 per month)
 - Standard support
 
-**Pro Tier ($12/month):**
+**Pro Tier ($1.99/month):**
 - Unlimited projects
 - Unlimited analytics history
 - Unlimited CSV exports
@@ -254,9 +254,9 @@ A **stint** is a predetermined focused work session (default 120 minutes, custom
 
 ### Revenue Projections (Year 1)
 
-- **Month 3:** 1,000 users (600 free, 400 Pro) = $4,800 MRR
-- **Month 6:** 5,000 users (3,000 free, 2,000 Pro) = $24,000 MRR
-- **Month 12:** 15,000 users (9,000 free, 6,000 Pro) = $72,000 MRR
+- **Month 3:** 1,000 users (600 free, 400 Pro) = $800 MRR
+- **Month 6:** 5,000 users (3,000 free, 2,000 Pro) = $4,000 MRR
+- **Month 12:** 15,000 users (9,000 free, 6,000 Pro) = $12,000 MRR
 
 ### Key Assumptions
 
@@ -306,8 +306,8 @@ A **stint** is a predetermined focused work session (default 120 minutes, custom
 
 - **Free to Pro conversion:** >5%
 - **Monthly churn rate:** <10%
-- **Customer lifetime value:** >$200
-- **LTV:CAC ratio:** >5:1
+- **Customer lifetime value:** >$25
+- **LTV:CAC ratio:** >1:1
 
 ---
 

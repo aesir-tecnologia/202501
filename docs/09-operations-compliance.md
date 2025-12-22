@@ -1,8 +1,8 @@
 # LifeStint - Operations, Security & Compliance
 
 **Product Name:** LifeStint  
-**Document Version:** 4.0
-**Date:** December 2, 2025
+**Document Version:** 4.1
+**Date:** December 19, 2025
 
 ---
 
@@ -89,7 +89,7 @@
   - Pro tier clear value (unlimited projects, custom branding)
   - Transparent pricing from day 1 (no bait-and-switch)
   - Annual discount (save 20%)
-- **Contingency:** If conversions low, test different price points ($8, $12, $15/month).
+- **Contingency:** If conversions low, test different price points ($0.99, $2.99, $4.99/month).
 
 **Risk 9: Competition from Established Players**
 - **Impact:** Medium. Users stick with known tools.
