@@ -68,9 +68,9 @@ As a user who paused a stint but no longer needs to complete it, I want to stop 
 
 **Acceptance Scenarios**:
 
-1. **Given** a user has a paused stint, **When** they click the stop button and confirm, **Then** the stint is marked as abandoned and does not count toward daily stint totals
+1. **Given** a user has a paused stint, **When** they click the stop button and confirm, **Then** the stint is marked as interrupted and does not count toward daily stint totals
 2. **Given** a user clicks the stop button on a paused stint, **When** the confirmation dialog appears, **Then** it clearly states the stint will not count toward their daily progress
-3. **Given** an abandoned stint, **When** the user views their stint history, **Then** the stint appears with an "abandoned" indicator but is excluded from statistics
+3. **Given** an interrupted stint, **When** the user views their stint history, **Then** the stint appears with an "interrupted" indicator and is excluded from statistics
 
 ---
 
@@ -115,18 +115,18 @@ As a user trying to start a new stint while another is paused, I want to see cle
 - **FR-006**: System MUST NOT count paused stints toward daily stint totals until they are completed (existing behavior)
 - **FR-007**: System MUST display paused stint information on the dashboard with project name, remaining time, and actions
 - **FR-008**: System MUST allow resuming a paused stint via the resume button (existing behavior)
-- **FR-009**: System MUST allow stopping a paused stint via the stop button, marking it as abandoned
-- **FR-010**: System MUST mark abandoned stints as excluded from daily totals and statistics
-- **FR-011**: System MUST record completion type as "abandoned" for user-stopped paused stints
+- **FR-009**: System MUST allow stopping a paused stint via the stop button, marking it as interrupted
+- **FR-010**: System MUST mark interrupted stints as excluded from daily totals and statistics (existing behavior)
+- **FR-011**: System MUST record completion type as "interrupted" for user-stopped paused stints (reuses existing type)
 - **FR-012**: System MUST update the conflict resolution dialog to include "Pause and switch" as the primary option
-- **FR-013**: System MUST show a confirmation dialog when stopping a paused stint, warning that it will be abandoned
+- **FR-013**: System MUST show a confirmation dialog when stopping a paused stint, warning that it will not count toward daily totals
 - **FR-014**: System MUST continue using existing `auto_stale` completion type for paused stints that expire after 24 hours
 
 ### Key Entities
 
 - **Stint**: No schema changes required; existing `status` and `completion_type` fields suffice
 - **Stint Status**: No changes — uses existing: active, paused, completed, interrupted
-- **Completion Type**: Add `abandoned` to existing: manual, auto, auto_stale, conflict_resolution
+- **Completion Type**: No changes — reuses existing `interrupted` for stopped paused stints
 
 ## Success Criteria *(mandatory)*
 
