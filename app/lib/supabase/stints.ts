@@ -92,6 +92,12 @@ export async function getStintById(
   return { data, error: null };
 }
 
+/**
+ * Get the currently active stint (status = 'active' only)
+ *
+ * Note: Changed from returning active OR paused to active only,
+ * since we now allow 1 active + 1 paused simultaneously.
+ */
 export async function getActiveStint(
   client: TypedSupabaseClient,
 ): Promise<Result<StintRow | null>> {
@@ -102,11 +108,37 @@ export async function getActiveStint(
     .from('stints')
     .select('*')
     .eq('user_id', userResult.data!)
-    .in('status', ['active', 'paused'])
+    .eq('status', 'active')
     .maybeSingle<StintRow>();
 
   if (error) {
     return { data: null, error: new Error(error.message || 'Failed to get active stint') };
+  }
+
+  return { data: data || null, error: null };
+}
+
+/**
+ * Get the currently paused stint (status = 'paused' only)
+ *
+ * Returns the user's paused stint if one exists. With the pause-and-switch
+ * feature, users can have both an active and a paused stint simultaneously.
+ */
+export async function getPausedStint(
+  client: TypedSupabaseClient,
+): Promise<Result<StintRow | null>> {
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
+
+  const { data, error } = await client
+    .from('stints')
+    .select('*')
+    .eq('user_id', userResult.data!)
+    .eq('status', 'paused')
+    .maybeSingle<StintRow>();
+
+  if (error) {
+    return { data: null, error: new Error(error.message || 'Failed to get paused stint') };
   }
 
   return { data: data || null, error: null };
@@ -218,6 +250,9 @@ export async function pauseStint(
     if (error.message?.includes('not found')) {
       return { data: null, error: new Error('Stint not found') };
     }
+    if (error.message?.includes('already have a paused stint')) {
+      return { data: null, error: new Error('You already have a paused stint. Complete or abandon it first.') };
+    }
     return { data: null, error: new Error('Failed to pause stint') };
   }
 
@@ -250,6 +285,9 @@ export async function resumeStint(
     }
     if (error.message?.includes('not found')) {
       return { data: null, error: new Error('Stint not found') };
+    }
+    if (error.message?.includes('Cannot resume while another stint is active')) {
+      return { data: null, error: new Error('Cannot resume while another stint is active. Stop or complete the active stint first.') };
     }
     return { data: null, error: new Error('Failed to resume stint') };
   }

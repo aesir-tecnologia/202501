@@ -8,6 +8,7 @@ import {
   listStints,
   getStintById,
   getActiveStint,
+  getPausedStint,
   createStint,
   updateStint,
   deleteStint,
@@ -163,17 +164,16 @@ describe('stints.ts - Integration Tests', () => {
       expect(result.data!.status).toBe('active');
     });
 
-    it('should return paused stint when exists', async () => {
+    it('should return null when only paused stint exists (active only)', async () => {
       await createPausedStint(serviceClient, testProject.id, testUserId);
 
       const result = await getActiveStint(authenticatedClient);
 
       expect(result.error).toBeNull();
-      expect(result.data).not.toBeNull();
-      expect(result.data!.status).toBe('paused');
+      expect(result.data).toBeNull();
     });
 
-    it('should return null when no active/paused stint', async () => {
+    it('should return null when no active stint', async () => {
       await createCompletedStint(serviceClient, testProject.id, testUserId);
 
       const result = await getActiveStint(authenticatedClient);
@@ -184,6 +184,43 @@ describe('stints.ts - Integration Tests', () => {
 
     it('should return auth error when user is not authenticated', async () => {
       const result = await getActiveStint(unauthenticatedClient);
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('authenticated');
+    });
+  });
+
+  describe('getPausedStint', () => {
+    it('should return paused stint when exists', async () => {
+      await createPausedStint(serviceClient, testProject.id, testUserId);
+
+      const result = await getPausedStint(authenticatedClient);
+
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('paused');
+    });
+
+    it('should return null when only active stint exists (paused only)', async () => {
+      await createActiveStint(serviceClient, testProject.id, testUserId);
+
+      const result = await getPausedStint(authenticatedClient);
+
+      expect(result.error).toBeNull();
+      expect(result.data).toBeNull();
+    });
+
+    it('should return null when no paused stint', async () => {
+      await createCompletedStint(serviceClient, testProject.id, testUserId);
+
+      const result = await getPausedStint(authenticatedClient);
+
+      expect(result.error).toBeNull();
+      expect(result.data).toBeNull();
+    });
+
+    it('should return auth error when user is not authenticated', async () => {
+      const result = await getPausedStint(unauthenticatedClient);
 
       expect(result.error).not.toBeNull();
       expect(result.error?.message).toContain('authenticated');
