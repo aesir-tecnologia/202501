@@ -430,6 +430,7 @@ export type Database = {
           can_start: boolean
           conflict_message: string
           existing_stint_id: string
+          existing_stint_status: string
         }[]
       }
     }
