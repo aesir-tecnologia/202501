@@ -5,6 +5,7 @@ import {
   listStints,
   getStintById,
   getActiveStint,
+  getPausedStint,
   updateStint as updateStintDb,
   deleteStint as deleteStintDb,
   pauseStint as pauseStintDb,
@@ -42,6 +43,7 @@ export const stintKeys = {
   details: () => [...stintKeys.all, 'detail'] as const,
   detail: (id: string) => [...stintKeys.details(), id] as const,
   active: () => [...stintKeys.all, 'active'] as const,
+  paused: () => [...stintKeys.all, 'paused'] as const,
 };
 
 export interface StintListFilters {
@@ -56,6 +58,7 @@ export interface StintListFilters {
 export type StintsQueryResult = UseQueryReturnType<StintRow[], Error>;
 export type StintQueryResult = UseQueryReturnType<StintRow | null, Error>;
 export type ActiveStintQueryResult = UseQueryReturnType<StintRow | null, Error>;
+export type PausedStintQueryResult = UseQueryReturnType<StintRow | null, Error>;
 
 export type CreateStintMutation = UseMutationReturnType<
   StintRow,
@@ -202,6 +205,32 @@ export function useActiveStintQuery() {
     queryKey: stintKeys.active(),
     queryFn: async () => {
       const { data, error } = await getActiveStint(client);
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Fetches the currently paused stint with automatic caching.
+ *
+ * With the pause-and-switch feature, users can have both an active stint
+ * and a paused stint simultaneously. This query fetches only the paused stint.
+ *
+ * @example
+ * ```ts
+ * const { data: pausedStint, isLoading, error } = usePausedStintQuery()
+ * ```
+ */
+export function usePausedStintQuery() {
+  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+
+  return useQuery({
+    queryKey: stintKeys.paused(),
+    queryFn: async () => {
+      const { data, error } = await getPausedStint(client);
       if (error) throw error;
       return data;
     },
@@ -597,6 +626,7 @@ export function usePauseStint() {
       queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
       queryClient.invalidateQueries({ queryKey: stintKeys.detail(stintId) });
       queryClient.invalidateQueries({ queryKey: stintKeys.active() });
+      queryClient.invalidateQueries({ queryKey: stintKeys.paused() });
     },
   });
 }
@@ -638,6 +668,7 @@ export function useResumeStint() {
       queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
       queryClient.invalidateQueries({ queryKey: stintKeys.detail(stintId) });
       queryClient.invalidateQueries({ queryKey: stintKeys.active() });
+      queryClient.invalidateQueries({ queryKey: stintKeys.paused() });
     },
   });
 }
@@ -851,6 +882,7 @@ export function useInterruptStint() {
       queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
       queryClient.invalidateQueries({ queryKey: stintKeys.detail(payload.stintId) });
       queryClient.invalidateQueries({ queryKey: stintKeys.active() });
+      queryClient.invalidateQueries({ queryKey: stintKeys.paused() });
 
       // Note: No streak cache update here - interrupted stints don't count toward streaks
       // per spec: "Only completed stints count toward streaks; interrupted stints do not"
