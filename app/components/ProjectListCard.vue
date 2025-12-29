@@ -4,10 +4,12 @@ import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
 import { PROJECT, STINT, type ProjectColor } from '~/constants';
 import { getColorClasses, getColorPillClasses } from '~/utils/project-colors';
+import { calculateRemainingSeconds } from '~/utils/stint-time';
 
 const props = defineProps<{
   project: ProjectRow
   activeStint: StintRow | null
+  pausedStint: StintRow | null
   dailyProgress: DailyProgress
   isToggling?: boolean
   isStarting?: boolean
@@ -23,6 +25,8 @@ const emit = defineEmits<{
   pauseStint: [stint: StintRow]
   resumeStint: [stint: StintRow]
   completeStint: [stint: StintRow]
+  resumePausedStint: [stint: StintRow]
+  abandonPausedStint: [stint: StintRow]
 }>();
 
 function formatDuration(minutes: number | null): string {
@@ -62,6 +66,10 @@ const hasActiveStint = computed(() => {
   return props.activeStint?.project_id === props.project.id;
 });
 
+const hasPausedStint = computed(() => {
+  return props.pausedStint?.project_id === props.project.id;
+});
+
 const projectColor = computed(() => {
   const tag = props.project.color_tag;
   if (!isProjectColor(tag)) return null;
@@ -93,13 +101,14 @@ const statusPill = computed(() => {
     };
   }
 
-  if (props.activeStint) {
+  if (hasPausedStint.value) {
     return {
-      label: 'Busy',
-      classes: 'text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700',
+      label: 'Paused',
+      classes: 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20',
     };
   }
 
+  // With pause-and-switch, other projects show "Ready" (dialog handles conflicts)
   return {
     label: 'Ready',
     classes: projectColor.value
@@ -110,7 +119,9 @@ const statusPill = computed(() => {
 
 const canStartStint = computed(() => {
   if (!props.project.is_active) return false;
-  if (props.activeStint) return false;
+  // Don't block if same project has the active stint
+  if (hasActiveStint.value) return false;
+  // Allow clicking even if another project has active stint - dialog handles conflicts
   return true;
 });
 
@@ -120,6 +131,18 @@ const { isPaused, secondsRemaining } = useStintTimer();
 const formattedTime = computed(() => {
   const mins = Math.floor(secondsRemaining.value / 60);
   const secs = secondsRemaining.value % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+});
+
+// Paused stint remaining time (calculated locally since timer singleton only tracks active)
+const pausedStintRemainingSeconds = computed(() => {
+  if (!hasPausedStint.value || !props.pausedStint) return 0;
+  return calculateRemainingSeconds(props.pausedStint);
+});
+
+const formattedPausedTime = computed(() => {
+  const mins = Math.floor(pausedStintRemainingSeconds.value / 60);
+  const secs = pausedStintRemainingSeconds.value % 60;
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 });
 
@@ -178,6 +201,18 @@ function handleResumeStint() {
 function handleCompleteStint() {
   if (props.activeStint) {
     emit('completeStint', props.activeStint);
+  }
+}
+
+function handleResumePausedStint() {
+  if (props.pausedStint) {
+    emit('resumePausedStint', props.pausedStint);
+  }
+}
+
+function handleAbandonPausedStint() {
+  if (props.pausedStint) {
+    emit('abandonPausedStint', props.pausedStint);
   }
 }
 </script>
@@ -291,6 +326,20 @@ function handleCompleteStint() {
               <span class="tabular-nums">
                 <span class="sr-only">Time remaining:</span>
                 {{ formattedTime }}
+              </span>
+            </div>
+
+            <div
+              v-else-if="hasPausedStint"
+              class="flex items-center gap-1.5 text-xs font-bold px-2 py-0.5 rounded border text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20"
+            >
+              <UIcon
+                name="i-lucide-pause"
+                class="w-3 h-3"
+              />
+              <span class="tabular-nums">
+                <span class="sr-only">Time remaining:</span>
+                {{ formattedPausedTime }}
               </span>
             </div>
           </div>
@@ -417,6 +466,53 @@ function handleCompleteStint() {
                   v-else
                   name="i-lucide-square"
                   class="w-[20px] h-[20px] opacity-85 group-hover/btn:opacity-100 fill-current"
+                />
+              </button>
+            </UTooltip>
+          </div>
+
+          <div
+            v-else-if="hasPausedStint"
+            class="flex flex-col gap-3"
+          >
+            <UTooltip text="Resume">
+              <button
+                type="button"
+                :disabled="isPausing || isCompleting"
+                aria-label="Resume paused stint"
+                class="group/btn w-11 h-11 rounded-2xl border transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0B1120] active:scale-[0.98] border-yellow-500/25 text-yellow-700 dark:text-yellow-400 bg-yellow-500/5 hover:bg-yellow-500/10 hover:border-yellow-500/40"
+                @click="handleResumePausedStint"
+              >
+                <UIcon
+                  v-if="isPausing"
+                  name="i-lucide-loader-2"
+                  class="w-[18px] h-[18px] animate-spin"
+                />
+                <UIcon
+                  v-else
+                  name="i-lucide-play"
+                  class="w-[20px] h-[20px] opacity-85 group-hover/btn:opacity-100 fill-current"
+                />
+              </button>
+            </UTooltip>
+
+            <UTooltip text="Abandon">
+              <button
+                type="button"
+                :disabled="isPausing || isCompleting"
+                aria-label="Abandon paused stint"
+                class="group/btn w-11 h-11 rounded-2xl border transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0B1120] active:scale-[0.98] border-red-500/25 text-red-700 dark:text-red-400 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/45"
+                @click="handleAbandonPausedStint"
+              >
+                <UIcon
+                  v-if="isCompleting"
+                  name="i-lucide-loader-2"
+                  class="w-[18px] h-[18px] animate-spin"
+                />
+                <UIcon
+                  v-else
+                  name="i-lucide-x"
+                  class="w-[20px] h-[20px] opacity-85 group-hover/btn:opacity-100"
                 />
               </button>
             </UTooltip>

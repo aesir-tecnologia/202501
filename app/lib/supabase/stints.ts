@@ -2,6 +2,7 @@ import type { Database } from '~/types/database.types';
 import type { TypedSupabaseClient } from '~/utils/supabase';
 import type { SyncCheckOutput } from '~/schemas/stints';
 import { STINT } from '~/constants';
+import { calculateRemainingSeconds } from '~/utils/stint-time';
 
 /**
  * Data-access helpers for the Supabase `stints` table.
@@ -26,6 +27,7 @@ interface ListStintsOptions {
 export type ConflictError = {
   code: 'CONFLICT'
   existingStint: StintRow | null
+  existingProjectName: string | null
   message: string
 };
 
@@ -92,6 +94,9 @@ export async function getStintById(
   return { data, error: null };
 }
 
+/**
+ * Get the currently active stint (status = 'active' only)
+ */
 export async function getActiveStint(
   client: TypedSupabaseClient,
 ): Promise<Result<StintRow | null>> {
@@ -102,11 +107,37 @@ export async function getActiveStint(
     .from('stints')
     .select('*')
     .eq('user_id', userResult.data!)
-    .in('status', ['active', 'paused'])
+    .eq('status', 'active')
     .maybeSingle<StintRow>();
 
   if (error) {
     return { data: null, error: new Error(error.message || 'Failed to get active stint') };
+  }
+
+  return { data: data || null, error: null };
+}
+
+/**
+ * Get the currently paused stint (status = 'paused' only)
+ *
+ * Returns the user's paused stint if one exists. With the pause-and-switch
+ * feature, users can have both an active and a paused stint simultaneously.
+ */
+export async function getPausedStint(
+  client: TypedSupabaseClient,
+): Promise<Result<StintRow | null>> {
+  const userResult = await requireUserId(client);
+  if (userResult.error) return { data: null, error: userResult.error };
+
+  const { data, error } = await client
+    .from('stints')
+    .select('*')
+    .eq('user_id', userResult.data!)
+    .eq('status', 'paused')
+    .maybeSingle<StintRow>();
+
+  if (error) {
+    return { data: null, error: new Error(error.message || 'Failed to get paused stint') };
   }
 
   return { data: data || null, error: null };
@@ -212,13 +243,22 @@ export async function pauseStint(
 
   if (error) {
     // Map database errors to user-friendly messages
+    if (error.message?.includes('Authentication required')) {
+      return { data: null, error: new Error('Your session has expired. Please log in again.') };
+    }
+    if (error.message?.includes('Permission denied')) {
+      return { data: null, error: new Error('You do not have permission to pause this stint.') };
+    }
     if (error.message?.includes('not active')) {
       return { data: null, error: new Error('This stint is not active and cannot be paused') };
     }
     if (error.message?.includes('not found')) {
       return { data: null, error: new Error('Stint not found') };
     }
-    return { data: null, error: new Error('Failed to pause stint') };
+    if (error.message?.includes('already have a paused stint')) {
+      return { data: null, error: new Error('You already have a paused stint. Complete or abandon it first.') };
+    }
+    return { data: null, error: new Error(`Failed to pause stint: ${error.message || 'Unknown error'}`) };
   }
 
   if (!data) {
@@ -245,13 +285,22 @@ export async function resumeStint(
 
   if (error) {
     // Map database errors to user-friendly messages
+    if (error.message?.includes('Authentication required')) {
+      return { data: null, error: new Error('Your session has expired. Please log in again.') };
+    }
+    if (error.message?.includes('Permission denied')) {
+      return { data: null, error: new Error('You do not have permission to resume this stint.') };
+    }
     if (error.message?.includes('not paused')) {
       return { data: null, error: new Error('This stint is not paused and cannot be resumed') };
     }
     if (error.message?.includes('not found')) {
       return { data: null, error: new Error('Stint not found') };
     }
-    return { data: null, error: new Error('Failed to resume stint') };
+    if (error.message?.includes('Cannot resume while another stint is active')) {
+      return { data: null, error: new Error('Cannot resume while another stint is active. Stop or complete the active stint first.') };
+    }
+    return { data: null, error: new Error(`Failed to resume stint: ${error.message || 'Unknown error'}`) };
   }
 
   if (!data) {
@@ -289,13 +338,19 @@ export async function completeStint(
 
   if (error) {
     // Map database errors to user-friendly messages
+    if (error.message?.includes('Authentication required')) {
+      return { data: null, error: new Error('Your session has expired. Please log in again.') };
+    }
+    if (error.message?.includes('Permission denied')) {
+      return { data: null, error: new Error('You do not have permission to complete this stint.') };
+    }
     if (error.message?.includes('not active') || error.message?.includes('not paused')) {
       return { data: null, error: new Error('This stint is not active or paused and cannot be completed') };
     }
     if (error.message?.includes('not found')) {
       return { data: null, error: new Error('Stint not found') };
     }
-    return { data: null, error: new Error('Failed to complete stint') };
+    return { data: null, error: new Error(`Failed to complete stint: ${error.message || 'Unknown error'}`) };
   }
 
   if (!data) {
@@ -366,9 +421,9 @@ export async function startStint(
   // 3. If insert fails with duplicate key (23505), handle race condition below
   // This two-phase approach ensures atomicity: validation prevents most conflicts,
   // and the unique constraint catches any race conditions between validation and insert.
+  // Note: validate_stint_start uses auth.uid() internally for security (no p_user_id param)
   const { data: validation, error: validationError } = await client
     .rpc('validate_stint_start', {
-      p_user_id: userId,
       p_project_id: projectId,
       p_version: userVersion,
     })
@@ -390,6 +445,7 @@ export async function startStint(
       error: {
         code: 'CONFLICT',
         existingStint: existingStint || null,
+        existingProjectName: validation.existing_project_name || null,
         message: validation.conflict_message || 'An active stint already exists',
       },
       data: null,
@@ -411,20 +467,25 @@ export async function startStint(
     .single();
 
   // Handle race condition (23505 = duplicate key)
+  // Note: With advisory locks in validate_stint_start, this should rarely happen
+  // but we keep it as a safety net for edge cases
   if (insertError) {
     if (insertError.code === '23505') {
       // Race condition: another stint was started between validation and insert
+      // Only query for active stints - the paused constraint cannot be violated
+      // by startStint since we always insert with status='active'
       const { data: conflictingStint } = await client
         .from('stints')
-        .select('*')
+        .select('*, projects(name)')
         .eq('user_id', userId)
-        .in('status', ['active', 'paused'])
+        .eq('status', 'active')
         .maybeSingle();
 
       return {
         error: {
           code: 'CONFLICT',
           existingStint: conflictingStint || null,
+          existingProjectName: (conflictingStint?.projects as { name: string } | null)?.name || null,
           message: 'An active stint already exists',
         },
         data: null,
@@ -471,27 +532,8 @@ export async function syncStintCheck(
     return { data: null, error: new Error('Invalid stint data: missing required fields') };
   }
 
-  const now = new Date();
-  const serverTimestamp = now.toISOString();
-  const startedAt = new Date(stint.started_at);
-  const pausedDuration = stint.paused_duration || 0;
-  const plannedDurationSeconds = stint.planned_duration * 60;
-
-  let remainingSeconds: number;
-
-  if (stint.status === 'active') {
-    const elapsedSeconds = Math.floor((now.getTime() - startedAt.getTime()) / 1000);
-    const pausedSeconds = pausedDuration;
-    remainingSeconds = plannedDurationSeconds - elapsedSeconds + pausedSeconds;
-  }
-  else {
-    const pausedAt = stint.paused_at ? new Date(stint.paused_at) : now;
-    const elapsedSeconds = Math.floor((pausedAt.getTime() - startedAt.getTime()) / 1000);
-    const pausedSeconds = pausedDuration;
-    remainingSeconds = plannedDurationSeconds - elapsedSeconds + pausedSeconds;
-  }
-
-  remainingSeconds = Math.max(0, remainingSeconds);
+  const serverTimestamp = new Date().toISOString();
+  const remainingSeconds = calculateRemainingSeconds(stint);
 
   return {
     data: {

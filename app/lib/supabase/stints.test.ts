@@ -1,13 +1,14 @@
 /**
  * @vitest-environment node
  */
-import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterAll, afterEach } from 'vitest';
 import type { TypedSupabaseClient } from '~/utils/supabase';
 import type { ProjectRow } from './projects';
 import {
   listStints,
   getStintById,
   getActiveStint,
+  getPausedStint,
   createStint,
   updateStint,
   deleteStint,
@@ -163,17 +164,16 @@ describe('stints.ts - Integration Tests', () => {
       expect(result.data!.status).toBe('active');
     });
 
-    it('should return paused stint when exists', async () => {
+    it('should return null when only paused stint exists (active only)', async () => {
       await createPausedStint(serviceClient, testProject.id, testUserId);
 
       const result = await getActiveStint(authenticatedClient);
 
       expect(result.error).toBeNull();
-      expect(result.data).not.toBeNull();
-      expect(result.data!.status).toBe('paused');
+      expect(result.data).toBeNull();
     });
 
-    it('should return null when no active/paused stint', async () => {
+    it('should return null when no active stint', async () => {
       await createCompletedStint(serviceClient, testProject.id, testUserId);
 
       const result = await getActiveStint(authenticatedClient);
@@ -184,6 +184,43 @@ describe('stints.ts - Integration Tests', () => {
 
     it('should return auth error when user is not authenticated', async () => {
       const result = await getActiveStint(unauthenticatedClient);
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('authenticated');
+    });
+  });
+
+  describe('getPausedStint', () => {
+    it('should return paused stint when exists', async () => {
+      await createPausedStint(serviceClient, testProject.id, testUserId);
+
+      const result = await getPausedStint(authenticatedClient);
+
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('paused');
+    });
+
+    it('should return null when only active stint exists (paused only)', async () => {
+      await createActiveStint(serviceClient, testProject.id, testUserId);
+
+      const result = await getPausedStint(authenticatedClient);
+
+      expect(result.error).toBeNull();
+      expect(result.data).toBeNull();
+    });
+
+    it('should return null when no paused stint', async () => {
+      await createCompletedStint(serviceClient, testProject.id, testUserId);
+
+      const result = await getPausedStint(authenticatedClient);
+
+      expect(result.error).toBeNull();
+      expect(result.data).toBeNull();
+    });
+
+    it('should return auth error when user is not authenticated', async () => {
+      const result = await getPausedStint(unauthenticatedClient);
 
       expect(result.error).not.toBeNull();
       expect(result.error?.message).toContain('authenticated');
@@ -358,6 +395,23 @@ describe('stints.ts - Integration Tests', () => {
       expect(result.error).not.toBeNull();
       expect(result.error?.message).toContain('authenticated');
     });
+
+    it('should return error when user already has a paused stint', async () => {
+      // Create a paused stint on project A
+      await createPausedStint(serviceClient, testProject.id, testUserId);
+
+      // Create an active stint on project B
+      const otherProject = await createTestProject(serviceClient, testUserId, {
+        name: 'Other Project',
+      });
+      const activeStint = await createActiveStint(serviceClient, otherProject.id, testUserId);
+
+      // Try to pause the active stint (should fail because we already have a paused stint)
+      const result = await pauseStint(authenticatedClient, activeStint.id);
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('already have a paused stint');
+    });
   });
 
   describe('resumeStint', () => {
@@ -405,6 +459,23 @@ describe('stints.ts - Integration Tests', () => {
 
       expect(result.error).not.toBeNull();
       expect(result.error?.message).toContain('authenticated');
+    });
+
+    it('should return error when trying to resume while another stint is active', async () => {
+      // Create a paused stint on project A
+      const pausedStint = await createPausedStint(serviceClient, testProject.id, testUserId);
+
+      // Create an active stint on project B
+      const otherProject = await createTestProject(serviceClient, testUserId, {
+        name: 'Other Project',
+      });
+      await createActiveStint(serviceClient, otherProject.id, testUserId);
+
+      // Try to resume the paused stint (should fail because there's already an active stint)
+      const result = await resumeStint(authenticatedClient, pausedStint.id);
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('Cannot resume while another stint is active');
     });
   });
 
@@ -720,6 +791,285 @@ describe('stints.ts - Integration Tests', () => {
 
       expect(result.error).toBeNull();
       expect(result.data!.actual_duration).toBeLessThan(63);
+    });
+  });
+
+  describe('concurrent stint constraints', () => {
+    it('should allow one active AND one paused stint simultaneously', async () => {
+      // Create an active stint on project A
+      await createActiveStint(serviceClient, testProject.id, testUserId);
+
+      // Create a paused stint on project B (using service client to bypass RPC validation)
+      const otherProject = await createTestProject(serviceClient, testUserId, {
+        name: 'Other Project',
+      });
+      await createPausedStint(serviceClient, otherProject.id, testUserId);
+
+      // Verify both exist via authenticated client queries
+      const activeResult = await getActiveStint(authenticatedClient);
+      const pausedResult = await getPausedStint(authenticatedClient);
+
+      expect(activeResult.error).toBeNull();
+      expect(activeResult.data).not.toBeNull();
+      expect(activeResult.data!.status).toBe('active');
+
+      expect(pausedResult.error).toBeNull();
+      expect(pausedResult.data).not.toBeNull();
+      expect(pausedResult.data!.status).toBe('paused');
+    });
+
+    it('should reject starting a stint when both active and paused exist (dual conflict)', async () => {
+      // Create an active stint on project A
+      await createActiveStint(serviceClient, testProject.id, testUserId);
+
+      // Create a paused stint on project B
+      const otherProject = await createTestProject(serviceClient, testUserId, {
+        name: 'Other Project',
+      });
+      await createPausedStint(serviceClient, otherProject.id, testUserId);
+
+      // Try to start a third stint on project C
+      const thirdProject = await createTestProject(serviceClient, testUserId, {
+        name: 'Third Project',
+      });
+      const result = await startStint(authenticatedClient, thirdProject.id);
+
+      // Should get a CONFLICT error (active stint blocks new starts)
+      expect(result.error).not.toBeNull();
+      expect('code' in result.error!).toBe(true);
+      expect((result.error as { code: string }).code).toBe('CONFLICT');
+    });
+
+    it('should allow starting a stint when only paused stint exists (not blocked by paused)', async () => {
+      // Create only a paused stint
+      await createPausedStint(serviceClient, testProject.id, testUserId);
+
+      // Try to start a new stint on another project
+      const otherProject = await createTestProject(serviceClient, testUserId, {
+        name: 'Other Project',
+      });
+      const result = await startStint(authenticatedClient, otherProject.id);
+
+      // Should succeed - paused stints don't block new starts
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('active');
+
+      // Verify we now have both active and paused
+      const activeResult = await getActiveStint(authenticatedClient);
+      const pausedResult = await getPausedStint(authenticatedClient);
+
+      expect(activeResult.data).not.toBeNull();
+      expect(pausedResult.data).not.toBeNull();
+    });
+
+    it('should reject creating a second active stint at database level', async () => {
+      await createActiveStint(serviceClient, testProject.id, testUserId);
+      const otherProject = await createTestProject(serviceClient, testUserId, { name: 'Other' });
+
+      const { error } = await serviceClient
+        .from('stints')
+        .insert({
+          user_id: testUserId,
+          project_id: otherProject.id,
+          status: 'active',
+          started_at: new Date().toISOString(),
+          planned_duration: 25,
+        });
+
+      expect(error).not.toBeNull();
+      expect(error?.code).toBe('23505');
+    });
+
+    it('should reject creating a second paused stint at database level', async () => {
+      await createPausedStint(serviceClient, testProject.id, testUserId);
+      const otherProject = await createTestProject(serviceClient, testUserId, { name: 'Other' });
+
+      const { error } = await serviceClient
+        .from('stints')
+        .insert({
+          user_id: testUserId,
+          project_id: otherProject.id,
+          status: 'paused',
+          started_at: new Date().toISOString(),
+          paused_at: new Date().toISOString(),
+          planned_duration: 25,
+        });
+
+      expect(error).not.toBeNull();
+      expect(error?.code).toBe('23505');
+    });
+  });
+
+  describe('cross-user access prevention', () => {
+    let otherUserId: string;
+    let otherUserEmail: string;
+    let otherUserClient: TypedSupabaseClient;
+
+    beforeAll(async () => {
+      otherUserEmail = `test-stints-other-${Date.now()}@integration.test`;
+      otherUserId = await createTestUser(serviceClient, otherUserEmail);
+      otherUserClient = await getAuthenticatedClient(otherUserEmail);
+    });
+
+    afterAll(async () => {
+      await cleanupTestData(serviceClient, otherUserId);
+      await deleteTestUser(serviceClient, otherUserId);
+    });
+
+    it('should prevent User B from pausing User A stint', async () => {
+      const stintA = await createActiveStint(serviceClient, testProject.id, testUserId);
+
+      const result = await pauseStint(otherUserClient, stintA.id);
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('do not have permission');
+    });
+
+    it('should prevent User B from resuming User A stint', async () => {
+      const stintA = await createPausedStint(serviceClient, testProject.id, testUserId);
+
+      const result = await resumeStint(otherUserClient, stintA.id);
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('do not have permission');
+    });
+
+    it('should prevent User B from completing User A stint', async () => {
+      const stintA = await createActiveStint(serviceClient, testProject.id, testUserId);
+
+      const result = await completeStint(otherUserClient, stintA.id, 'manual');
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('do not have permission');
+    });
+  });
+
+  describe('pause-and-switch workflow', () => {
+    let projectA: ProjectRow;
+    let projectB: ProjectRow;
+
+    beforeEach(async () => {
+      projectA = await createTestProject(serviceClient, testUserId, { name: 'Workflow Project A' });
+      projectB = await createTestProject(serviceClient, testUserId, { name: 'Workflow Project B' });
+    });
+
+    afterEach(async () => {
+      await serviceClient.from('stints').delete().eq('project_id', projectA.id);
+      await serviceClient.from('stints').delete().eq('project_id', projectB.id);
+      await serviceClient.from('projects').delete().eq('id', projectA.id);
+      await serviceClient.from('projects').delete().eq('id', projectB.id);
+    });
+
+    it('should complete full pause-and-switch workflow', async () => {
+      // Step 1: Start stint on Project A
+      const startAResult = await startStint(authenticatedClient, projectA.id, 50);
+      expect(startAResult.error).toBeNull();
+      expect(startAResult.data?.status).toBe('active');
+      const stintA = startAResult.data!;
+
+      // Step 2: Pause stint A (add delay to accumulate pause time)
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const pauseResult = await pauseStint(authenticatedClient, stintA.id);
+      expect(pauseResult.error).toBeNull();
+      expect(pauseResult.data?.status).toBe('paused');
+
+      // Wait while paused to accumulate pause time
+      await new Promise(resolve => setTimeout(resolve, 1100));
+
+      // Step 3: Start stint on Project B (alongside paused A)
+      const startBResult = await startStint(authenticatedClient, projectB.id, 30);
+      expect(startBResult.error).toBeNull();
+      expect(startBResult.data?.status).toBe('active');
+      const stintB = startBResult.data!;
+
+      // Verify: Both stints coexist (A=paused, B=active)
+      const activeResult = await getActiveStint(authenticatedClient);
+      expect(activeResult.data?.id).toBe(stintB.id);
+
+      const pausedResult = await getPausedStint(authenticatedClient);
+      expect(pausedResult.data?.id).toBe(stintA.id);
+
+      // Step 4: Complete stint B
+      const completeBResult = await completeStint(authenticatedClient, stintB.id, 'manual');
+      expect(completeBResult.error).toBeNull();
+      expect(completeBResult.data?.status).toBe('completed');
+
+      // Step 5: Resume stint A
+      const resumeResult = await resumeStint(authenticatedClient, stintA.id);
+      expect(resumeResult.error).toBeNull();
+      expect(resumeResult.data?.status).toBe('active');
+      expect(resumeResult.data?.paused_duration).toBeGreaterThanOrEqual(1);
+
+      // Verify: A is now active again with preserved accumulated time
+      const finalActiveResult = await getActiveStint(authenticatedClient);
+      expect(finalActiveResult.data?.id).toBe(stintA.id);
+
+      // Cleanup
+      await completeStint(authenticatedClient, stintA.id, 'manual');
+    });
+
+    it('should reject starting third stint when both active and paused exist', async () => {
+      // Create a third project for this test
+      const projectC = await createTestProject(serviceClient, testUserId, { name: 'Workflow Project C' });
+
+      try {
+        // Step 1: Start and pause stint on Project A
+        const startAResult = await startStint(authenticatedClient, projectA.id, 50);
+        const stintA = startAResult.data!;
+        await pauseStint(authenticatedClient, stintA.id);
+
+        // Step 2: Start stint on Project B
+        const startBResult = await startStint(authenticatedClient, projectB.id, 30);
+        const stintB = startBResult.data!;
+
+        // Step 3: Try to start third stint on Project C (should fail)
+        // The error is "active stint already running" because validate_stint_start
+        // checks for active stint first before checking paused stint
+        const startCResult = await startStint(authenticatedClient, projectC.id, 25);
+
+        expect(startCResult.error).not.toBeNull();
+        expect(startCResult.error?.message).toContain('active stint is already running');
+
+        // Cleanup
+        await completeStint(authenticatedClient, stintB.id, 'manual');
+        await completeStint(authenticatedClient, stintA.id, 'interrupted');
+      }
+      finally {
+        await serviceClient.from('stints').delete().eq('project_id', projectC.id);
+        await serviceClient.from('projects').delete().eq('id', projectC.id);
+      }
+    });
+
+    it('should correctly preserve paused_duration after pause-switch-resume cycle', async () => {
+      // Step 1: Start stint on Project A
+      const startResult = await startStint(authenticatedClient, projectA.id, 50);
+      const stintA = startResult.data!;
+
+      // Wait briefly to accumulate some active time
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Step 2: Pause stint A
+      await pauseStint(authenticatedClient, stintA.id);
+
+      // Wait while paused to accumulate pause time
+      await new Promise(resolve => setTimeout(resolve, 1100));
+
+      // Step 3: Start stint B (switch)
+      const startBResult = await startStint(authenticatedClient, projectB.id, 30);
+      const stintB = startBResult.data!;
+
+      // Complete B quickly
+      await completeStint(authenticatedClient, stintB.id, 'manual');
+
+      // Step 4: Resume A
+      const resumeResult = await resumeStint(authenticatedClient, stintA.id);
+
+      // Verify paused_duration was preserved and accumulated
+      expect(resumeResult.data?.paused_duration).toBeGreaterThanOrEqual(1);
+
+      // Cleanup
+      await completeStint(authenticatedClient, stintA.id, 'manual');
     });
   });
 });

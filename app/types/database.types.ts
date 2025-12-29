@@ -425,11 +425,13 @@ export type Database = {
         }[]
       }
       validate_stint_start: {
-        Args: { p_project_id: string; p_user_id: string; p_version: number }
+        Args: { p_project_id: string; p_version: number }
         Returns: {
           can_start: boolean
           conflict_message: string
+          existing_project_name: string
           existing_stint_id: string
+          existing_stint_status: string
         }[]
       }
     }

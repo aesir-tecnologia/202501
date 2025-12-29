@@ -3,10 +3,13 @@ import { useSortable } from '@vueuse/integrations/useSortable';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
+import { useQueryClient } from '@tanstack/vue-query';
 import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
-import { useActiveStintQuery, useStartStint, usePauseStint, useResumeStint, useCompleteStint, useStintsQuery } from '~/composables/useStints';
+import { useActiveStintQuery, usePausedStintQuery, useStartStint, usePauseStint, useResumeStint, useCompleteStint, useStintsQuery, stintKeys } from '~/composables/useStints';
 import ProjectListCard from './ProjectListCard.vue';
+import StintConflictDialog, { type ConflictResolutionAction, type DualConflictInfo } from './StintConflictDialog.vue';
 import { parseSafeDate } from '~/utils/date-helpers';
+import { calculateRemainingSeconds } from '~/utils/stint-time';
 
 const props = defineProps<{
   projects: ProjectRow[]
@@ -20,6 +23,7 @@ const emit = defineEmits<{
 const isDraggable = computed(() => props.isDraggable ?? false);
 
 const toast = useToast();
+const queryClient = useQueryClient();
 const { mutate: reorderProjects, isError, error } = useReorderProjects();
 const { mutateAsync: toggleActive } = useToggleProjectActive();
 const togglingProjectId = ref<string | null>(null);
@@ -30,28 +34,39 @@ const activeListRef = ref<HTMLElement | null>(null);
 const localProjects = ref<ProjectRow[]>([...props.projects]);
 const isDragging = ref(false);
 
-// Stint management
 const { data: activeStint } = useActiveStintQuery();
+const { data: pausedStint } = usePausedStintQuery();
 const { mutateAsync: startStint, isPending: isStarting } = useStartStint();
 const { mutateAsync: pauseStint, isPending: isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint();
 const { mutateAsync: completeStint, isPending: isCompleting } = useCompleteStint();
 
-// Completion modal state
 const showCompletionModal = ref(false);
 const stintToComplete = ref<StintRow | null>(null);
 
-// Query all stints for daily progress calculation
+const showConflictDialog = ref(false);
+const conflictStint = ref<{
+  id: string
+  status: 'active' | 'paused'
+  projectName: string
+  remainingSeconds: number
+} | null>(null);
+const dualConflictInfo = ref<DualConflictInfo | null>(null);
+const pendingProject = ref<ProjectRow | null>(null);
+const isConflictResolving = ref(false);
+
 const { data: allStints } = useStintsQuery();
 
-// Helper function: Get start of day (midnight) for a date
 function startOfDay(date: Date): Date {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
   return d;
 }
 
-// Helper function: Add days to a date
+function getProjectName(projectId: string): string {
+  return props.projects.find(p => p.id === projectId)?.name || 'Unknown Project';
+}
+
 function addDays(date: Date, days: number): Date {
   const d = new Date(date);
   d.setDate(d.getDate() + days);
@@ -99,7 +114,6 @@ function computeAllDailyProgress(
   return progressMap;
 }
 
-// Computed: Daily progress for all projects (single calculation)
 const dailyProgressMap = computed(() => {
   return computeAllDailyProgress(props.projects, allStints.value);
 });
@@ -111,7 +125,6 @@ watch(() => props.projects, (newProjects) => {
   }
 }, { deep: true });
 
-// Show error toast when reorder fails
 watch(isError, (hasError) => {
   if (hasError && error.value) {
     toast.add({
@@ -122,7 +135,6 @@ watch(isError, (hasError) => {
   }
 });
 
-// Writable computed for sortable - allows useSortable to update the array
 const sortableProjects = computed({
   get: () => localProjects.value,
   set: (val) => { localProjects.value = val; },
@@ -187,6 +199,54 @@ async function handleToggleActive(project: ProjectRow) {
 }
 
 async function handleStartStint(project: ProjectRow): Promise<void> {
+  // Check for dual-conflict first - both active AND paused stints exist
+  if (activeStint.value && pausedStint.value) {
+    dualConflictInfo.value = {
+      activeStint: {
+        projectName: getProjectName(activeStint.value.project_id),
+        remainingSeconds: calculateRemainingSeconds(activeStint.value),
+      },
+      pausedStint: {
+        projectName: getProjectName(pausedStint.value.project_id),
+        remainingSeconds: calculateRemainingSeconds(pausedStint.value),
+      },
+    };
+    pendingProject.value = project;
+    showConflictDialog.value = true;
+    return;
+  }
+
+  // Check for active stint - blocks starting, must pause or complete first
+  if (activeStint.value) {
+    conflictStint.value = {
+      id: activeStint.value.id,
+      status: 'active',
+      projectName: getProjectName(activeStint.value.project_id),
+      remainingSeconds: calculateRemainingSeconds(activeStint.value),
+    };
+    pendingProject.value = project;
+    showConflictDialog.value = true;
+    return;
+  }
+
+  // Check for paused stint - allowed but show dialog for awareness
+  if (pausedStint.value) {
+    conflictStint.value = {
+      id: pausedStint.value.id,
+      status: 'paused',
+      projectName: getProjectName(pausedStint.value.project_id),
+      remainingSeconds: calculateRemainingSeconds(pausedStint.value),
+    };
+    pendingProject.value = project;
+    showConflictDialog.value = true;
+    return;
+  }
+
+  // No conflicts, start directly
+  await doStartStint(project);
+}
+
+async function doStartStint(project: ProjectRow): Promise<void> {
   try {
     await startStint({
       projectId: project.id,
@@ -194,8 +254,29 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
     });
 
     screenReaderAnnouncement.value = `Started working on ${project.name}`;
+    toast.add({ title: 'Stint started', color: 'success' });
   }
   catch (error) {
+    const errorWithConflict = error as Error & { conflict?: StintRow };
+
+    if (errorWithConflict.conflict) {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: stintKeys.active() }),
+        queryClient.invalidateQueries({ queryKey: stintKeys.paused() }),
+      ]);
+
+      const existingStint = errorWithConflict.conflict;
+      conflictStint.value = {
+        id: existingStint.id,
+        status: existingStint.status as 'active' | 'paused',
+        projectName: getProjectName(existingStint.project_id),
+        remainingSeconds: calculateRemainingSeconds(existingStint),
+      };
+      pendingProject.value = project;
+      showConflictDialog.value = true;
+      return;
+    }
+
     screenReaderAnnouncement.value = `Failed to start stint on ${project.name}`;
     toast.add({
       title: 'Failed to Start Stint',
@@ -210,6 +291,7 @@ async function handlePauseStint(stint: StintRow): Promise<void> {
   try {
     await pauseStint(stint.id);
     screenReaderAnnouncement.value = 'Stint paused';
+    toast.add({ title: 'Stint paused', color: 'success' });
   }
   catch (error) {
     screenReaderAnnouncement.value = 'Failed to pause stint';
@@ -226,12 +308,61 @@ async function handleResumeStint(stint: StintRow): Promise<void> {
   try {
     await resumeStint(stint.id);
     screenReaderAnnouncement.value = 'Stint resumed';
+    toast.add({ title: 'Stint resumed', color: 'success' });
   }
   catch (error) {
     screenReaderAnnouncement.value = 'Failed to resume stint';
     toast.add({
       title: 'Failed to Resume Stint',
       description: error instanceof Error ? error.message : 'Could not resume stint. Please try again.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    });
+  }
+}
+
+async function handleResumePausedStint(stint: StintRow): Promise<void> {
+  // Check if there's an active stint - can't resume while another is active
+  if (activeStint.value) {
+    toast.add({
+      title: 'Cannot Resume',
+      description: 'Stop or complete the active stint first before resuming the paused one.',
+      color: 'warning',
+      icon: 'i-lucide-alert-triangle',
+    });
+    return;
+  }
+
+  try {
+    await resumeStint(stint.id);
+    screenReaderAnnouncement.value = 'Paused stint resumed';
+    toast.add({ title: 'Stint resumed', color: 'success' });
+  }
+  catch (error) {
+    screenReaderAnnouncement.value = 'Failed to resume paused stint';
+    toast.add({
+      title: 'Failed to Resume',
+      description: error instanceof Error ? error.message : 'Could not resume stint. Please try again.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    });
+  }
+}
+
+async function handleAbandonPausedStint(stint: StintRow): Promise<void> {
+  try {
+    await completeStint({
+      stintId: stint.id,
+      completionType: 'interrupted',
+    });
+    screenReaderAnnouncement.value = 'Paused stint abandoned';
+    toast.add({ title: 'Stint abandoned', color: 'neutral' });
+  }
+  catch (error) {
+    screenReaderAnnouncement.value = 'Failed to abandon stint';
+    toast.add({
+      title: 'Failed to Abandon',
+      description: error instanceof Error ? error.message : 'Could not abandon stint. Please try again.',
       color: 'error',
       icon: 'i-lucide-alert-circle',
     });
@@ -271,6 +402,185 @@ async function handleCompletionConfirm(notes: string): Promise<void> {
   finally {
     showCompletionModal.value = false;
     stintToComplete.value = null;
+  }
+}
+
+async function handleConflictResolution(action: ConflictResolutionAction): Promise<void> {
+  // For dual-conflict dismissal, just close the dialog
+  if (action === 'dismiss-dual-conflict') {
+    showConflictDialog.value = false;
+    pendingProject.value = null;
+    dualConflictInfo.value = null;
+    return;
+  }
+
+  if (!conflictStint.value) {
+    console.error('[ProjectList] handleConflictResolution called without conflictStint', { action });
+    toast.add({
+      title: 'Unexpected Error',
+      description: 'Conflict state was lost. Please try again.',
+      color: 'error',
+    });
+    showConflictDialog.value = false;
+    return;
+  }
+
+  if (!pendingProject.value) {
+    console.error('[ProjectList] handleConflictResolution called without pendingProject', { action });
+    toast.add({
+      title: 'Unexpected Error',
+      description: 'Target project was lost. Please try again.',
+      color: 'error',
+    });
+    showConflictDialog.value = false;
+    conflictStint.value = null;
+    return;
+  }
+
+  const currentConflictStint = conflictStint.value;
+  const currentPendingProject = pendingProject.value;
+
+  isConflictResolving.value = true;
+
+  try {
+    switch (action) {
+      case 'pause-and-switch':
+        try {
+          await pauseStint(currentConflictStint.id);
+        }
+        catch (pauseError) {
+          toast.add({
+            title: 'Failed to Pause',
+            description: pauseError instanceof Error ? pauseError.message : 'Could not pause current stint.',
+            color: 'error',
+            icon: 'i-lucide-alert-circle',
+          });
+          break;
+        }
+        try {
+          await doStartStint(currentPendingProject);
+          toast.add({ title: 'Switched projects', color: 'success' });
+        }
+        catch (startError) {
+          toast.add({
+            title: 'Partial Switch',
+            description: `Current stint paused, but couldn't start new stint: ${startError instanceof Error ? startError.message : 'Unknown error'}`,
+            color: 'warning',
+            icon: 'i-lucide-alert-triangle',
+          });
+        }
+        break;
+
+      case 'complete-active-and-start':
+        try {
+          await completeStint({
+            stintId: currentConflictStint.id,
+            completionType: 'manual',
+          });
+        }
+        catch (completeError) {
+          toast.add({
+            title: 'Failed to Complete',
+            description: completeError instanceof Error ? completeError.message : 'Could not complete current stint.',
+            color: 'error',
+            icon: 'i-lucide-alert-circle',
+          });
+          break;
+        }
+        try {
+          await doStartStint(currentPendingProject);
+          toast.add({ title: 'Completed and started new stint', color: 'success' });
+        }
+        catch (startError) {
+          toast.add({
+            title: 'Partial Completion',
+            description: `Previous stint completed, but couldn't start new stint: ${startError instanceof Error ? startError.message : 'Unknown error'}`,
+            color: 'warning',
+            icon: 'i-lucide-alert-triangle',
+          });
+        }
+        break;
+
+      case 'start-alongside':
+        try {
+          await doStartStint(currentPendingProject);
+          toast.add({ title: 'New stint started', color: 'success' });
+        }
+        catch (error) {
+          toast.add({
+            title: 'Failed to Start',
+            description: error instanceof Error ? error.message : 'Could not start new stint.',
+            color: 'error',
+            icon: 'i-lucide-alert-circle',
+          });
+        }
+        break;
+
+      case 'complete-paused-and-start':
+        try {
+          await completeStint({
+            stintId: currentConflictStint.id,
+            completionType: 'manual',
+          });
+        }
+        catch (completeError) {
+          toast.add({
+            title: 'Failed to Complete',
+            description: completeError instanceof Error ? completeError.message : 'Could not complete paused stint.',
+            color: 'error',
+            icon: 'i-lucide-alert-circle',
+          });
+          break;
+        }
+        try {
+          await doStartStint(currentPendingProject);
+          toast.add({ title: 'Completed paused and started new stint', color: 'success' });
+        }
+        catch (startError) {
+          toast.add({
+            title: 'Partial Completion',
+            description: `Paused stint completed, but couldn't start new stint: ${startError instanceof Error ? startError.message : 'Unknown error'}`,
+            color: 'warning',
+            icon: 'i-lucide-alert-triangle',
+          });
+        }
+        break;
+
+      case 'resume-paused':
+        try {
+          await resumeStint(currentConflictStint.id);
+          toast.add({ title: 'Resumed paused stint', color: 'success' });
+        }
+        catch (error) {
+          toast.add({
+            title: 'Failed to Resume',
+            description: error instanceof Error ? error.message : 'Could not resume stint.',
+            color: 'error',
+            icon: 'i-lucide-alert-circle',
+          });
+        }
+        break;
+
+      case 'cancel':
+        break;
+
+      default: {
+        const _exhaustiveCheck: never = action;
+        console.error('[ProjectList] Unhandled conflict resolution action:', action);
+        toast.add({
+          title: 'Unexpected Action',
+          description: `Action "${action}" is not implemented.`,
+          color: 'error',
+        });
+      }
+    }
+  }
+  finally {
+    isConflictResolving.value = false;
+    showConflictDialog.value = false;
+    pendingProject.value = null;
+    conflictStint.value = null;
+    dualConflictInfo.value = null;
   }
 }
 </script>
@@ -314,6 +624,7 @@ async function handleCompletionConfirm(notes: string): Promise<void> {
         :key="project.id"
         :project="project"
         :active-stint="activeStint ?? null"
+        :paused-stint="pausedStint ?? null"
         :daily-progress="dailyProgressMap.get(project.id) ?? {
           projectId: project.id,
           completed: 0,
@@ -333,6 +644,8 @@ async function handleCompletionConfirm(notes: string): Promise<void> {
         @pause-stint="handlePauseStint"
         @resume-stint="handleResumeStint"
         @complete-stint="handleCompleteStint"
+        @resume-paused-stint="handleResumePausedStint"
+        @abandon-paused-stint="handleAbandonPausedStint"
       />
     </ul>
 
@@ -342,6 +655,17 @@ async function handleCompletionConfirm(notes: string): Promise<void> {
       :stint-id="stintToComplete?.id ?? ''"
       @cancel="handleCompletionCancel"
       @confirm="handleCompletionConfirm"
+    />
+
+    <!-- Stint Conflict Dialog -->
+    <StintConflictDialog
+      v-if="conflictStint || dualConflictInfo"
+      v-model:open="showConflictDialog"
+      :existing-stint="conflictStint ?? undefined"
+      :dual-conflict="dualConflictInfo ?? undefined"
+      :new-project-name="pendingProject?.name ?? 'New Project'"
+      :is-pending="isConflictResolving"
+      @resolve="handleConflictResolution"
     />
   </div>
 </template>
