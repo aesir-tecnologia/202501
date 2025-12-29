@@ -3,11 +3,13 @@ import { useSortable } from '@vueuse/integrations/useSortable';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
+import { useQueryClient } from '@tanstack/vue-query';
 import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
-import { useActiveStintQuery, usePausedStintQuery, useStartStint, usePauseStint, useResumeStint, useCompleteStint, useStintsQuery } from '~/composables/useStints';
+import { useActiveStintQuery, usePausedStintQuery, useStartStint, usePauseStint, useResumeStint, useCompleteStint, useStintsQuery, stintKeys } from '~/composables/useStints';
 import ProjectListCard from './ProjectListCard.vue';
 import StintConflictDialog, { type ConflictResolutionAction, type DualConflictInfo } from './StintConflictDialog.vue';
 import { parseSafeDate } from '~/utils/date-helpers';
+import { calculateRemainingSeconds } from '~/utils/stint-time';
 
 const props = defineProps<{
   projects: ProjectRow[]
@@ -21,6 +23,7 @@ const emit = defineEmits<{
 const isDraggable = computed(() => props.isDraggable ?? false);
 
 const toast = useToast();
+const queryClient = useQueryClient();
 const { mutate: reorderProjects, isError, error } = useReorderProjects();
 const { mutateAsync: toggleActive } = useToggleProjectActive();
 const togglingProjectId = ref<string | null>(null);
@@ -63,26 +66,6 @@ function startOfDay(date: Date): Date {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
   return d;
-}
-
-// Helper function: Calculate remaining seconds for a stint
-function calculateRemainingSeconds(stint: StintRow): number {
-  if (!stint.started_at || !stint.planned_duration) return 0;
-
-  const now = new Date();
-  const startedAt = new Date(stint.started_at);
-  const pausedDuration = stint.paused_duration || 0;
-  const plannedDurationSeconds = stint.planned_duration * 60;
-
-  if (stint.status === 'active') {
-    const elapsedSeconds = Math.floor((now.getTime() - startedAt.getTime()) / 1000);
-    return Math.max(0, plannedDurationSeconds - elapsedSeconds + pausedDuration);
-  }
-  else {
-    const pausedAt = stint.paused_at ? new Date(stint.paused_at) : now;
-    const elapsedSeconds = Math.floor((pausedAt.getTime() - startedAt.getTime()) / 1000);
-    return Math.max(0, plannedDurationSeconds - elapsedSeconds + pausedDuration);
-  }
 }
 
 // Helper function: Get project name by ID
@@ -283,6 +266,26 @@ async function doStartStint(project: ProjectRow): Promise<void> {
     screenReaderAnnouncement.value = `Started working on ${project.name}`;
   }
   catch (error) {
+    const errorWithConflict = error as Error & { conflict?: StintRow };
+
+    if (errorWithConflict.conflict) {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: stintKeys.active() }),
+        queryClient.invalidateQueries({ queryKey: stintKeys.paused() }),
+      ]);
+
+      const existingStint = errorWithConflict.conflict;
+      conflictStint.value = {
+        id: existingStint.id,
+        status: existingStint.status as 'active' | 'paused',
+        projectName: getProjectName(existingStint.project_id),
+        remainingSeconds: calculateRemainingSeconds(existingStint),
+      };
+      pendingProject.value = project;
+      showConflictDialog.value = true;
+      return;
+    }
+
     screenReaderAnnouncement.value = `Failed to start stint on ${project.name}`;
     toast.add({
       title: 'Failed to Start Stint',
@@ -418,43 +421,67 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
     return;
   }
 
-  if (!conflictStint.value || !pendingProject.value) return;
+  if (!conflictStint.value) {
+    console.error('[ProjectList] handleConflictResolution called without conflictStint', { action });
+    toast.add({
+      title: 'Unexpected Error',
+      description: 'Conflict state was lost. Please try again.',
+      color: 'error',
+    });
+    showConflictDialog.value = false;
+    return;
+  }
+
+  if (!pendingProject.value) {
+    console.error('[ProjectList] handleConflictResolution called without pendingProject', { action });
+    toast.add({
+      title: 'Unexpected Error',
+      description: 'Target project was lost. Please try again.',
+      color: 'error',
+    });
+    showConflictDialog.value = false;
+    conflictStint.value = null;
+    return;
+  }
+
+  const currentConflictStint = conflictStint.value;
+  const currentPendingProject = pendingProject.value;
 
   isConflictResolving.value = true;
 
   try {
     switch (action) {
       case 'pause-and-switch':
-        await pauseStint(conflictStint.value.id);
-        await doStartStint(pendingProject.value);
+        await pauseStint(currentConflictStint.id);
+        await doStartStint(currentPendingProject);
         toast.add({ title: 'Switched projects', color: 'success' });
         break;
 
       case 'complete-active-and-start':
         await completeStint({
-          stintId: conflictStint.value.id,
+          stintId: currentConflictStint.id,
           completionType: 'manual',
         });
-        await doStartStint(pendingProject.value);
+        await doStartStint(currentPendingProject);
         toast.add({ title: 'Completed and started new stint', color: 'success' });
         break;
 
       case 'start-alongside':
-        await doStartStint(pendingProject.value);
+        await doStartStint(currentPendingProject);
         toast.add({ title: 'New stint started', color: 'success' });
         break;
 
       case 'complete-paused-and-start':
         await completeStint({
-          stintId: conflictStint.value.id,
+          stintId: currentConflictStint.id,
           completionType: 'manual',
         });
-        await doStartStint(pendingProject.value);
+        await doStartStint(currentPendingProject);
         toast.add({ title: 'Completed paused and started new stint', color: 'success' });
         break;
 
       case 'resume-paused':
-        await resumeStint(conflictStint.value.id);
+        await resumeStint(currentConflictStint.id);
         toast.add({ title: 'Resumed paused stint', color: 'success' });
         break;
 

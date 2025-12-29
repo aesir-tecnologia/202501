@@ -4,6 +4,7 @@ import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
 import { PROJECT, STINT, type ProjectColor } from '~/constants';
 import { getColorClasses, getColorPillClasses } from '~/utils/project-colors';
+import { calculateRemainingSeconds } from '~/utils/stint-time';
 
 const props = defineProps<{
   project: ProjectRow
@@ -136,18 +137,7 @@ const formattedTime = computed(() => {
 // Paused stint remaining time (calculated locally since timer singleton only tracks active)
 const pausedStintRemainingSeconds = computed(() => {
   if (!hasPausedStint.value || !props.pausedStint) return 0;
-
-  const stint = props.pausedStint;
-  if (!stint.started_at || !stint.planned_duration) return 0;
-
-  const startedAt = new Date(stint.started_at);
-  const pausedAt = stint.paused_at ? new Date(stint.paused_at) : new Date();
-  const pausedDuration = stint.paused_duration || 0;
-  const plannedDurationSeconds = stint.planned_duration * 60;
-
-  const elapsedSeconds = Math.floor((pausedAt.getTime() - startedAt.getTime()) / 1000);
-  const activeTimeSeconds = elapsedSeconds - pausedDuration;
-  return Math.max(0, plannedDurationSeconds - activeTimeSeconds);
+  return calculateRemainingSeconds(props.pausedStint);
 });
 
 const formattedPausedTime = computed(() => {

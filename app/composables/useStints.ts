@@ -451,6 +451,7 @@ export function useCompleteStint() {
       queryClient.invalidateQueries({ queryKey: stintKeys.lists() });
       queryClient.invalidateQueries({ queryKey: stintKeys.detail(payload.stintId) });
       queryClient.invalidateQueries({ queryKey: stintKeys.active() });
+      queryClient.invalidateQueries({ queryKey: stintKeys.paused() });
 
       // Update the user_streaks materialized cache table (fire-and-forget)
       // This keeps the cache in sync for faster reads; errors don't block UI

@@ -2,6 +2,7 @@ import type { Database } from '~/types/database.types';
 import type { TypedSupabaseClient } from '~/utils/supabase';
 import type { SyncCheckOutput } from '~/schemas/stints';
 import { STINT } from '~/constants';
+import { calculateRemainingSeconds } from '~/utils/stint-time';
 
 /**
  * Data-access helpers for the Supabase `stints` table.
@@ -406,7 +407,6 @@ export async function startStint(
   // and the unique constraint catches any race conditions between validation and insert.
   const { data: validation, error: validationError } = await client
     .rpc('validate_stint_start', {
-      p_user_id: userId,
       p_project_id: projectId,
       p_version: userVersion,
     })
@@ -509,27 +509,8 @@ export async function syncStintCheck(
     return { data: null, error: new Error('Invalid stint data: missing required fields') };
   }
 
-  const now = new Date();
-  const serverTimestamp = now.toISOString();
-  const startedAt = new Date(stint.started_at);
-  const pausedDuration = stint.paused_duration || 0;
-  const plannedDurationSeconds = stint.planned_duration * 60;
-
-  let remainingSeconds: number;
-
-  if (stint.status === 'active') {
-    const elapsedSeconds = Math.floor((now.getTime() - startedAt.getTime()) / 1000);
-    const pausedSeconds = pausedDuration;
-    remainingSeconds = plannedDurationSeconds - elapsedSeconds + pausedSeconds;
-  }
-  else {
-    const pausedAt = stint.paused_at ? new Date(stint.paused_at) : now;
-    const elapsedSeconds = Math.floor((pausedAt.getTime() - startedAt.getTime()) / 1000);
-    const pausedSeconds = pausedDuration;
-    remainingSeconds = plannedDurationSeconds - elapsedSeconds + pausedSeconds;
-  }
-
-  remainingSeconds = Math.max(0, remainingSeconds);
+  const serverTimestamp = new Date().toISOString();
+  const remainingSeconds = calculateRemainingSeconds(stint);
 
   return {
     data: {

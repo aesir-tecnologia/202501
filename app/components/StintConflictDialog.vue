@@ -30,6 +30,22 @@ interface Props {
 const props = defineProps<Props>();
 const isOpen = defineModel<boolean>('open', { required: true });
 
+const previousActiveElement = ref<HTMLElement | null>(null);
+
+watch(isOpen, (newValue, oldValue) => {
+  if (newValue && !oldValue) {
+    previousActiveElement.value = document.activeElement as HTMLElement | null;
+  }
+  else if (!newValue && oldValue) {
+    nextTick(() => {
+      if (previousActiveElement.value && typeof previousActiveElement.value.focus === 'function') {
+        previousActiveElement.value.focus();
+      }
+      previousActiveElement.value = null;
+    });
+  }
+});
+
 const emit = defineEmits<{
   resolve: [action: ConflictResolutionAction]
 }>();

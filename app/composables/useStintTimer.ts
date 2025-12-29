@@ -9,6 +9,7 @@ import type { Database } from '~/types/database.types';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useActiveStintQuery } from './useStints';
 import { parseSafeDate } from '~/utils/date-helpers';
+import { calculateRemainingSeconds } from '~/utils/stint-time';
 import { syncStintCheck as syncStintCheckDb, completeStint } from '~/lib/supabase/stints';
 import { stintKeys } from '~/composables/useStints';
 import { streakKeys } from '~/composables/useStreaks';
@@ -373,24 +374,7 @@ function initializePausedState(stint: StintRow): void {
   globalTimerState.isPaused.value = true;
   globalTimerState.timerCompleted.value = false;
 
-  // Calculate remaining time for display
-  const startedAtDate = parseSafeDate(stint.started_at);
-  if (!startedAtDate) {
-    console.error('Cannot initialize paused state: invalid started_at date', stint.started_at);
-    return;
-  }
-  const startedAt = startedAtDate.getTime();
-  const pausedAtDate = stint.paused_at ? parseSafeDate(stint.paused_at) : null;
-  const pausedAt = pausedAtDate ? pausedAtDate.getTime() : Date.now();
-  const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000;
-  const pausedDurationMs = (stint.paused_duration || 0) * 1000;
-
-  // Calculate active duration (elapsed time minus paused time)
-  const elapsedMs = pausedAt - startedAt;
-  const activeDurationMs = elapsedMs - pausedDurationMs;
-  const remainingMs = Math.max(0, plannedDurationMs - activeDurationMs);
-
-  globalTimerState.secondsRemaining.value = Math.floor(remainingMs / 1000);
+  globalTimerState.secondsRemaining.value = calculateRemainingSeconds(stint);
 }
 
 /**
