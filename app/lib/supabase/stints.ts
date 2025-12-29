@@ -27,6 +27,7 @@ interface ListStintsOptions {
 export type ConflictError = {
   code: 'CONFLICT'
   existingStint: StintRow | null
+  existingProjectName: string | null
   message: string
 };
 
@@ -444,6 +445,7 @@ export async function startStint(
       error: {
         code: 'CONFLICT',
         existingStint: existingStint || null,
+        existingProjectName: validation.existing_project_name || null,
         message: validation.conflict_message || 'An active stint already exists',
       },
       data: null,
@@ -465,6 +467,8 @@ export async function startStint(
     .single();
 
   // Handle race condition (23505 = duplicate key)
+  // Note: With advisory locks in validate_stint_start, this should rarely happen
+  // but we keep it as a safety net for edge cases
   if (insertError) {
     if (insertError.code === '23505') {
       // Race condition: another stint was started between validation and insert
@@ -472,7 +476,7 @@ export async function startStint(
       // by startStint since we always insert with status='active'
       const { data: conflictingStint } = await client
         .from('stints')
-        .select('*')
+        .select('*, projects(name)')
         .eq('user_id', userId)
         .eq('status', 'active')
         .maybeSingle();
@@ -481,6 +485,7 @@ export async function startStint(
         error: {
           code: 'CONFLICT',
           existingStint: conflictingStint || null,
+          existingProjectName: (conflictingStint?.projects as { name: string } | null)?.name || null,
           message: 'An active stint already exists',
         },
         data: null,

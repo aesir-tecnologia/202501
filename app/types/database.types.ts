@@ -429,6 +429,7 @@ export type Database = {
         Returns: {
           can_start: boolean
           conflict_message: string
+          existing_project_name: string
           existing_stint_id: string
           existing_stint_status: string
         }[]
