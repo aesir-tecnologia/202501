@@ -399,15 +399,15 @@ export function useCompleteStint() {
       await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
       await queryClient.cancelQueries({ queryKey: stintKeys.detail(payload.stintId) });
       await queryClient.cancelQueries({ queryKey: stintKeys.active() });
+      await queryClient.cancelQueries({ queryKey: stintKeys.paused() });
 
       // Snapshot previous values
       const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
       const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(payload.stintId));
       const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
+      const previousPausedStint = queryClient.getQueryData<StintRow | null>(stintKeys.paused());
 
       // Optimistically update list
-      // Note: All completion types result in status='completed'. The completion_type field
-      // stores whether it was 'manual', 'auto', or 'interrupted'.
       if (previousStints) {
         queryClient.setQueryData<StintRow[]>(
           stintKeys.list(undefined),
@@ -443,7 +443,12 @@ export function useCompleteStint() {
         queryClient.setQueryData<StintRow | null>(stintKeys.active(), null);
       }
 
-      return { previousStints, previousStint, previousActiveStint };
+      // Clear paused stint if completing a paused stint
+      if (previousPausedStint && previousPausedStint.id === payload.stintId) {
+        queryClient.setQueryData<StintRow | null>(stintKeys.paused(), null);
+      }
+
+      return { previousStints, previousStint, previousActiveStint, previousPausedStint };
     },
     onError: (_err, payload, context) => {
       // Rollback on error
@@ -455,6 +460,9 @@ export function useCompleteStint() {
       }
       if (context?.previousActiveStint !== undefined) {
         queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
+      }
+      if (context?.previousPausedStint !== undefined) {
+        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStint);
       }
     },
     onSuccess: async (_data, payload) => {
@@ -469,7 +477,11 @@ export function useCompleteStint() {
       // as calculate_streak_with_tz RPC still works without it
       const timezone = getBrowserTimezone();
       updateStreakAfterCompletion(client, timezone).catch((err) => {
-        console.warn('[Streak] Failed to update streak cache:', err);
+        console.error('[Streak] Failed to update streak cache. Streak display may be stale.', {
+          error: err instanceof Error ? err.message : String(err),
+          timezone,
+          stintId: payload.stintId,
+        });
       });
 
       // Invalidate streak cache to trigger refetch and update UI
@@ -586,6 +598,7 @@ export function usePauseStint() {
       await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
       await queryClient.cancelQueries({ queryKey: stintKeys.detail(stintId) });
       await queryClient.cancelQueries({ queryKey: stintKeys.active() });
+      await queryClient.cancelQueries({ queryKey: stintKeys.paused() });
 
       // Snapshot previous values
       const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
@@ -619,9 +632,7 @@ export function usePauseStint() {
         });
       }
 
-      // Clear active stint (it's being paused) and set as paused stint
-      // Note: getActiveStint() returns only status='active', so we must clear it
-      // and update the paused cache instead
+      // Clear active stint and set as paused stint
       const previousPausedStint = queryClient.getQueryData<StintRow | null>(stintKeys.paused());
       if (previousActiveStint && previousActiveStint.id === stintId) {
         queryClient.setQueryData<StintRow | null>(stintKeys.active(), null);
@@ -852,14 +863,15 @@ export function useInterruptStint() {
       await queryClient.cancelQueries({ queryKey: stintKeys.lists() });
       await queryClient.cancelQueries({ queryKey: stintKeys.detail(payload.stintId) });
       await queryClient.cancelQueries({ queryKey: stintKeys.active() });
+      await queryClient.cancelQueries({ queryKey: stintKeys.paused() });
 
       // Snapshot previous values
       const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
       const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(payload.stintId));
       const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
+      const previousPausedStint = queryClient.getQueryData<StintRow | null>(stintKeys.paused());
 
       // Optimistically update list
-      // Note: 'interrupted' is a completion_type, not a status. Status must be 'completed'.
       if (previousStints) {
         queryClient.setQueryData<StintRow[]>(
           stintKeys.list(undefined),
@@ -895,7 +907,12 @@ export function useInterruptStint() {
         queryClient.setQueryData<StintRow | null>(stintKeys.active(), null);
       }
 
-      return { previousStints, previousStint, previousActiveStint };
+      // Clear paused stint if interrupting a paused stint
+      if (previousPausedStint && previousPausedStint.id === payload.stintId) {
+        queryClient.setQueryData<StintRow | null>(stintKeys.paused(), null);
+      }
+
+      return { previousStints, previousStint, previousActiveStint, previousPausedStint };
     },
     onError: (_err, payload, context) => {
       // Rollback on error
@@ -907,6 +924,9 @@ export function useInterruptStint() {
       }
       if (context?.previousActiveStint !== undefined) {
         queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
+      }
+      if (context?.previousPausedStint !== undefined) {
+        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStint);
       }
     },
     onSuccess: (_data, payload) => {

@@ -862,5 +862,86 @@ describe('stints.ts - Integration Tests', () => {
       expect(activeResult.data).not.toBeNull();
       expect(pausedResult.data).not.toBeNull();
     });
+
+    it('should reject creating a second active stint at database level', async () => {
+      await createActiveStint(serviceClient, testProject.id, testUserId);
+      const otherProject = await createTestProject(serviceClient, testUserId, { name: 'Other' });
+
+      const { error } = await serviceClient
+        .from('stints')
+        .insert({
+          user_id: testUserId,
+          project_id: otherProject.id,
+          status: 'active',
+          started_at: new Date().toISOString(),
+          planned_duration: 25,
+        });
+
+      expect(error).not.toBeNull();
+      expect(error?.code).toBe('23505');
+    });
+
+    it('should reject creating a second paused stint at database level', async () => {
+      await createPausedStint(serviceClient, testProject.id, testUserId);
+      const otherProject = await createTestProject(serviceClient, testUserId, { name: 'Other' });
+
+      const { error } = await serviceClient
+        .from('stints')
+        .insert({
+          user_id: testUserId,
+          project_id: otherProject.id,
+          status: 'paused',
+          started_at: new Date().toISOString(),
+          paused_at: new Date().toISOString(),
+          planned_duration: 25,
+        });
+
+      expect(error).not.toBeNull();
+      expect(error?.code).toBe('23505');
+    });
+  });
+
+  describe('cross-user access prevention', () => {
+    let otherUserId: string;
+    let otherUserEmail: string;
+    let otherUserClient: TypedSupabaseClient;
+
+    beforeAll(async () => {
+      otherUserEmail = `test-stints-other-${Date.now()}@integration.test`;
+      otherUserId = await createTestUser(serviceClient, otherUserEmail);
+      otherUserClient = await getAuthenticatedClient(otherUserEmail);
+    });
+
+    afterAll(async () => {
+      await cleanupTestData(serviceClient, otherUserId);
+      await deleteTestUser(serviceClient, otherUserId);
+    });
+
+    it('should prevent User B from pausing User A stint', async () => {
+      const stintA = await createActiveStint(serviceClient, testProject.id, testUserId);
+
+      const result = await pauseStint(otherUserClient, stintA.id);
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('do not have permission');
+    });
+
+    it('should prevent User B from resuming User A stint', async () => {
+      const stintA = await createPausedStint(serviceClient, testProject.id, testUserId);
+
+      const result = await resumeStint(otherUserClient, stintA.id);
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('do not have permission');
+    });
+
+    it('should prevent User B from completing User A stint', async () => {
+      const stintA = await createActiveStint(serviceClient, testProject.id, testUserId);
+
+      const result = await completeStint(otherUserClient, stintA.id, 'manual');
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('do not have permission');
+    });
   });
 });

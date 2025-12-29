@@ -264,6 +264,7 @@ async function doStartStint(project: ProjectRow): Promise<void> {
     });
 
     screenReaderAnnouncement.value = `Started working on ${project.name}`;
+    toast.add({ title: 'Stint started', color: 'success' });
   }
   catch (error) {
     const errorWithConflict = error as Error & { conflict?: StintRow };
@@ -300,6 +301,7 @@ async function handlePauseStint(stint: StintRow): Promise<void> {
   try {
     await pauseStint(stint.id);
     screenReaderAnnouncement.value = 'Stint paused';
+    toast.add({ title: 'Stint paused', color: 'success' });
   }
   catch (error) {
     screenReaderAnnouncement.value = 'Failed to pause stint';
@@ -316,6 +318,7 @@ async function handleResumeStint(stint: StintRow): Promise<void> {
   try {
     await resumeStint(stint.id);
     screenReaderAnnouncement.value = 'Stint resumed';
+    toast.add({ title: 'Stint resumed', color: 'success' });
   }
   catch (error) {
     screenReaderAnnouncement.value = 'Failed to resume stint';
@@ -487,6 +490,16 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
 
       case 'cancel':
         break;
+
+      default: {
+        const _exhaustiveCheck: never = action;
+        console.error('[ProjectList] Unhandled conflict resolution action:', action);
+        toast.add({
+          title: 'Unexpected Action',
+          description: `Action "${action}" is not implemented.`,
+          color: 'error',
+        });
+      }
     }
   }
   catch (error) {

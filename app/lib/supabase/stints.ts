@@ -95,9 +95,6 @@ export async function getStintById(
 
 /**
  * Get the currently active stint (status = 'active' only)
- *
- * Note: Changed from returning active OR paused to active only,
- * since we now allow 1 active + 1 paused simultaneously.
  */
 export async function getActiveStint(
   client: TypedSupabaseClient,
