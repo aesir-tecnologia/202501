@@ -1,5 +1,6 @@
 import type { Database } from '~/types/database.types';
 import type { TypedSupabaseClient } from '~/utils/supabase';
+import { requireUserId, type Result } from './auth';
 
 export type UserStreakRow = Database['public']['Tables']['user_streaks']['Row'];
 
@@ -10,20 +11,7 @@ export type StreakData = {
   isAtRisk: boolean
 };
 
-export type Result<T> = {
-  data: T | null
-  error: Error | null
-};
-
-async function requireUserId(client: TypedSupabaseClient): Promise<Result<string>> {
-  const { data, error } = await client.auth.getUser();
-
-  if (error || !data?.user) {
-    return { data: null, error: new Error('User must be authenticated to view streaks') };
-  }
-
-  return { data: data.user.id, error: null };
-}
+export type { Result };
 
 /**
  * Gets the current streak data for the authenticated user.
@@ -38,7 +26,7 @@ export async function getStreak(
   client: TypedSupabaseClient,
   timezone: string = 'UTC',
 ): Promise<Result<StreakData>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'view streaks');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -92,7 +80,7 @@ export async function updateStreakAfterCompletion(
   client: TypedSupabaseClient,
   timezone: string = 'UTC',
 ): Promise<Result<StreakData>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'view streaks');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }

@@ -1,5 +1,6 @@
 import type { Database } from '~/types/database.types';
 import type { TypedSupabaseClient } from '~/utils/supabase';
+import { requireUserId, type Result } from './auth';
 
 export type ProjectRow = Database['public']['Tables']['projects']['Row'];
 export type ProjectInsert = Database['public']['Tables']['projects']['Insert'];
@@ -8,22 +9,9 @@ export type ProjectUpdate = Database['public']['Tables']['projects']['Update'];
 export type CreateProjectPayload = Omit<ProjectInsert, 'user_id'>;
 export type UpdateProjectPayload = Omit<ProjectUpdate, 'user_id' | 'id'>;
 
-export type Result<T> = {
-  data: T | null
-  error: Error | null
-};
+export type { Result };
 
 const POSTGRES_UNIQUE_VIOLATION = '23505';
-
-async function requireUserId(client: TypedSupabaseClient): Promise<Result<string>> {
-  const { data, error } = await client.auth.getUser();
-
-  if (error || !data?.user) {
-    return { data: null, error: new Error('User must be authenticated to interact with projects') };
-  }
-
-  return { data: data.user.id, error: null };
-}
 
 async function checkForActiveStints(
   client: TypedSupabaseClient,
@@ -69,7 +57,7 @@ export async function listProjects(
   client: TypedSupabaseClient,
   options?: { includeInactive?: boolean, archived?: boolean },
 ): Promise<Result<ProjectRow[]>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with projects');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -101,7 +89,7 @@ export async function getProject(
   client: TypedSupabaseClient,
   projectId: string,
 ): Promise<Result<ProjectRow | null>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with projects');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -122,7 +110,7 @@ export async function createProject(
   client: TypedSupabaseClient,
   payload: CreateProjectPayload,
 ): Promise<Result<ProjectRow>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with projects');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -152,7 +140,7 @@ export async function updateProject(
   projectId: string,
   updates: UpdateProjectPayload,
 ): Promise<Result<ProjectRow>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with projects');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -180,7 +168,7 @@ export async function deleteProject(
   client: TypedSupabaseClient,
   projectId: string,
 ): Promise<Result<void>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with projects');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -214,7 +202,7 @@ export async function updateProjectSortOrder(
   client: TypedSupabaseClient,
   updates: Array<{ id: string, sortOrder: number }>,
 ): Promise<Result<void>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with projects');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -256,7 +244,7 @@ export async function hasActiveStint(
   client: TypedSupabaseClient,
   projectId: string,
 ): Promise<Result<boolean>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with projects');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -278,7 +266,7 @@ export async function archiveProject(
   client: TypedSupabaseClient,
   projectId: string,
 ): Promise<Result<ProjectRow>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with projects');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -316,7 +304,7 @@ export async function unarchiveProject(
   client: TypedSupabaseClient,
   projectId: string,
 ): Promise<Result<ProjectRow>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with projects');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -348,7 +336,7 @@ export async function permanentlyDeleteProject(
   client: TypedSupabaseClient,
   projectId: string,
 ): Promise<Result<void>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with projects');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }

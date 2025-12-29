@@ -14,6 +14,7 @@ import { syncStintCheck as syncStintCheckDb, completeStint } from '~/lib/supabas
 import { stintKeys } from '~/composables/useStints';
 import { streakKeys } from '~/composables/useStreaks';
 import { STINT } from '~/constants';
+import { isAuthError, withAuthRetry } from '~/utils/auth-recovery';
 
 type StintRow = Database['public']['Tables']['stints']['Row'];
 
@@ -408,6 +409,7 @@ function stopServerSync(): void {
 /**
  * Sync with server to correct timer drift
  * Tracks consecutive failures and warns user after threshold
+ * Attempts auth recovery on authentication errors
  */
 async function syncWithServer(stintId: string): Promise<void> {
   if (!globalTimerState.worker) return;
@@ -416,11 +418,13 @@ async function syncWithServer(stintId: string): Promise<void> {
     const supabase = useSupabaseClient();
     const clientRemaining = globalTimerState.secondsRemaining.value;
 
-    // Call database sync check function
-    const { data, error } = await syncStintCheckDb(supabase, stintId);
+    // Call database sync check function with auth retry
+    const { data, error } = await withAuthRetry(supabase, () =>
+      syncStintCheckDb(supabase, stintId),
+    );
 
     if (error || !data) {
-      handleSyncFailure(error);
+      handleSyncFailure(error, isAuthError(error));
       return;
     }
 
@@ -444,19 +448,33 @@ async function syncWithServer(stintId: string): Promise<void> {
     }
   }
   catch (error) {
-    handleSyncFailure(error);
+    handleSyncFailure(error, isAuthError(error));
   }
 }
 
 /**
  * Handle sync failure - tracks consecutive failures and warns user
+ * Auth errors trigger redirect to login after recovery fails
  */
-function handleSyncFailure(error: unknown): void {
+function handleSyncFailure(error: unknown, isAuth: boolean = false): void {
   globalTimerState.consecutiveSyncFailures++;
 
   console.error('Sync with server failed:', error, {
     failureCount: globalTimerState.consecutiveSyncFailures,
+    isAuthError: isAuth,
   });
+
+  // Auth errors that persist after retry: redirect to login
+  if (isAuth) {
+    globalTimerState.toast?.add({
+      title: 'Session Expired',
+      description: 'Your session has expired. Please log in again.',
+      color: 'error',
+      icon: 'i-lucide-log-out',
+    });
+    navigateTo('/auth/login');
+    return;
+  }
 
   // Show warning after threshold consecutive failures (only once per failure streak)
   if (
@@ -475,6 +493,7 @@ function handleSyncFailure(error: unknown): void {
 
 /**
  * Handle timer completion - auto-completes stint in database with retry logic
+ * Uses auth recovery on authentication errors
  * If all retries fail, resets timer state and prompts user to complete manually
  */
 async function handleTimerComplete(): Promise<void> {
@@ -483,14 +502,13 @@ async function handleTimerComplete(): Promise<void> {
 
   const client = useSupabaseClient();
   let lastError: Error | null = null;
+  let authErrorEncountered = false;
 
   // Retry loop for auto-completion
   for (let attempt = 1; attempt <= AUTO_COMPLETE_MAX_RETRIES; attempt++) {
-    const { data, error } = await completeStint(
-      client,
-      activeStint.id,
-      'auto',
-      null,
+    // Use auth retry wrapper - attempts session refresh on auth errors
+    const { data, error } = await withAuthRetry(client, () =>
+      completeStint(client, activeStint.id, 'auto', null),
     );
 
     if (!error && data) {
@@ -521,6 +539,13 @@ async function handleTimerComplete(): Promise<void> {
     // Track error for final failure message
     lastError = error || new Error('Failed to complete stint');
 
+    // Check if this is an auth error (session refresh already attempted by withAuthRetry)
+    if (isAuthError(error)) {
+      authErrorEncountered = true;
+      // Don't retry on auth errors - session refresh already failed
+      break;
+    }
+
     // Log retry attempt
     console.error(`Auto-complete attempt ${attempt}/${AUTO_COMPLETE_MAX_RETRIES} failed:`, error);
 
@@ -534,6 +559,20 @@ async function handleTimerComplete(): Promise<void> {
   globalTimerState.timerCompleted.value = false;
 
   console.error('Auto-complete failed after all retries:', lastError);
+
+  // Auth errors: redirect to login with clear message
+  if (authErrorEncountered) {
+    globalTimerState.toast?.add({
+      title: 'Session Expired',
+      description: 'Your session expired and your stint could not be saved. Please log in and complete it manually.',
+      color: 'error',
+      icon: 'i-lucide-log-out',
+    });
+    navigateTo('/auth/login');
+    return;
+  }
+
+  // Non-auth errors: prompt manual completion
   globalTimerState.toast?.add({
     title: 'Auto-Complete Failed',
     description: 'Could not save completion automatically. Please complete your stint manually.',

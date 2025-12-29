@@ -3,6 +3,7 @@ import type { TypedSupabaseClient } from '~/utils/supabase';
 import type { SyncCheckOutput } from '~/schemas/stints';
 import { STINT } from '~/constants';
 import { calculateRemainingSeconds } from '~/utils/stint-time';
+import { requireUserId, type Result } from './auth';
 
 /**
  * Data-access helpers for the Supabase `stints` table.
@@ -14,10 +15,7 @@ export type StintUpdate = Database['public']['Tables']['stints']['Update'];
 export type CreateStintPayload = Omit<StintInsert, 'user_id'>;
 export type UpdateStintPayload = Omit<StintUpdate, 'user_id' | 'id'>;
 
-export type Result<T> = {
-  data: T | null
-  error: Error | null
-};
+export type { Result };
 
 interface ListStintsOptions {
   projectId?: string
@@ -39,21 +37,11 @@ export type StintConflictResult = {
   data: StintRow
 };
 
-async function requireUserId(client: TypedSupabaseClient): Promise<Result<string>> {
-  const { data, error } = await client.auth.getUser();
-
-  if (error || !data?.user) {
-    return { data: null, error: new Error('User must be authenticated to interact with stints') };
-  }
-
-  return { data: data.user.id, error: null };
-}
-
 export async function listStints(
   client: TypedSupabaseClient,
   options: ListStintsOptions = {},
 ): Promise<Result<StintRow[]>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   let query = client
@@ -80,7 +68,7 @@ export async function getStintById(
   client: TypedSupabaseClient,
   stintId: string | number,
 ): Promise<Result<StintRow | null>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   const { data, error } = await client
@@ -100,7 +88,7 @@ export async function getStintById(
 export async function getActiveStint(
   client: TypedSupabaseClient,
 ): Promise<Result<StintRow | null>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   const { data, error } = await client
@@ -126,7 +114,7 @@ export async function getActiveStint(
 export async function getPausedStint(
   client: TypedSupabaseClient,
 ): Promise<Result<StintRow | null>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   const { data, error } = await client
@@ -147,7 +135,7 @@ export async function createStint(
   client: TypedSupabaseClient,
   payload: CreateStintPayload,
 ): Promise<Result<StintRow>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   const { data, error } = await client
@@ -168,7 +156,7 @@ export async function updateStint(
   stintId: string | number,
   updates: UpdateStintPayload,
 ): Promise<Result<StintRow>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   const { data, error } = await client
@@ -187,7 +175,7 @@ export async function deleteStint(
   client: TypedSupabaseClient,
   stintId: string | number,
 ): Promise<Result<void>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   // Verify stint exists and is owned by user
@@ -213,7 +201,7 @@ export async function deleteStint(
 export async function getUserVersion(
   client: TypedSupabaseClient,
 ): Promise<Result<number>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   const { data, error } = await client
@@ -233,7 +221,7 @@ export async function pauseStint(
   client: TypedSupabaseClient,
   stintId: string,
 ): Promise<Result<StintRow>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   // Call pause_stint RPC directly
@@ -275,7 +263,7 @@ export async function resumeStint(
   client: TypedSupabaseClient,
   stintId: string,
 ): Promise<Result<StintRow>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   // Call resume_stint RPC directly
@@ -319,7 +307,7 @@ export async function completeStint(
   completionType: 'manual' | 'auto' | 'interrupted',
   notes?: string | null,
 ): Promise<Result<StintRow>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   // Validate notes length (max 500 chars)
@@ -369,7 +357,7 @@ export async function startStint(
   plannedDurationMinutes?: number,
   notes?: string,
 ): Promise<StintConflictResult | Result<StintRow>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -506,7 +494,7 @@ export async function syncStintCheck(
   client: TypedSupabaseClient,
   stintId: string,
 ): Promise<Result<SyncCheckOutput>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
   const { data: stint, error } = await client

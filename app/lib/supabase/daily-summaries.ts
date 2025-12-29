@@ -1,6 +1,7 @@
 import type { Database, Json } from '~/types/database.types';
 import type { TypedSupabaseClient } from '~/utils/supabase';
 import { isValidDbProjectBreakdownItem } from '~/utils/daily-summaries';
+import { requireUserId, type Result } from './auth';
 
 export type DailySummaryRow = Database['public']['Tables']['daily_summaries']['Row'];
 
@@ -37,10 +38,7 @@ export interface WeeklyStats {
   projectBreakdown: ProjectBreakdownItem[]
 }
 
-export type Result<T> = {
-  data: T | null
-  error: Error | null
-};
+export type { Result };
 
 interface ParseContext {
   summaryId?: string
@@ -85,21 +83,11 @@ function parseProjectBreakdown(
   return validItems;
 }
 
-async function requireUserId(client: TypedSupabaseClient): Promise<Result<string>> {
-  const { data, error } = await client.auth.getUser();
-
-  if (error || !data?.user) {
-    return { data: null, error: new Error('User must be authenticated to view daily summaries') };
-  }
-
-  return { data: data.user.id, error: null };
-}
-
 export async function listDailySummaries(
   client: TypedSupabaseClient,
   filters: DailySummaryFilters,
 ): Promise<Result<DailySummaryResult[]>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'view daily summaries');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
@@ -137,7 +125,7 @@ export async function getDailySummary(
 export async function getWeeklyStats(
   client: TypedSupabaseClient,
 ): Promise<Result<WeeklyStats>> {
-  const userResult = await requireUserId(client);
+  const userResult = await requireUserId(client, 'view daily summaries');
   if (userResult.error || !userResult.data) {
     return { data: null, error: userResult.error || new Error('User ID unavailable') };
   }
