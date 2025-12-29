@@ -242,6 +242,35 @@ describe('projects.ts - Integration Tests', () => {
       expect(result.error).not.toBeNull();
       expect(result.error?.message).toContain('authenticated');
     });
+
+    it('should return error when deactivating project with active stint', async () => {
+      const project = await createTestProject(serviceClient, testUserId, { name: 'Active Stint', is_active: true });
+      await createActiveStint(serviceClient, project.id, testUserId);
+
+      const result = await updateProject(authenticatedClient, project.id, { is_active: false });
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('Cannot deactivate project while a stint is running');
+    });
+
+    it('should allow deactivating project without active stint', async () => {
+      const project = await createTestProject(serviceClient, testUserId, { name: 'No Stint', is_active: true });
+
+      const result = await updateProject(authenticatedClient, project.id, { is_active: false });
+
+      expect(result.error).toBeNull();
+      expect(result.data!.is_active).toBe(false);
+    });
+
+    it('should allow deactivating project with only completed stints', async () => {
+      const project = await createTestProject(serviceClient, testUserId, { name: 'Completed Stint', is_active: true });
+      await createCompletedStint(serviceClient, project.id, testUserId);
+
+      const result = await updateProject(authenticatedClient, project.id, { is_active: false });
+
+      expect(result.error).toBeNull();
+      expect(result.data!.is_active).toBe(false);
+    });
   });
 
   describe('deleteProject', () => {

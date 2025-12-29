@@ -146,6 +146,13 @@ export async function updateProject(
   }
   const userId = userResult.data;
 
+  if (updates.is_active === false) {
+    const hasActive = await checkForActiveStints(client, projectId, userId);
+    if (hasActive) {
+      return { data: null, error: new Error('Cannot deactivate project while a stint is running. Please stop the stint first.') };
+    }
+  }
+
   const { data, error } = await client
     .from('projects')
     .update(updates)
