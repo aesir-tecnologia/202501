@@ -36,6 +36,9 @@ const TIMER_SYNC_INTERVAL_MS = 60000;
 const DEFAULT_PLANNED_DURATION_MINUTES = STINT.DURATION_MINUTES.DEFAULT;
 const WORKER_RETRY_BASE_DELAY_MS = 1000;
 const NOTIFICATION_TIMEOUT_MS = 10000;
+const AUTO_COMPLETE_MAX_RETRIES = 3;
+const AUTO_COMPLETE_RETRY_DELAY_MS = 1000;
+const MAX_SYNC_FAILURES_BEFORE_WARNING = 3;
 
 // Global singleton state
 const globalTimerState = {
@@ -51,6 +54,8 @@ const globalTimerState = {
   activeStintRef: null as Ref<StintRow | null | undefined> | null,
   stopWatch: null as (() => void) | null,
   toast: null as ReturnType<typeof useToast> | null,
+  consecutiveSyncFailures: 0,
+  syncWarningShown: false,
 };
 
 // Worker creation retry state
@@ -402,6 +407,7 @@ function stopServerSync(): void {
 
 /**
  * Sync with server to correct timer drift
+ * Tracks consecutive failures and warns user after threshold
  */
 async function syncWithServer(stintId: string): Promise<void> {
   if (!globalTimerState.worker) return;
@@ -414,9 +420,13 @@ async function syncWithServer(stintId: string): Promise<void> {
     const { data, error } = await syncStintCheckDb(supabase, stintId);
 
     if (error || !data) {
-      console.error('Sync check failed:', error);
+      handleSyncFailure(error);
       return;
     }
+
+    // Reset failure count on success
+    globalTimerState.consecutiveSyncFailures = 0;
+    globalTimerState.syncWarningShown = false;
 
     // Check for drift
     const serverRemaining = data.remainingSeconds;
@@ -434,61 +444,109 @@ async function syncWithServer(stintId: string): Promise<void> {
     }
   }
   catch (error) {
-    console.error('Sync with server failed:', error);
-    // Don't break the timer - just log and continue
+    handleSyncFailure(error);
   }
 }
 
 /**
- * Handle timer completion - auto-completes stint in database
+ * Handle sync failure - tracks consecutive failures and warns user
+ */
+function handleSyncFailure(error: unknown): void {
+  globalTimerState.consecutiveSyncFailures++;
+
+  console.error('Sync with server failed:', error, {
+    failureCount: globalTimerState.consecutiveSyncFailures,
+  });
+
+  // Show warning after threshold consecutive failures (only once per failure streak)
+  if (
+    globalTimerState.consecutiveSyncFailures >= MAX_SYNC_FAILURES_BEFORE_WARNING
+    && !globalTimerState.syncWarningShown
+  ) {
+    globalTimerState.syncWarningShown = true;
+    globalTimerState.toast?.add({
+      title: 'Timer Sync Issue',
+      description: 'Unable to sync with server. Timer may be slightly inaccurate.',
+      color: 'warning',
+      icon: 'i-lucide-wifi-off',
+    });
+  }
+}
+
+/**
+ * Handle timer completion - auto-completes stint in database with retry logic
+ * If all retries fail, resets timer state and prompts user to complete manually
  */
 async function handleTimerComplete(): Promise<void> {
   const activeStint = globalTimerState.activeStintRef?.value;
   if (!activeStint) return;
 
   const client = useSupabaseClient();
+  let lastError: Error | null = null;
 
-  // Complete the stint in the database
-  const { data, error } = await completeStint(
-    client,
-    activeStint.id,
-    'auto',
-    null,
-  );
+  // Retry loop for auto-completion
+  for (let attempt = 1; attempt <= AUTO_COMPLETE_MAX_RETRIES; attempt++) {
+    const { data, error } = await completeStint(
+      client,
+      activeStint.id,
+      'auto',
+      null,
+    );
 
-  if (error || !data) {
-    console.error('Failed to auto-complete stint:', error);
-    globalTimerState.toast?.add({
-      title: 'Auto-Complete Failed',
-      description: error?.message || 'Failed to complete stint',
-      color: 'error',
-    });
-    return;
+    if (!error && data) {
+      // Success - invalidate caches and show notification
+      if (globalTimerState.queryClient) {
+        await globalTimerState.queryClient.invalidateQueries({
+          queryKey: stintKeys.all,
+        });
+
+        // Invalidate streak cache to trigger refetch and update dashboard banner
+        await globalTimerState.queryClient.invalidateQueries({
+          queryKey: streakKeys.all,
+        });
+      }
+
+      // Fetch project name for notification
+      const { data: project } = await client
+        .from('projects')
+        .select('name')
+        .eq('id', activeStint.project_id)
+        .single();
+
+      const projectName = project?.name || 'Project';
+      showNotification(projectName);
+      return;
+    }
+
+    // Track error for final failure message
+    lastError = error || new Error('Failed to complete stint');
+
+    // Log retry attempt
+    console.error(`Auto-complete attempt ${attempt}/${AUTO_COMPLETE_MAX_RETRIES} failed:`, error);
+
+    // Wait before retrying (except on last attempt)
+    if (attempt < AUTO_COMPLETE_MAX_RETRIES) {
+      await new Promise(resolve => setTimeout(resolve, AUTO_COMPLETE_RETRY_DELAY_MS * attempt));
+    }
   }
 
-  // Invalidate cache to update UI
+  // All retries failed - reset timer state to reflect actual database state
+  globalTimerState.timerCompleted.value = false;
+
+  console.error('Auto-complete failed after all retries:', lastError);
+  globalTimerState.toast?.add({
+    title: 'Auto-Complete Failed',
+    description: 'Could not save completion automatically. Please complete your stint manually.',
+    color: 'error',
+    icon: 'i-lucide-alert-circle',
+  });
+
+  // Invalidate queries to refresh UI with actual database state
   if (globalTimerState.queryClient) {
     await globalTimerState.queryClient.invalidateQueries({
       queryKey: stintKeys.all,
     });
-
-    // Invalidate streak cache to trigger refetch and update dashboard banner
-    await globalTimerState.queryClient.invalidateQueries({
-      queryKey: streakKeys.all,
-    });
   }
-
-  // Fetch project name for notification
-  const { data: project } = await client
-    .from('projects')
-    .select('name')
-    .eq('id', activeStint.project_id)
-    .single();
-
-  const projectName = project?.name || 'Project';
-
-  // Show notifications
-  showNotification(projectName);
 }
 
 /**
@@ -504,9 +562,14 @@ function requestNotificationPermission(): void {
 
   // Request permission if not already granted or denied
   if (Notification.permission === 'default') {
-    Notification.requestPermission().then((permission) => {
-      globalTimerState.notificationPermission.value = permission;
-    });
+    Notification.requestPermission()
+      .then((permission) => {
+        globalTimerState.notificationPermission.value = permission;
+      })
+      .catch((error) => {
+        console.warn('Failed to request notification permission:', error);
+        globalTimerState.notificationPermission.value = 'denied';
+      });
   }
 }
 
@@ -566,6 +629,8 @@ function _cleanup(): void {
   globalTimerState.secondsRemaining.value = 0;
   globalTimerState.isPaused.value = false;
   globalTimerState.timerCompleted.value = false;
+  globalTimerState.consecutiveSyncFailures = 0;
+  globalTimerState.syncWarningShown = false;
   globalTimerState.toast = null;
   globalTimerState.isInitialized = false;
 }

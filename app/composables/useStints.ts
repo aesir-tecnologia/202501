@@ -743,7 +743,7 @@ export function useStartStint() {
         throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
-      // Call database start function (handles validation and conflicts via Edge Function)
+      // Call database start function (handles validation and conflicts via RPC)
       const result = await startStintDb(
         client,
         payload.projectId,

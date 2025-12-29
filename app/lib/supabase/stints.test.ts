@@ -944,4 +944,132 @@ describe('stints.ts - Integration Tests', () => {
       expect(result.error?.message).toContain('do not have permission');
     });
   });
+
+  describe('pause-and-switch workflow', () => {
+    let projectA: ProjectRow;
+    let projectB: ProjectRow;
+
+    beforeEach(async () => {
+      projectA = await createTestProject(serviceClient, testUserId, { name: 'Workflow Project A' });
+      projectB = await createTestProject(serviceClient, testUserId, { name: 'Workflow Project B' });
+    });
+
+    afterEach(async () => {
+      await serviceClient.from('stints').delete().eq('project_id', projectA.id);
+      await serviceClient.from('stints').delete().eq('project_id', projectB.id);
+      await serviceClient.from('projects').delete().eq('id', projectA.id);
+      await serviceClient.from('projects').delete().eq('id', projectB.id);
+    });
+
+    it('should complete full pause-and-switch workflow', async () => {
+      // Step 1: Start stint on Project A
+      const startAResult = await startStint(authenticatedClient, projectA.id, 50);
+      expect(startAResult.error).toBeNull();
+      expect(startAResult.data?.status).toBe('active');
+      const stintA = startAResult.data!;
+
+      // Step 2: Pause stint A (add delay to accumulate pause time)
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const pauseResult = await pauseStint(authenticatedClient, stintA.id);
+      expect(pauseResult.error).toBeNull();
+      expect(pauseResult.data?.status).toBe('paused');
+
+      // Wait while paused to accumulate pause time
+      await new Promise(resolve => setTimeout(resolve, 1100));
+
+      // Step 3: Start stint on Project B (alongside paused A)
+      const startBResult = await startStint(authenticatedClient, projectB.id, 30);
+      expect(startBResult.error).toBeNull();
+      expect(startBResult.data?.status).toBe('active');
+      const stintB = startBResult.data!;
+
+      // Verify: Both stints coexist (A=paused, B=active)
+      const activeResult = await getActiveStint(authenticatedClient);
+      expect(activeResult.data?.id).toBe(stintB.id);
+
+      const pausedResult = await getPausedStint(authenticatedClient);
+      expect(pausedResult.data?.id).toBe(stintA.id);
+
+      // Step 4: Complete stint B
+      const completeBResult = await completeStint(authenticatedClient, stintB.id, 'manual');
+      expect(completeBResult.error).toBeNull();
+      expect(completeBResult.data?.status).toBe('completed');
+
+      // Step 5: Resume stint A
+      const resumeResult = await resumeStint(authenticatedClient, stintA.id);
+      expect(resumeResult.error).toBeNull();
+      expect(resumeResult.data?.status).toBe('active');
+      expect(resumeResult.data?.paused_duration).toBeGreaterThanOrEqual(1);
+
+      // Verify: A is now active again with preserved accumulated time
+      const finalActiveResult = await getActiveStint(authenticatedClient);
+      expect(finalActiveResult.data?.id).toBe(stintA.id);
+
+      // Cleanup
+      await completeStint(authenticatedClient, stintA.id, 'manual');
+    });
+
+    it('should reject starting third stint when both active and paused exist', async () => {
+      // Create a third project for this test
+      const projectC = await createTestProject(serviceClient, testUserId, { name: 'Workflow Project C' });
+
+      try {
+        // Step 1: Start and pause stint on Project A
+        const startAResult = await startStint(authenticatedClient, projectA.id, 50);
+        const stintA = startAResult.data!;
+        await pauseStint(authenticatedClient, stintA.id);
+
+        // Step 2: Start stint on Project B
+        const startBResult = await startStint(authenticatedClient, projectB.id, 30);
+        const stintB = startBResult.data!;
+
+        // Step 3: Try to start third stint on Project C (should fail)
+        // The error is "active stint already running" because validate_stint_start
+        // checks for active stint first before checking paused stint
+        const startCResult = await startStint(authenticatedClient, projectC.id, 25);
+
+        expect(startCResult.error).not.toBeNull();
+        expect(startCResult.error?.message).toContain('active stint is already running');
+
+        // Cleanup
+        await completeStint(authenticatedClient, stintB.id, 'manual');
+        await completeStint(authenticatedClient, stintA.id, 'interrupted');
+      }
+      finally {
+        await serviceClient.from('stints').delete().eq('project_id', projectC.id);
+        await serviceClient.from('projects').delete().eq('id', projectC.id);
+      }
+    });
+
+    it('should correctly preserve paused_duration after pause-switch-resume cycle', async () => {
+      // Step 1: Start stint on Project A
+      const startResult = await startStint(authenticatedClient, projectA.id, 50);
+      const stintA = startResult.data!;
+
+      // Wait briefly to accumulate some active time
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Step 2: Pause stint A
+      await pauseStint(authenticatedClient, stintA.id);
+
+      // Wait while paused to accumulate pause time
+      await new Promise(resolve => setTimeout(resolve, 1100));
+
+      // Step 3: Start stint B (switch)
+      const startBResult = await startStint(authenticatedClient, projectB.id, 30);
+      const stintB = startBResult.data!;
+
+      // Complete B quickly
+      await completeStint(authenticatedClient, stintB.id, 'manual');
+
+      // Step 4: Resume A
+      const resumeResult = await resumeStint(authenticatedClient, stintA.id);
+
+      // Verify paused_duration was preserved and accumulated
+      expect(resumeResult.data?.paused_duration).toBeGreaterThanOrEqual(1);
+
+      // Cleanup
+      await completeStint(authenticatedClient, stintA.id, 'manual');
+    });
+  });
 });
