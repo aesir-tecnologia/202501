@@ -245,6 +245,12 @@ export async function pauseStint(
 
   if (error) {
     // Map database errors to user-friendly messages
+    if (error.message?.includes('Authentication required')) {
+      return { data: null, error: new Error('Your session has expired. Please log in again.') };
+    }
+    if (error.message?.includes('Permission denied')) {
+      return { data: null, error: new Error('You do not have permission to pause this stint.') };
+    }
     if (error.message?.includes('not active')) {
       return { data: null, error: new Error('This stint is not active and cannot be paused') };
     }
@@ -254,7 +260,7 @@ export async function pauseStint(
     if (error.message?.includes('already have a paused stint')) {
       return { data: null, error: new Error('You already have a paused stint. Complete or abandon it first.') };
     }
-    return { data: null, error: new Error('Failed to pause stint') };
+    return { data: null, error: new Error(`Failed to pause stint: ${error.message || 'Unknown error'}`) };
   }
 
   if (!data) {
@@ -281,6 +287,12 @@ export async function resumeStint(
 
   if (error) {
     // Map database errors to user-friendly messages
+    if (error.message?.includes('Authentication required')) {
+      return { data: null, error: new Error('Your session has expired. Please log in again.') };
+    }
+    if (error.message?.includes('Permission denied')) {
+      return { data: null, error: new Error('You do not have permission to resume this stint.') };
+    }
     if (error.message?.includes('not paused')) {
       return { data: null, error: new Error('This stint is not paused and cannot be resumed') };
     }
@@ -290,7 +302,7 @@ export async function resumeStint(
     if (error.message?.includes('Cannot resume while another stint is active')) {
       return { data: null, error: new Error('Cannot resume while another stint is active. Stop or complete the active stint first.') };
     }
-    return { data: null, error: new Error('Failed to resume stint') };
+    return { data: null, error: new Error(`Failed to resume stint: ${error.message || 'Unknown error'}`) };
   }
 
   if (!data) {
@@ -328,13 +340,19 @@ export async function completeStint(
 
   if (error) {
     // Map database errors to user-friendly messages
+    if (error.message?.includes('Authentication required')) {
+      return { data: null, error: new Error('Your session has expired. Please log in again.') };
+    }
+    if (error.message?.includes('Permission denied')) {
+      return { data: null, error: new Error('You do not have permission to complete this stint.') };
+    }
     if (error.message?.includes('not active') || error.message?.includes('not paused')) {
       return { data: null, error: new Error('This stint is not active or paused and cannot be completed') };
     }
     if (error.message?.includes('not found')) {
       return { data: null, error: new Error('Stint not found') };
     }
-    return { data: null, error: new Error('Failed to complete stint') };
+    return { data: null, error: new Error(`Failed to complete stint: ${error.message || 'Unknown error'}`) };
   }
 
   if (!data) {
