@@ -108,7 +108,7 @@ describe('stint-time utils', () => {
     });
 
     it('handles missing planned_duration gracefully', () => {
-      const stint = createMockStint({ planned_duration: null });
+      const stint = createMockStint({ planned_duration: undefined as unknown as number });
 
       const result = calculateStintTime(stint);
 
