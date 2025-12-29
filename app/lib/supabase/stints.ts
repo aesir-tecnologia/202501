@@ -420,6 +420,7 @@ export async function startStint(
   // 3. If insert fails with duplicate key (23505), handle race condition below
   // This two-phase approach ensures atomicity: validation prevents most conflicts,
   // and the unique constraint catches any race conditions between validation and insert.
+  // Note: validate_stint_start uses auth.uid() internally for security (no p_user_id param)
   const { data: validation, error: validationError } = await client
     .rpc('validate_stint_start', {
       p_project_id: projectId,
@@ -467,11 +468,13 @@ export async function startStint(
   if (insertError) {
     if (insertError.code === '23505') {
       // Race condition: another stint was started between validation and insert
+      // Only query for active stints - the paused constraint cannot be violated
+      // by startStint since we always insert with status='active'
       const { data: conflictingStint } = await client
         .from('stints')
         .select('*')
         .eq('user_id', userId)
-        .in('status', ['active', 'paused'])
+        .eq('status', 'active')
         .maybeSingle();
 
       return {
