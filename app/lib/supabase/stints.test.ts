@@ -542,12 +542,35 @@ describe('stints.ts - Integration Tests', () => {
       expect(result.error?.message).toContain('500');
     });
 
-    it('should return error when stint already completed', async () => {
+    it('should be idempotent and return stint when already completed (GitHub #24)', async () => {
       const stint = await createCompletedStint(serviceClient, testProject.id, testUserId);
 
       const result = await completeStint(authenticatedClient, stint.id, 'manual');
 
-      expect(result.error).not.toBeNull();
+      // Idempotent: returns the already-completed stint instead of error
+      // This prevents race condition errors when multiple actors complete simultaneously
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('completed');
+      expect(result.data!.completion_type).toBe('manual');
+      expect(result.data!.id).toBe(stint.id);
+    });
+
+    it('should be idempotent and return stint when already interrupted (GitHub #24)', async () => {
+      const stint = await createCompletedStint(serviceClient, testProject.id, testUserId, {
+        status: 'interrupted',
+        completion_type: 'interrupted',
+      });
+
+      const result = await completeStint(authenticatedClient, stint.id, 'manual');
+
+      // Idempotent: returns the already-interrupted stint instead of error
+      // Both completed and interrupted are terminal states
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('interrupted');
+      expect(result.data!.completion_type).toBe('interrupted');
+      expect(result.data!.id).toBe(stint.id);
     });
 
     it('should return auth error when user is not authenticated', async () => {
@@ -688,13 +711,33 @@ describe('stints.ts - Integration Tests', () => {
       expect(result.data!.remainingSeconds).toBeGreaterThan(0);
     });
 
-    it('should return error when stint is completed', async () => {
+    it('should gracefully handle completed stint and return status (GitHub #24)', async () => {
       const stint = await createCompletedStint(serviceClient, testProject.id, testUserId);
 
       const result = await syncStintCheck(authenticatedClient, stint.id);
 
-      expect(result.error).not.toBeNull();
-      expect(result.error?.message).toContain('completed');
+      // Graceful handling: returns status with 0 remaining instead of error
+      // This prevents console errors from the race condition
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('completed');
+      expect(result.data!.remainingSeconds).toBe(0);
+    });
+
+    it('should gracefully handle interrupted stint and return status (GitHub #24)', async () => {
+      const stint = await createCompletedStint(serviceClient, testProject.id, testUserId, {
+        status: 'interrupted',
+        completion_type: 'interrupted',
+      });
+
+      const result = await syncStintCheck(authenticatedClient, stint.id);
+
+      // Graceful handling: returns status with 0 remaining instead of error
+      // Both completed and interrupted are terminal states
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('interrupted');
+      expect(result.data!.remainingSeconds).toBe(0);
     });
 
     it('should return error when stint not found', async () => {

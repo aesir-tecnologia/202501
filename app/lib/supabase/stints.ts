@@ -512,8 +512,19 @@ export async function syncStintCheck(
     return { data: null, error: new Error('Stint not found') };
   }
 
-  if (stint.status === 'completed') {
-    return { data: null, error: new Error('Stint is completed and cannot be synced') };
+  // GRACEFUL HANDLING: If stint is already completed (by Supabase cron or another actor),
+  // return status with 0 remaining seconds instead of returning an error.
+  // This prevents console errors from the race condition (GitHub #24).
+  if (stint.status === 'completed' || stint.status === 'interrupted') {
+    return {
+      data: {
+        stintId: stint.id,
+        status: stint.status,
+        remainingSeconds: 0,
+        serverTimestamp: new Date().toISOString(),
+      },
+      error: null,
+    };
   }
 
   if (!stint.started_at || !stint.planned_duration) {

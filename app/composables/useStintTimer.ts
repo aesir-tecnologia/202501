@@ -432,6 +432,31 @@ async function syncWithServer(stintId: string): Promise<void> {
     globalTimerState.consecutiveSyncFailures = 0;
     globalTimerState.syncWarningShown = false;
 
+    // RACE CONDITION FIX (GitHub #24): Handle stint already completed externally
+    // (by Supabase cron, manual action in another tab, etc.). Invalidate cache to
+    // trigger the watcher which will call stopTimer() and clean up gracefully.
+    if (data.status === 'completed' || data.status === 'interrupted') {
+      console.log('Sync detected stint completed externally, refreshing cache...');
+      stopServerSync();
+      try {
+        if (globalTimerState.queryClient) {
+          await globalTimerState.queryClient.invalidateQueries({
+            queryKey: stintKeys.all,
+          });
+        }
+      }
+      catch (cacheError) {
+        console.error('Failed to invalidate cache after detecting completed stint:', cacheError);
+        globalTimerState.toast?.add({
+          title: 'Sync Issue',
+          description: 'Your stint was completed but the display may be outdated. Please refresh the page.',
+          color: 'warning',
+          icon: 'i-lucide-refresh-cw',
+        });
+      }
+      return;
+    }
+
     // Check for drift
     const serverRemaining = data.remainingSeconds;
     const drift = Math.abs(serverRemaining - clientRemaining);
@@ -499,6 +524,30 @@ function handleSyncFailure(error: unknown, isAuth: boolean = false): void {
 async function handleTimerComplete(): Promise<void> {
   const activeStint = globalTimerState.activeStintRef?.value;
   if (!activeStint) return;
+
+  // RACE CONDITION FIX (GitHub #24): Pre-check stint status before completion
+  // If another actor (Supabase cron, manual action, etc.) already completed this
+  // stint, just refresh the cache and let the watcher handle cleanup.
+  if (activeStint.status !== 'active' && activeStint.status !== 'paused') {
+    console.log('Stint already completed/interrupted, skipping auto-complete');
+    try {
+      if (globalTimerState.queryClient) {
+        await globalTimerState.queryClient.invalidateQueries({
+          queryKey: stintKeys.all,
+        });
+      }
+    }
+    catch (cacheError) {
+      console.error('Failed to invalidate cache after skipping auto-complete:', cacheError);
+      globalTimerState.toast?.add({
+        title: 'Sync Issue',
+        description: 'Your stint was completed but the display may be outdated. Please refresh the page.',
+        color: 'warning',
+        icon: 'i-lucide-refresh-cw',
+      });
+    }
+    return;
+  }
 
   const client = useSupabaseClient();
   let lastError: Error | null = null;
