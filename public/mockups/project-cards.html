@@ -1,0 +1,3916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeStint - Project Card Variations (Ready State)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #fffbf5;
+            --bg-secondary: #fef7ed;
+            --bg-tertiary: #fdf4e7;
+            --bg-card: #ffffff;
+            --bg-elevated: #fffcf8;
+
+            --text-primary: #292524;
+            --text-secondary: #57534e;
+            --text-muted: #a8a29e;
+            --text-inverse: #fafaf9;
+
+            --accent-primary: #c2410c;
+            --accent-primary-hover: #9a3412;
+            --accent-primary-soft: rgba(194, 65, 12, 0.1);
+            --accent-primary-glow: rgba(194, 65, 12, 0.2);
+
+            --accent-secondary: #166534;
+            --accent-secondary-soft: rgba(22, 101, 52, 0.1);
+            --accent-secondary-glow: rgba(22, 101, 52, 0.15);
+
+            --accent-tertiary: #84cc16;
+            --accent-tertiary-soft: rgba(132, 204, 22, 0.15);
+
+            --accent-amber: #d97706;
+            --accent-amber-soft: rgba(217, 119, 6, 0.1);
+
+            --border-light: #e7e5e4;
+            --border-medium: #d6d3d1;
+            --border-warm: rgba(194, 65, 12, 0.2);
+
+            --shadow-soft: 0 4px 20px rgba(120, 113, 108, 0.08);
+            --shadow-medium: 0 8px 30px rgba(120, 113, 108, 0.12);
+            --shadow-glow: 0 0 40px rgba(194, 65, 12, 0.15);
+            --shadow-card: 0 1px 3px rgba(120, 113, 108, 0.06), 0 8px 24px rgba(120, 113, 108, 0.08);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --radius-full: 100px;
+
+            --transition-fast: 0.15s ease;
+            --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1c1917;
+            --bg-secondary: #1f1b18;
+            --bg-tertiary: #231f1b;
+            --bg-card: #292524;
+            --bg-elevated: #2e2926;
+
+            --text-primary: #fafaf9;
+            --text-secondary: #d6d3d1;
+            --text-muted: #78716c;
+            --text-inverse: #292524;
+
+            --accent-primary: #ea580c;
+            --accent-primary-hover: #f97316;
+            --accent-primary-soft: rgba(234, 88, 12, 0.15);
+            --accent-primary-glow: rgba(234, 88, 12, 0.25);
+
+            --accent-secondary: #22c55e;
+            --accent-secondary-soft: rgba(34, 197, 94, 0.12);
+
+            --accent-tertiary: #a3e635;
+            --accent-amber: #fbbf24;
+
+            --border-light: #3d3835;
+            --border-medium: #4a4543;
+            --border-warm: rgba(234, 88, 12, 0.25);
+
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 60px rgba(234, 88, 12, 0.2);
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        body {
+            font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 40px 24px;
+            transition: background var(--transition-medium), color var(--transition-medium);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 48px;
+        }
+
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        h1 span {
+            color: var(--accent-primary);
+            font-style: italic;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-full);
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all var(--transition-fast);
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .variation {
+            margin-bottom: 64px;
+        }
+
+        .variation-header {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .variation-number {
+            font-family: 'Fraunces', serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-primary);
+            background: var(--accent-primary-soft);
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+        }
+
+        .variation-title {
+            font-family: 'Fraunces', serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .variation-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            max-width: 600px;
+        }
+
+        .card-container {
+            background: var(--bg-secondary);
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+        }
+
+        /* ============================================
+           ICONS (SVG inline for simplicity)
+           ============================================ */
+        .icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .icon-sm {
+            width: 16px;
+            height: 16px;
+        }
+
+        .icon-lg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* ============================================
+           SHARED COMPONENTS
+           ============================================ */
+        .play-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .play-btn:hover {
+            background: var(--accent-primary-hover);
+            transform: scale(1.05);
+        }
+
+        .play-btn-sm {
+            width: 40px;
+            height: 40px;
+        }
+
+        .play-btn-lg {
+            width: 56px;
+            height: 56px;
+        }
+
+        .badge {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            border: 1px solid var(--border-light);
+        }
+
+        .badge-ready {
+            background: var(--accent-secondary-soft);
+            color: var(--accent-secondary);
+            border-color: transparent;
+        }
+
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: var(--accent-secondary);
+            border-radius: var(--radius-full);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            right: 3px;
+            transition: all var(--transition-fast);
+        }
+
+        .toggle-switch.off {
+            background: var(--border-medium);
+        }
+
+        .toggle-switch.off::after {
+            right: auto;
+            left: 3px;
+        }
+
+        .settings-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .settings-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        /* Progress segments */
+        .progress-segments {
+            display: flex;
+            gap: 4px;
+        }
+
+        .progress-segment {
+            width: 24px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-light);
+        }
+
+        .progress-segment.completed {
+            background: var(--accent-secondary);
+        }
+
+        /* ============================================
+           VARIATION 1: Current / Baseline
+           ============================================ */
+        .card-v1 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-fast);
+        }
+
+        .card-v1:hover {
+            box-shadow: var(--shadow-soft);
+        }
+
+        .card-v1 .project-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .card-v1 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v1 .project-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        .card-v1 .project-name {
+            font-family: 'Fraunces', serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v1 .project-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .card-v1 .project-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .card-v1 .progress-info {
+            text-align: right;
+        }
+
+        .card-v1 .progress-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .card-v1 .progress-text strong {
+            color: var(--text-primary);
+        }
+
+        /* ============================================
+           VARIATION 2: Minimal
+           ============================================ */
+        .card-v2 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .card-v2:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 1px var(--accent-primary-soft);
+        }
+
+        .card-v2 .project-color {
+            width: 4px;
+            height: 36px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .card-v2 .project-info {
+            flex: 1;
+        }
+
+        .card-v2 .project-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v2 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v2 .play-btn {
+            width: 36px;
+            height: 36px;
+        }
+
+        /* ============================================
+           VARIATION 3: Progress-Focused
+           ============================================ */
+        .card-v3 {
+            padding: 20px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+        }
+
+        .card-v3 .card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-v3 .project-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-v3 .project-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .card-v3 .project-name {
+            font-family: 'Fraunces', serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v3 .card-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-v3 .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            margin-right: 20px;
+            overflow: hidden;
+        }
+
+        .card-v3 .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-secondary) 0%, var(--accent-tertiary) 100%);
+            border-radius: 4px;
+            transition: width var(--transition-medium);
+        }
+
+        .card-v3 .progress-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-right: 16px;
+            white-space: nowrap;
+        }
+
+        /* ============================================
+           VARIATION 4: Compact Row
+           ============================================ */
+        .card-v4 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+        }
+
+        .card-v4 .project-color {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .card-v4 .project-name {
+            flex: 1;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v4 .stint-info {
+            font-size: 13px;
+            color: var(--text-muted);
+            padding: 4px 10px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .card-v4 .progress-compact {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .card-v4 .progress-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .card-v4 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-light);
+        }
+
+        .card-v4 .progress-dot.filled {
+            background: var(--accent-secondary);
+        }
+
+        .card-v4 .play-btn {
+            width: 32px;
+            height: 32px;
+        }
+
+        /* ============================================
+           VARIATION 5: Two-Line Stacked
+           ============================================ */
+        .card-v5 {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+        }
+
+        .card-v5 .project-color {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Fraunces', serif;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .card-v5 .project-info {
+            flex: 1;
+        }
+
+        .card-v5 .project-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v5 .project-stats {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v5 .stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-v5 .stat-value {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* ============================================
+           VARIATION 6: Accent Border Left
+           ============================================ */
+        .card-v6 {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 24px;
+            padding-left: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-left: 4px solid;
+            border-radius: var(--radius-md);
+        }
+
+        .card-v6 .project-info {
+            flex: 1;
+        }
+
+        .card-v6 .project-name {
+            font-family: 'Fraunces', serif;
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .card-v6 .project-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v6 .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-v6 .project-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ============================================
+           VARIATION 7: Card with Stats Grid
+           ============================================ */
+        .card-v7 {
+            padding: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+        }
+
+        .card-v7 .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-v7 .project-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-v7 .project-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .card-v7 .project-name {
+            font-family: 'Fraunces', serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v7 .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .card-v7 .stat-box {
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .card-v7 .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-v7 .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .card-v7 .card-footer {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* ============================================
+           VARIATION 8: Glass Card
+           ============================================ */
+        .card-v8 {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 24px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        [data-theme="dark"] .card-v8 {
+            background: rgba(41, 37, 36, 0.6);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .card-v8 .project-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .card-v8 .project-info {
+            flex: 1;
+        }
+
+        .card-v8 .project-name {
+            font-family: 'Fraunces', serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .card-v8 .project-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-v8 .progress-ring {
+            width: 24px;
+            height: 24px;
+        }
+
+        .card-v8 .progress-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* ============================================
+           VARIATION 9: Split Layout
+           ============================================ */
+        .card-v9 {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .card-v9 .card-main {
+            padding: 20px 24px;
+        }
+
+        .card-v9 .project-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .card-v9 .project-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .card-v9 .project-name {
+            font-family: 'Fraunces', serif;
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v9 .progress-inline {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-v9 .progress-bar {
+            flex: 1;
+            max-width: 160px;
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .card-v9 .progress-fill {
+            height: 100%;
+            background: var(--accent-secondary);
+            border-radius: 3px;
+        }
+
+        .card-v9 .progress-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v9 .card-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 32px;
+            background: var(--accent-primary-soft);
+            border-left: 1px solid var(--border-light);
+            transition: background var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .card-v9 .card-action:hover {
+            background: var(--accent-primary);
+        }
+
+        .card-v9 .card-action:hover .play-icon {
+            color: white;
+        }
+
+        .card-v9 .play-icon {
+            color: var(--accent-primary);
+            transition: color var(--transition-fast);
+        }
+
+        /* ============================================
+           VARIATION 10: Hero / Featured Card
+           ============================================ */
+        .card-v10 {
+            padding: 28px 32px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-v10::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .card-v10 .card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-v10 .project-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .card-v10 .project-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Fraunces', serif;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .card-v10 .project-name {
+            font-family: 'Fraunces', serif;
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v10 .project-meta {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .card-v10 .card-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-v10 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .card-v10 .progress-visual {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-v10 .progress-segment {
+            width: 32px;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border-light);
+        }
+
+        .card-v10 .progress-segment.filled {
+            background: var(--accent-secondary);
+        }
+
+        .card-v10 .progress-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        .card-v10 .progress-text strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .card-v10 .action-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-v10 .play-btn {
+            width: 56px;
+            height: 56px;
+            box-shadow: 0 4px 16px rgba(194, 65, 12, 0.3);
+        }
+
+        /* ============================================
+           VARIATION 11: Glass Minimal
+           ============================================ */
+        .card-v11 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v11 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v11 .project-color {
+            width: 4px;
+            height: 40px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .card-v11 .project-info {
+            flex: 1;
+        }
+
+        .card-v11 .project-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v11 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v11 .play-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        /* ============================================
+           VARIATION 12: Compact Glass Row
+           ============================================ */
+        .card-v12 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius-md);
+        }
+
+        [data-theme="dark"] .card-v12 {
+            background: rgba(41, 37, 36, 0.4);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .card-v12 .project-emoji {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .card-v12 .project-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v12 .progress-mini {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card-v12 .progress-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.3);
+        }
+
+        .card-v12 .progress-dot.filled {
+            background: var(--accent-secondary);
+        }
+
+        .card-v12 .play-btn {
+            width: 28px;
+            height: 28px;
+        }
+
+        /* ============================================
+           VARIATION 13: Split Minimal
+           ============================================ */
+        .card-v13 {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .card-v13 .card-main {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+        }
+
+        .card-v13 .project-color {
+            width: 4px;
+            height: 32px;
+            border-radius: 2px;
+        }
+
+        .card-v13 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v13 .project-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .card-v13 .card-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .card-v13 .card-action:hover {
+            background: var(--accent-primary);
+        }
+
+        .card-v13 .card-action:hover .play-icon {
+            color: white;
+        }
+
+        .card-v13 .play-icon {
+            color: var(--accent-primary);
+            transition: color var(--transition-fast);
+        }
+
+        /* ============================================
+           VARIATION 14: Glass Split
+           ============================================ */
+        .card-v14 {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+        }
+
+        [data-theme="dark"] .card-v14 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v14 .card-main {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 22px;
+        }
+
+        .card-v14 .project-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .card-v14 .project-info {
+            flex: 1;
+        }
+
+        .card-v14 .project-name {
+            font-family: 'Fraunces', serif;
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .card-v14 .project-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v14 .card-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 28px;
+            background: rgba(194, 65, 12, 0.1);
+            border-left: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v14 .card-action {
+            border-left-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v14 .card-action:hover {
+            background: var(--accent-primary);
+        }
+
+        .card-v14 .card-action:hover .play-icon {
+            color: white;
+        }
+
+        .card-v14 .play-icon {
+            color: var(--accent-primary);
+            transition: color var(--transition-fast);
+        }
+
+        /* ============================================
+           VARIATION 15: Compact Split Row
+           ============================================ */
+        .card-v15 {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .card-v15 .card-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+        }
+
+        .card-v15 .project-color {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .card-v15 .project-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v15 .stint-badge {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            padding: 2px 8px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        .card-v15 .progress-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .card-v15 .progress-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--border-light);
+        }
+
+        .card-v15 .progress-dot.filled {
+            background: var(--accent-secondary);
+        }
+
+        .card-v15 .card-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            background: var(--accent-primary-soft);
+            border-left: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .card-v15 .card-action:hover {
+            background: var(--accent-primary);
+        }
+
+        .card-v15 .card-action:hover svg {
+            fill: white;
+        }
+
+        .card-v15 .card-action svg {
+            fill: var(--accent-primary);
+            transition: fill var(--transition-fast);
+        }
+
+        /* ============================================
+           VARIATION 16: Minimal with Progress Ring
+           ============================================ */
+        .card-v16 {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+        }
+
+        .card-v16 .project-color {
+            width: 4px;
+            height: 36px;
+            border-radius: 2px;
+        }
+
+        .card-v16 .project-info {
+            flex: 1;
+        }
+
+        .card-v16 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v16 .project-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .card-v16 .progress-ring-wrapper {
+            position: relative;
+            width: 40px;
+            height: 40px;
+        }
+
+        .card-v16 .progress-ring {
+            width: 40px;
+            height: 40px;
+            transform: rotate(-90deg);
+        }
+
+        .card-v16 .progress-ring-bg {
+            fill: none;
+            stroke: var(--border-light);
+            stroke-width: 3;
+        }
+
+        .card-v16 .progress-ring-fill {
+            fill: none;
+            stroke: var(--accent-secondary);
+            stroke-width: 3;
+            stroke-linecap: round;
+            transition: stroke-dashoffset var(--transition-medium);
+        }
+
+        .card-v16 .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .card-v16 .play-btn {
+            width: 36px;
+            height: 36px;
+        }
+
+        /* ============================================
+           VARIATION 17: Glass Compact with Emoji
+           ============================================ */
+        .card-v17 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: var(--radius-full);
+        }
+
+        [data-theme="dark"] .card-v17 {
+            background: rgba(41, 37, 36, 0.35);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .card-v17 .project-emoji {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+        }
+
+        [data-theme="dark"] .card-v17 .project-emoji {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .card-v17 .project-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v17 .stint-count {
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 2px 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius-full);
+        }
+
+        [data-theme="dark"] .card-v17 .stint-count {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v17 .play-btn {
+            width: 28px;
+            height: 28px;
+        }
+
+        /* ============================================
+           VARIATION 18: Split Glass Pill
+           ============================================ */
+        .card-v18 {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        [data-theme="dark"] .card-v18 {
+            background: rgba(41, 37, 36, 0.45);
+            border-color: rgba(255, 255, 255, 0.07);
+        }
+
+        .card-v18 .card-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 18px;
+        }
+
+        .card-v18 .project-emoji {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .card-v18 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-v18 .progress-dots {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+        }
+
+        .card-v18 .progress-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+        }
+
+        .card-v18 .progress-dot.filled {
+            background: var(--accent-secondary);
+        }
+
+        .card-v18 .card-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            background: rgba(194, 65, 12, 0.15);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .card-v18 .card-action:hover {
+            background: var(--accent-primary);
+        }
+
+        .card-v18 .card-action:hover svg {
+            fill: white;
+        }
+
+        .card-v18 .card-action svg {
+            fill: var(--accent-primary);
+            transition: fill var(--transition-fast);
+        }
+
+        /* ============================================
+           VARIATION 19: Glass Minimal + Dots
+           ============================================ */
+        .card-v19 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v19 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v19 .project-color {
+            width: 4px;
+            height: 36px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .card-v19 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v19 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v19 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v19 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-v19 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v19 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v19 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v19 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        [data-theme="dark"] .card-v19 .progress-dot.filled {
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+        }
+
+        .card-v19 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v19 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        [data-theme="dark"] .card-v19 .play-btn {
+            background: var(--accent-primary);
+        }
+
+        /* ============================================
+           VARIATION 20: Glass Accent Border + Dots
+           ============================================ */
+        .card-v20 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-left: 4px solid;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v20 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+            border-left-width: 4px;
+            border-left-style: solid;
+        }
+
+        .card-v20 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v20 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v20 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v20 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-v20 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v20 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v20 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v20 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        [data-theme="dark"] .card-v20 .progress-dot.filled {
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+        }
+
+        .card-v20 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v20 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        [data-theme="dark"] .card-v20 .play-btn {
+            background: var(--accent-primary);
+        }
+
+        /* ============================================
+           VARIATION 21: Glass Minimal + Gradient Bar
+           ============================================ */
+        .card-v21 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v21 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v21 .project-color {
+            width: 4px;
+            height: 36px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .card-v21 .project-color.gradient-orange {
+            background: linear-gradient(180deg, #ea580c 0%, #fdba74 100%);
+        }
+
+        .card-v21 .project-color.gradient-blue {
+            background: linear-gradient(180deg, #2563eb 0%, #93c5fd 100%);
+        }
+
+        .card-v21 .project-color.gradient-green {
+            background: linear-gradient(180deg, #16a34a 0%, #86efac 100%);
+        }
+
+        .card-v21 .project-color.gradient-purple {
+            background: linear-gradient(180deg, #9333ea 0%, #d8b4fe 100%);
+        }
+
+        .card-v21 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v21 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v21 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v21 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-v21 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v21 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v21 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v21 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        .card-v21 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v21 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        /* ============================================
+           VARIATION 22: Glass Minimal + Glow Bar
+           ============================================ */
+        .card-v22 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v22 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v22 .project-color {
+            width: 4px;
+            height: 36px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .card-v22 .project-color.glow-orange {
+            background: #ea580c;
+            box-shadow: 0 0 12px rgba(234, 88, 12, 0.5), 0 0 24px rgba(234, 88, 12, 0.25);
+        }
+
+        .card-v22 .project-color.glow-blue {
+            background: #2563eb;
+            box-shadow: 0 0 12px rgba(37, 99, 235, 0.5), 0 0 24px rgba(37, 99, 235, 0.25);
+        }
+
+        .card-v22 .project-color.glow-green {
+            background: #16a34a;
+            box-shadow: 0 0 12px rgba(22, 163, 74, 0.5), 0 0 24px rgba(22, 163, 74, 0.25);
+        }
+
+        .card-v22 .project-color.glow-purple {
+            background: #9333ea;
+            box-shadow: 0 0 12px rgba(147, 51, 234, 0.5), 0 0 24px rgba(147, 51, 234, 0.25);
+        }
+
+        .card-v22 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v22 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v22 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v22 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-v22 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v22 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v22 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v22 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        .card-v22 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v22 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        /* ============================================
+           VARIATION 23: Glass Minimal + Color Dot
+           ============================================ */
+        .card-v23 {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v23 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v23 .project-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .card-v23 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v23 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v23 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v23 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-v23 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v23 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v23 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v23 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        .card-v23 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v23 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        /* ============================================
+           VARIATION 24: Glass Minimal + Wide Bar
+           ============================================ */
+        .card-v24 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v24 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v24 .project-color {
+            width: 8px;
+            height: 40px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .card-v24 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v24 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v24 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v24 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-v24 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v24 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v24 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v24 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        .card-v24 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v24 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        /* ============================================
+           VARIATION 25: Glass Minimal + Border Left
+           ============================================ */
+        .card-v25 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-left: 4px solid;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v25 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+            border-left-width: 4px;
+            border-left-style: solid;
+        }
+
+        .card-v25.border-orange { border-left-color: #ea580c; }
+        .card-v25.border-blue { border-left-color: #2563eb; }
+        .card-v25.border-green { border-left-color: #16a34a; }
+        .card-v25.border-purple { border-left-color: #9333ea; }
+
+        .card-v25 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v25 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v25 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v25 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-v25 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v25 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v25 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v25 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        .card-v25 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v25 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        /* ============================================
+           VARIATION 26: Glass Minimal + Tapered Bar
+           ============================================ */
+        .card-v26 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v26 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v26 .project-color {
+            width: 6px;
+            height: 36px;
+            flex-shrink: 0;
+            clip-path: polygon(0 0, 100% 0, 60% 100%, 40% 100%);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .card-v26 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v26 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v26 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v26 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-v26 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v26 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v26 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v26 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        .card-v26 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v26 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        /* ============================================
+           VARIATION 27: Glass Minimal + Color Ring
+           ============================================ */
+        .card-v27 {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v27 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v27 .project-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: transparent;
+            border: 3px solid;
+        }
+
+        .card-v27 .project-color.ring-orange { border-color: #ea580c; }
+        .card-v27 .project-color.ring-blue { border-color: #2563eb; }
+        .card-v27 .project-color.ring-green { border-color: #16a34a; }
+        .card-v27 .project-color.ring-purple { border-color: #9333ea; }
+
+        .card-v27 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v27 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v27 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v27 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-v27 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v27 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v27 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v27 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        .card-v27 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v27 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        /* Card V27 State Variations */
+
+        /* Running state */
+        .card-v27.state-running {
+            ring: 1px solid rgba(22, 163, 74, 0.3);
+            box-shadow: 0 2px 12px rgba(22, 163, 74, 0.1);
+        }
+
+        .card-v27 .status-pill {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: var(--radius-full);
+            border: 1px solid;
+        }
+
+        .card-v27 .status-pill.ready {
+            color: var(--accent-secondary);
+            background: var(--accent-secondary-soft);
+            border-color: transparent;
+        }
+
+        .card-v27 .status-pill.running {
+            color: #15803d;
+            background: rgba(22, 163, 74, 0.1);
+            border-color: rgba(22, 163, 74, 0.2);
+        }
+
+        [data-theme="dark"] .card-v27 .status-pill.running {
+            color: #4ade80;
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.2);
+        }
+
+        .card-v27 .status-pill.paused {
+            color: #b45309;
+            background: rgba(217, 119, 6, 0.1);
+            border-color: rgba(217, 119, 6, 0.2);
+        }
+
+        [data-theme="dark"] .card-v27 .status-pill.paused {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+            border-color: rgba(251, 191, 36, 0.2);
+        }
+
+        .card-v27 .status-pill.inactive {
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            border-color: var(--border-light);
+        }
+
+        /* Inactive state card */
+        .card-v27.state-inactive {
+            opacity: 0.7;
+            filter: saturate(0.85);
+        }
+
+        .card-v27.state-inactive .project-name {
+            color: var(--text-muted);
+        }
+
+        .card-v27.state-inactive .play-btn {
+            background: var(--border-medium);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* Timer display */
+        .card-v27 .timer-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: var(--radius-full);
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid;
+        }
+
+        .card-v27 .timer-display.running {
+            color: #15803d;
+            background: rgba(22, 163, 74, 0.1);
+            border-color: rgba(22, 163, 74, 0.2);
+        }
+
+        [data-theme="dark"] .card-v27 .timer-display.running {
+            color: #4ade80;
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.2);
+        }
+
+        .card-v27 .timer-display.paused {
+            color: #b45309;
+            background: rgba(217, 119, 6, 0.1);
+            border-color: rgba(217, 119, 6, 0.2);
+        }
+
+        [data-theme="dark"] .card-v27 .timer-display.paused {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+            border-color: rgba(251, 191, 36, 0.2);
+        }
+
+        /* Pulse dot for running state */
+        .card-v27 .pulse-dot {
+            position: relative;
+            width: 8px;
+            height: 8px;
+        }
+
+        .card-v27 .pulse-dot .ping {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: #4ade80;
+            opacity: 0.75;
+            animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        .card-v27 .pulse-dot .dot {
+            position: relative;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+
+        @keyframes ping {
+            75%, 100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        /* Action buttons for running/paused states */
+        .card-v27 .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-v27 .action-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            background: transparent;
+        }
+
+        .card-v27 .action-btn.pause {
+            color: #b45309;
+            border-color: rgba(217, 119, 6, 0.25);
+            background: rgba(217, 119, 6, 0.05);
+        }
+
+        .card-v27 .action-btn.pause:hover {
+            background: rgba(217, 119, 6, 0.15);
+            border-color: rgba(217, 119, 6, 0.4);
+        }
+
+        [data-theme="dark"] .card-v27 .action-btn.pause {
+            color: #fbbf24;
+        }
+
+        .card-v27 .action-btn.resume {
+            color: #b45309;
+            border-color: rgba(217, 119, 6, 0.25);
+            background: rgba(217, 119, 6, 0.05);
+        }
+
+        .card-v27 .action-btn.resume:hover {
+            background: rgba(217, 119, 6, 0.15);
+            border-color: rgba(217, 119, 6, 0.4);
+        }
+
+        [data-theme="dark"] .card-v27 .action-btn.resume {
+            color: #fbbf24;
+        }
+
+        .card-v27 .action-btn.stop {
+            color: #dc2626;
+            border-color: rgba(220, 38, 38, 0.25);
+            background: rgba(220, 38, 38, 0.05);
+        }
+
+        .card-v27 .action-btn.stop:hover {
+            background: rgba(220, 38, 38, 0.15);
+            border-color: rgba(220, 38, 38, 0.4);
+        }
+
+        [data-theme="dark"] .card-v27 .action-btn.stop {
+            color: #f87171;
+        }
+
+        /* ============================================
+           VARIATION 28: Glass Minimal + Double Bars
+           ============================================ */
+        .card-v28 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v28 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v28 .project-color {
+            display: flex;
+            gap: 3px;
+            flex-shrink: 0;
+        }
+
+        .card-v28 .project-color .bar {
+            width: 3px;
+            height: 32px;
+            border-radius: 2px;
+        }
+
+        .card-v28 .project-color .bar:last-child {
+            opacity: 0.5;
+        }
+
+        .card-v28 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v28 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v28 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v28 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-v28 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v28 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v28 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v28 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        .card-v28 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v28 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        /* ============================================
+           VARIATION 29: Glass Minimal + Color Bleed
+           ============================================ */
+        .card-v29 {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 20px;
+            padding-left: 24px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        [data-theme="dark"] .card-v29 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v29::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 60px;
+            pointer-events: none;
+        }
+
+        .card-v29.bleed-orange::before {
+            background: linear-gradient(90deg, rgba(234, 88, 12, 0.2) 0%, transparent 100%);
+        }
+
+        .card-v29.bleed-blue::before {
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.2) 0%, transparent 100%);
+        }
+
+        .card-v29.bleed-green::before {
+            background: linear-gradient(90deg, rgba(22, 163, 74, 0.2) 0%, transparent 100%);
+        }
+
+        .card-v29.bleed-purple::before {
+            background: linear-gradient(90deg, rgba(147, 51, 234, 0.2) 0%, transparent 100%);
+        }
+
+        .card-v29 .project-color {
+            width: 4px;
+            height: 36px;
+            border-radius: 2px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-v29 .project-info {
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-v29 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v29 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v29 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-v29 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v29 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v29 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v29 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        .card-v29 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v29 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           VARIATION 30: Glass Minimal + Pill Badge
+           ============================================ */
+        .card-v30 {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .card-v30 {
+            background: rgba(41, 37, 36, 0.5);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-v30 .project-color {
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-sm);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-v30 .project-color .initial {
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .card-v30 .project-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-v30 .project-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .card-v30 .project-meta {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-v30 .progress-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-v30 .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-v30 .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(120, 113, 108, 0.25);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .card-v30 .progress-dot {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-v30 .progress-dot.filled {
+            background: var(--accent-secondary);
+            box-shadow: 0 0 6px rgba(22, 101, 52, 0.3);
+        }
+
+        .card-v30 .progress-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-v30 .play-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(194, 65, 12, 0.9);
+            backdrop-filter: blur(4px);
+        }
+
+        /* ============================================
+           PROJECT COLORS
+           ============================================ */
+        .color-orange { background-color: #ea580c; }
+        .color-green { background-color: #16a34a; }
+        .color-blue { background-color: #2563eb; }
+        .color-purple { background-color: #9333ea; }
+        .color-amber { background-color: #d97706; }
+        .color-teal { background-color: #0d9488; }
+        .color-rose { background-color: #e11d48; }
+        .color-indigo { background-color: #4f46e5; }
+
+        .border-orange { border-left-color: #ea580c; }
+        .border-green { border-left-color: #16a34a; }
+        .border-blue { border-left-color: #2563eb; }
+        .border-purple { border-left-color: #9333ea; }
+
+        .top-orange::before { background: linear-gradient(90deg, #ea580c, #fb923c); }
+        .top-green::before { background: linear-gradient(90deg, #16a34a, #4ade80); }
+        .top-blue::before { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+        .top-purple::before { background: linear-gradient(90deg, #9333ea, #c084fc); }
+
+        /* Play Icon SVG */
+        .play-icon-svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .play-btn .play-icon-svg {
+            fill: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Project Card <span>Variations</span></h1>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+                Toggle Theme
+            </button>
+        </header>
+
+        <!-- VARIATION 1: Current / Baseline -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">01</span>
+                <span class="variation-title">Current / Baseline</span>
+            </div>
+            <p class="variation-desc">The existing card design from the dashboard mockup. Horizontal layout with project color dot, name, badge, meta info, progress segments, and action buttons.</p>
+            <div class="card-container">
+                <div class="card-v1">
+                    <div class="project-color color-purple"></div>
+                    <div class="project-info">
+                        <div class="project-header">
+                            <span class="project-name">Internal Tools</span>
+                            <span class="badge badge-ready">Ready</span>
+                        </div>
+                        <div class="project-meta">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            25m / stint
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <div class="progress-info">
+                            <div class="progress-text"><strong>2</strong>/2 Met</div>
+                            <div class="progress-segments">
+                                <div class="progress-segment completed"></div>
+                                <div class="progress-segment completed"></div>
+                            </div>
+                        </div>
+                        <button class="play-btn">
+                            <svg class="play-icon-svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <div class="toggle-switch"></div>
+                        <button class="settings-btn">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 2: Minimal -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">02</span>
+                <span class="variation-title">Minimal</span>
+            </div>
+            <p class="variation-desc">Stripped down to essentials: vertical color bar, name, stint duration, and play button. Great for dense lists.</p>
+            <div class="card-container">
+                <div class="card-v2">
+                    <div class="project-color color-green"></div>
+                    <div class="project-info">
+                        <div class="project-name">Orion Migrations</div>
+                        <div class="project-meta">30m per stint</div>
+                    </div>
+                    <button class="play-btn play-btn-sm">
+                        <svg class="play-icon-svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 3: Progress-Focused -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">03</span>
+                <span class="variation-title">Progress-Focused</span>
+            </div>
+            <p class="variation-desc">Emphasizes daily progress with a full-width gradient progress bar. The visual weight is on how much work is done.</p>
+            <div class="card-container">
+                <div class="card-v3">
+                    <div class="card-top">
+                        <div class="project-header">
+                            <div class="project-color color-amber"></div>
+                            <span class="project-name">Website Redesign</span>
+                            <span class="badge badge-ready">Ready</span>
+                        </div>
+                        <button class="settings-btn">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                        </button>
+                    </div>
+                    <div class="card-bottom">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 66%;"></div>
+                        </div>
+                        <span class="progress-label">2 of 3 stints</span>
+                        <button class="play-btn play-btn-sm">
+                            <svg class="play-icon-svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 4: Compact Row -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">04</span>
+                <span class="variation-title">Compact Row</span>
+            </div>
+            <p class="variation-desc">Ultra-compact single row with dot progress indicators. Ideal for sidebar lists or mobile views.</p>
+            <div class="card-container">
+                <div class="card-v4">
+                    <div class="project-color color-teal"></div>
+                    <span class="project-name">API Documentation</span>
+                    <span class="stint-info">20m</span>
+                    <div class="progress-compact">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span>1/3</span>
+                    </div>
+                    <button class="play-btn play-btn-sm" style="width: 32px; height: 32px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 5: Two-Line Stacked -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">05</span>
+                <span class="variation-title">Icon Avatar</span>
+            </div>
+            <p class="variation-desc">Uses project initial as a colored avatar. Stats shown inline with icons. Feels more like a contact/app card.</p>
+            <div class="card-container">
+                <div class="card-v5">
+                    <div class="project-color color-orange" style="width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600;">C</div>
+                    <div class="project-info">
+                        <div class="project-name">Client Atlas</div>
+                        <div class="project-stats">
+                            <span class="stat">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                <span class="stat-value">45m</span> / stint
+                            </span>
+                            <span class="stat">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+                                <span class="stat-value">3</span>/5 today
+                            </span>
+                        </div>
+                    </div>
+                    <button class="play-btn">
+                        <svg class="play-icon-svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 6: Accent Border Left -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">06</span>
+                <span class="variation-title">Accent Border Left</span>
+            </div>
+            <p class="variation-desc">Project color as a bold left border accent. Clean and modern, with clear visual hierarchy.</p>
+            <div class="card-container">
+                <div class="card-v6 border-blue">
+                    <div class="project-info">
+                        <div class="project-name">Mobile App v2</div>
+                        <div class="project-meta">
+                            <span class="meta-item">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                35m / stint
+                            </span>
+                            <span class="meta-item">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+                                1 of 4 done
+                            </span>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <span class="badge badge-ready">Ready</span>
+                        <button class="play-btn">
+                            <svg class="play-icon-svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 7: Card with Stats Grid -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">07</span>
+                <span class="variation-title">Stats Grid</span>
+            </div>
+            <p class="variation-desc">Expanded card with a grid of stats boxes. Good for when you want to show more context at a glance.</p>
+            <div class="card-container">
+                <div class="card-v7">
+                    <div class="card-header">
+                        <div class="project-title">
+                            <div class="project-color color-rose"></div>
+                            <span class="project-name">Marketing Campaign</span>
+                        </div>
+                        <span class="badge badge-ready">Ready</span>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-value">30m</div>
+                            <div class="stat-label">Per Stint</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">1/3</div>
+                            <div class="stat-label">Today</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">4.2h</div>
+                            <div class="stat-label">This Week</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="play-btn play-btn-lg">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 8: Glass Card -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">08</span>
+                <span class="variation-title">Glass / Frosted</span>
+            </div>
+            <p class="variation-desc">Semi-transparent card with backdrop blur. Feels lighter and more modern. Uses emoji as project icon.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v8">
+                    <div class="project-icon" style="background: linear-gradient(135deg, #f97316 0%, #eab308 100%);">
+                        🎨
+                    </div>
+                    <div class="project-info">
+                        <div class="project-name">Brand Guidelines</div>
+                        <div class="project-progress">
+                            <svg class="progress-ring" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" fill="none" stroke="var(--border-light)" stroke-width="3"/>
+                                <circle cx="12" cy="12" r="10" fill="none" stroke="var(--accent-secondary)" stroke-width="3" stroke-dasharray="62.83" stroke-dashoffset="20.94" transform="rotate(-90 12 12)"/>
+                            </svg>
+                            <span class="progress-text">2 of 3 stints today</span>
+                        </div>
+                    </div>
+                    <button class="play-btn">
+                        <svg class="play-icon-svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 9: Split Layout -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">09</span>
+                <span class="variation-title">Split Action Zone</span>
+            </div>
+            <p class="variation-desc">Card with a dedicated action zone on the right. The play area is a full-height click target that changes on hover.</p>
+            <div class="card-container">
+                <div class="card-v9">
+                    <div class="card-main">
+                        <div class="project-header">
+                            <div class="project-color color-indigo"></div>
+                            <span class="project-name">Backend Refactor</span>
+                            <span class="badge badge-ready">Ready</span>
+                        </div>
+                        <div class="progress-inline">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 25%;"></div>
+                            </div>
+                            <span class="progress-label">1 of 4 • 40m per stint</span>
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <svg class="play-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 10: Hero / Featured Card -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">10</span>
+                <span class="variation-title">Hero / Featured</span>
+            </div>
+            <p class="variation-desc">Larger, more prominent card with colored top accent bar. Good for featuring the "next up" or most important project.</p>
+            <div class="card-container">
+                <div class="card-v10 top-green">
+                    <div class="card-top">
+                        <div class="project-header">
+                            <div class="project-avatar color-green">O</div>
+                            <div>
+                                <div class="project-name">Orion Migrations</div>
+                                <div class="project-meta">30 minutes per stint</div>
+                            </div>
+                        </div>
+                        <span class="badge badge-ready">Ready</span>
+                    </div>
+                    <div class="card-bottom">
+                        <div class="progress-section">
+                            <div class="progress-visual">
+                                <div class="progress-segment filled"></div>
+                                <div class="progress-segment"></div>
+                                <div class="progress-segment"></div>
+                            </div>
+                            <span class="progress-text"><strong>1</strong> of 3 stints today</span>
+                        </div>
+                        <div class="action-group">
+                            <div class="toggle-switch"></div>
+                            <button class="play-btn play-btn-lg">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 11: Glass Minimal -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">11</span>
+                <span class="variation-title">Glass Minimal</span>
+            </div>
+            <p class="variation-desc">Combines V2's minimal vertical bar layout with V8's frosted glass effect. Light and airy feel.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v11">
+                    <div class="project-color color-purple"></div>
+                    <div class="project-info">
+                        <div class="project-name">Design System</div>
+                        <div class="project-meta">25m per stint</div>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 12: Compact Glass Row -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">12</span>
+                <span class="variation-title">Compact Glass Row</span>
+            </div>
+            <p class="variation-desc">Ultra-compact row with glass effect and emoji icon. Combines V4's density with V8's aesthetics.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #dcfce7 0%, #cffafe 50%, #e0e7ff 100%);">
+                <div class="card-v12">
+                    <span class="project-emoji">📊</span>
+                    <span class="project-name">Analytics Dashboard</span>
+                    <div class="progress-mini">
+                        <div class="progress-dot filled"></div>
+                        <div class="progress-dot filled"></div>
+                        <div class="progress-dot"></div>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 13: Split Minimal -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">13</span>
+                <span class="variation-title">Split Minimal</span>
+            </div>
+            <p class="variation-desc">V9's split action zone with V2's minimal vertical bar. Clean separation of content and action.</p>
+            <div class="card-container">
+                <div class="card-v13">
+                    <div class="card-main">
+                        <div class="project-color color-teal"></div>
+                        <div>
+                            <div class="project-name">Code Review</div>
+                            <div class="project-meta">20m per stint</div>
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 14: Glass Split -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">14</span>
+                <span class="variation-title">Glass Split</span>
+            </div>
+            <p class="variation-desc">V8's frosted glass with V9's split action zone. Premium feel with clear action affordance.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v14">
+                    <div class="card-main">
+                        <div class="project-icon" style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);">
+                            🚀
+                        </div>
+                        <div class="project-info">
+                            <div class="project-name">Product Launch</div>
+                            <div class="project-meta">
+                                <span>45m / stint</span>
+                                <span>•</span>
+                                <span>2/4 today</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <svg class="play-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 15: Compact Split Row -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">15</span>
+                <span class="variation-title">Compact Split Row</span>
+            </div>
+            <p class="variation-desc">V4's ultra-compact row with V9's split action zone. Efficient use of space with clear CTA.</p>
+            <div class="card-container">
+                <div class="card-v15">
+                    <div class="card-main">
+                        <div class="project-color color-rose"></div>
+                        <span class="project-name">Email Campaign</span>
+                        <span class="stint-badge">15m</span>
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <svg width="14" height="14" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 16: Minimal with Progress Ring -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">16</span>
+                <span class="variation-title">Minimal + Progress Ring</span>
+            </div>
+            <p class="variation-desc">V2's minimal layout with V8's circular progress indicator. Visual progress without bulk.</p>
+            <div class="card-container">
+                <div class="card-v16">
+                    <div class="project-color color-amber"></div>
+                    <div class="project-info">
+                        <div class="project-name">Client Proposal</div>
+                        <div class="project-meta">35m per stint</div>
+                    </div>
+                    <div class="progress-ring-wrapper">
+                        <svg class="progress-ring" viewBox="0 0 40 40">
+                            <circle class="progress-ring-bg" cx="20" cy="20" r="16"/>
+                            <circle class="progress-ring-fill" cx="20" cy="20" r="16" stroke-dasharray="100.53" stroke-dashoffset="33.51"/>
+                        </svg>
+                        <span class="progress-text">2/3</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 17: Glass Compact Pill -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">17</span>
+                <span class="variation-title">Glass Compact Pill</span>
+            </div>
+            <p class="variation-desc">Pill-shaped glass card with emoji. Playful, compact, great for mobile or sidebar.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fbcfe8 50%, #ddd6fe 100%);">
+                <div class="card-v17">
+                    <span class="project-emoji">✏️</span>
+                    <span class="project-name">Blog Post</span>
+                    <span class="stint-count">1/2</span>
+                    <button class="play-btn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 18: Split Glass Pill -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">18</span>
+                <span class="variation-title">Split Glass Pill</span>
+            </div>
+            <p class="variation-desc">Pill-shaped glass card with split action zone. V17 + V9 hybrid with rounded ends.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #dcfce7 0%, #cffafe 50%, #e0e7ff 100%);">
+                <div class="card-v18">
+                    <div class="card-main">
+                        <span class="project-emoji">🎯</span>
+                        <span class="project-name">Sprint Planning</span>
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 19: Glass Minimal + Dots -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">19</span>
+                <span class="variation-title">Glass Minimal + Dots</span>
+            </div>
+            <p class="variation-desc">V11's glass minimal with V4's dot progress indicators. Clean, airy, with at-a-glance progress.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v19">
+                    <div class="project-color color-blue"></div>
+                    <div class="project-info">
+                        <div class="project-name">Mobile App v2</div>
+                        <div class="project-meta">35m per stint</div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">2/4</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 20: Glass Accent Border + Dots -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">20</span>
+                <span class="variation-title">Glass Accent Border + Dots</span>
+            </div>
+            <p class="variation-desc">V19 with V6's accent border left instead of vertical bar. Bold color edge meets frosted glass.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v20 border-purple">
+                    <div class="project-info">
+                        <div class="project-name">Design System</div>
+                        <div class="project-meta">25m per stint</div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">3/4</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 21: Glass Minimal + Gradient Bar -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">21</span>
+                <span class="variation-title">Glass Minimal + Gradient Bar</span>
+            </div>
+            <p class="variation-desc">V19 with a vertical gradient bar that fades from the project color to a lighter tint. Adds visual depth.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v21">
+                    <div class="project-color gradient-blue"></div>
+                    <div class="project-info">
+                        <div class="project-name">Mobile App v2</div>
+                        <div class="project-meta">35m per stint</div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">2/4</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 22: Glass Minimal + Glow Bar -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">22</span>
+                <span class="variation-title">Glass Minimal + Glow Bar</span>
+            </div>
+            <p class="variation-desc">V19 with a glowing bar effect. The color has a soft radial glow that creates visual emphasis.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v22">
+                    <div class="project-color glow-purple"></div>
+                    <div class="project-info">
+                        <div class="project-name">Design System</div>
+                        <div class="project-meta">25m per stint</div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">3/4</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 23: Glass Minimal + Color Dot -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">23</span>
+                <span class="variation-title">Glass Minimal + Color Dot</span>
+            </div>
+            <p class="variation-desc">V19 with a circular dot instead of a vertical bar. More compact, softer visual weight.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v23">
+                    <div class="project-color color-green"></div>
+                    <div class="project-info">
+                        <div class="project-name">Client Atlas</div>
+                        <div class="project-meta">40m per stint</div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">1/3</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 24: Glass Minimal + Wide Bar -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">24</span>
+                <span class="variation-title">Glass Minimal + Wide Bar</span>
+            </div>
+            <p class="variation-desc">V19 with a wider (8px) bar and more rounded corners. More prominent color presence.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v24">
+                    <div class="project-color color-orange"></div>
+                    <div class="project-info">
+                        <div class="project-name">Marketing Site</div>
+                        <div class="project-meta">30m per stint</div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">2/3</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 25: Glass Minimal + Border Left -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">25</span>
+                <span class="variation-title">Glass Minimal + Border Left</span>
+            </div>
+            <p class="variation-desc">V19 with CSS border-left instead of a separate element. Cleaner DOM, color touches the edge.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v25 border-blue">
+                    <div class="project-info">
+                        <div class="project-name">API Documentation</div>
+                        <div class="project-meta">20m per stint</div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">1/4</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 26: Glass Minimal + Tapered Bar -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">26</span>
+                <span class="variation-title">Glass Minimal + Tapered Bar</span>
+            </div>
+            <p class="variation-desc">V19 with a bar that tapers from wide at top to narrow at bottom. Adds visual direction.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v26">
+                    <div class="project-color color-purple"></div>
+                    <div class="project-info">
+                        <div class="project-name">Brand Guidelines</div>
+                        <div class="project-meta">45m per stint</div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">2/3</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 27: Glass Minimal + Color Ring -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">27</span>
+                <span class="variation-title">Glass Minimal + Color Ring</span>
+            </div>
+            <p class="variation-desc">V19 with an outlined circle instead of solid. Lighter visual weight, more elegant. Showing all states.</p>
+
+            <!-- STATE: Ready -->
+            <p style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; margin-top: 16px; text-transform: uppercase; letter-spacing: 0.05em;">Ready State</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v27">
+                    <div class="project-color ring-green"></div>
+                    <div class="project-info">
+                        <div class="project-name">Orion Migrations</div>
+                        <div class="project-meta">30m per stint</div>
+                    </div>
+                    <span class="status-pill ready">Ready</span>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">1/3</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STATE: Running -->
+            <p style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; margin-top: 24px; text-transform: uppercase; letter-spacing: 0.05em;">Running State</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v27 state-running">
+                    <div class="project-color ring-blue"></div>
+                    <div class="project-info">
+                        <div class="project-name">Mobile App v2</div>
+                        <div class="project-meta">35m per stint</div>
+                    </div>
+                    <span class="status-pill running">Running</span>
+                    <div class="timer-display running">
+                        <span class="pulse-dot">
+                            <span class="ping"></span>
+                            <span class="dot"></span>
+                        </span>
+                        <span>24:32</span>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">2/4</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn pause" title="Pause">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+                        </button>
+                        <button class="action-btn stop" title="Stop">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATE: Paused -->
+            <p style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; margin-top: 24px; text-transform: uppercase; letter-spacing: 0.05em;">Paused State</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v27">
+                    <div class="project-color ring-purple"></div>
+                    <div class="project-info">
+                        <div class="project-name">Design System</div>
+                        <div class="project-meta">25m per stint</div>
+                    </div>
+                    <span class="status-pill paused">Paused</span>
+                    <div class="timer-display paused">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+                        <span>18:45</span>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">3/4</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn resume" title="Resume">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <button class="action-btn stop" title="Stop">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STATE: Inactive -->
+            <p style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; margin-top: 24px; text-transform: uppercase; letter-spacing: 0.05em;">Inactive State</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v27 state-inactive">
+                    <div class="project-color ring-orange"></div>
+                    <div class="project-info">
+                        <div class="project-name">Marketing Site</div>
+                        <div class="project-meta">30m per stint</div>
+                    </div>
+                    <span class="status-pill inactive">Inactive</span>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">2/3</span>
+                    </div>
+                    <button class="play-btn" disabled>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 28: Glass Minimal + Double Bars -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">28</span>
+                <span class="variation-title">Glass Minimal + Double Bars</span>
+            </div>
+            <p class="variation-desc">V19 with two parallel bars, second at 50% opacity. Creates depth and visual interest.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v28">
+                    <div class="project-color">
+                        <div class="bar color-orange"></div>
+                        <div class="bar color-orange"></div>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-name">Email Campaign</div>
+                        <div class="project-meta">15m per stint</div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                        </div>
+                        <span class="progress-label">4/4</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 29: Glass Minimal + Color Bleed -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">29</span>
+                <span class="variation-title">Glass Minimal + Color Bleed</span>
+            </div>
+            <p class="variation-desc">V19 with a soft gradient that bleeds from the project color into the card background.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v29 bleed-purple">
+                    <div class="project-color color-purple"></div>
+                    <div class="project-info">
+                        <div class="project-name">Internal Tools</div>
+                        <div class="project-meta">25m per stint</div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">2/3</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VARIATION 30: Glass Minimal + Pill Badge -->
+        <div class="variation">
+            <div class="variation-header">
+                <span class="variation-number">30</span>
+                <span class="variation-title">Glass Minimal + Pill Badge</span>
+            </div>
+            <p class="variation-desc">V19 with a small rounded badge showing project initial. More identity, app-like feel.</p>
+            <div class="card-container" style="background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #e0e7ff 100%);">
+                <div class="card-v30">
+                    <div class="project-color color-blue">
+                        <span class="initial">C</span>
+                    </div>
+                    <div class="project-info">
+                        <div class="project-name">Client Portal</div>
+                        <div class="project-meta">35m per stint</div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-dots">
+                            <div class="progress-dot filled"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        <span class="progress-label">1/5</span>
+                    </div>
+                    <button class="play-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            html.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+    </script>
+</body>
+</html>

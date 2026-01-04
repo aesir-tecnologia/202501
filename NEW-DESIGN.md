@@ -1,5 +1,9 @@
 # LifeStint Design System Analysis & Recommendations
 
+> **STATUS: ✅ IMPLEMENTED** - The "Focused Warmth + Deep Focus Hybrid" design system has been fully implemented as of January 2026.
+
+---
+
 ## Current State Assessment
 
 Your current design system has solid foundations (Nuxt UI + Tailwind) but suffers from three key issues:
@@ -364,11 +368,107 @@ The hybrid design can be implemented in the existing Nuxt UI 4 setup by:
 
 ---
 
+## Project Card Design (V27)
+
+The project card has been redesigned as a compact, horizontal "Glass Minimal" layout with color ring indicators. This replaces the previous vertically-oriented card with segmented progress bars.
+
+**Mockup Location:** `/public/mockups/project-card-27.html`
+**URL:** http://localhost:3005/mockups/project-card-27.html
+
+### Card States
+
+| State | Description | Visual Indicators |
+|-------|-------------|-------------------|
+| **Ready** | Active project, no stint running | Neutral timer (`--:--`), Play button enabled |
+| **Running** | Stint in progress | Green timer with pulse dot, Pause + Stop buttons |
+| **Paused** | Stint paused mid-session | Amber timer with pause icon, Resume + Stop buttons |
+| **Goal Exceeded** | Daily goal surpassed | Progress badge shows `+N` extra indicator |
+| **Inactive** | Project deactivated | Muted styling, Play button disabled |
+
+### Visual Elements
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  ⠿  ○  Project Name                    --:--   2/3   ✎    ▶       │
+│     ↑  Meta text (duration/status)              ↑     ↑    ↑       │
+│     │                                           │     │    │       │
+│  Ring                               Progress  Edit  Play/          │
+│  (color)                            Badge          Pause/Stop      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+| Element | Description |
+|---------|-------------|
+| **Drag Handle** | 6-dot grip icon for reordering |
+| **Color Ring** | 18px circle outline in project color (replaces left accent bar) |
+| **Project Name** | 15px font-weight-500 text |
+| **Meta Text** | Duration ("30m per stint") or status ("Started 10:32 AM", "Paused 5m ago") |
+| **Timer Display** | MM:SS format with state-specific styling |
+| **Progress Badge** | `X/Y` format showing completed/expected stints |
+| **Extra Indicator** | `+N` suffix in green when exceeding daily goal |
+| **Edit Button** | Pencil icon for project settings |
+| **Action Buttons** | Play (start), Pause/Resume, Stop (complete) |
+
+### Design Decisions
+
+**Adopted from V27:**
+- Horizontal compact layout with glassmorphism
+- Project color shown as ring outline (not solid fill)
+- Simple `X/Y` numeric progress badge
+- Extra stints indicator (`+2`) for goal exceeded state
+- Stop button replaces Abandon for paused stints
+- Timer display integrated inline
+
+**Removed (no longer used):**
+- ~~Status pills~~ ("Ready", "Running", "Paused", "Inactive" badges)
+- ~~Visual segmented progress bar~~
+- ~~Daily progress section~~ (label, summary text, "Met" badge)
+- ~~Left accent bar~~ (replaced by color ring)
+- ~~Background progress tint~~ (subtle gradient at bottom)
+- ~~Abandon button~~ (use Stop instead)
+
+### Timer Display States
+
+| State | Background | Border | Text Color | Icon |
+|-------|------------|--------|------------|------|
+| Ready | Transparent | Transparent | Muted | None (`--:--`) |
+| Running | Green 10% | Green 20% | Green | Pulse dot |
+| Paused | Amber 10% | Amber 20% | Amber | Pause icon |
+| Inactive | Transparent | Transparent | Muted 50% | None (`--:--`) |
+
+### Action Button Variants
+
+| Button | Color | Use Case |
+|--------|-------|----------|
+| Play | Orange border, orange text | Start new stint |
+| Pause | Amber border, amber text | Pause running stint |
+| Resume | Amber border, amber text | Resume paused stint |
+| Stop | Red border, red text | Complete/stop stint |
+
+### Progress Badge Extra Indicator
+
+When a user exceeds their daily goal, the progress badge displays an additional `+N` suffix:
+
+```html
+<span class="progress-badge">
+    <span class="filled">5</span>
+    <span class="sep">/</span>
+    <span>3</span>
+    <span class="extra">+2</span>  <!-- Exceeded by 2 -->
+</span>
+```
+
+The extra indicator uses green (`#15803d` light / `#4ade80` dark) to reinforce positive achievement.
+
+---
+
 ## Next Steps
 
 1. ✅ ~~Create side-by-side mockups of all 4 variants~~
 2. ✅ ~~Create full hybrid mockup with landing + dashboard~~
-3. **Extract design tokens** for Nuxt/Tailwind implementation
-4. **Update existing components** to use new color system
-5. **Test accessibility** - Ensure WCAG AA contrast ratios
-6. **Implement font loading** - Add Fraunces with proper fallbacks
+3. ✅ ~~Document Project Card V27 design~~
+4. **Extract design tokens** for Nuxt/Tailwind implementation
+5. **Update existing components** to use new color system
+6. **Update ProjectListCard.vue** to implement V27 design
+7. **Test accessibility** - Ensure WCAG AA contrast ratios
+8. **Implement font loading** - Add Fraunces with proper fallbacks

@@ -214,6 +214,26 @@ export const projectKeys = {
 - **Dark Mode:** Via Tailwind `dark:` variants, theme toggle uses `UColorModeButton`
 - **Config:** `colorMode` settings in `nuxt.config.ts` and `app.config.ts`
 
+**Design System: "Focused Warmth + Deep Focus Hybrid"**
+
+The design system uses warm, natural tones that reinforce the "focused work" metaphor:
+
+| Role | Light Mode | Dark Mode | Tailwind |
+|------|------------|-----------|----------|
+| Primary | Terracotta | Orange | `orange-600/700` |
+| Secondary | Forest | Green | `green-600/700` |
+| Tertiary | Sage | Lime | `lime-500` |
+| Background | Warm Cream `#fffbf5` | Stone-900 | `bg-[#fffbf5]` / `stone-900` |
+| Text | Stone-800 | Stone-50 | `stone-800` / `stone-50` |
+| Borders | Stone-200 | Stone-700 | `stone-200` / `stone-700` |
+
+**Typography:**
+- **Headings:** Fraunces (serif) via `font-serif` class
+- **Body:** Instrument Sans via `font-sans` class
+- **Mono:** JetBrains Mono for timers/code
+
+**CSS Tokens:** Defined in `app/assets/css/tokens.css` with semantic CSS variables for both modes.
+
 ## Testing
 
 Tests are **co-located** with the files they test for better discoverability and maintainability.

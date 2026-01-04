@@ -1,0 +1,3197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeStint - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Light Mode - Focused Warmth */
+            --bg-primary: #fffbf5;
+            --bg-secondary: #fef7ed;
+            --bg-tertiary: #fdf4e7;
+            --bg-card: #ffffff;
+            --bg-elevated: #fffcf8;
+
+            --text-primary: #292524;
+            --text-secondary: #57534e;
+            --text-muted: #a8a29e;
+            --text-inverse: #fafaf9;
+
+            --accent-primary: #c2410c;
+            --accent-primary-hover: #9a3412;
+            --accent-primary-soft: rgba(194, 65, 12, 0.1);
+            --accent-primary-glow: rgba(194, 65, 12, 0.2);
+
+            --accent-secondary: #166534;
+            --accent-secondary-soft: rgba(22, 101, 52, 0.1);
+            --accent-secondary-glow: rgba(22, 101, 52, 0.15);
+
+            --accent-tertiary: #84cc16;
+            --accent-tertiary-soft: rgba(132, 204, 22, 0.15);
+
+            --accent-amber: #d97706;
+            --accent-amber-soft: rgba(217, 119, 6, 0.1);
+
+            --border-light: #e7e5e4;
+            --border-medium: #d6d3d1;
+            --border-warm: rgba(194, 65, 12, 0.2);
+
+            --shadow-soft: 0 4px 20px rgba(120, 113, 108, 0.08);
+            --shadow-medium: 0 8px 30px rgba(120, 113, 108, 0.12);
+            --shadow-glow: 0 0 40px rgba(194, 65, 12, 0.15);
+            --shadow-card: 0 1px 3px rgba(120, 113, 108, 0.06), 0 8px 24px rgba(120, 113, 108, 0.08);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --radius-full: 100px;
+
+            --transition-fast: 0.15s ease;
+            --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1c1917;
+            --bg-secondary: #1f1b18;
+            --bg-tertiary: #231f1b;
+            --bg-card: #292524;
+            --bg-elevated: #2e2926;
+
+            --text-primary: #fafaf9;
+            --text-secondary: #d6d3d1;
+            --text-muted: #78716c;
+            --text-inverse: #292524;
+
+            --accent-primary: #ea580c;
+            --accent-primary-hover: #f97316;
+            --accent-primary-soft: rgba(234, 88, 12, 0.15);
+            --accent-primary-glow: rgba(234, 88, 12, 0.25);
+
+            --accent-secondary: #22c55e;
+            --accent-secondary-soft: rgba(34, 197, 94, 0.12);
+            --accent-secondary-glow: rgba(34, 197, 94, 0.2);
+
+            --accent-tertiary: #a3e635;
+            --accent-tertiary-soft: rgba(163, 230, 53, 0.12);
+
+            --accent-amber: #fbbf24;
+            --accent-amber-soft: rgba(251, 191, 36, 0.12);
+
+            --border-light: #3d3835;
+            --border-medium: #4a4543;
+            --border-warm: rgba(234, 88, 12, 0.25);
+
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 60px rgba(234, 88, 12, 0.2);
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        body {
+            font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background var(--transition-medium), color var(--transition-medium);
+        }
+
+        /* ============================================
+           DASHBOARD LAYOUT
+           ============================================ */
+        .dashboard {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ============================================
+           HEADER - Mobile First
+           ============================================ */
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(255, 251, 245, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        [data-theme="dark"] .dash-header {
+            background: rgba(28, 25, 23, 0.8);
+        }
+
+        @media (min-width: 768px) {
+            .dash-header {
+                padding: 16px 24px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .dash-header {
+                padding: 16px 40px;
+                max-width: 1400px;
+                margin: 0 auto;
+                width: 100%;
+            }
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Hamburger Menu Button - Mobile Only */
+        .hamburger-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .hamburger-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        @media (min-width: 768px) {
+            .hamburger-btn {
+                display: none;
+            }
+        }
+
+        .logo {
+            font-family: 'Fraunces', serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        @media (min-width: 768px) {
+            .logo {
+                font-size: 24px;
+            }
+        }
+
+        .logo span {
+            color: var(--accent-primary);
+            font-style: italic;
+        }
+
+        /* Desktop Navigation */
+        .dash-nav {
+            display: none;
+            gap: 4px;
+            background: var(--bg-secondary);
+            padding: 4px;
+            border-radius: var(--radius-full);
+        }
+
+        @media (min-width: 768px) {
+            .dash-nav {
+                display: flex;
+            }
+        }
+
+        .dash-nav-item {
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px 20px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: var(--radius-full);
+            transition: all var(--transition-fast);
+        }
+
+        .dash-nav-item:hover {
+            color: var(--text-primary);
+        }
+
+        .dash-nav-item.active {
+            color: var(--text-inverse);
+            background: var(--accent-primary);
+        }
+
+        /* Header Right Section */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .header-right {
+                gap: 12px;
+            }
+        }
+
+        /* User Menu Container */
+        .user-menu-container {
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            min-width: 44px;
+            min-height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-amber) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform var(--transition-fast);
+            border: none;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        /* User Dropdown Menu */
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 240px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-medium);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all var(--transition-fast);
+            z-index: 200;
+        }
+
+        .user-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .user-dropdown-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .user-dropdown-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+
+        .user-dropdown-email {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .user-dropdown-menu {
+            padding: 8px;
+        }
+
+        .user-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            transition: all var(--transition-fast);
+        }
+
+        .user-dropdown-item:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .user-dropdown-item svg {
+            flex-shrink: 0;
+        }
+
+        .user-dropdown-divider {
+            height: 1px;
+            background: var(--border-light);
+            margin: 8px;
+        }
+
+        .user-dropdown-item.danger {
+            color: #dc2626;
+        }
+
+        .user-dropdown-item.danger:hover {
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        /* Theme Toggle in dropdown */
+        .theme-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-radius: var(--radius-md);
+        }
+
+        .theme-toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle-btn {
+            width: 44px;
+            height: 24px;
+            border-radius: var(--radius-full);
+            background: var(--bg-tertiary);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: all var(--transition-fast);
+        }
+
+        .theme-toggle-btn::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all var(--transition-fast);
+        }
+
+        [data-theme="dark"] .theme-toggle-btn {
+            background: var(--accent-primary);
+        }
+
+        [data-theme="dark"] .theme-toggle-btn::after {
+            transform: translateX(20px);
+        }
+
+        /* Mobile Navigation Dropdown */
+        .mobile-nav {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-light);
+            box-shadow: var(--shadow-medium);
+            padding: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all var(--transition-fast);
+            z-index: 99;
+        }
+
+        .mobile-nav.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        @media (min-width: 768px) {
+            .mobile-nav {
+                display: none;
+            }
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .mobile-nav-item:hover,
+        .mobile-nav-item.active {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .mobile-nav-item.active {
+            color: var(--accent-primary);
+        }
+
+        /* ============================================
+           MAIN CONTENT - Mobile First
+           ============================================ */
+        .dash-main {
+            flex: 1;
+            padding: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .dash-main {
+                padding: 24px;
+                max-width: 1400px;
+                margin: 0 auto;
+                width: 100%;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .dash-main {
+                padding: 32px;
+            }
+        }
+
+        /* Two-Column Grid Layout - Mobile First */
+        .dash-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        @media (min-width: 1024px) {
+            .dash-grid {
+                display: grid;
+                grid-template-columns: 1fr 380px;
+                gap: 32px;
+                align-items: start;
+            }
+        }
+
+        /* ============================================
+           FOCUS ZONE (Sidebar) - Mobile First
+           ============================================ */
+        .focus-zone {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            order: 1;
+        }
+
+        @media (min-width: 1024px) {
+            .focus-zone {
+                gap: 24px;
+                position: sticky;
+                top: 100px;
+                order: 2;
+            }
+        }
+
+        .projects-zone {
+            order: 2;
+        }
+
+        @media (min-width: 1024px) {
+            .projects-zone {
+                order: 1;
+            }
+        }
+
+        /* ============================================
+           SESSION CARD - Mobile First
+           ============================================ */
+        .session-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .session-card {
+                border-radius: var(--radius-xl);
+                padding: 32px;
+            }
+        }
+
+        .session-card::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--accent-primary-glow) 0%, transparent 60%);
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        @media (min-width: 768px) {
+            .session-card::before {
+                width: 500px;
+                height: 500px;
+            }
+        }
+
+        .session-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            position: relative;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .session-project {
+            font-family: 'Fraunces', serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        @media (min-width: 768px) {
+            .session-project {
+                font-size: 22px;
+            }
+        }
+
+        .session-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--accent-secondary-soft);
+            color: var(--accent-secondary);
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        @media (min-width: 768px) {
+            .session-status {
+                gap: 8px;
+                padding: 6px 14px;
+                font-size: 12px;
+            }
+        }
+
+        .session-status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent-secondary);
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @media (min-width: 768px) {
+            .session-status::before {
+                width: 8px;
+                height: 8px;
+            }
+        }
+
+        .session-status.paused {
+            background: var(--accent-amber-soft);
+            color: var(--accent-amber);
+        }
+
+        .session-status.paused::before {
+            background: var(--accent-amber);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        .session-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 24px;
+            padding: 12px 0;
+            border-top: 1px solid var(--border-light);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        @media (min-width: 768px) {
+            .session-meta {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                margin-bottom: 32px;
+                padding: 16px 0;
+            }
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        @media (min-width: 768px) {
+            .meta-item {
+                gap: 4px;
+            }
+        }
+
+        .meta-item .meta-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        @media (min-width: 768px) {
+            .meta-item .meta-value {
+                font-size: 18px;
+            }
+        }
+
+        .meta-item .meta-label {
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        @media (min-width: 768px) {
+            .meta-item .meta-label {
+                font-size: 11px;
+            }
+        }
+
+        .meta-paused {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        @media (min-width: 768px) {
+            .meta-paused {
+                font-size: 14px;
+            }
+        }
+
+        .session-timer {
+            text-align: center;
+            padding: 16px 0 24px;
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .session-timer {
+                padding: 24px 0 32px;
+            }
+        }
+
+        .timer-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 48px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.02em;
+            line-height: 1;
+            text-shadow: 0 0 40px var(--accent-primary-glow);
+        }
+
+        @media (min-width: 768px) {
+            .timer-display {
+                font-size: 72px;
+                text-shadow: 0 0 60px var(--accent-primary-glow);
+            }
+        }
+
+        .timer-label {
+            font-size: 13px;
+            color: var(--accent-primary);
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .timer-label {
+                font-size: 14px;
+                margin-top: 12px;
+            }
+        }
+
+        /* Progress */
+        .session-progress {
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .session-progress {
+                margin-bottom: 32px;
+            }
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .progress-header {
+                margin-bottom: 12px;
+            }
+        }
+
+        .progress-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        @media (min-width: 768px) {
+            .progress-label {
+                font-size: 14px;
+            }
+        }
+
+        .progress-count {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        @media (min-width: 768px) {
+            .progress-count {
+                font-size: 14px;
+            }
+        }
+
+        .progress-bar {
+            display: flex;
+            gap: 6px;
+        }
+
+        @media (min-width: 768px) {
+            .progress-bar {
+                gap: 8px;
+            }
+        }
+
+        .progress-segment {
+            flex: 1;
+            height: 8px;
+            border-radius: var(--radius-full);
+            background: var(--bg-tertiary);
+            transition: all var(--transition-medium);
+        }
+
+        @media (min-width: 768px) {
+            .progress-segment {
+                height: 10px;
+            }
+        }
+
+        .progress-segment.completed {
+            background: var(--accent-tertiary);
+            box-shadow: 0 2px 8px var(--accent-tertiary-soft);
+        }
+
+        .progress-segment.current {
+            background: linear-gradient(90deg, var(--accent-primary) 60%, var(--bg-tertiary) 60%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-segment.current::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Session Controls */
+        .session-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            position: relative;
+            flex-wrap: wrap;
+        }
+
+        @media (min-width: 768px) {
+            .session-controls {
+                gap: 12px;
+            }
+        }
+
+        .ctrl-btn {
+            font-family: 'Instrument Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: var(--radius-full);
+            border: 1px solid var(--border-medium);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 44px;
+        }
+
+        @media (min-width: 768px) {
+            .ctrl-btn {
+                font-size: 14px;
+                padding: 14px 28px;
+                gap: 8px;
+            }
+        }
+
+        .ctrl-btn:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+
+        .ctrl-btn.primary {
+            background: var(--accent-secondary);
+            border-color: var(--accent-secondary);
+            color: white;
+            padding: 12px 28px;
+            box-shadow: 0 4px 16px var(--accent-secondary-glow);
+        }
+
+        @media (min-width: 768px) {
+            .ctrl-btn.primary {
+                padding: 14px 36px;
+            }
+        }
+
+        .ctrl-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px var(--accent-secondary-glow);
+        }
+
+        .ctrl-btn.warning {
+            border-color: var(--accent-amber);
+            color: var(--accent-amber);
+            box-shadow: 0 0 0 3px var(--accent-amber-soft);
+        }
+
+        .ctrl-btn.warning:hover {
+            background: var(--accent-amber);
+            color: white;
+            box-shadow: 0 4px 16px var(--accent-amber-soft);
+        }
+
+        .ctrl-btn.danger {
+            border-color: #dc2626;
+            color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .ctrl-btn.danger:hover {
+            background: #dc2626;
+            color: white;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.2);
+        }
+
+        /* No Session State */
+        .no-session {
+            text-align: center;
+            padding: 32px 16px;
+        }
+
+        @media (min-width: 768px) {
+            .no-session {
+                padding: 48px 24px;
+            }
+        }
+
+        .no-session-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 12px;
+            background: var(--bg-tertiary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        @media (min-width: 768px) {
+            .no-session-icon {
+                width: 64px;
+                height: 64px;
+                margin: 0 auto 16px;
+            }
+        }
+
+        .no-session h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        @media (min-width: 768px) {
+            .no-session h3 {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+        }
+
+        .no-session p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        @media (min-width: 768px) {
+            .no-session p {
+                font-size: 14px;
+            }
+        }
+
+        /* ============================================
+           STREAK CARD - Mobile First
+           ============================================ */
+        .streak-card {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-amber) 100%);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+
+        @media (min-width: 768px) {
+            .streak-card {
+                border-radius: var(--radius-xl);
+                padding: 24px;
+            }
+        }
+
+        .streak-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .streak-top {
+                gap: 16px;
+                margin-bottom: 16px;
+            }
+        }
+
+        .streak-icon {
+            font-size: 28px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: var(--radius-md);
+        }
+
+        @media (min-width: 768px) {
+            .streak-icon {
+                font-size: 36px;
+                padding: 12px;
+                border-radius: var(--radius-lg);
+            }
+        }
+
+        .streak-info h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        @media (min-width: 768px) {
+            .streak-info h3 {
+                font-size: 32px;
+            }
+        }
+
+        .streak-info span {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        @media (min-width: 768px) {
+            .streak-info span {
+                font-size: 14px;
+            }
+        }
+
+        .streak-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .streak-bottom {
+                padding-top: 16px;
+            }
+        }
+
+        .streak-stat {
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .streak-stat-value {
+            font-family: 'Fraunces', serif;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        @media (min-width: 768px) {
+            .streak-stat-value {
+                font-size: 20px;
+            }
+        }
+
+        .streak-stat-label {
+            font-size: 11px;
+            opacity: 0.75;
+        }
+
+        @media (min-width: 768px) {
+            .streak-stat-label {
+                font-size: 12px;
+            }
+        }
+
+        .streak-days {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (min-width: 768px) {
+            .streak-days {
+                gap: 6px;
+            }
+        }
+
+        .streak-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .streak-day {
+                gap: 4px;
+            }
+        }
+
+        .streak-day-label {
+            font-size: 9px;
+            font-weight: 600;
+            opacity: 0.6;
+            text-transform: uppercase;
+        }
+
+        @media (min-width: 768px) {
+            .streak-day-label {
+                font-size: 10px;
+            }
+        }
+
+        .streak-day-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .streak-day-dot {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+        }
+
+        .streak-day.filled .streak-day-dot {
+            background: white;
+            color: var(--accent-primary);
+        }
+
+        .streak-day.today .streak-day-dot {
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            background: transparent;
+        }
+
+        .streak-day.today .streak-day-label {
+            opacity: 1;
+        }
+
+        /* ============================================
+           STATS CARD - Mobile First
+           ============================================ */
+        .stats-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        @media (min-width: 768px) {
+            .stats-card {
+                border-radius: var(--radius-xl);
+                padding: 24px;
+            }
+        }
+
+        .stats-card h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .stats-card h3 {
+                font-size: 18px;
+                margin-bottom: 20px;
+            }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .stats-grid {
+                gap: 16px;
+            }
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+        }
+
+        @media (min-width: 768px) {
+            .stat-item {
+                padding: 16px;
+            }
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        @media (min-width: 768px) {
+            .stat-value {
+                font-size: 24px;
+            }
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        @media (min-width: 768px) {
+            .stat-label {
+                font-size: 12px;
+            }
+        }
+
+        /* ============================================
+           PROJECTS ZONE - Mobile First
+           ============================================ */
+        .projects-zone {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .projects-zone {
+                gap: 24px;
+            }
+        }
+
+        .projects-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .projects-title {
+            font-family: 'Fraunces', serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        @media (min-width: 768px) {
+            .projects-title {
+                font-size: 24px;
+            }
+        }
+
+        .new-project-btn {
+            font-family: 'Instrument Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 10px 16px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all var(--transition-fast);
+            min-height: 44px;
+        }
+
+        @media (min-width: 768px) {
+            .new-project-btn {
+                font-size: 14px;
+                padding: 10px 20px;
+                gap: 8px;
+            }
+        }
+
+        .new-project-btn:hover {
+            background: var(--accent-primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Project Tabs */
+        .project-tabs {
+            display: flex;
+            gap: 2px;
+            background: var(--bg-secondary);
+            padding: 4px;
+            border-radius: var(--radius-full);
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        @media (min-width: 768px) {
+            .project-tabs {
+                gap: 4px;
+                width: fit-content;
+            }
+        }
+
+        .project-tab {
+            font-family: 'Instrument Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 8px 12px;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+            flex: 1;
+            justify-content: center;
+            min-height: 44px;
+        }
+
+        @media (min-width: 768px) {
+            .project-tab {
+                font-size: 13px;
+                padding: 8px 16px;
+                gap: 6px;
+                flex: none;
+            }
+        }
+
+        .project-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .project-tab.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* Project List */
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .project-list {
+                gap: 12px;
+            }
+        }
+
+        /* ============================================
+           PROJECT CARD - Mobile First
+           ============================================ */
+        .project-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: all var(--transition-fast);
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .project-card {
+                border-radius: var(--radius-lg);
+                padding: 20px;
+                display: grid;
+                grid-template-columns: auto 1fr auto auto;
+                gap: 16px;
+                align-items: center;
+            }
+        }
+
+        .project-card:hover {
+            border-color: var(--border-medium);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .project-card.running {
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 0 1px var(--accent-secondary-soft);
+        }
+
+        .project-card.paused {
+            border-color: var(--accent-amber);
+            box-shadow: 0 0 0 1px var(--accent-amber-soft);
+        }
+
+        .project-card.inactive,
+        .project-card.archived {
+            opacity: 0.7;
+        }
+
+        /* Mobile: Top row with color dot and name */
+        .project-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .project-card-header {
+                display: contents;
+            }
+        }
+
+        /* Color Dot */
+        .project-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .project-color {
+                width: 12px;
+                height: 12px;
+            }
+        }
+
+        .project-color.orange { background: #f97316; }
+        .project-color.teal { background: #14b8a6; }
+        .project-color.purple { background: #8b5cf6; }
+        .project-color.amber { background: #f59e0b; }
+        .project-color.rose { background: #f43f5e; }
+        .project-color.blue { background: #3b82f6; }
+        .project-color.gray { background: #9ca3af; }
+
+        /* Project Info */
+        .project-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .project-name-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+        }
+
+        .project-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (min-width: 768px) {
+            .project-name {
+                font-size: 16px;
+            }
+        }
+
+        .project-status {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .project-status {
+                font-size: 11px;
+                padding: 3px 8px;
+            }
+        }
+
+        .project-status.running {
+            background: var(--accent-secondary-soft);
+            color: var(--accent-secondary);
+        }
+
+        .project-status.paused {
+            background: var(--accent-amber-soft);
+            color: var(--accent-amber);
+        }
+
+        .project-status.ready {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        .project-status.inactive {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        .project-status.archived {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        .project-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+
+        @media (min-width: 768px) {
+            .project-meta {
+                font-size: 13px;
+                gap: 16px;
+            }
+        }
+
+        .project-meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .project-timer-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--accent-secondary);
+        }
+
+        .project-timer-badge.paused {
+            color: var(--accent-amber);
+        }
+
+        /* Progress Mini - Full width on mobile */
+        .project-progress {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .project-progress {
+                align-items: flex-end;
+                min-width: 120px;
+                width: auto;
+            }
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .progress-text strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .progress-text .met {
+            color: var(--accent-secondary);
+            font-weight: 600;
+        }
+
+        .progress-mini {
+            display: flex;
+            gap: 4px;
+            width: 100%;
+        }
+
+        .progress-mini-seg {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-tertiary);
+        }
+
+        .progress-mini-seg.filled {
+            background: var(--accent-tertiary);
+        }
+
+        .progress-mini-seg.current {
+            background: linear-gradient(90deg, var(--accent-primary) 60%, var(--bg-tertiary) 60%);
+        }
+
+        /* Project Actions */
+        .project-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border-light);
+            background: var(--bg-card);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        @media (min-width: 768px) {
+            .action-btn {
+                width: 36px;
+                height: 36px;
+            }
+        }
+
+        .action-btn:hover {
+            border-color: var(--border-medium);
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .action-btn.play {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+            width: 48px;
+            height: 48px;
+        }
+
+        @media (min-width: 768px) {
+            .action-btn.play {
+                width: 44px;
+                height: 44px;
+            }
+        }
+
+        .action-btn.play:hover {
+            background: var(--accent-primary-hover);
+            transform: scale(1.05);
+        }
+
+        .action-btn.pause {
+            background: var(--accent-amber);
+            border-color: var(--accent-amber);
+            color: white;
+        }
+
+        .action-btn.stop {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .action-btn.stop:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .action-btn.resume {
+            background: var(--accent-secondary);
+            border-color: var(--accent-secondary);
+            color: white;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 26px;
+        }
+
+        @media (min-width: 768px) {
+            .toggle-switch {
+                width: 40px;
+                height: 22px;
+            }
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-full);
+            transition: var(--transition-fast);
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: var(--transition-fast);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 768px) {
+            .toggle-slider::before {
+                height: 16px;
+                width: 16px;
+            }
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--accent-secondary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(18px);
+        }
+
+        /* Settings Button */
+        .settings-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        @media (min-width: 768px) {
+            .settings-btn {
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        .settings-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--text-muted);
+        }
+
+        @media (min-width: 768px) {
+            .empty-state {
+                padding: 48px 24px;
+            }
+        }
+
+        .empty-state svg {
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ============================================
+           MODALS - Mobile First
+           ============================================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            padding: 0;
+        }
+
+        @media (min-width: 768px) {
+            .modal-overlay {
+                align-items: center;
+                padding: 24px;
+            }
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-medium);
+            animation: modalSlideUp 0.2s ease-out;
+        }
+
+        @media (min-width: 768px) {
+            .modal {
+                border-radius: var(--radius-xl);
+                max-width: 480px;
+                max-height: 85vh;
+                animation: modalIn 0.2s ease-out;
+            }
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 20px 0;
+        }
+
+        @media (min-width: 768px) {
+            .modal-header {
+                padding: 24px 24px 0;
+            }
+        }
+
+        .modal-header h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        @media (min-width: 768px) {
+            .modal-header h2 {
+                font-size: 22px;
+            }
+        }
+
+        .modal-close {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        @media (min-width: 768px) {
+            .modal-close {
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .modal-body {
+                padding: 24px;
+            }
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 0 20px 20px;
+            flex-wrap: wrap;
+        }
+
+        @media (min-width: 768px) {
+            .modal-footer {
+                padding: 0 24px 24px;
+            }
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            font-family: 'Instrument Sans', sans-serif;
+            font-size: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+            min-height: 48px;
+        }
+
+        @media (min-width: 768px) {
+            .form-group input,
+            .form-group select {
+                padding: 12px 16px;
+                font-size: 15px;
+                min-height: auto;
+            }
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--accent-primary-soft);
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        @media (min-width: 768px) {
+            .color-option {
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 2px var(--bg-card);
+        }
+
+        .color-option.orange { background: #f97316; }
+        .color-option.teal { background: #14b8a6; }
+        .color-option.purple { background: #8b5cf6; }
+        .color-option.amber { background: #f59e0b; }
+        .color-option.rose { background: #f43f5e; }
+        .color-option.blue { background: #3b82f6; }
+
+        /* Modal Buttons */
+        .btn-primary {
+            font-family: 'Instrument Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 14px 24px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            min-height: 48px;
+        }
+
+        @media (min-width: 768px) {
+            .btn-primary {
+                padding: 12px 24px;
+                min-height: auto;
+            }
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-primary-hover);
+        }
+
+        .btn-secondary {
+            font-family: 'Instrument Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 14px 24px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            min-height: 48px;
+        }
+
+        @media (min-width: 768px) {
+            .btn-secondary {
+                padding: 12px 24px;
+                min-height: auto;
+            }
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+
+        .btn-ghost {
+            font-family: 'Instrument Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 14px 24px;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            min-height: 48px;
+        }
+
+        @media (min-width: 768px) {
+            .btn-ghost {
+                padding: 12px 24px;
+                min-height: auto;
+            }
+        }
+
+        .btn-ghost:hover {
+            color: var(--text-primary);
+        }
+
+        /* Form Divider */
+        .form-divider {
+            height: 1px;
+            background: var(--border-light);
+            margin: 24px 0;
+        }
+
+        /* Danger Zone */
+        .danger-zone h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 12px;
+        }
+
+        .btn-danger-outline {
+            font-family: 'Instrument Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 12px 16px;
+            background: transparent;
+            color: var(--accent-primary);
+            border: 1px solid var(--accent-primary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all var(--transition-fast);
+            min-height: 48px;
+        }
+
+        @media (min-width: 768px) {
+            .btn-danger-outline {
+                padding: 10px 16px;
+                min-height: auto;
+            }
+        }
+
+        .btn-danger-outline:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* Conflict Modal */
+        .conflict-info {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .conflict-status {
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+
+        .conflict-status.running strong {
+            color: var(--accent-secondary);
+        }
+
+        .tabular-nums {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .conflict-message {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .conflict-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .conflict-actions .btn-primary,
+        .conflict-actions .btn-outline {
+            width: 100%;
+            justify-content: center;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-outline {
+            font-family: 'Instrument Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 14px 24px;
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            min-height: 48px;
+        }
+
+        @media (min-width: 768px) {
+            .btn-outline {
+                padding: 12px 24px;
+                min-height: auto;
+            }
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        /* Archived Date */
+        .archived-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .restore-btn {
+            font-family: 'Instrument Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 10px 16px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all var(--transition-fast);
+            min-height: 44px;
+        }
+
+        .restore-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="dash-header">
+            <div class="header-left">
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12h18M3 6h18M3 18h18"/>
+                    </svg>
+                </button>
+                <a href="#" class="logo">Life<span>Stint</span></a>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <nav class="dash-nav">
+                <a href="#" class="dash-nav-item active">Today</a>
+                <a href="#" class="dash-nav-item">Analytics</a>
+                <a href="#" class="dash-nav-item">Reports</a>
+            </nav>
+
+            <div class="header-right">
+                <div class="user-menu-container">
+                    <button class="user-avatar" id="userMenuBtn" aria-label="User menu">JD</button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-dropdown-header">
+                            <div class="user-dropdown-name">John Doe</div>
+                            <div class="user-dropdown-email">john@example.com</div>
+                        </div>
+                        <div class="user-dropdown-menu">
+                            <a href="#" class="user-dropdown-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                Profile
+                            </a>
+                            <a href="#" class="user-dropdown-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                                </svg>
+                                Settings
+                            </a>
+                            <div class="user-dropdown-divider"></div>
+                            <div class="theme-toggle-row">
+                                <span class="theme-toggle-label">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="5"/>
+                                        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                                    </svg>
+                                    Dark mode
+                                </span>
+                                <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle dark mode"></button>
+                            </div>
+                            <div class="user-dropdown-divider"></div>
+                            <button class="user-dropdown-item danger">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                    <polyline points="16 17 21 12 16 7"/>
+                                    <line x1="21" y1="12" x2="9" y2="12"/>
+                                </svg>
+                                Log out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation Dropdown -->
+            <nav class="mobile-nav" id="mobileNav">
+                <a href="#" class="mobile-nav-item active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    Today
+                </a>
+                <a href="#" class="mobile-nav-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                    Analytics
+                </a>
+                <a href="#" class="mobile-nav-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    Reports
+                </a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dash-main">
+            <div class="dash-grid">
+                <!-- Focus Zone (Sidebar) -->
+                <aside class="focus-zone">
+                    <!-- Active Session Card -->
+                    <div class="session-card" id="sessionCard">
+                        <div class="session-header">
+                            <h2 class="session-project" id="sessionProject">Client Atlas</h2>
+                            <span class="session-status" id="sessionStatus">Running</span>
+                        </div>
+                        <div class="session-meta" id="sessionMeta">
+                            <div class="meta-item">
+                                <span class="meta-value">16:45</span>
+                                <span class="meta-label">Started</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-value">45m<span class="meta-paused">+3</span></span>
+                                <span class="meta-label">Duration</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-value">17:33</span>
+                                <span class="meta-label">Ends</span>
+                            </div>
+                        </div>
+
+                        <div class="session-timer">
+                            <div class="timer-display" id="timerDisplay">28:15</div>
+                            <div class="timer-label">Time Remaining</div>
+                        </div>
+
+                        <div class="session-progress">
+                            <div class="progress-header">
+                                <span class="progress-label">Today's progress</span>
+                                <span class="progress-count" id="progressCount">3/5 stints</span>
+                            </div>
+                            <div class="progress-bar" id="progressBar">
+                                <div class="progress-segment completed"></div>
+                                <div class="progress-segment completed"></div>
+                                <div class="progress-segment current"></div>
+                                <div class="progress-segment"></div>
+                                <div class="progress-segment"></div>
+                            </div>
+                        </div>
+
+                        <div class="session-controls" id="sessionControls">
+                            <button class="ctrl-btn warning" data-action="pause">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <rect x="6" y="4" width="4" height="16" rx="1"/>
+                                    <rect x="14" y="4" width="4" height="16" rx="1"/>
+                                </svg>
+                                Pause
+                            </button>
+                            <button class="ctrl-btn danger" data-action="stop">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <rect x="4" y="4" width="16" height="16" rx="2"/>
+                                </svg>
+                                Stop
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- No Session State (hidden by default) -->
+                    <div class="session-card hidden" id="noSessionCard">
+                        <div class="no-session">
+                            <div class="no-session-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                            </div>
+                            <h3>No active session</h3>
+                            <p>Select a project to start a focused work stint</p>
+                        </div>
+                    </div>
+
+                    <!-- Streak Card -->
+                    <div class="streak-card" id="streakCard">
+                        <div class="streak-top">
+                            <div class="streak-icon">🔥</div>
+                            <div class="streak-info">
+                                <h3 id="streakValue">14</h3>
+                                <span>days streak</span>
+                            </div>
+                        </div>
+                        <div class="streak-bottom">
+                            <div class="streak-stat">
+                                <div class="streak-stat-value">21</div>
+                                <div class="streak-stat-label">Longest</div>
+                            </div>
+                            <div class="streak-days">
+                                <div class="streak-day filled">
+                                    <span class="streak-day-label">M</span>
+                                    <span class="streak-day-dot">✓</span>
+                                </div>
+                                <div class="streak-day filled">
+                                    <span class="streak-day-label">T</span>
+                                    <span class="streak-day-dot">✓</span>
+                                </div>
+                                <div class="streak-day filled">
+                                    <span class="streak-day-label">W</span>
+                                    <span class="streak-day-dot">✓</span>
+                                </div>
+                                <div class="streak-day filled">
+                                    <span class="streak-day-label">T</span>
+                                    <span class="streak-day-dot">✓</span>
+                                </div>
+                                <div class="streak-day filled">
+                                    <span class="streak-day-label">F</span>
+                                    <span class="streak-day-dot">✓</span>
+                                </div>
+                                <div class="streak-day filled">
+                                    <span class="streak-day-label">S</span>
+                                    <span class="streak-day-dot">✓</span>
+                                </div>
+                                <div class="streak-day today">
+                                    <span class="streak-day-label">S</span>
+                                    <span class="streak-day-dot"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Today's Stats -->
+                    <div class="stats-card">
+                        <h3>Today's Stats</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value">8<span style="font-size: 14px; color: var(--text-muted); font-weight: 400;">/13</span></div>
+                                <div class="stat-label">Daily Goal</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">4.2<span style="font-size: 14px; color: var(--text-muted); font-weight: 400;">h</span></div>
+                                <div class="stat-label">Deep Focus</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">52<span style="font-size: 14px; color: var(--text-muted); font-weight: 400;">m</span></div>
+                                <div class="stat-label">Best Block</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" style="color: var(--accent-secondary);">+18<span style="font-size: 14px; font-weight: 400;">%</span></div>
+                                <div class="stat-label">vs Last Week</div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Left Column: Projects -->
+                <section class="projects-zone">
+                    <div class="projects-header">
+                        <h2 class="projects-title">Your Projects</h2>
+                        <button class="new-project-btn" id="newProjectBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            New Project
+                        </button>
+                    </div>
+
+                    <!-- Project Tabs -->
+                    <div class="project-tabs">
+                        <button class="project-tab active" data-tab="active">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                            </svg>
+                            Active
+                        </button>
+                        <button class="project-tab" data-tab="inactive">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M10 15V9M14 15V9"/>
+                            </svg>
+                            Inactive
+                        </button>
+                        <button class="project-tab" data-tab="archived">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="4" width="20" height="5" rx="2"/>
+                                <path d="M4 9v9a2 2 0 002 2h12a2 2 0 002-2V9M10 13h4"/>
+                            </svg>
+                            Archived
+                        </button>
+                    </div>
+
+                    <!-- Active Projects List -->
+                    <div class="project-list" id="activeProjects">
+                        <!-- Project 1: Client Atlas (Running) -->
+                        <div class="project-card running" data-project="atlas" data-status="running">
+                            <div class="project-card-header">
+                                <div class="project-color orange"></div>
+                                <div class="project-info">
+                                    <div class="project-name-row">
+                                        <h3 class="project-name">Client Atlas</h3>
+                                        <span class="project-status running">Running</span>
+                                    </div>
+                                    <div class="project-meta">
+                                        <span class="project-meta-item">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                                            </svg>
+                                            45m / stint
+                                        </span>
+                                        <span class="project-timer-badge" id="atlasTimer">28:15</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-progress">
+                                <div class="progress-text"><strong>3</strong>/5 today</div>
+                                <div class="progress-mini">
+                                    <div class="progress-mini-seg filled"></div>
+                                    <div class="progress-mini-seg filled"></div>
+                                    <div class="progress-mini-seg current"></div>
+                                    <div class="progress-mini-seg"></div>
+                                    <div class="progress-mini-seg"></div>
+                                </div>
+                            </div>
+                            <div class="project-actions">
+                                <button class="action-btn pause" data-action="pause" data-project="atlas" title="Pause">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <rect x="6" y="4" width="4" height="16" rx="1"/>
+                                        <rect x="14" y="4" width="4" height="16" rx="1"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn stop" data-action="stop" data-project="atlas" title="Stop">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <rect x="5" y="5" width="14" height="14" rx="2"/>
+                                    </svg>
+                                </button>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked data-toggle="atlas">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <button class="settings-btn" data-settings="atlas" title="Settings">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Project 2: Orion Migrations (Paused) -->
+                        <div class="project-card paused" data-project="orion" data-status="paused">
+                            <div class="project-card-header">
+                                <div class="project-color teal"></div>
+                                <div class="project-info">
+                                    <div class="project-name-row">
+                                        <h3 class="project-name">Orion Migrations</h3>
+                                        <span class="project-status paused">Paused</span>
+                                    </div>
+                                    <div class="project-meta">
+                                        <span class="project-meta-item">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                                            </svg>
+                                            30m / stint
+                                        </span>
+                                        <span class="project-timer-badge paused" id="orionTimer">15:30</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-progress">
+                                <div class="progress-text"><strong>1</strong>/3 today</div>
+                                <div class="progress-mini">
+                                    <div class="progress-mini-seg filled"></div>
+                                    <div class="progress-mini-seg"></div>
+                                    <div class="progress-mini-seg"></div>
+                                </div>
+                            </div>
+                            <div class="project-actions">
+                                <button class="action-btn resume" data-action="resume" data-project="orion" title="Resume">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <polygon points="5 3 19 12 5 21 5 3"/>
+                                    </svg>
+                                </button>
+                                <button class="action-btn" data-action="abandon" data-project="orion" title="Abandon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M18 6L6 18M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked data-toggle="orion">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <button class="settings-btn" data-settings="orion" title="Settings">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Project 3: Internal Tools (Ready - Goal Met) -->
+                        <div class="project-card" data-project="internal" data-status="ready">
+                            <div class="project-card-header">
+                                <div class="project-color purple"></div>
+                                <div class="project-info">
+                                    <div class="project-name-row">
+                                        <h3 class="project-name">Internal Tools</h3>
+                                        <span class="project-status ready">Ready</span>
+                                    </div>
+                                    <div class="project-meta">
+                                        <span class="project-meta-item">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                                            </svg>
+                                            25m / stint
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-progress">
+                                <div class="progress-text"><strong>2</strong>/2 <span class="met">Met</span></div>
+                                <div class="progress-mini">
+                                    <div class="progress-mini-seg filled"></div>
+                                    <div class="progress-mini-seg filled"></div>
+                                </div>
+                            </div>
+                            <div class="project-actions">
+                                <button class="action-btn play" data-action="start" data-project="internal" title="Start">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                        <polygon points="5 3 19 12 5 21 5 3"/>
+                                    </svg>
+                                </button>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked data-toggle="internal">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <button class="settings-btn" data-settings="internal" title="Settings">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Project 4: Website Redesign (Ready - Extra stints) -->
+                        <div class="project-card" data-project="website" data-status="ready">
+                            <div class="project-card-header">
+                                <div class="project-color amber"></div>
+                                <div class="project-info">
+                                    <div class="project-name-row">
+                                        <h3 class="project-name">Website Redesign</h3>
+                                        <span class="project-status ready">Ready</span>
+                                    </div>
+                                    <div class="project-meta">
+                                        <span class="project-meta-item">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                                            </svg>
+                                            45m / stint
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-progress">
+                                <div class="progress-text"><strong>4</strong>/3 <span class="met">+1</span></div>
+                                <div class="progress-mini">
+                                    <div class="progress-mini-seg filled"></div>
+                                    <div class="progress-mini-seg filled"></div>
+                                    <div class="progress-mini-seg filled"></div>
+                                </div>
+                            </div>
+                            <div class="project-actions">
+                                <button class="action-btn play" data-action="start" data-project="website" title="Start">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                        <polygon points="5 3 19 12 5 21 5 3"/>
+                                    </svg>
+                                </button>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked data-toggle="website">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <button class="settings-btn" data-settings="website" title="Settings">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inactive Projects List -->
+                    <div class="project-list hidden" id="inactiveProjects">
+                        <div class="project-card inactive" data-project="legacy" data-status="inactive">
+                            <div class="project-card-header">
+                                <div class="project-color gray"></div>
+                                <div class="project-info">
+                                    <div class="project-name-row">
+                                        <h3 class="project-name">Legacy System</h3>
+                                        <span class="project-status inactive">Inactive</span>
+                                    </div>
+                                    <div class="project-meta">
+                                        <span class="project-meta-item">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                                            </svg>
+                                            45m / stint
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-progress">
+                                <div class="progress-text"><strong>0</strong>/2 today</div>
+                                <div class="progress-mini">
+                                    <div class="progress-mini-seg"></div>
+                                    <div class="progress-mini-seg"></div>
+                                </div>
+                            </div>
+                            <div class="project-actions">
+                                <button class="action-btn play" disabled title="Activate to start">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                        <polygon points="5 3 19 12 5 21 5 3"/>
+                                    </svg>
+                                </button>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" data-toggle="legacy">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <button class="settings-btn" data-settings="legacy" title="Settings">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"/>
+                                        <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Archived Projects List -->
+                    <div class="project-list hidden" id="archivedProjects">
+                        <div class="project-card archived" data-project="oldclient" data-status="archived">
+                            <div class="project-card-header">
+                                <div class="project-color gray"></div>
+                                <div class="project-info">
+                                    <div class="project-name-row">
+                                        <h3 class="project-name">Old Client Project</h3>
+                                        <span class="project-status archived">Archived</span>
+                                    </div>
+                                    <div class="project-meta">
+                                        <span class="project-meta-item">45m / stint</span>
+                                        <span class="archived-date">Archived Dec 15, 2025</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-progress"></div>
+                            <div class="project-actions">
+                                <button class="restore-btn" data-restore="oldclient">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                        <path d="M3 3v5h5"/>
+                                    </svg>
+                                    Restore
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="empty-state hidden" id="emptyState">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <h3>No projects</h3>
+                        <p>No projects in this category</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- ============================================
+         MODALS
+         ============================================ -->
+
+    <!-- Create Project Modal -->
+    <div class="modal-overlay hidden" id="createProjectModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Create New Project</h2>
+                <button class="modal-close" data-close="createProjectModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="projectName">Project Name</label>
+                    <input type="text" id="projectName" placeholder="e.g., Client Atlas">
+                </div>
+                <div class="form-group">
+                    <label for="projectColor">Color</label>
+                    <div class="color-picker">
+                        <button class="color-option orange selected" data-color="orange"></button>
+                        <button class="color-option teal" data-color="teal"></button>
+                        <button class="color-option purple" data-color="purple"></button>
+                        <button class="color-option amber" data-color="amber"></button>
+                        <button class="color-option rose" data-color="rose"></button>
+                        <button class="color-option blue" data-color="blue"></button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="stintDuration">Stint Duration</label>
+                    <select id="stintDuration">
+                        <option value="25">25 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="45" selected>45 minutes</option>
+                        <option value="60">60 minutes</option>
+                        <option value="90">90 minutes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="dailyStints">Expected Daily Stints</label>
+                    <input type="number" id="dailyStints" value="3" min="1" max="8">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-close="createProjectModal">Cancel</button>
+                <button class="btn-primary" id="createProjectBtn">Create Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conflict Dialog Modal -->
+    <div class="modal-overlay hidden" id="conflictModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="conflictTitle">Switch Projects?</h2>
+                <button class="modal-close" data-close="conflictModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="conflict-info" id="conflictInfo">
+                    <div class="conflict-status running">
+                        <strong id="conflictProjectName">Client Atlas</strong> is running
+                        with <strong class="tabular-nums" id="conflictTime">28:15</strong> remaining.
+                    </div>
+                </div>
+                <p class="conflict-message">You're about to start a stint on <strong id="targetProjectName">Internal Tools</strong>.</p>
+                <div class="conflict-actions">
+                    <button class="btn-primary" id="pauseAndSwitchBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="6" y="4" width="4" height="16" rx="1"/>
+                            <rect x="14" y="4" width="4" height="16" rx="1"/>
+                        </svg>
+                        Pause & Switch
+                    </button>
+                    <button class="btn-outline" id="completeAndStartBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        Complete Current & Start New
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" data-close="conflictModal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay hidden" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Project Settings</h2>
+                <button class="modal-close" data-close="settingsModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editProjectName">Project Name</label>
+                    <input type="text" id="editProjectName" value="Client Atlas">
+                </div>
+                <div class="form-group">
+                    <label for="editProjectColor">Color</label>
+                    <div class="color-picker">
+                        <button class="color-option orange selected" data-color="orange"></button>
+                        <button class="color-option teal" data-color="teal"></button>
+                        <button class="color-option purple" data-color="purple"></button>
+                        <button class="color-option amber" data-color="amber"></button>
+                        <button class="color-option rose" data-color="rose"></button>
+                        <button class="color-option blue" data-color="blue"></button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editStintDuration">Stint Duration</label>
+                    <select id="editStintDuration">
+                        <option value="25">25 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="45" selected>45 minutes</option>
+                        <option value="60">60 minutes</option>
+                        <option value="90">90 minutes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editDailyStints">Expected Daily Stints</label>
+                    <input type="number" id="editDailyStints" value="5" min="1" max="8">
+                </div>
+                <div class="form-divider"></div>
+                <div class="danger-zone">
+                    <h4>Danger Zone</h4>
+                    <button class="btn-danger-outline" id="archiveProjectBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="4" width="20" height="5" rx="2"/>
+                            <path d="M4 9v9a2 2 0 002 2h12a2 2 0 002-2V9M10 13h4"/>
+                        </svg>
+                        Archive Project
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" data-close="settingsModal">Cancel</button>
+                <button class="btn-primary" id="saveSettingsBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completion Modal -->
+    <div class="modal-overlay hidden" id="completionModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Stint Complete!</h2>
+                <button class="modal-close" data-close="completionModal">×</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 32px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+                <p style="font-size: 16px; color: var(--text-secondary);">
+                    Great work! You completed a 45-minute stint on <strong>Client Atlas</strong>.
+                </p>
+                <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md);">
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 600; color: var(--accent-secondary);">
+                        3/5 stints today
+                    </div>
+                    <div style="font-size: 14px; color: var(--text-muted); margin-top: 4px;">
+                        2 more to reach your daily goal
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn-primary" data-close="completionModal">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        }
+
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Dropdown elements
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const mobileNav = document.getElementById('mobileNav');
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userDropdown = document.getElementById('userDropdown');
+
+        // Dropdown helper functions
+        function showDropdown(el) {
+            el.style.opacity = '1';
+            el.style.visibility = 'visible';
+            el.style.transform = 'translateY(0)';
+            el.classList.add('open');
+        }
+
+        function hideDropdown(el) {
+            el.style.opacity = '0';
+            el.style.visibility = 'hidden';
+            el.style.transform = 'translateY(-8px)';
+            el.classList.remove('open');
+        }
+
+        function toggleDropdown(el) {
+            if (el.classList.contains('open')) {
+                hideDropdown(el);
+            } else {
+                showDropdown(el);
+            }
+        }
+
+        // Mobile Navigation Toggle
+        hamburgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDropdown(mobileNav);
+            hideDropdown(userDropdown);
+        });
+
+        // User Menu Toggle
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDropdown(userDropdown);
+            hideDropdown(mobileNav);
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userDropdown.contains(e.target) && !userMenuBtn.contains(e.target)) {
+                hideDropdown(userDropdown);
+            }
+            if (!mobileNav.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                hideDropdown(mobileNav);
+            }
+        });
+
+        // Close dropdowns on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                hideDropdown(userDropdown);
+                hideDropdown(mobileNav);
+            }
+        });
+
+        // Project Tabs
+        const tabs = document.querySelectorAll('.project-tab');
+        const activeList = document.getElementById('activeProjects');
+        const inactiveList = document.getElementById('inactiveProjects');
+        const archivedList = document.getElementById('archivedProjects');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const tabName = tab.dataset.tab;
+                activeList.classList.toggle('hidden', tabName !== 'active');
+                inactiveList.classList.toggle('hidden', tabName !== 'inactive');
+                archivedList.classList.toggle('hidden', tabName !== 'archived');
+            });
+        });
+
+        // Modal Handling
+        const newProjectBtn = document.getElementById('newProjectBtn');
+        const createProjectModal = document.getElementById('createProjectModal');
+        const settingsModal = document.getElementById('settingsModal');
+        const conflictModal = document.getElementById('conflictModal');
+        const completionModal = document.getElementById('completionModal');
+
+        newProjectBtn.addEventListener('click', () => {
+            createProjectModal.classList.remove('hidden');
+        });
+
+        // Close modals
+        document.querySelectorAll('[data-close]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modalId = btn.dataset.close;
+                document.getElementById(modalId).classList.add('hidden');
+            });
+        });
+
+        // Close modal on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.add('hidden');
+                }
+            });
+        });
+
+        // Settings buttons
+        document.querySelectorAll('[data-settings]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                settingsModal.classList.remove('hidden');
+            });
+        });
+
+        // Color picker
+        document.querySelectorAll('.color-picker').forEach(picker => {
+            picker.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    picker.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                    option.classList.add('selected');
+                });
+            });
+        });
+
+        // Demo: Start action shows conflict modal
+        document.querySelectorAll('[data-action="start"]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const project = btn.dataset.project;
+                // Show conflict modal if there's an active session
+                if (document.querySelector('.project-card.running')) {
+                    document.getElementById('targetProjectName').textContent =
+                        btn.closest('.project-card').querySelector('.project-name').textContent;
+                    conflictModal.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Demo: Timer countdown
+        let timerSeconds = 28 * 60 + 15;
+        setInterval(() => {
+            timerSeconds--;
+            if (timerSeconds < 0) timerSeconds = 45 * 60;
+
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            document.getElementById('timerDisplay').textContent = timeStr;
+            document.getElementById('atlasTimer').textContent = timeStr;
+            document.getElementById('conflictTime').textContent = timeStr;
+        }, 1000);
+    </script>
+</body>
+</html>

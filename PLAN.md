@@ -2,349 +2,558 @@
 
 ## Overview
 
-Migrate LifeStint from the current violet/sky dark-mode-centric design to the "Focused Warmth + Deep Focus Hybrid" design system documented in `NEW-DESIGN.md`.
+Migrate LifeStint from the current design to the "Focused Warmth + Deep Focus Hybrid" design system documented in `NEW-DESIGN.md` and visualized in `/public/mockups/focused-warmth-hybrid.html`.
 
-**Key Changes:**
-- Color palette: violet/sky → terracotta/forest/sage (warm, natural tones)
-- Typography: Public Sans → Fraunces (headings) + Instrument Sans (body)
-- Light mode: Fix broken light mode with warm cream backgrounds
-- Dark mode: Use warm browns/charcoals instead of cold grays
-- Visual style: Larger radius, warm shadows, ambient glows
-
-**Final Completion Criteria:**
-When ALL phases complete, output `<promise>COMPLETE</promise>` only if:
-- [ ] `npm run dev` starts without errors
-- [ ] Landing page renders correctly in both light/dark modes
-- [ ] Dashboard components use new color system
-- [ ] No violet/sky/cyan color remnants in codebase
-- [ ] Mockup files deleted from `/public/mockups/`
+**Reference Mockup:** `/public/mockups/focused-warmth-hybrid.html`
 
 ---
 
-## Phase 1: Foundation (CSS & Configuration)
+## ✅ RESOLVED: Decision Points
 
-### Tasks
+**All architectural decisions have been resolved (2026-01-04):**
 
-**1.1 Update `app/assets/css/main.css`**
-- Add Google Fonts imports: Fraunces (serif), Instrument Sans (sans)
-- Define CSS custom properties for design tokens (both light/dark)
-- Update font-family definitions in @theme
+### Decision 1: Dashboard Layout → **Option A: Match Mockup** ✅
+2-column grid layout with timer hero (2fr) + sticky sidebar (380px). Major restructure to match design vision.
 
-**1.2 Update `app/app.config.ts`**
-- Change primary color from `violet` to `orange` (closest Tailwind match to terracotta)
-- Change secondary color from `sky` to `green` (forest green)
+### Decision 2: Timer Hero Component → **Option A: Hero Timer** ✅
+New `DashboardTimerHero.vue` component with 72px monospace timer, ambient glow, centered display.
 
-**1.3 Create Design Token Reference**
-- Add `app/assets/css/tokens.css` with semantic CSS variables
-- Import tokens.css in main.css
-
-### Phase 1 Verification
-
-```bash
-npm run dev
-```
-
-**Phase 1 Complete When:**
-- [ ] Dev server starts without CSS errors
-- [ ] Browser DevTools shows new CSS variables loaded (check `:root`)
-- [ ] Fraunces and Instrument Sans fonts load (check Network tab)
-- [ ] `app.config.ts` shows `primary: 'orange'` and `secondary: 'green'`
-
-**Self-Correction:**
-1. If fonts don't load → Check Google Fonts import URL syntax
-2. If CSS variables missing → Verify tokens.css is imported in main.css
-3. If dev server errors → Run `npm run lint:fix` and check syntax
+### Decision 3: Sidebar Components → **Option A: Full Sidebar** ✅
+Session card + Today's Stats (4-item grid) + enhanced Streak card. Full mockup implementation.
 
 ---
 
-## Phase 2: Landing Page Overhaul
+## Current Status
 
-### Tasks
+### ✅ Phase 1: Foundation (COMPLETE)
+- [x] Add Google Fonts imports (Fraunces, Instrument Sans) → `main.css:1`
+- [x] Create `app/assets/css/tokens.css` with CSS variables → EXISTS with all tokens
+- [x] Update `app.config.ts` to use orange/green colors → `primary: 'orange', secondary: 'green', neutral: 'stone'`
 
-**2.1 Update `app/pages/index.vue`**
-- Replace `ink-900` backgrounds with warm cream (`#fffbf5` / `bg-[#fffbf5]`) for light mode
-- Update dark mode to use warm charcoal (`stone-900`) instead of cold black
-- Change text colors from `ink-*` to `stone-*` palette
-- Update gradients from violet/cyan to terracotta/forest/sage
-- Replace button colors with new primary/secondary
-- Update hero section with proper light mode support
-- Add ambient glow effects to timer preview
+### ✅ Phase 2: Landing Page (COMPLETE)
+- [x] Update colors from violet/sky to orange/green/stone → No forbidden colors found
+- [x] Fix light mode backgrounds (warm cream #fffbf5) → `index.vue:66`
+- [x] Update dark mode to warm charcoal (stone-900) → `index.vue:66`
+- [x] Apply font-serif to headings → Multiple h1/h2/h3 elements
 
-**2.2 Update Landing Page Typography**
-- Add `font-serif` class (Fraunces) to headings
-- Ensure body text uses Instrument Sans (default sans)
+### ⏳ Phase 3: Dashboard & Components (IN PROGRESS)
+- [x] Update `StreakBanner.vue` gradient → Already uses `from-orange-600 to-green-600`
+- [x] Update `ProjectListCard.vue` → **V27 rewrite complete (§3.6) — ⚠️ DO NOT MODIFY**
+- [x] Delete `ProjectCardToolbar.vue` → **Deleted (§3.6.6)**
+- [x] Update `ProjectEditModal.vue` → **Active toggle added (§3.6.5)**
+- [x] Update `ProjectList.vue` → **Deprecated events removed (§3.6.4)**
+- [ ] **Dashboard page warm backgrounds** → Missing `bg-[#fffbf5]` / `stone-900`
+- [ ] **Typography (Fraunces serif for headings)** → Dashboard `<h2>` lacks `font-serif`
+- [ ] **Ambient glow effects** → Not implemented
+- [ ] **Dashboard 2-column layout** → Ready (Decision 1 resolved: Match Mockup)
+- [ ] **DashboardTimerHero.vue** → Create new component (Decision 2 resolved: Hero Timer)
+- [ ] **TodaysStats.vue** → Create new component (Decision 3 resolved: Full Sidebar)
+- [ ] **DashboardSidebar.vue** → Create wrapper component for sidebar
 
-### Phase 2 Verification
+### ❌ Phase 4: Auth Pages (NOT STARTED)
+- [ ] Update auth page backgrounds
+- [ ] Apply consistent styling to login/register forms
 
-```bash
-npm run dev
-# Navigate to http://localhost:3005/
-# Toggle between light/dark mode
-```
+### ❌ Phase 5: Validation Script (NOT STARTED)
+- [ ] Create `scripts/validate-design-system.ts`
+- [ ] Add `npm run validate:design` script
 
-**Phase 2 Complete When:**
-- [ ] Landing page hero has warm cream background in light mode
-- [ ] Landing page has warm charcoal background in dark mode
-- [ ] Headings use Fraunces serif font
-- [ ] No violet/cyan/sky colors visible on landing page
-- [ ] Color mode toggle works smoothly
-- [ ] Buttons use orange (primary) color scheme
-
-**Self-Correction:**
-1. If colors don't change → Search for hardcoded `violet`, `sky`, `cyan` in index.vue
-2. If light mode looks wrong → Check `dark:` prefixes are applied correctly
-3. If fonts wrong → Verify `font-serif` class maps to Fraunces in CSS
-
----
-
-## Phase 3: Dashboard & Components
-
-### Tasks
-
-**3.1 Update `app/layouts/default.vue`**
-- Update header/nav colors for both modes
-- Change active states from violet to terracotta (orange)
-- Update background colors for warm cream/charcoal
-
-**3.2 Update `app/components/ProjectListCard.vue`**
-- Replace gradient backgrounds with warm tones
-- Update progress bar colors (sage/terracotta instead of violet/indigo)
-- Update status pill colors
-- Increase border radius to match new design
-
-**3.3 Update `app/components/StintTimer.vue`**
-- Add ambient glow effect around timer
-- Update active/paused colors (terracotta for active, amber for paused)
-- Ensure monospace font styling preserved
-
-**3.4 Update `app/components/StreakBanner.vue`**
-- Replace violet-emerald gradient with terracotta-forest gradient
-
-**3.5 Update Other Components (as needed)**
-- `ProjectForm.vue` - Update color picker styling
-- `StintConflictDialog.vue` - Update status colors
-- `ProjectCardToolbar.vue` - Update glass effects with warm tones
-- `ArchivedProjectsList.vue` - Update accent colors
-
-### Phase 3 Verification
-
-```bash
-npm run dev
-# Log in and navigate to /dashboard
-# Test project cards, timer, streak banner
-```
-
-**Phase 3 Complete When:**
-- [ ] Dashboard background uses warm cream/charcoal
-- [ ] Project cards have updated gradients (no violet)
-- [ ] Progress bars use sage/terracotta colors
-- [ ] Timer has visible ambient glow effect
-- [ ] Streak banner uses terracotta-forest gradient
-- [ ] All interactive states use orange (primary) color
-
-**Self-Correction:**
-1. If components still violet → Run: `grep -r "violet\|sky\|cyan" app/components/`
-2. If glow not visible → Check `shadow-glow` CSS variable is defined
-3. If layout broken → Check Tailwind classes are valid (no typos)
+### ❌ Phase 6: Cleanup (NOT STARTED)
+- [ ] Delete mockup files after validation passes
+- [ ] Update documentation
 
 ---
 
-## Phase 4: Utilities & Constants
+## Gap Analysis: Current vs Mockup
 
-### Tasks
-
-**4.1 `app/constants/index.ts`**
-- **Keep as-is** - Project tag colors (red, orange, amber, green, teal, blue, purple, pink) remain unchanged
-
-**4.2 `app/utils/project-colors.ts`**
-- **Keep as-is** - COLOR_CLASSES and COLOR_PILL_CLASSES remain unchanged
-
-### Phase 4 Verification
-
-**Phase 4 Complete When:**
-- [ ] Confirmed: No changes needed to constants/utils
-- [ ] Project color picker still works with existing tag colors
-
----
-
-## Phase 5: Codebase Audit & Cleanup
-
-### Tasks
-
-**5.1 Search for remaining old color references**
-```bash
-grep -rn "violet\|sky\|cyan" app/ --include="*.vue" --include="*.ts" --include="*.css"
-```
-
-**5.2 Fix any remaining instances**
-- Replace violet → orange
-- Replace sky/cyan → green or stone
-
-**5.3 Remove mockup files**
-- Delete `/public/mockups/index.html`
-- Delete `/public/mockups/focused-warmth-hybrid.html`
-- Remove `/public/mockups/` directory
-
-### Phase 5 Verification
-
-```bash
-# Should return NO results (or only intentional uses in comments)
-grep -rn "violet\|sky\|cyan" app/ --include="*.vue" --include="*.ts" --include="*.css"
-
-# Verify mockups deleted
-ls public/mockups/  # Should error: directory not found
-```
-
-**Phase 5 Complete When:**
-- [ ] No violet/sky/cyan references in app/ (except constants for tag colors)
-- [ ] `/public/mockups/` directory deleted
-- [ ] `npm run lint` passes
-
-**Self-Correction:**
-1. If grep finds matches → Update each file to use new colors
-2. If lint fails → Run `npm run lint:fix`
+| Feature | Mockup | Current | Gap | Status |
+|---------|--------|---------|-----|--------|
+| Foundation (tokens, fonts) | CSS variables + fonts | `tokens.css` exists | None | ✅ Done |
+| Landing Page | Warm cream, orange/green | Matches mockup | None | ✅ Done |
+| **Project Cards (V27)** | Glass minimal + color ring | V27 horizontal compact | None | ✅ Done |
+| Dashboard Layout | 2-column (timer 2fr + sidebar 1fr) | Single column with tabs | **Major** | ⏳ Ready |
+| Timer Display | 72px hero with ambient glow | Small inline timer in cards | **Major** | ⏳ Ready |
+| Typography | Fraunces serif for headings | Landing ✅, Dashboard ❌ | **Medium** | ⏳ Partial |
+| Sidebar | Session + Stats grid + Streak card | Streak banner at top only | **Major** | ⏳ Ready |
+| Page Background | Warm cream/charcoal | Landing ✅, Dashboard ❌ | **Medium** | ⏳ Partial |
+| Ambient Glows | Radial glow effects on timer | Landing has glows, Dashboard none | **Medium** | ⏳ Partial |
+| Stats Section | Today's Stats grid (4 items) | None | **Medium** | ⏳ Ready |
 
 ---
 
-## Phase 6: Final Verification & Documentation
+## Phase 3: Dashboard Implementation (After Decisions)
 
-### Tasks
-
-**6.1 Full Application Test**
-```bash
-npm run dev
-# Test all routes: /, /dashboard, /analytics, /reports, /settings
-# Toggle light/dark mode on each page
+### 3.1 Dashboard Page Background
+Update `app/pages/dashboard.vue` to use warm backgrounds:
+```html
+<template>
+  <div class="min-h-screen bg-[#fffbf5] dark:bg-stone-900">
+    <!-- content -->
+  </div>
+</template>
 ```
 
-**6.2 Build Test**
-```bash
-npm run generate
-npm run serve
-# Test static build at http://localhost:3000
+### 3.2 Typography - Apply Fraunces Serif
+Update all dashboard headings to use `font-serif`:
+- `UPageHeader` title → Add font-serif class
+- Card headers (h2, h3) → Add font-serif class
+- Project names in cards → Consider serif
+
+### 3.3 Dashboard Layout (Depends on Decision 1)
+
+**If Option A (Match Mockup):**
+```html
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2">
+    <DashboardTimerHero />
+  </div>
+  <div class="space-y-6">
+    <ProjectsSidebar />
+    <TodaysStats />
+    <StreakCard />
+  </div>
+</div>
 ```
 
-**6.3 Update Documentation**
-- Update `NEW-DESIGN.md` - Mark implementation as complete
-- Update `CLAUDE.md` - Document new color system in Styling section
+**If Option B (Enhance Current):**
+- Keep existing tab-based layout
+- Add warm backgrounds only
+- Apply font-serif to headings
 
-### Phase 6 Verification
-
-**Phase 6 Complete When:**
-- [ ] `npm run dev` works without errors
-- [ ] `npm run generate` builds successfully
-- [ ] `npm run serve` serves static site correctly
-- [ ] All pages render correctly in light mode
-- [ ] All pages render correctly in dark mode
-- [ ] `NEW-DESIGN.md` marked as implemented
-- [ ] `CLAUDE.md` Styling section updated
-
-**Self-Correction:**
-1. If build fails → Check error output, likely missing import or syntax error
-2. If pages broken → Compare against mockup in `NEW-DESIGN.md`
-3. If accessibility issues → Check contrast ratios with browser DevTools
-
----
-
-## Design Token Reference
-
-### Colors - Light Mode
+### 3.4 Ambient Glow Effects
+Add to timer displays and active states:
 ```css
---bg-primary: #fffbf5;      /* warm cream */
---bg-secondary: #fef7ed;    /* linen */
---bg-card: #ffffff;
---text-primary: #292524;    /* stone-800 */
---text-secondary: #57534e;  /* stone-600 */
---text-muted: #a8a29e;      /* stone-400 */
---accent-primary: #c2410c;  /* terracotta - orange-700 */
---accent-secondary: #166534; /* forest - green-700 */
---accent-tertiary: #84cc16; /* sage - lime-500 */
---border-light: #e7e5e4;    /* stone-200 */
+.timer-glow {
+  text-shadow: 0 0 60px var(--accent-primary-glow);
+}
+.card-glow {
+  box-shadow: var(--shadow-glow);
+}
 ```
 
-### Colors - Dark Mode
-```css
---bg-primary: #1c1917;      /* stone-900 */
---bg-secondary: #292524;    /* stone-800 */
---bg-card: #292524;
---text-primary: #fafaf9;    /* stone-50 */
---text-secondary: #d6d3d1;  /* stone-300 */
---accent-primary: #ea580c;  /* orange-600 */
---accent-secondary: #22c55e; /* green-500 */
+### 3.5 Streak Card Enhancement
+Transform current `StreakBanner.vue` to match mockup's sidebar streak card style (if sidebar is chosen).
+
+### ✅ 3.6 Project Card V27 Migration (COMPLETE)
+
+> ⚠️ **DO NOT MODIFY `ProjectListCard.vue`** — V27 redesign is complete and tested.
+> The component has been fully rewritten with glass morphism, color rings, inline timer,
+> and all 5 states (ready/running/paused/exceeded/inactive). Any dashboard layout changes
+> must work WITH the existing card design, not alter it.
+
+Migrate `ProjectListCard.vue` from complex vertical layout to V27 "Glass Minimal + Color Ring" horizontal compact design. Reference: `/public/mockups/project-card-27.html`
+
+**Key Decisions:**
+- Toggle Active → Moved to Edit Modal (not on card)
+- Stop for Paused → Opens completion modal (same as running)
+- ProjectCardToolbar → Delete entirely (edit button inlined)
+
+#### ✅ 3.6.1 ProjectListCard.vue Template Rewrite (COMPLETE)
+
+New V27 horizontal layout:
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  ⠿  ○  Project Name                    --:--   2/3   ✎    ▶       │
+│     ↑  Meta text                                ↑     ↑    ↑       │
+│  Drag Ring                              Badge  Edit  Action        │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Typography
-```css
---font-serif: 'Fraunces', Georgia, serif;
---font-sans: 'Instrument Sans', system-ui, sans-serif;
---font-mono: 'JetBrains Mono', monospace;
-```
+- [x] Replace template with V27 horizontal structure
+- [x] Drag handle (keep existing)
+- [x] Color ring (18px circle outline, replaces left bar)
+- [x] Project name + meta text ("30m per stint" | "Started 10:32 AM" | "Paused 5m ago")
+- [x] Timer display inline (idle/running/paused states)
+- [x] Progress badge (`X/Y +N` format with green extra indicator)
+- [x] Edit button (inline, pencil icon)
+- [x] Action buttons (Play | Pause+Stop | Resume+Stop)
 
-### Radius & Shadows
-```css
---radius-lg: 20px;
---radius-xl: 28px;
---shadow-warm: 0 4px 20px rgba(120, 113, 108, 0.08);
---shadow-glow: 0 0 40px rgba(194, 65, 12, 0.15);
-```
+#### ✅ 3.6.2 ProjectListCard.vue Script Updates (COMPLETE)
+
+**Add computed:**
+- [x] `metaText` - Duration or status text
+- [x] `extraStints` - completed - expected (for +N badge)
+- [x] `colorRingClass` - border-{color}-500 for ring
+- [x] `timerDisplayState` - 'idle' | 'running' | 'paused'
+
+**Modify handlers:**
+- [x] `handleResumeStint()` - Handle both activeStint and pausedStint
+- [x] `handleCompleteStint()` - Handle both activeStint and pausedStint
+
+**Remove:**
+- [x] `statusPill` computed
+- [x] `progressSegmentsCount` / `filledSegmentsCount` computed
+- [x] `dailyProgressSummary` computed
+- [x] `cardStyles` object
+- [x] `handleResumePausedStint()` / `handleAbandonPausedStint()`
+- [x] Emits: `resumePausedStint`, `abandonPausedStint`
+
+#### ✅ 3.6.3 ProjectListCard.vue Styles (COMPLETE)
+
+- [x] Replace all styles with V27 CSS from mockup
+- [x] `.card-v27` base with glass morphism
+- [x] `.state-running` / `.state-inactive` modifiers
+- [x] `.project-color` ring styles
+- [x] `.timer-display` state variants (idle/running/paused)
+- [x] `.progress-badge` with `.extra` for +N
+- [x] `.edit-btn` / `.play-btn` / `.action-btn` styles
+- [x] Responsive wrap at mobile
+
+#### ✅ 3.6.4 ProjectList.vue Updates (COMPLETE)
+
+- [x] Remove `@resume-paused-stint` event binding
+- [x] Remove `@abandon-paused-stint` event binding
+- [x] Remove `handleResumePausedStint()` handler
+- [x] Remove `handleAbandonPausedStint()` handler
+- [x] Ensure `handleResumeStint()` handles paused stint case
+
+#### ✅ 3.6.5 ProjectEditModal.vue Updates (COMPLETE)
+
+Add active toggle in footer (before Archive button):
+- [x] Add emit: `toggleActive: [project: ProjectRow]`
+- [x] Add prop: `isTogglingActive?: boolean`
+- [x] Add USwitch for active/inactive status
+- [x] Add handler calling parent toggle
+
+#### ✅ 3.6.6 Delete ProjectCardToolbar.vue (COMPLETE)
+
+- [x] Remove `app/components/ProjectCardToolbar.vue` file
+
+#### 3.6.7 V27 States Reference
+
+| State | Timer | Meta | Action Buttons |
+|-------|-------|------|----------------|
+| Ready | `--:--` muted | "30m per stint" | Play |
+| Running | `MM:SS` green + pulse | "Started 10:32 AM" | Pause + Stop |
+| Paused | `MM:SS` amber + icon | "Paused 5m ago" | Resume + Stop |
+| Goal Exceeded | (any) | (any) | Badge shows `+N` |
+| Inactive | `--:--` faded | "Inactive" | Play (disabled) |
+
+#### 3.6.8 Testing Checklist
+
+- [ ] All 5 states render correctly
+- [ ] Dark mode colors adapt
+- [ ] Drag-and-drop reordering works
+- [ ] Timer updates in real-time
+- [ ] +N extra indicator shows when exceeding goal
+- [ ] Stop opens completion modal for both running and paused
+- [ ] Edit button opens modal
+- [ ] Toggle in modal activates/deactivates project
+- [ ] Mobile layout wraps correctly
 
 ---
 
-## Tailwind Color Mapping
+## Phase 5: Automated UI Validation
 
-| Design Token | Tailwind Equivalent |
-|--------------|---------------------|
-| Terracotta | `orange-700` (#c2410c) |
-| Forest | `green-700` (#166534) |
-| Sage | `lime-500` (#84cc16) |
-| Warm Cream | Custom `bg-[#fffbf5]` or `orange-50` |
-| Warm Charcoal | `stone-900` (#1c1917) |
+### 5.1 Create Validation Script
+Create `scripts/validate-design-system.ts`:
+
+```typescript
+/**
+ * Design System Validation Script
+ * Checks that all UI elements match the mockup specification
+ */
+
+import { readFileSync, existsSync } from 'fs';
+import { glob } from 'glob';
+
+interface ValidationResult {
+  passed: boolean;
+  checks: { name: string; passed: boolean; details?: string }[];
+}
+
+async function validateDesignSystem(): Promise<ValidationResult> {
+  const checks: { name: string; passed: boolean; details?: string }[] = [];
+
+  // Check 1: No violet/sky/cyan colors in Vue/CSS files
+  const forbiddenColors = await checkForbiddenColors();
+  checks.push(forbiddenColors);
+
+  // Check 2: Fraunces font is imported
+  const fontCheck = await checkFontsImported();
+  checks.push(fontCheck);
+
+  // Check 3: CSS tokens file exists and has required variables
+  const tokensCheck = await checkTokensFile();
+  checks.push(tokensCheck);
+
+  // Check 4: app.config.ts uses correct primary/secondary colors
+  const configCheck = await checkAppConfig();
+  checks.push(configCheck);
+
+  // Check 5: Dashboard page has warm backgrounds
+  const bgCheck = await checkWarmBackgrounds();
+  checks.push(bgCheck);
+
+  // Check 6: Typography classes are applied
+  const typographyCheck = await checkTypography();
+  checks.push(typographyCheck);
+
+  // Check 7: Dark mode classes present
+  const darkModeCheck = await checkDarkModeSupport();
+  checks.push(darkModeCheck);
+
+  return {
+    passed: checks.every(c => c.passed),
+    checks
+  };
+}
+
+async function checkForbiddenColors(): Promise<{ name: string; passed: boolean; details?: string }> {
+  const files = await glob('app/**/*.{vue,ts,css}', { ignore: ['**/node_modules/**'] });
+  const violations: string[] = [];
+
+  for (const file of files) {
+    const content = readFileSync(file, 'utf-8');
+    // Skip constants file (intentionally has color names)
+    if (file.includes('constants/index.ts') || file.includes('project-colors.ts')) continue;
+
+    const lines = content.split('\n');
+    lines.forEach((line, i) => {
+      // Check for violet, sky, cyan as Tailwind class prefixes
+      if (/\b(violet|sky|cyan)-\d+/.test(line)) {
+        violations.push(`${file}:${i + 1}: ${line.trim().substring(0, 80)}`);
+      }
+    });
+  }
+
+  return {
+    name: 'No forbidden colors (violet/sky/cyan)',
+    passed: violations.length === 0,
+    details: violations.length > 0 ? violations.join('\n') : undefined
+  };
+}
+
+async function checkFontsImported(): Promise<{ name: string; passed: boolean; details?: string }> {
+  const mainCssPath = 'app/assets/css/main.css';
+  if (!existsSync(mainCssPath)) {
+    return { name: 'Fonts imported', passed: false, details: 'main.css not found' };
+  }
+
+  const content = readFileSync(mainCssPath, 'utf-8');
+  const hasFraunces = content.includes('Fraunces');
+  const hasInstrument = content.includes('Instrument+Sans') || content.includes('Instrument Sans');
+
+  return {
+    name: 'Fonts imported (Fraunces, Instrument Sans)',
+    passed: hasFraunces && hasInstrument,
+    details: `Fraunces: ${hasFraunces}, Instrument Sans: ${hasInstrument}`
+  };
+}
+
+async function checkTokensFile(): Promise<{ name: string; passed: boolean; details?: string }> {
+  const tokensPath = 'app/assets/css/tokens.css';
+  if (!existsSync(tokensPath)) {
+    return { name: 'Tokens file exists', passed: false, details: 'tokens.css not found' };
+  }
+
+  const content = readFileSync(tokensPath, 'utf-8');
+  const requiredVars = [
+    '--bg-primary',
+    '--accent-primary',
+    '--accent-secondary',
+    '--font-serif',
+    '--font-sans'
+  ];
+
+  const missing = requiredVars.filter(v => !content.includes(v));
+
+  return {
+    name: 'CSS tokens defined',
+    passed: missing.length === 0,
+    details: missing.length > 0 ? `Missing: ${missing.join(', ')}` : undefined
+  };
+}
+
+async function checkAppConfig(): Promise<{ name: string; passed: boolean; details?: string }> {
+  const configPath = 'app/app.config.ts';
+  if (!existsSync(configPath)) {
+    return { name: 'App config correct', passed: false, details: 'app.config.ts not found' };
+  }
+
+  const content = readFileSync(configPath, 'utf-8');
+  const hasOrangePrimary = /primary:\s*['"]orange['"]/.test(content);
+  const hasGreenSecondary = /secondary:\s*['"]green['"]/.test(content);
+
+  return {
+    name: 'App config uses orange/green colors',
+    passed: hasOrangePrimary && hasGreenSecondary,
+    details: `Primary: ${hasOrangePrimary ? 'orange' : 'WRONG'}, Secondary: ${hasGreenSecondary ? 'green' : 'WRONG'}`
+  };
+}
+
+async function checkWarmBackgrounds(): Promise<{ name: string; passed: boolean; details?: string }> {
+  const files = ['app/pages/dashboard.vue', 'app/pages/index.vue'];
+  const issues: string[] = [];
+
+  for (const file of files) {
+    if (!existsSync(file)) continue;
+    const content = readFileSync(file, 'utf-8');
+
+    // Check for warm cream background in light mode
+    const hasWarmCream = content.includes('#fffbf5') || content.includes('bg-[#fffbf5]');
+    // Check for warm charcoal in dark mode
+    const hasWarmCharcoal = content.includes('stone-900') || content.includes('#1c1917');
+
+    if (!hasWarmCream && !hasWarmCharcoal) {
+      issues.push(`${file}: Missing warm backgrounds`);
+    }
+  }
+
+  return {
+    name: 'Warm backgrounds applied',
+    passed: issues.length === 0,
+    details: issues.length > 0 ? issues.join('\n') : undefined
+  };
+}
+
+async function checkTypography(): Promise<{ name: string; passed: boolean; details?: string }> {
+  const dashboardPath = 'app/pages/dashboard.vue';
+  if (!existsSync(dashboardPath)) {
+    return { name: 'Typography classes', passed: false, details: 'dashboard.vue not found' };
+  }
+
+  const content = readFileSync(dashboardPath, 'utf-8');
+  const hasSerifClass = content.includes('font-serif');
+
+  return {
+    name: 'Serif typography applied to headings',
+    passed: hasSerifClass,
+    details: hasSerifClass ? undefined : 'No font-serif classes found in dashboard'
+  };
+}
+
+async function checkDarkModeSupport(): Promise<{ name: string; passed: boolean; details?: string }> {
+  const dashboardPath = 'app/pages/dashboard.vue';
+  if (!existsSync(dashboardPath)) {
+    return { name: 'Dark mode support', passed: false, details: 'dashboard.vue not found' };
+  }
+
+  const content = readFileSync(dashboardPath, 'utf-8');
+  const hasDarkClasses = content.includes('dark:');
+
+  return {
+    name: 'Dark mode classes present',
+    passed: hasDarkClasses,
+    details: hasDarkClasses ? undefined : 'No dark: classes found in dashboard'
+  };
+}
+
+// Run validation
+validateDesignSystem().then(result => {
+  console.log('\n=== Design System Validation ===\n');
+
+  for (const check of result.checks) {
+    const status = check.passed ? '✅' : '❌';
+    console.log(`${status} ${check.name}`);
+    if (check.details) {
+      console.log(`   ${check.details}`);
+    }
+  }
+
+  console.log('\n================================');
+  console.log(result.passed ? '✅ ALL CHECKS PASSED' : '❌ VALIDATION FAILED');
+
+  process.exit(result.passed ? 0 : 1);
+});
+```
+
+### 5.2 Add npm Script
+Add to `package.json`:
+```json
+{
+  "scripts": {
+    "validate:design": "npx tsx scripts/validate-design-system.ts"
+  }
+}
+```
+
+### 5.3 Visual Regression Test (Optional)
+Create Playwright visual comparison test against mockup.
 
 ---
 
-## Critical Files Summary
+## Phase 6: Cleanup
 
-| File | Priority | Changes |
-|------|----------|---------|
-| `app/assets/css/main.css` | P0 | Fonts, CSS variables, theme tokens |
-| `app/assets/css/tokens.css` | P0 | New file - semantic CSS variables |
-| `app/app.config.ts` | P0 | Primary/secondary colors |
-| `app/pages/index.vue` | P0 | Complete landing page restyle |
-| `app/layouts/default.vue` | P1 | Header/nav styling |
-| `app/components/ProjectListCard.vue` | P1 | Card styling, progress bars |
-| `app/components/StintTimer.vue` | P1 | Timer glow, colors |
-| `app/components/StreakBanner.vue` | P2 | Gradient update |
-| `NEW-DESIGN.md` | P3 | Mark complete |
-| `CLAUDE.md` | P3 | Document new system |
-
-**Files NOT being modified:**
-- `app/constants/index.ts` - Project tag colors kept as-is
-- `app/utils/project-colors.ts` - Color utilities kept as-is
-
-**Files to DELETE:**
-- `public/mockups/index.html`
-- `public/mockups/focused-warmth-hybrid.html`
-- `public/mockups/` directory
-
----
-
-## Completion Protocol
-
-After completing all phases:
-
-1. Run final verification:
+### 6.1 Delete Mockup Files (AFTER validation passes)
 ```bash
+rm -rf public/mockups/
+```
+
+### 6.2 Update Documentation
+- Mark `NEW-DESIGN.md` as implemented
+- Update `CLAUDE.md` Styling section
+
+---
+
+## Final Completion Criteria
+
+**DO NOT mark complete until ALL of these pass:**
+
+```bash
+# 1. Automated validation
+npm run validate:design
+
+# 2. Lint check
 npm run lint
+
+# 3. Build check
 npm run generate
-npm run serve
+
+# 4. Manual visual comparison
+# Open mockup: public/mockups/focused-warmth-hybrid.html
+# Compare with: npm run dev → localhost:3005/dashboard
 ```
 
-2. Confirm all checklist items from each phase
+**Checklist:**
+- [x] Phase 1: Foundation complete
+- [x] Phase 2: Landing page complete
+- [ ] Phase 3: Dashboard & components complete
+- [ ] `npm run validate:design` exits with code 0
+- [ ] `npm run lint` passes
+- [ ] `npm run generate` succeeds
+- [ ] Dashboard visually matches mockup:
+  - [ ] Warm cream background (light mode)
+  - [ ] Warm charcoal background (dark mode)
+  - [ ] Fraunces serif font on headings
+  - [ ] Orange/green/stone color palette
+  - [ ] No violet/sky/cyan colors visible
+- [x] Landing page matches mockup styling
+- [ ] Mockup files deleted ONLY after all above pass
 
-3. If ALL criteria met, output: `<promise>COMPLETE</promise>`
+---
 
-4. If any criteria NOT met:
-   - Identify which phase failed
-   - Apply self-correction steps
-   - Re-verify that phase
-   - Continue only when phase passes
+## File Priority (Updated)
+
+| Priority | File | Status | Remaining Work |
+|----------|------|--------|----------------|
+| ~~P0~~ | ~~`app/assets/css/tokens.css`~~ | ✅ Done | — |
+| ~~P0~~ | ~~`app/app.config.ts`~~ | ✅ Done | — |
+| P0 | `scripts/validate-design-system.ts` | ❌ Create | Full file |
+| P0 | `package.json` | ❌ Update | Add validate script |
+| ~~P1~~ | ~~`app/pages/index.vue`~~ | ✅ Done | — |
+| P1 | `app/pages/dashboard.vue` | ⏳ Partial | Backgrounds, typography, layout (blocked) |
+| ~~P1~~ | ~~`app/components/ProjectListCard.vue`~~ | ✅ Done | V27 complete — ⚠️ DO NOT MODIFY |
+| ~~P1~~ | ~~`app/components/ProjectList.vue`~~ | ✅ Done | Deprecated events removed (§3.6.4) |
+| ~~P1~~ | ~~`app/components/ProjectEditModal.vue`~~ | ✅ Done | Active toggle added (§3.6.5) |
+| ~~P1~~ | ~~`app/components/ProjectCardToolbar.vue`~~ | ✅ Deleted | File removed (§3.6.6) |
+| P2 | `app/layouts/default.vue` | ❓ Review | Check if warm backgrounds needed |
+| ~~P2~~ | ~~`app/components/StreakBanner.vue`~~ | ✅ Done | Already uses orange→green gradient |
+| P3 | `public/mockups/` | 📦 Keep | Delete after validation passes |
+
+---
+
+## Next Steps
+
+1. ~~**Resolve the 3 blocking decisions above**~~ ✅ All decisions resolved (Match Mockup + Hero Timer + Full Sidebar)
+2. **Implement Phase 3 dashboard restructure:**
+   - Create `DashboardTimerHero.vue` (72px timer with glow)
+   - Create `TodaysStats.vue` (4-item stats grid)
+   - Create `DashboardSidebar.vue` (wrapper for sidebar components)
+   - Update `dashboard.vue` to 2-column grid layout
+   - Apply warm backgrounds + typography
+3. Create validation script (Phase 5)
+4. Run full validation
+5. Cleanup (Phase 6)
+
+> **Note:** V27 card migration (§3.6) is fully complete. All component updates finished.
