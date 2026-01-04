@@ -2,9 +2,11 @@
 
 ## Overview
 
-Migrate LifeStint from the current design to the "Focused Warmth + Deep Focus Hybrid" design system documented in `NEW-DESIGN.md` and visualized in `/public/mockups/focused-warmth-hybrid.html`.
+Migrate LifeStint from the current design to the "Focused Warmth + Deep Focus Hybrid" design system documented in `NEW-DESIGN.md`.
 
-**Reference Mockup:** `/public/mockups/focused-warmth-hybrid.html`
+**Reference Mockups:**
+- Dashboard & Navigation: `/public/mockups/dashboard.html`
+- Landing Page: `/public/mockups/focused-warmth-hybrid.html`
 
 ---
 
@@ -36,29 +38,48 @@ Session card + Today's Stats (4-item grid) + enhanced Streak card. Full mockup i
 - [x] Update dark mode to warm charcoal (stone-900) → `index.vue:66`
 - [x] Apply font-serif to headings → Multiple h1/h2/h3 elements
 
-### ⏳ Phase 3: Dashboard & Components (IN PROGRESS)
+### ✅ Phase 3: Dashboard & Components (COMPLETE)
 - [x] Update `StreakBanner.vue` gradient → Already uses `from-orange-600 to-green-600`
 - [x] Update `ProjectListCard.vue` → **V27 rewrite complete (§3.6) — ⚠️ DO NOT MODIFY**
 - [x] Delete `ProjectCardToolbar.vue` → **Deleted (§3.6.6)**
 - [x] Update `ProjectEditModal.vue` → **Active toggle added (§3.6.5)**
 - [x] Update `ProjectList.vue` → **Deprecated events removed (§3.6.4)**
-- [ ] **Dashboard page warm backgrounds** → Missing `bg-[#fffbf5]` / `stone-900`
-- [ ] **Typography (Fraunces serif for headings)** → Dashboard `<h2>` lacks `font-serif`
-- [ ] **Ambient glow effects** → Not implemented
-- [ ] **Dashboard 2-column layout** → Ready (Decision 1 resolved: Match Mockup)
-- [ ] **DashboardTimerHero.vue** → Create new component (Decision 2 resolved: Hero Timer)
-- [ ] **TodaysStats.vue** → Create new component (Decision 3 resolved: Full Sidebar)
-- [ ] **DashboardSidebar.vue** → Create wrapper component for sidebar
+- [x] **Dashboard page warm backgrounds** → `bg-[#fffbf5] dark:bg-stone-900` applied
+- [x] **Typography (Fraunces serif for headings)** → `font-serif` on "Your Projects" heading
+- [x] **Ambient glow effects** → Radial glow on DashboardTimerHero via `::before` pseudo-element
+- [x] **Dashboard 2-column layout** → `grid-cols-[1fr_380px]` with responsive order
+- [x] **DashboardTimerHero.vue** → Created with 72px timer, ambient glow, session metadata, controls
+- [x] **TodaysStats.vue** → Created with 2x2 stats grid (Daily Goal, Deep Focus, Best Block, vs Last Week)
+- [x] **DashboardSidebar.vue** → Created as sticky wrapper for TimerHero + StreakBanner + TodaysStats
 
-### ❌ Phase 4: Auth Pages (NOT STARTED)
+### ✅ Phase 4: Navigation Bar (COMPLETE)
+**Reference:** `/public/mockups/dashboard.html` (lines 2292-2387)
+
+Update `app/layouts/default.vue` to match the mockup navigation design:
+
+- [x] **Header structure** → Sticky glass morphism header with `backdrop-filter: blur(12px)`
+- [x] **Logo** → "Life**Stint**" with Fraunces serif, italic accent on "Stint"
+- [x] **Desktop navigation** → Pill-shaped container with Today/Analytics/Reports tabs
+- [x] **Active state** → Orange background (`bg-orange-600`) with white text
+- [x] **User avatar** → Initials button with gradient background
+- [x] **User dropdown menu** → Settings, Dark mode toggle, Logout
+- [x] **Mobile hamburger** → Hidden on desktop, shows mobile nav dropdown
+- [x] **Mobile navigation** → Full-width dropdown with icons for each nav item
+- [x] **Dark mode support** → Warm charcoal backgrounds, proper contrast
+
+**✅ Issues Fixed (2026-01-04):**
+- [x] **Hamburger position**: Moved BEFORE logo in `header-left` wrapper
+- [x] **Mobile header structure**: Added `header-left` wrapper grouping hamburger + logo together
+
+### ❌ Phase 5: Auth Pages (NOT STARTED)
 - [ ] Update auth page backgrounds
 - [ ] Apply consistent styling to login/register forms
 
-### ❌ Phase 5: Validation Script (NOT STARTED)
+### ❌ Phase 6: Validation Script (NOT STARTED)
 - [ ] Create `scripts/validate-design-system.ts`
 - [ ] Add `npm run validate:design` script
 
-### ❌ Phase 6: Cleanup (NOT STARTED)
+### ❌ Phase 7: Cleanup (NOT STARTED)
 - [ ] Delete mockup files after validation passes
 - [ ] Update documentation
 
@@ -71,13 +92,14 @@ Session card + Today's Stats (4-item grid) + enhanced Streak card. Full mockup i
 | Foundation (tokens, fonts) | CSS variables + fonts | `tokens.css` exists | None | ✅ Done |
 | Landing Page | Warm cream, orange/green | Matches mockup | None | ✅ Done |
 | **Project Cards (V27)** | Glass minimal + color ring | V27 horizontal compact | None | ✅ Done |
-| Dashboard Layout | 2-column (timer 2fr + sidebar 1fr) | Single column with tabs | **Major** | ⏳ Ready |
-| Timer Display | 72px hero with ambient glow | Small inline timer in cards | **Major** | ⏳ Ready |
-| Typography | Fraunces serif for headings | Landing ✅, Dashboard ❌ | **Medium** | ⏳ Partial |
-| Sidebar | Session + Stats grid + Streak card | Streak banner at top only | **Major** | ⏳ Ready |
-| Page Background | Warm cream/charcoal | Landing ✅, Dashboard ❌ | **Medium** | ⏳ Partial |
-| Ambient Glows | Radial glow effects on timer | Landing has glows, Dashboard none | **Medium** | ⏳ Partial |
-| Stats Section | Today's Stats grid (4 items) | None | **Medium** | ⏳ Ready |
+| Dashboard Layout | 2-column (timer 2fr + sidebar 1fr) | 2-column grid with sticky sidebar | None | ✅ Done |
+| Timer Display | 72px hero with ambient glow | DashboardTimerHero with 72px + glow | None | ✅ Done |
+| Typography | Fraunces serif for headings | Landing ✅, Dashboard ✅ | None | ✅ Done |
+| Sidebar | Session + Stats grid + Streak card | DashboardSidebar with all 3 | None | ✅ Done |
+| Page Background | Warm cream/charcoal | `bg-[#fffbf5] dark:bg-stone-900` | None | ✅ Done |
+| Ambient Glows | Radial glow effects on timer | Radial gradient `::before` on timer | None | ✅ Done |
+| Stats Section | Today's Stats grid (4 items) | TodaysStats with 2x2 grid | None | ✅ Done |
+| **Navigation Bar** | Glass header + pill nav + user menu | Glass header + pill nav + user menu | None | ✅ Done |
 
 ---
 
@@ -243,9 +265,9 @@ Add active toggle in footer (before Archive button):
 
 ---
 
-## Phase 5: Automated UI Validation
+## Phase 6: Automated UI Validation
 
-### 5.1 Create Validation Script
+### 6.1 Create Validation Script
 Create `scripts/validate-design-system.ts`:
 
 ```typescript
@@ -458,7 +480,7 @@ validateDesignSystem().then(result => {
 });
 ```
 
-### 5.2 Add npm Script
+### 6.2 Add npm Script
 Add to `package.json`:
 ```json
 {
@@ -468,19 +490,19 @@ Add to `package.json`:
 }
 ```
 
-### 5.3 Visual Regression Test (Optional)
+### 6.3 Visual Regression Test (Optional)
 Create Playwright visual comparison test against mockup.
 
 ---
 
-## Phase 6: Cleanup
+## Phase 7: Cleanup
 
-### 6.1 Delete Mockup Files (AFTER validation passes)
+### 7.1 Delete Mockup Files (AFTER validation passes)
 ```bash
 rm -rf public/mockups/
 ```
 
-### 6.2 Update Documentation
+### 7.2 Update Documentation
 - Mark `NEW-DESIGN.md` as implemented
 - Update `CLAUDE.md` Styling section
 
@@ -501,23 +523,29 @@ npm run lint
 npm run generate
 
 # 4. Manual visual comparison
-# Open mockup: public/mockups/focused-warmth-hybrid.html
+# Open mockup: public/mockups/dashboard.html
 # Compare with: npm run dev → localhost:3005/dashboard
 ```
 
 **Checklist:**
 - [x] Phase 1: Foundation complete
 - [x] Phase 2: Landing page complete
-- [ ] Phase 3: Dashboard & components complete
+- [x] Phase 3: Dashboard & components complete
+- [x] Phase 4: Navigation bar complete
 - [ ] `npm run validate:design` exits with code 0
-- [ ] `npm run lint` passes
+- [x] `npm run lint` passes
 - [ ] `npm run generate` succeeds
-- [ ] Dashboard visually matches mockup:
-  - [ ] Warm cream background (light mode)
-  - [ ] Warm charcoal background (dark mode)
-  - [ ] Fraunces serif font on headings
-  - [ ] Orange/green/stone color palette
-  - [ ] No violet/sky/cyan colors visible
+- [x] Dashboard visually matches mockup:
+  - [x] Warm cream background (light mode)
+  - [x] Warm charcoal background (dark mode)
+  - [x] Fraunces serif font on headings
+  - [x] Orange/green/stone color palette
+  - [x] No violet/sky/cyan colors visible
+- [x] Navigation bar matches mockup:
+  - [x] Glass morphism header with blur
+  - [x] Pill-shaped navigation tabs
+  - [x] User avatar with dropdown menu
+  - [x] Mobile hamburger menu works
 - [x] Landing page matches mockup styling
 - [ ] Mockup files deleted ONLY after all above pass
 
@@ -532,12 +560,15 @@ npm run generate
 | P0 | `scripts/validate-design-system.ts` | ❌ Create | Full file |
 | P0 | `package.json` | ❌ Update | Add validate script |
 | ~~P1~~ | ~~`app/pages/index.vue`~~ | ✅ Done | — |
-| P1 | `app/pages/dashboard.vue` | ⏳ Partial | Backgrounds, typography, layout (blocked) |
+| ~~P1~~ | ~~`app/pages/dashboard.vue`~~ | ✅ Done | 2-column layout, warm backgrounds, serif typography |
+| ~~P1~~ | ~~`app/components/DashboardTimerHero.vue`~~ | ✅ Done | 72px timer with ambient glow |
+| ~~P1~~ | ~~`app/components/TodaysStats.vue`~~ | ✅ Done | 2x2 stats grid |
+| ~~P1~~ | ~~`app/components/DashboardSidebar.vue`~~ | ✅ Done | Sticky wrapper for sidebar |
 | ~~P1~~ | ~~`app/components/ProjectListCard.vue`~~ | ✅ Done | V27 complete — ⚠️ DO NOT MODIFY |
 | ~~P1~~ | ~~`app/components/ProjectList.vue`~~ | ✅ Done | Deprecated events removed (§3.6.4) |
 | ~~P1~~ | ~~`app/components/ProjectEditModal.vue`~~ | ✅ Done | Active toggle added (§3.6.5) |
 | ~~P1~~ | ~~`app/components/ProjectCardToolbar.vue`~~ | ✅ Deleted | File removed (§3.6.6) |
-| P2 | `app/layouts/default.vue` | ❓ Review | Check if warm backgrounds needed |
+| ~~P1~~ | ~~`app/layouts/default.vue`~~ | ✅ Done | Navigation bar complete (glass header, nav tabs, user menu, mobile hamburger) |
 | ~~P2~~ | ~~`app/components/StreakBanner.vue`~~ | ✅ Done | Already uses orange→green gradient |
 | P3 | `public/mockups/` | 📦 Keep | Delete after validation passes |
 
@@ -546,14 +577,22 @@ npm run generate
 ## Next Steps
 
 1. ~~**Resolve the 3 blocking decisions above**~~ ✅ All decisions resolved (Match Mockup + Hero Timer + Full Sidebar)
-2. **Implement Phase 3 dashboard restructure:**
-   - Create `DashboardTimerHero.vue` (72px timer with glow)
-   - Create `TodaysStats.vue` (4-item stats grid)
-   - Create `DashboardSidebar.vue` (wrapper for sidebar components)
-   - Update `dashboard.vue` to 2-column grid layout
-   - Apply warm backgrounds + typography
-3. Create validation script (Phase 5)
-4. Run full validation
-5. Cleanup (Phase 6)
+2. ~~**Implement Phase 3 dashboard restructure:**~~ ✅ Complete
+   - ~~Create `DashboardTimerHero.vue` (72px timer with glow)~~
+   - ~~Create `TodaysStats.vue` (4-item stats grid)~~
+   - ~~Create `DashboardSidebar.vue` (wrapper for sidebar components)~~
+   - ~~Update `dashboard.vue` to 2-column grid layout~~
+   - ~~Apply warm backgrounds + typography~~
+3. ~~**Implement Phase 4 navigation bar:**~~ ✅ Complete
+   - ~~Update `default.vue` layout with glass morphism header~~
+   - ~~Add pill-shaped navigation tabs (Today/Analytics/Reports)~~
+   - ~~Implement user avatar dropdown menu~~
+   - ~~Add mobile hamburger menu with responsive navigation~~
+4. **Implement Phase 5 auth pages:** (NOT STARTED)
+   - Update auth page backgrounds
+   - Apply consistent styling to login/register forms
+5. Create validation script (Phase 6)
+6. Run full validation
+7. Cleanup (Phase 7)
 
-> **Note:** V27 card migration (§3.6) is fully complete. All component updates finished.
+> **Note:** V27 card migration (§3.6), Phase 3 dashboard restructure, and Phase 4 navigation bar are fully complete.
