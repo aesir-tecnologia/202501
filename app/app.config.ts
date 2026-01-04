@@ -11,8 +11,9 @@ export default defineAppConfig({
       dark: 'i-lucide-moon',
     },
     colors: {
-      primary: 'violet',
-      secondary: 'sky',
+      primary: 'orange',
+      secondary: 'green',
+      neutral: 'stone',
     },
   },
   project: {
