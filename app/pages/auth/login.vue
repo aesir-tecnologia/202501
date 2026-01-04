@@ -101,7 +101,10 @@ watch(() => state.password, () => {
             to="/"
             class="inline-flex items-center gap-2 text-stone-500 hover:text-orange-700 dark:text-stone-400 dark:hover:text-orange-500 transition-colors mb-4"
           >
-            <UIcon name="i-lucide-arrow-left" class="size-4" />
+            <UIcon
+              name="i-lucide-arrow-left"
+              class="size-4"
+            />
             <span class="text-sm font-medium">Back to home</span>
           </NuxtLink>
           <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
