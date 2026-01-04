@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useProjectsQuery, useArchivedProjectsQuery, useToggleProjectActive } from '~/composables/useProjects';
+import { useActiveStintQuery, usePausedStintQuery, usePauseStint, useResumeStint, useStintsQuery } from '~/composables/useStints';
+import { useDailySummaryQuery, useWeeklyStatsQuery } from '~/composables/useDailySummaries';
 import type { ProjectRow } from '~/lib/supabase/projects';
+import type { StintRow } from '~/lib/supabase/stints';
+import { parseSafeDate } from '~/utils/date-helpers';
 
 definePageMeta({
   title: 'Dashboard',
@@ -41,11 +45,118 @@ const isLoading = computed(() => {
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showArchiveModal = ref(false);
+const showCompletionModal = ref(false);
 const selectedProject = ref<ProjectRow | null>(null);
+const stintToComplete = ref<StintRow | null>(null);
 
 const toast = useToast();
 const { mutateAsync: toggleActive, isPending: isTogglingActive } = useToggleProjectActive();
 
+// Stint queries and mutations
+const { data: activeStint } = useActiveStintQuery();
+const { data: pausedStint } = usePausedStintQuery();
+const { mutateAsync: pauseStint, isPending: _isPausing } = usePauseStint();
+const { mutateAsync: resumeStint, isPending: _isResuming } = useResumeStint();
+const { data: allStints } = useStintsQuery();
+
+// Stats queries
+const today = computed(() => new Date().toISOString().split('T')[0] as string);
+const { data: dailySummary, isLoading: isLoadingDailySummary } = useDailySummaryQuery(today);
+const { data: weeklyStats, isLoading: isLoadingWeeklyStats } = useWeeklyStatsQuery();
+
+// Compute active project for timer hero
+const activeProject = computed(() => {
+  const stint = activeStint.value || pausedStint.value;
+  if (!stint) return null;
+  return projects.value.find(p => p.id === stint.project_id) || null;
+});
+
+// Compute daily progress for timer hero
+const dailyProgress = computed(() => {
+  const today = startOfDay(new Date());
+  const tomorrow = addDays(today, 1);
+
+  let completed = 0;
+  let expected = 0;
+
+  // Sum expected from active projects
+  for (const project of activeProjects.value) {
+    expected += project.expected_daily_stints ?? 0;
+  }
+
+  // Count completed stints today
+  if (allStints.value) {
+    for (const stint of allStints.value) {
+      if (stint.status !== 'completed' || !stint.ended_at) continue;
+      const endedAt = parseSafeDate(stint.ended_at);
+      if (endedAt && endedAt >= today && endedAt < tomorrow) {
+        completed++;
+      }
+    }
+  }
+
+  return { completed, expected };
+});
+
+// Compute stats for TodaysStats component
+const completedStints = computed(() => dailySummary.value?.totalStints ?? dailyProgress.value.completed);
+const totalGoal = computed(() => dailyProgress.value.expected);
+const focusMinutes = computed(() => {
+  if (dailySummary.value) {
+    return Math.round(dailySummary.value.totalFocusSeconds / 60);
+  }
+  return 0;
+});
+
+const bestBlockMinutes = computed(() => {
+  if (!allStints.value) return 0;
+
+  const today = startOfDay(new Date());
+  const tomorrow = addDays(today, 1);
+
+  let maxDuration = 0;
+  for (const stint of allStints.value) {
+    if (stint.status !== 'completed' || !stint.ended_at) continue;
+    const endedAt = parseSafeDate(stint.ended_at);
+    if (endedAt && endedAt >= today && endedAt < tomorrow) {
+      const duration = stint.actual_duration ?? 0;
+      if (duration > maxDuration) {
+        maxDuration = duration;
+      }
+    }
+  }
+  return Math.round(maxDuration / 60);
+});
+
+const weeklyChange = computed(() => {
+  if (!weeklyStats.value || !dailySummary.value) return null;
+
+  const todayFocus = dailySummary.value.totalFocusSeconds;
+  const weeklyAvgFocus = weeklyStats.value.daysTracked > 0
+    ? weeklyStats.value.totalFocusSeconds / weeklyStats.value.daysTracked
+    : 0;
+
+  if (weeklyAvgFocus === 0) return null;
+
+  return ((todayFocus - weeklyAvgFocus) / weeklyAvgFocus) * 100;
+});
+
+const isLoadingStats = computed(() => isLoadingDailySummary.value || isLoadingWeeklyStats.value);
+
+// Helper functions
+function startOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function addDays(date: Date, days: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+// Modal handlers
 function openCreateModal() {
   showCreateModal.value = true;
 }
@@ -78,56 +189,88 @@ async function handleToggleActive(project: ProjectRow) {
     });
   }
 }
+
+// Stint action handlers
+async function handlePauseStint(stint: StintRow) {
+  try {
+    await pauseStint(stint.id);
+    toast.add({
+      title: 'Stint paused',
+      description: 'Take a break, you can resume anytime.',
+      color: 'success',
+    });
+  }
+  catch (error) {
+    toast.add({
+      title: 'Failed to pause stint',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      color: 'error',
+    });
+  }
+}
+
+async function handleResumeStint(stint: StintRow) {
+  try {
+    await resumeStint(stint.id);
+    toast.add({
+      title: 'Stint resumed',
+      description: 'Welcome back! Timer is running.',
+      color: 'success',
+    });
+  }
+  catch (error) {
+    toast.add({
+      title: 'Failed to resume stint',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      color: 'error',
+    });
+  }
+}
+
+function handleCompleteStint(stint: StintRow) {
+  stintToComplete.value = stint;
+  showCompletionModal.value = true;
+}
 </script>
 
 <template>
-  <UContainer>
-    <UPage>
-      <UPageHeader
-        title="Dashboard"
-        description="Manage your projects and start focused work sessions"
-      />
+  <div>
+    <UContainer class="py-6 lg:py-8">
+      <!-- 2-column grid layout -->
+      <div class="flex flex-col lg:grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 items-start">
+        <!-- Main Content: Projects (order-2 on mobile, order-1 on desktop) -->
+        <section class="order-2 lg:order-1 w-full space-y-6">
+          <!-- Header -->
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl lg:text-2xl font-semibold font-serif text-stone-900 dark:text-stone-50">
+              Your Projects
+            </h2>
+            <UButton
+              icon="i-lucide-plus"
+              class="motion-safe:transition-all motion-safe:duration-200"
+              @click="openCreateModal"
+            >
+              New Project
+            </UButton>
+          </div>
 
-      <!-- Streak Banner -->
-      <StreakBanner />
+          <!-- Loading State -->
+          <div
+            v-if="isLoading"
+            class="text-center py-12"
+          >
+            <Icon
+              name="i-lucide-loader-2"
+              class="h-8 w-8 mx-auto motion-safe:animate-spin text-neutral-400 dark:text-neutral-500"
+            />
+            <p class="mt-2 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
+              Loading projects...
+            </p>
+          </div>
 
-      <!-- Loading State -->
-      <div
-        v-if="isLoading"
-        class="text-center py-12"
-      >
-        <Icon
-          name="i-lucide-loader-2"
-          class="h-8 w-8 mx-auto motion-safe:animate-spin text-neutral-400 dark:text-neutral-500"
-        />
-        <p class="mt-2 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
-          Loading projects...
-        </p>
-      </div>
-
-      <!-- Content -->
-      <div
-        v-else
-        class="space-y-6"
-      >
-        <!-- Projects Section with Tabs -->
-        <UCard>
-          <template #header>
-            <div class="flex items-center justify-between">
-              <h2 class="text-lg font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
-                Your Projects
-              </h2>
-              <UButton
-                icon="i-lucide-plus"
-                class="motion-safe:transition-all motion-safe:duration-200"
-                @click="openCreateModal"
-              >
-                New Project
-              </UButton>
-            </div>
-          </template>
-
+          <!-- Projects Tabs -->
           <UTabs
+            v-if="!isLoading"
             v-model="selectedTab"
             :items="tabItems"
             class="w-full"
@@ -158,9 +301,27 @@ async function handleToggleActive(project: ProjectRow) {
               </div>
             </template>
           </UTabs>
-        </UCard>
+        </section>
+
+        <!-- Sidebar (order-1 on mobile, order-2 on desktop) -->
+        <DashboardSidebar
+          class="order-1 lg:order-2 w-full"
+          :active-stint="activeStint ?? null"
+          :paused-stint="pausedStint ?? null"
+          :active-project="activeProject"
+          :daily-progress="dailyProgress"
+          :completed-stints="completedStints"
+          :total-goal="totalGoal"
+          :focus-minutes="focusMinutes"
+          :best-block-minutes="bestBlockMinutes"
+          :weekly-change="weeklyChange"
+          :is-loading-stats="isLoadingStats"
+          @pause-stint="handlePauseStint"
+          @resume-stint="handleResumeStint"
+          @complete-stint="handleCompleteStint"
+        />
       </div>
-    </UPage>
+    </UContainer>
 
     <!-- Modals -->
     <ProjectCreateModal
@@ -181,5 +342,11 @@ async function handleToggleActive(project: ProjectRow) {
       v-model:open="showArchiveModal"
       :project="selectedProject"
     />
-  </UContainer>
+
+    <StintCompletionModal
+      v-if="stintToComplete"
+      v-model:open="showCompletionModal"
+      :stint-id="stintToComplete.id"
+    />
+  </div>
 </template>
