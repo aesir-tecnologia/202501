@@ -728,101 +728,107 @@ const timezones = [
 
     <!-- Password Change Dialog -->
     <UModal
-      v-model="showPasswordDialog"
+      v-model:open="showPasswordDialog"
       title="Change Password"
+      :ui="{ footer: 'justify-end' }"
     >
-      <div class="space-y-4">
-        <UFormField
-          label="Current Password"
-          name="currentPassword"
-        >
-          <UInput
-            v-model="passwordForm.currentPassword"
-            type="password"
-            placeholder="Enter current password"
-          />
-        </UFormField>
-
-        <UFormField
-          label="New Password"
-          name="newPassword"
-        >
-          <UInput
-            v-model="passwordForm.newPassword"
-            type="password"
-            placeholder="Enter new password"
-          />
-        </UFormField>
-
-        <UFormField
-          label="Confirm New Password"
-          name="confirmPassword"
-        >
-          <UInput
-            v-model="passwordForm.confirmPassword"
-            type="password"
-            placeholder="Confirm new password"
-          />
-        </UFormField>
-
-        <div class="flex justify-end gap-3 pt-2">
-          <UButton
-            variant="ghost"
-            @click="showPasswordDialog = false"
+      <template #body>
+        <div class="space-y-4">
+          <UFormField
+            label="Current Password"
+            name="currentPassword"
           >
-            Cancel
-          </UButton>
-          <UButton
-            color="primary"
-            @click="changePassword"
+            <UInput
+              v-model="passwordForm.currentPassword"
+              type="password"
+              placeholder="Enter current password"
+            />
+          </UFormField>
+
+          <UFormField
+            label="New Password"
+            name="newPassword"
           >
-            Update Password
-          </UButton>
+            <UInput
+              v-model="passwordForm.newPassword"
+              type="password"
+              placeholder="Enter new password"
+            />
+          </UFormField>
+
+          <UFormField
+            label="Confirm New Password"
+            name="confirmPassword"
+          >
+            <UInput
+              v-model="passwordForm.confirmPassword"
+              type="password"
+              placeholder="Confirm new password"
+            />
+          </UFormField>
         </div>
-      </div>
+      </template>
+
+      <template #footer>
+        <UButton
+          variant="ghost"
+          @click="showPasswordDialog = false"
+        >
+          Cancel
+        </UButton>
+        <UButton
+          color="primary"
+          @click="changePassword"
+        >
+          Update Password
+        </UButton>
+      </template>
     </UModal>
 
     <!-- Delete Account Dialog -->
     <UModal
-      v-model="showDeleteAccountDialog"
+      v-model:open="showDeleteAccountDialog"
       title="Delete Account"
+      :ui="{ footer: 'justify-end' }"
     >
-      <div class="space-y-4">
-        <UAlert
-          color="error"
-          variant="soft"
-          icon="i-lucide-alert-triangle"
-        >
-          This action cannot be undone. All your data will be permanently deleted.
-        </UAlert>
-
-        <UFormField
-          label="Type your email to confirm"
-          name="deleteConfirm"
-        >
-          <UInput
-            v-model="deleteConfirmText"
-            type="email"
-            placeholder="your@email.com"
-          />
-        </UFormField>
-
-        <div class="flex justify-end gap-3 pt-2">
-          <UButton
-            variant="ghost"
-            @click="showDeleteAccountDialog = false"
-          >
-            Cancel
-          </UButton>
-          <UButton
+      <template #body>
+        <div class="space-y-4">
+          <UAlert
             color="error"
-            :disabled="deleteConfirmText !== accountForm.email"
-            @click="deleteAccount"
+            variant="soft"
+            icon="i-lucide-alert-triangle"
           >
-            Delete Account
-          </UButton>
+            This action cannot be undone. All your data will be permanently deleted.
+          </UAlert>
+
+          <UFormField
+            label="Type your email to confirm"
+            name="deleteConfirm"
+          >
+            <UInput
+              v-model="deleteConfirmText"
+              type="email"
+              placeholder="your@email.com"
+            />
+          </UFormField>
         </div>
-      </div>
+      </template>
+
+      <template #footer>
+        <UButton
+          variant="ghost"
+          @click="showDeleteAccountDialog = false"
+        >
+          Cancel
+        </UButton>
+        <UButton
+          color="error"
+          :disabled="deleteConfirmText !== accountForm.email"
+          @click="deleteAccount"
+        >
+          Delete Account
+        </UButton>
+      </template>
     </UModal>
   </UContainer>
 </template>

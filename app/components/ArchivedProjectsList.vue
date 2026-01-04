@@ -164,57 +164,48 @@ async function handlePermanentDelete() {
       v-model:open="showDeleteConfirm"
       title="Permanently Delete Project"
       description="This action cannot be undone"
+      :ui="{ footer: 'justify-end' }"
     >
-      <template #content>
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">
-              Permanently Delete Project
-            </h3>
-          </template>
+      <template #body>
+        <p class="text-neutral-700 dark:text-neutral-300">
+          Are you sure you want to permanently delete <strong>{{ projectToDelete?.name }}</strong>?
+        </p>
 
-          <div class="space-y-4">
-            <p class="text-neutral-700 dark:text-neutral-300">
-              Are you sure you want to permanently delete <strong>{{ projectToDelete?.name }}</strong>?
-            </p>
-
-            <div class="rounded-md bg-red-50 dark:bg-red-950 p-4">
-              <div class="flex items-start">
-                <div class="flex-shrink-0">
-                  <Icon
-                    name="i-lucide-alert-triangle"
-                    class="h-5 w-5 text-red-400"
-                  />
-                </div>
-                <div class="ml-3">
-                  <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
-                    Warning
-                  </h3>
-                  <div class="mt-2 text-sm text-red-700 dark:text-red-300">
-                    <p>This will permanently delete the project and all associated stint history. This action cannot be undone.</p>
-                  </div>
-                </div>
+        <div class="mt-4 rounded-md bg-red-50 dark:bg-red-950 p-4">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <Icon
+                name="i-lucide-alert-triangle"
+                class="h-5 w-5 text-red-400"
+              />
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                Warning
+              </h3>
+              <div class="mt-2 text-sm text-red-700 dark:text-red-300">
+                <p>This will permanently delete the project and all associated stint history. This action cannot be undone.</p>
               </div>
             </div>
           </div>
+        </div>
+      </template>
 
-          <div class="flex justify-end gap-2 pt-4">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              @click="closeDeleteConfirmation"
-            >
-              Cancel
-            </UButton>
-            <UButton
-              color="error"
-              :loading="isDeleting"
-              @click="handlePermanentDelete"
-            >
-              Permanently Delete
-            </UButton>
-          </div>
-        </UCard>
+      <template #footer>
+        <UButton
+          color="neutral"
+          variant="ghost"
+          @click="closeDeleteConfirmation"
+        >
+          Cancel
+        </UButton>
+        <UButton
+          color="error"
+          :loading="isDeleting"
+          @click="handlePermanentDelete"
+        >
+          Permanently Delete
+        </UButton>
       </template>
     </UModal>
   </div>
