@@ -1,26 +1,33 @@
 <template>
   <UApp>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
-      <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
+    <div class="min-h-screen flex items-center justify-center bg-[#fffbf5] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 dark:bg-stone-900">
+      <div class="max-w-md w-full space-y-8 text-stone-800 dark:text-stone-50">
         <div class="text-center space-y-3">
-          <h2 class="text-3xl font-bold">
+          <NuxtLink
+            to="/"
+            class="inline-flex items-center gap-2 text-stone-500 hover:text-orange-700 dark:text-stone-400 dark:hover:text-orange-500 transition-colors mb-4"
+          >
+            <UIcon name="i-lucide-arrow-left" class="size-4" />
+            <span class="text-sm font-medium">Back to home</span>
+          </NuxtLink>
+          <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
             Set your new password
           </h2>
-          <p class="text-sm text-gray-600 dark:text-gray-300">
+          <p class="text-sm text-stone-600 dark:text-stone-400">
             Enter your new password below
           </p>
         </div>
 
-        <UCard class="p-8 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+        <UCard class="p-8 bg-white shadow-warm border border-stone-200 rounded-2xl transition-colors duration-300 dark:border-stone-700 dark:bg-stone-800">
           <div
             v-if="!sessionChecked"
             class="space-y-4 text-center"
           >
             <UIcon
               name="i-lucide-loader-2"
-              class="w-8 h-8 mx-auto text-brand-600 animate-spin dark:text-brand-400"
+              class="w-8 h-8 mx-auto text-orange-600 animate-spin dark:text-orange-500"
             />
-            <p class="text-gray-600 dark:text-gray-300">
+            <p class="text-stone-600 dark:text-stone-400">
               Verifying reset link...
             </p>
           </div>
@@ -42,7 +49,7 @@
             <div class="text-center mt-6">
               <NuxtLink
                 to="/auth/forgot-password"
-                class="text-sm font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
+                class="text-sm font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
               >
                 Request a new password reset
               </NuxtLink>
@@ -69,7 +76,7 @@
                   :disabled="loading"
                 />
                 <template #hint>
-                  <div class="text-xs text-gray-500 mt-1 dark:text-gray-400">
+                  <div class="text-xs text-stone-500 mt-1 dark:text-stone-400">
                     Password must be at least 8 characters with uppercase, lowercase, number, and special character
                   </div>
                 </template>
@@ -100,10 +107,10 @@
               </UButton>
             </UForm>
 
-            <div class="text-center mt-6 text-gray-600 dark:text-gray-300">
+            <div class="text-center mt-6 text-stone-600 dark:text-stone-400">
               <NuxtLink
                 to="/auth/login"
-                class="text-sm font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
+                class="text-sm font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
               >
                 Back to sign in
               </NuxtLink>

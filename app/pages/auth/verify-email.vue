@@ -1,40 +1,47 @@
 <template>
   <UApp>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
-      <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
+    <div class="min-h-screen flex items-center justify-center bg-[#fffbf5] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 dark:bg-stone-900">
+      <div class="max-w-md w-full space-y-8 text-stone-800 dark:text-stone-50">
         <div class="text-center space-y-3">
-          <h2 class="text-3xl font-bold">
+          <NuxtLink
+            to="/"
+            class="inline-flex items-center gap-2 text-stone-500 hover:text-orange-700 dark:text-stone-400 dark:hover:text-orange-500 transition-colors mb-4"
+          >
+            <UIcon name="i-lucide-arrow-left" class="size-4" />
+            <span class="text-sm font-medium">Back to home</span>
+          </NuxtLink>
+          <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
             Check your email
           </h2>
-          <p class="text-sm text-gray-600 dark:text-gray-300">
+          <p class="text-sm text-stone-600 dark:text-stone-400">
             We've sent a verification link to your email address
           </p>
         </div>
 
-        <UCard class="p-8 text-center bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+        <UCard class="p-8 text-center bg-white shadow-warm border border-stone-200 rounded-2xl transition-colors duration-300 dark:border-stone-700 dark:bg-stone-800">
           <div class="space-y-6">
-            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-mint-100 dark:bg-mint-900/40">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40">
               <UIcon
                 name="i-lucide-mail"
-                class="h-6 w-6 text-mint-600 dark:text-mint-400"
+                class="h-6 w-6 text-green-700 dark:text-green-400"
               />
             </div>
 
             <div class="space-y-2">
-              <h3 class="text-lg font-medium">
+              <h3 class="text-lg font-medium text-stone-800 dark:text-stone-50">
                 Verification email sent
               </h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300">
+              <p class="text-sm text-stone-600 dark:text-stone-400">
                 Please check your inbox and click the verification link to complete your registration.
                 <span
                   v-if="email"
-                  class="block font-medium mt-1"
+                  class="block font-medium mt-1 text-stone-800 dark:text-stone-200"
                 >{{ email }}</span>
               </p>
             </div>
 
             <div class="space-y-3">
-              <p class="text-xs text-gray-500 dark:text-gray-400">
+              <p class="text-xs text-stone-500 dark:text-stone-400">
                 Didn't receive the email? Check your spam folder or click below to resend.
               </p>
 
@@ -51,7 +58,7 @@
 
               <div
                 v-if="cooldownActive"
-                class="text-xs text-gray-500 dark:text-gray-400"
+                class="text-xs text-stone-500 dark:text-stone-400"
               >
                 You can request another email in {{ cooldownSeconds }} seconds
               </div>
@@ -76,18 +83,18 @@
             />
           </div>
 
-          <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
+          <div class="mt-8 pt-6 border-t border-stone-200 dark:border-stone-700">
             <div class="space-y-2">
               <NuxtLink
                 to="/auth/login"
-                class="text-sm font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
+                class="text-sm font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
               >
                 Back to sign in
               </NuxtLink>
               <br>
               <NuxtLink
                 to="/auth/register"
-                class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                class="text-sm text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
               >
                 Use a different email address
               </NuxtLink>

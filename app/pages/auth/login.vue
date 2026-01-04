@@ -93,18 +93,25 @@ watch(() => state.password, () => {
 
 <template>
   <UApp>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
-      <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
+    <div class="min-h-screen flex items-center justify-center bg-[#fffbf5] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 dark:bg-stone-900">
+      <div class="max-w-md w-full space-y-8 text-stone-800 dark:text-stone-50">
         <!-- Header Section -->
         <div class="text-center space-y-3">
-          <h2 class="text-3xl font-bold">
-            Sign in to your account
+          <NuxtLink
+            to="/"
+            class="inline-flex items-center gap-2 text-stone-500 hover:text-orange-700 dark:text-stone-400 dark:hover:text-orange-500 transition-colors mb-4"
+          >
+            <UIcon name="i-lucide-arrow-left" class="size-4" />
+            <span class="text-sm font-medium">Back to home</span>
+          </NuxtLink>
+          <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
+            Welcome back
           </h2>
-          <p class="text-sm text-gray-600 dark:text-gray-300">
+          <p class="text-sm text-stone-600 dark:text-stone-400">
             Don't have an account?
             <NuxtLink
               to="/auth/register"
-              class="font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
+              class="font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
             >
               Sign up here
             </NuxtLink>
@@ -112,7 +119,7 @@ watch(() => state.password, () => {
         </div>
 
         <!-- Form Card -->
-        <UCard class="p-8 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+        <UCard class="p-8 bg-white shadow-warm border border-stone-200 rounded-2xl transition-colors duration-300 dark:border-stone-700 dark:bg-stone-800">
           <UForm
             :schema="loginSchema"
             :state="state"
@@ -160,13 +167,13 @@ watch(() => state.password, () => {
                 :disabled="loading"
               >
                 <template #label>
-                  <span class="text-sm">Remember me</span>
+                  <span class="text-sm text-stone-600 dark:text-stone-400">Remember me</span>
                 </template>
               </UCheckbox>
 
               <NuxtLink
                 to="/auth/forgot-password"
-                class="text-sm font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
+                class="text-sm font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
               >
                 Forgot your password?
               </NuxtLink>
