@@ -61,17 +61,17 @@ const formattedTime = computed(() => {
 
 <template>
   <div>
-    <header class="flex items-center justify-between px-6 lg:px-10 py-4 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-50 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60">
+    <header class="flex items-center justify-between px-6 lg:px-10 py-4 border-b border-stone-200 dark:border-stone-700/50 bg-[#fffbf5]/80 dark:bg-stone-900/80 backdrop-blur-md sticky top-0 z-50 supports-[backdrop-filter]:bg-[#fffbf5]/60 dark:supports-[backdrop-filter]:bg-stone-900/60">
       <div
         class="flex items-center gap-3 group cursor-pointer"
         @click="navigateTo('/')"
       >
-        <h1 class="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+        <h1 class="text-xl font-bold text-stone-900 dark:text-white tracking-tight font-serif">
           LifeStint
         </h1>
       </div>
 
-      <nav class="hidden md:flex items-center gap-1 bg-gray-100/50 dark:bg-gray-800/40 p-1.5 rounded-full border border-gray-200 dark:border-white/5 shadow-inner relative">
+      <nav class="hidden md:flex items-center gap-1 bg-stone-100/50 dark:bg-stone-800/40 p-1.5 rounded-full border border-stone-200 dark:border-stone-700/50 shadow-inner relative">
         <div
           v-for="item in items"
           :key="item.to"
@@ -82,14 +82,14 @@ const formattedTime = computed(() => {
             class="px-5 py-1.5 text-sm font-medium rounded-full transition-colors duration-300 block relative"
             :class="[
               item.active
-                ? 'text-primary-600 dark:text-white'
-                : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white',
+                ? 'text-orange-700 dark:text-white'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white',
             ]"
           >
             {{ item.label }}
             <span
               v-if="item.active"
-              class="absolute inset-0 bg-primary-50 dark:bg-primary-500/20 rounded-full shadow-sm ring-1 ring-primary-100 dark:ring-primary-500/30 -z-10"
+              class="absolute inset-0 bg-orange-50 dark:bg-orange-500/20 rounded-full shadow-sm ring-1 ring-orange-100 dark:ring-orange-500/30 -z-10"
               style="view-transition-name: nav-item-active"
             />
           </NuxtLink>
@@ -104,14 +104,14 @@ const formattedTime = computed(() => {
             class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
             :class="isPaused
               ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
-              : 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]'"
+              : 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-400 shadow-[0_0_10px_rgba(22,163,74,0.2)]'"
           >
             <div
               v-if="!isPaused"
               class="relative flex h-2 w-2 mr-0.5"
             >
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
             </div>
             <UIcon
               :name="isPaused ? 'i-lucide-pause' : 'i-lucide-clock'"
@@ -121,9 +121,9 @@ const formattedTime = computed(() => {
           </div>
         </ClientOnly>
 
-        <div class="h-6 w-px bg-gray-200 dark:bg-white/10 mx-2 hidden sm:block" />
+        <div class="h-6 w-px bg-stone-200 dark:bg-stone-700 mx-2 hidden sm:block" />
         <button
-          class="text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors p-2.5 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 flex items-center justify-center"
+          class="text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors p-2.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 flex items-center justify-center"
           aria-label="Toggle dark mode"
           @click="toggleDarkMode"
         >
@@ -134,7 +134,7 @@ const formattedTime = computed(() => {
         </button>
         <button
           aria-label="Sign out"
-          class="text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors p-2.5 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center"
+          class="text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition-colors p-2.5 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center"
           @click="signOut"
         >
           <UIcon
@@ -143,7 +143,7 @@ const formattedTime = computed(() => {
           />
         </button>
         <div class="hidden sm:block">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-purple-500 ring-2 ring-white/10 cursor-pointer" />
+          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-green-500 ring-2 ring-white/10 cursor-pointer" />
         </div>
       </div>
     </header>
