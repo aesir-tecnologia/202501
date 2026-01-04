@@ -3,7 +3,6 @@ import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
 import { PROJECT, STINT, type ProjectColor } from '~/constants';
-import { getColorClasses, getColorPillClasses } from '~/utils/project-colors';
 import { calculateRemainingSeconds } from '~/utils/stint-time';
 
 const props = defineProps<{
@@ -25,8 +24,6 @@ const emit = defineEmits<{
   pauseStint: [stint: StintRow]
   resumeStint: [stint: StintRow]
   completeStint: [stint: StintRow]
-  resumePausedStint: [stint: StintRow]
-  abandonPausedStint: [stint: StintRow]
 }>();
 
 function formatDuration(minutes: number | null): string {
@@ -37,30 +34,30 @@ function formatDuration(minutes: number | null): string {
   return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
 }
 
-function isProjectColor(color: unknown): color is ProjectColor {
-  return PROJECT.COLORS.includes(color as ProjectColor);
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
-// Extracted style constants for maintainability
-const cardStyles = {
-  base: [
-    'group relative flex flex-col md:flex-row items-stretch rounded-2xl',
-    'transition-all duration-300 ease-out overflow-hidden min-h-[120px]',
-    'ring-1 ring-inset backdrop-blur-[2px]',
-  ].join(' '),
-  active: [
-    'bg-gradient-to-br from-white/90 to-white/60 dark:from-slate-900/55 dark:to-slate-800/50',
-    'ring-primary-500/25 shadow-lg',
-    'hover:ring-primary-500/40 hover:shadow-xl hover:-translate-y-1',
-  ].join(' '),
-  inactive: [
-    'bg-gradient-to-br from-white/60 to-white/40 dark:from-slate-900/35 dark:to-slate-800/35',
-    'ring-slate-200/80 dark:ring-slate-800/80',
-    'hover:ring-slate-300/80 dark:hover:ring-slate-700/80',
-    'hover:from-white/70 hover:to-white/50 dark:hover:from-slate-900/45 dark:hover:to-slate-800/45',
-    'hover:-translate-y-0.5 opacity-85 saturate-[0.95]',
-  ].join(' '),
-};
+function formatRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}d ago`;
+}
+
+function parseSafeDate(dateStr: string | null | undefined): Date | null {
+  if (!dateStr) return null;
+  const date = new Date(dateStr);
+  return isNaN(date.getTime()) ? null : date;
+}
 
 const hasActiveStint = computed(() => {
   return props.activeStint?.project_id === props.project.id;
@@ -70,116 +67,86 @@ const hasPausedStint = computed(() => {
   return props.pausedStint?.project_id === props.project.id;
 });
 
-const projectColor = computed(() => {
-  const tag = props.project.color_tag;
-  if (!isProjectColor(tag)) return null;
-  return {
-    ...getColorClasses(tag),
-    pill: getColorPillClasses(tag),
-  };
+const { isPaused, secondsRemaining } = useStintTimer();
+
+const formattedTime = computed(() => {
+  if (!hasActiveStint.value && !hasPausedStint.value) return '--:--';
+
+  let seconds = secondsRemaining.value;
+
+  if (hasPausedStint.value && !hasActiveStint.value && props.pausedStint) {
+    seconds = calculateRemainingSeconds(props.pausedStint);
+  }
+
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 });
 
-const statusPill = computed(() => {
-  if (!props.project.is_active) {
-    return {
-      label: 'Inactive',
-      classes: 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700',
-    };
-  }
+const timerDisplayState = computed(() => {
+  if (hasActiveStint.value && !isPaused.value) return 'running';
+  if (hasPausedStint.value || isPaused.value) return 'paused';
+  return 'idle';
+});
 
-  if (hasActiveStint.value) {
-    if (isPaused.value) {
-      return {
-        label: 'Paused',
-        classes: 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20',
-      };
+const metaText = computed(() => {
+  if (hasActiveStint.value && !isPaused.value) {
+    const startedAt = parseSafeDate(props.activeStint?.started_at);
+    if (startedAt) {
+      return `Started ${formatTime(startedAt)}`;
     }
-
-    return {
-      label: 'Running',
-      classes: 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20',
-    };
   }
 
-  if (hasPausedStint.value) {
-    return {
-      label: 'Paused',
-      classes: 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20',
-    };
+  if (hasPausedStint.value || (hasActiveStint.value && isPaused.value)) {
+    const pausedAt = parseSafeDate(props.pausedStint?.paused_at || props.activeStint?.paused_at);
+    if (pausedAt) {
+      return `Paused ${formatRelativeTime(pausedAt)}`;
+    }
   }
 
-  // With pause-and-switch, other projects show "Ready" (dialog handles conflicts)
-  return {
-    label: 'Ready',
-    classes: projectColor.value
-      ? `${projectColor.value.pill.text} ${projectColor.value.pill.bg} ${projectColor.value.pill.border}`
-      : 'text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-500/10 border-primary-200 dark:border-primary-500/20',
+  if (!props.project.is_active) {
+    return 'Inactive';
+  }
+
+  return `${formatDuration(props.project.custom_stint_duration)} per stint`;
+});
+
+const extraStints = computed(() => {
+  const { completed, expected } = props.dailyProgress;
+  if (expected > 0 && completed > expected) {
+    return completed - expected;
+  }
+  return 0;
+});
+
+const colorRingClass = computed(() => {
+  const color = props.project.color_tag;
+  if (!color || !PROJECT.COLORS.includes(color as ProjectColor)) {
+    return 'border-stone-400 dark:border-stone-500';
+  }
+
+  const ringColorMap: Record<ProjectColor, string> = {
+    red: 'border-red-500',
+    orange: 'border-orange-500',
+    amber: 'border-amber-500',
+    green: 'border-green-500',
+    teal: 'border-teal-500',
+    blue: 'border-blue-500',
+    purple: 'border-purple-500',
+    pink: 'border-pink-500',
   };
+
+  return ringColorMap[color as ProjectColor];
 });
 
 const canStartStint = computed(() => {
   if (!props.project.is_active) return false;
-  // Don't block if same project has the active stint
   if (hasActiveStint.value) return false;
-  // Allow clicking even if another project has active stint - dialog handles conflicts
   return true;
 });
 
-// Timer state (from singleton)
-const { isPaused, secondsRemaining } = useStintTimer();
-
-const formattedTime = computed(() => {
-  const mins = Math.floor(secondsRemaining.value / 60);
-  const secs = secondsRemaining.value % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-});
-
-// Paused stint remaining time (calculated locally since timer singleton only tracks active)
-const pausedStintRemainingSeconds = computed(() => {
-  if (!hasPausedStint.value || !props.pausedStint) return 0;
-  return calculateRemainingSeconds(props.pausedStint);
-});
-
-const formattedPausedTime = computed(() => {
-  const mins = Math.floor(pausedStintRemainingSeconds.value / 60);
-  const secs = pausedStintRemainingSeconds.value % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-});
-
-const progressSegmentsCount = computed(() => {
-  const expected = Math.max(0, props.dailyProgress.expected);
-  return Math.max(1, Math.min(expected, PROJECT.PROGRESS_BAR.MAX_SEGMENTS));
-});
-
-const filledSegmentsCount = computed(() => {
-  const expected = Math.max(0, props.dailyProgress.expected);
-  const completed = Math.max(0, props.dailyProgress.completed);
-
-  if (expected <= PROJECT.PROGRESS_BAR.MAX_SEGMENTS) return Math.min(completed, progressSegmentsCount.value);
-  if (expected === 0) return 0;
-
-  const ratio = Math.min(completed / expected, 1);
-  return Math.round(ratio * progressSegmentsCount.value);
-});
-
-const dailyProgressSummary = computed(() => {
-  const expected = Math.max(0, props.dailyProgress.expected);
-  const completed = Math.max(0, props.dailyProgress.completed);
-  const extra = expected > 0 ? Math.max(0, completed - expected) : 0;
-
-  return {
-    text: expected > 0 ? `${completed}/${expected} today` : `${completed} today`,
-    extraText: extra > 0 ? `+${extra} extra` : '',
-  };
-});
-
-// Event handlers
 function handleEdit() {
   emit('edit', props.project);
-}
-
-function handleToggleActive() {
-  emit('toggleActive', props.project);
 }
 
 function handleStartStint() {
@@ -187,373 +154,572 @@ function handleStartStint() {
 }
 
 function handlePauseStint() {
-  if (props.activeStint) {
-    emit('pauseStint', props.activeStint);
+  if (!props.activeStint) {
+    console.error('[ProjectListCard] handlePauseStint called but activeStint is null');
+    return;
   }
+  emit('pauseStint', props.activeStint);
 }
 
 function handleResumeStint() {
   if (props.activeStint) {
     emit('resumeStint', props.activeStint);
+    return;
   }
+  if (props.pausedStint) {
+    emit('resumeStint', props.pausedStint);
+    return;
+  }
+  console.error('[ProjectListCard] handleResumeStint called without active or paused stint');
 }
 
 function handleCompleteStint() {
-  if (props.activeStint) {
-    emit('completeStint', props.activeStint);
+  const stint = props.activeStint || props.pausedStint;
+  if (!stint) {
+    console.error('[ProjectListCard] handleCompleteStint called without any stint');
+    return;
   }
-}
-
-function handleResumePausedStint() {
-  if (props.pausedStint) {
-    emit('resumePausedStint', props.pausedStint);
-  }
-}
-
-function handleAbandonPausedStint() {
-  if (props.pausedStint) {
-    emit('abandonPausedStint', props.pausedStint);
-  }
+  emit('completeStint', stint);
 }
 </script>
 
 <template>
   <li
-    :class="[
-      cardStyles.base,
-      project.is_active ? cardStyles.active : cardStyles.inactive,
-    ]"
+    class="card-v27"
+    :class="{
+      'state-running': hasActiveStint && !isPaused,
+      'state-inactive': !project.is_active,
+    }"
   >
-    <!-- Subtle Glass Highlight -->
     <div
-      aria-hidden="true"
-      class="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent dark:from-white/[0.06] pointer-events-none z-0"
+      v-if="isDraggable"
+      class="drag-handle"
+    >
+      <UIcon
+        name="i-lucide-grip-vertical"
+        class="w-4 h-4"
+      />
+    </div>
+
+    <div
+      class="project-color"
+      :class="colorRingClass"
     />
 
-    <!-- Active Accent (left edge) -->
-    <div
-      v-if="project.is_active"
-      aria-hidden="true"
-      class="absolute left-0 top-0 h-full w-1.5 z-0 opacity-80"
-      :class="projectColor?.bg ?? 'bg-primary-500'"
-    />
+    <div class="project-info">
+      <div class="project-name">
+        {{ project.name }}
+      </div>
+      <div
+        class="project-meta"
+        :class="{
+          'text-green-600 dark:text-green-400': hasActiveStint && !isPaused,
+          'text-amber-600 dark:text-amber-400': hasPausedStint || isPaused,
+        }"
+      >
+        {{ metaText }}
+      </div>
+    </div>
 
-    <!-- Background Progress Tint for Active Projects -->
     <div
-      v-if="project.is_active"
-      aria-hidden="true"
-      class="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary-500/90 via-indigo-400/40 to-transparent opacity-25 transition-all duration-1000 z-0"
-      :style="{ width: `${Math.max(5, dailyProgress.percentage)}%` }"
-    />
+      class="timer-display"
+      :class="timerDisplayState"
+    >
+      <span
+        v-if="timerDisplayState === 'running'"
+        class="pulse-dot"
+      >
+        <span class="ping" />
+        <span class="dot" />
+      </span>
+      <UIcon
+        v-else-if="timerDisplayState === 'paused'"
+        name="i-lucide-pause"
+        class="w-3 h-3"
+      />
+      <span class="tabular-nums">{{ formattedTime }}</span>
+    </div>
 
-    <!-- Main Content Area -->
-    <div class="flex-1 p-5 md:p-6 flex flex-col justify-center gap-4 z-10">
-      <div class="flex items-start gap-4">
-        <!-- Drag Handle -->
-        <div
-          v-if="isDraggable"
-          class="drag-handle hidden md:flex items-center text-slate-400 dark:text-slate-600 cursor-grab active:cursor-grabbing hover:text-slate-600 dark:hover:text-slate-400 mt-1"
+    <span class="progress-badge">
+      <span class="filled">{{ dailyProgress.completed }}</span>
+      <span class="sep">/</span>
+      <span>{{ dailyProgress.expected }}</span>
+      <span
+        v-if="extraStints > 0"
+        class="extra"
+      >+{{ extraStints }}</span>
+    </span>
+
+    <UTooltip text="Edit Project">
+      <button
+        type="button"
+        class="edit-btn"
+        aria-label="Edit project"
+        @click="handleEdit"
+      >
+        <UIcon
+          name="i-lucide-pencil"
+          class="w-4 h-4"
+        />
+      </button>
+    </UTooltip>
+
+    <div
+      v-if="hasActiveStint || hasPausedStint"
+      class="action-buttons"
+    >
+      <UTooltip :text="isPaused || hasPausedStint ? 'Resume' : 'Pause'">
+        <button
+          type="button"
+          class="action-btn"
+          :class="isPaused || hasPausedStint ? 'resume' : 'pause'"
+          :disabled="isPausing || isCompleting"
+          :aria-label="isPaused || hasPausedStint ? 'Resume stint' : 'Pause stint'"
+          @click="isPaused || hasPausedStint ? handleResumeStint() : handlePauseStint()"
         >
           <UIcon
-            name="i-lucide-grip-vertical"
-            class="w-5 h-5"
+            v-if="isPausing"
+            name="i-lucide-loader-2"
+            class="w-4 h-4 animate-spin"
           />
-        </div>
+          <UIcon
+            v-else
+            :name="isPaused || hasPausedStint ? 'i-lucide-play' : 'i-lucide-pause'"
+            class="w-4 h-4"
+          />
+        </button>
+      </UTooltip>
 
-        <div class="flex-1 space-y-1">
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex items-center gap-2 min-w-0 pt-0.5">
-              <h3
-                class="text-xl font-bold tracking-tight transition-colors truncate"
-                :class="project.is_active ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'"
-              >
-                {{ project.name }}
-              </h3>
-
-              <span
-                class="shrink-0 inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border"
-                :class="statusPill.classes"
-              >
-                {{ statusPill.label }}
-              </span>
-            </div>
-
-            <!-- Desktop Toolbar -->
-            <div class="hidden md:flex">
-              <ProjectCardToolbar
-                :is-active="project.is_active ?? true"
-                :is-toggling="isToggling ?? false"
-                variant="desktop"
-                @toggle-active="handleToggleActive"
-                @edit="handleEdit"
-              />
-            </div>
-
-            <!-- Numeric Badge (Mobile Only) -->
-            <div class="md:hidden flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300">
-              <span :class="{ 'text-primary-600 dark:text-primary-400': dailyProgress.completed > 0 }">{{ dailyProgress.completed }}</span>
-              <span class="text-slate-400 dark:text-slate-600">/</span>
-              <span>{{ dailyProgress.expected }}</span>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-            <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/50 px-2 py-0.5 rounded text-xs font-medium border border-slate-200 dark:border-slate-700/50">
-              <UIcon
-                name="i-lucide-clock"
-                class="w-3 h-3 text-slate-500"
-              />
-              <span>{{ formatDuration(project.custom_stint_duration) }} / stint</span>
-            </div>
-
-            <div
-              v-if="hasActiveStint"
-              class="flex items-center gap-1.5 text-xs font-bold px-2 py-0.5 rounded border"
-              :class="isPaused ? 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' : 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20'"
-            >
-              <span
-                v-if="!isPaused"
-                class="relative flex h-2 w-2"
-              >
-                <span class="animate-ping motion-reduce:animate-none absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <UIcon
-                v-else
-                name="i-lucide-pause"
-                class="w-3 h-3"
-              />
-              <span class="tabular-nums">
-                <span class="sr-only">Time remaining:</span>
-                {{ formattedTime }}
-              </span>
-            </div>
-
-            <div
-              v-else-if="hasPausedStint"
-              class="flex items-center gap-1.5 text-xs font-bold px-2 py-0.5 rounded border text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20"
-            >
-              <UIcon
-                name="i-lucide-pause"
-                class="w-3 h-3"
-              />
-              <span class="tabular-nums">
-                <span class="sr-only">Time remaining:</span>
-                {{ formattedPausedTime }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Visual Indicator: Segmented Progress Pills -->
-      <div class="md:pl-9 space-y-2">
-        <div class="flex items-end justify-between gap-3 text-xs mb-1.5">
-          <span class="text-slate-500 font-semibold tracking-wide">
-            Daily progress
-          </span>
-
-          <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium">
-            <span class="tabular-nums">
-              <span class="text-slate-900 dark:text-white">{{ dailyProgressSummary.text }}</span>
-            </span>
-            <span
-              v-if="dailyProgressSummary.extraText"
-              class="text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-1.5 py-0.5 rounded-full font-semibold"
-            >
-              {{ dailyProgressSummary.extraText }}
-            </span>
-            <span
-              v-if="dailyProgress.isMet"
-              class="text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-500/20 px-1.5 py-0.5 rounded-full font-semibold"
-            >
-              Met
-            </span>
-          </div>
-        </div>
-
-        <div
-          class="relative flex gap-1.5 h-2.5 w-full"
-          role="progressbar"
-          :aria-label="dailyProgress.expected > 0 ? `Daily progress: ${dailyProgress.completed} of ${dailyProgress.expected} stints completed today` : `Daily progress: ${dailyProgress.completed} stints completed today`"
-          :aria-valuemin="0"
-          :aria-valuemax="Math.max(1, dailyProgress.expected)"
-          :aria-valuenow="Math.max(0, dailyProgress.completed)"
+      <UTooltip text="Stop">
+        <button
+          type="button"
+          class="action-btn stop"
+          :disabled="isPausing || isCompleting"
+          aria-label="Stop stint"
+          @click="handleCompleteStint"
         >
-          <!-- Subtle track behind segments -->
-          <div
-            aria-hidden="true"
-            class="absolute inset-0 rounded-full bg-slate-100/70 dark:bg-slate-900/30 ring-1 ring-inset ring-slate-200/80 dark:ring-slate-800/70"
+          <UIcon
+            v-if="isCompleting"
+            name="i-lucide-loader-2"
+            class="w-4 h-4 animate-spin"
           />
-          <div
-            v-for="index in progressSegmentsCount"
-            :key="index"
-            class="relative h-full flex-1 rounded-full transition-all duration-500 ease-out border border-transparent overflow-hidden"
-            :class="[
-              index <= filledSegmentsCount
-                ? [projectColor?.bg ?? 'bg-gradient-to-r from-primary-500 to-indigo-400', 'shadow-[0_0_10px_rgba(99,102,241,0.35)] ring-1 ring-inset ring-white/25']
-                : 'bg-slate-200/90 dark:bg-slate-800/80 hover:bg-slate-300/90 dark:hover:bg-slate-700/80 ring-1 ring-inset ring-slate-200/60 dark:ring-slate-700/30',
-            ]"
-            :title="dailyProgress.expected <= PROJECT.PROGRESS_BAR.MAX_SEGMENTS ? `Stint ${index}` : `Progress segment ${index} of ${progressSegmentsCount}`"
+          <UIcon
+            v-else
+            name="i-lucide-square"
+            class="w-4 h-4"
           />
-        </div>
-
-        <p
-          v-if="dailyProgress.expected > PROJECT.PROGRESS_BAR.MAX_SEGMENTS"
-          class="text-[11px] leading-tight text-slate-400 dark:text-slate-500"
-        >
-          Showing {{ progressSegmentsCount }} segments (goal is {{ dailyProgress.expected }} stints).
-        </p>
-      </div>
+        </button>
+      </UTooltip>
     </div>
 
-    <!-- Actions Section -->
-    <div class="flex items-stretch border-t md:border-t-0 md:border-l border-white/5 bg-transparent z-10">
-      <!-- Mobile Toolbar -->
-      <div class="md:hidden flex items-center justify-center px-4 py-4">
-        <ProjectCardToolbar
-          :is-active="project.is_active ?? true"
-          :is-toggling="isToggling ?? false"
-          variant="mobile"
-          @toggle-active="handleToggleActive"
-          @edit="handleEdit"
+    <UTooltip
+      v-else
+      :text="project.is_active ? 'Start Session' : 'Activate project to start'"
+    >
+      <button
+        type="button"
+        class="play-btn"
+        :disabled="!canStartStint || isStarting"
+        aria-label="Start stint"
+        @click="handleStartStint"
+      >
+        <UIcon
+          v-if="isStarting"
+          name="i-lucide-loader-2"
+          class="w-5 h-5 animate-spin"
         />
-      </div>
-
-      <!-- Right Action Group: Play/Pause/Stop (Dark Panel) -->
-      <div class="w-24 md:w-24 md:border-l border-slate-200/80 dark:border-white/5 flex flex-col items-center justify-center py-4 md:py-0 bg-white/15 dark:bg-black/20">
-        <div class="flex flex-col items-center justify-center rounded-2xl px-3 py-3 bg-white/25 dark:bg-black/25 ring-1 ring-inset ring-slate-200/60 dark:ring-white/10 backdrop-blur-md shadow-sm">
-          <div
-            v-if="hasActiveStint"
-            class="flex flex-col gap-3"
-          >
-            <UTooltip :text="isPaused ? 'Resume' : 'Pause'">
-              <button
-                type="button"
-                :disabled="isPausing || isCompleting"
-                :aria-label="isPaused ? 'Resume stint' : 'Pause stint'"
-                :aria-pressed="isPaused"
-                class="group/btn w-11 h-11 rounded-2xl border transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0B1120] active:scale-[0.98] border-yellow-500/25 text-yellow-700 dark:text-yellow-400 bg-yellow-500/5 hover:bg-yellow-500/10 hover:border-yellow-500/40"
-                @click="isPaused ? handleResumeStint() : handlePauseStint()"
-              >
-                <UIcon
-                  v-if="isPausing"
-                  name="i-lucide-loader-2"
-                  class="w-[18px] h-[18px] animate-spin"
-                />
-                <UIcon
-                  v-else
-                  :name="isPaused ? 'i-lucide-play' : 'i-lucide-pause'"
-                  class="w-[20px] h-[20px] opacity-85 group-hover/btn:opacity-100 fill-current"
-                />
-              </button>
-            </UTooltip>
-
-            <UTooltip text="Stop">
-              <button
-                type="button"
-                :disabled="isPausing || isCompleting"
-                aria-label="Stop stint"
-                class="group/btn w-11 h-11 rounded-2xl border transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0B1120] active:scale-[0.98] border-red-500/25 text-red-700 dark:text-red-400 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/45"
-                @click="handleCompleteStint"
-              >
-                <UIcon
-                  v-if="isCompleting"
-                  name="i-lucide-loader-2"
-                  class="w-[18px] h-[18px] animate-spin"
-                />
-                <UIcon
-                  v-else
-                  name="i-lucide-square"
-                  class="w-[20px] h-[20px] opacity-85 group-hover/btn:opacity-100 fill-current"
-                />
-              </button>
-            </UTooltip>
-          </div>
-
-          <div
-            v-else-if="hasPausedStint"
-            class="flex flex-col gap-3"
-          >
-            <UTooltip text="Resume">
-              <button
-                type="button"
-                :disabled="isPausing || isCompleting"
-                aria-label="Resume paused stint"
-                class="group/btn w-11 h-11 rounded-2xl border transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0B1120] active:scale-[0.98] border-yellow-500/25 text-yellow-700 dark:text-yellow-400 bg-yellow-500/5 hover:bg-yellow-500/10 hover:border-yellow-500/40"
-                @click="handleResumePausedStint"
-              >
-                <UIcon
-                  v-if="isPausing"
-                  name="i-lucide-loader-2"
-                  class="w-[18px] h-[18px] animate-spin"
-                />
-                <UIcon
-                  v-else
-                  name="i-lucide-play"
-                  class="w-[20px] h-[20px] opacity-85 group-hover/btn:opacity-100 fill-current"
-                />
-              </button>
-            </UTooltip>
-
-            <UTooltip text="Abandon">
-              <button
-                type="button"
-                :disabled="isPausing || isCompleting"
-                aria-label="Abandon paused stint"
-                class="group/btn w-11 h-11 rounded-2xl border transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0B1120] active:scale-[0.98] border-red-500/25 text-red-700 dark:text-red-400 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/45"
-                @click="handleAbandonPausedStint"
-              >
-                <UIcon
-                  v-if="isCompleting"
-                  name="i-lucide-loader-2"
-                  class="w-[18px] h-[18px] animate-spin"
-                />
-                <UIcon
-                  v-else
-                  name="i-lucide-x"
-                  class="w-[20px] h-[20px] opacity-85 group-hover/btn:opacity-100"
-                />
-              </button>
-            </UTooltip>
-          </div>
-
-          <div v-else>
-            <UTooltip :text="project.is_active ? 'Start Session' : 'Activate project to start'">
-              <button
-                type="button"
-                :disabled="!canStartStint || isStarting"
-                aria-label="Start stint"
-                class="group/play w-12 h-12 rounded-2xl border transition-all duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#0B1120] active:scale-[0.98]"
-                :class="[
-                  canStartStint && !isStarting
-                    ? 'border-slate-300/80 dark:border-slate-600/60 text-slate-700 dark:text-slate-200 bg-white/10 dark:bg-white/[0.03] hover:bg-white/20 dark:hover:bg-white/[0.06] hover:border-slate-400/80 dark:hover:border-slate-500/60 shadow-sm'
-                    : 'border-slate-200/70 dark:border-slate-800 text-slate-300 dark:text-slate-700 cursor-not-allowed opacity-50 bg-transparent',
-                ]"
-                @click="handleStartStint"
-              >
-                <UIcon
-                  v-if="isStarting"
-                  name="i-lucide-loader-2"
-                  class="w-6 h-6 animate-spin"
-                />
-                <UIcon
-                  v-else
-                  name="i-lucide-play"
-                  class="w-6 h-6 fill-current"
-                  :class="{ 'ml-0.5': canStartStint }"
-                />
-              </button>
-            </UTooltip>
-          </div>
-        </div>
-      </div>
-    </div>
+        <UIcon
+          v-else
+          name="i-lucide-play"
+          class="w-5 h-5"
+        />
+      </button>
+    </UTooltip>
   </li>
 </template>
 
 <style scoped>
+.card-v27 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease;
+}
+
+:root.dark .card-v27 {
+  background: rgba(41, 37, 36, 0.5);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.card-v27.state-running {
+  box-shadow: 0 2px 12px rgba(22, 163, 74, 0.1);
+}
+
+.card-v27.state-inactive {
+  opacity: 0.7;
+  filter: saturate(0.85);
+}
+
+.card-v27.state-inactive .project-name {
+  color: var(--color-stone-500);
+}
+
+:root.dark .card-v27.state-inactive .project-name {
+  color: var(--color-stone-400);
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  color: rgba(120, 113, 108, 0.4);
+  cursor: grab;
+  transition: color 0.15s ease;
+}
+
+.drag-handle:hover {
+  color: var(--color-stone-500);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+:root.dark .drag-handle {
+  color: rgba(168, 162, 158, 0.3);
+}
+
+:root.dark .drag-handle:hover {
+  color: var(--color-stone-400);
+}
+
+.project-color {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: transparent;
+  border: 3.5px solid;
+}
+
+.project-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.project-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-stone-900);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root.dark .project-name {
+  color: var(--color-stone-50);
+}
+
+.project-meta {
+  font-size: 13px;
+  color: var(--color-stone-500);
+}
+
+:root.dark .project-meta {
+  color: var(--color-stone-400);
+}
+
+.timer-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  border: 1px solid;
+  min-width: 70px;
+  justify-content: center;
+}
+
+.timer-display.idle {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-stone-400);
+}
+
+:root.dark .timer-display.idle {
+  color: var(--color-stone-500);
+}
+
+.timer-display.running {
+  color: #15803d;
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+:root.dark .timer-display.running {
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.timer-display.paused {
+  color: #b45309;
+  background: rgba(217, 119, 6, 0.1);
+  border-color: rgba(217, 119, 6, 0.2);
+}
+
+:root.dark .timer-display.paused {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.2);
+}
+
+.pulse-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+}
+
+.pulse-dot .ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #4ade80;
+  opacity: 0.75;
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.pulse-dot .dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.progress-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-stone-500);
+  background: var(--color-stone-100);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--color-stone-200);
+}
+
+:root.dark .progress-badge {
+  background: var(--color-stone-800);
+  border-color: var(--color-stone-700);
+  color: var(--color-stone-400);
+}
+
+.progress-badge .filled {
+  color: #16a34a;
+}
+
+:root.dark .progress-badge .filled {
+  color: #4ade80;
+}
+
+.progress-badge .sep {
+  opacity: 0.5;
+}
+
+.progress-badge .extra {
+  color: #15803d;
+  margin-left: 4px;
+  font-weight: 700;
+}
+
+:root.dark .progress-badge .extra {
+  color: #4ade80;
+}
+
+.card-v27.state-inactive .progress-badge .filled {
+  color: var(--color-stone-500);
+}
+
+:root.dark .card-v27.state-inactive .progress-badge .filled {
+  color: var(--color-stone-500);
+}
+
+.edit-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(120, 113, 108, 0.08);
+  color: var(--color-stone-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.edit-btn:hover {
+  background: rgba(120, 113, 108, 0.15);
+  color: var(--color-stone-700);
+}
+
+:root.dark .edit-btn {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-stone-400);
+}
+
+:root.dark .edit-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-stone-200);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: transparent;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-btn.pause,
+.action-btn.resume {
+  color: #b45309;
+  border-color: rgba(217, 119, 6, 0.25);
+  background: rgba(217, 119, 6, 0.05);
+}
+
+.action-btn.pause:hover:not(:disabled),
+.action-btn.resume:hover:not(:disabled) {
+  background: rgba(217, 119, 6, 0.15);
+  border-color: rgba(217, 119, 6, 0.4);
+}
+
+:root.dark .action-btn.pause,
+:root.dark .action-btn.resume {
+  color: #fbbf24;
+}
+
+.action-btn.stop {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.25);
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.action-btn.stop:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(220, 38, 38, 0.4);
+}
+
+:root.dark .action-btn.stop {
+  color: #f87171;
+}
+
+.play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(194, 65, 12, 0.05);
+  color: #c2410c;
+  border: 1px solid rgba(194, 65, 12, 0.25);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.play-btn:hover:not(:disabled) {
+  background: rgba(194, 65, 12, 0.15);
+  border-color: rgba(194, 65, 12, 0.4);
+}
+
+:root.dark .play-btn {
+  background: rgba(234, 88, 12, 0.05);
+  color: #fb923c;
+  border-color: rgba(234, 88, 12, 0.25);
+}
+
+:root.dark .play-btn:hover:not(:disabled) {
+  background: rgba(234, 88, 12, 0.15);
+  border-color: rgba(234, 88, 12, 0.4);
+}
+
+.play-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .card-v27 {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+
+  .project-info {
+    order: 1;
+    flex-basis: calc(100% - 50px);
+  }
+
+  .drag-handle {
+    order: 0;
+  }
+
+  .project-color {
+    order: 0;
+  }
+
+  .timer-display {
+    order: 2;
+  }
+
+  .progress-badge {
+    order: 2;
+  }
+
+  .edit-btn {
+    order: 3;
+  }
+
+  .action-buttons,
+  .play-btn {
+    order: 3;
+    margin-left: auto;
+  }
 }
 </style>

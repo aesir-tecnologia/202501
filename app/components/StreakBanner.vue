@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useStreakQuery } from '~/composables/useStreaks';
 
-const { data: streak, isLoading } = useStreakQuery();
+const { data: streak, isLoading, isError } = useStreakQuery();
 
 const showStreak = computed(() =>
   streak.value && streak.value.currentStreak > 0,
@@ -15,11 +15,11 @@ const streakText = computed(() =>
 <template>
   <!-- Hidden when streak is 0 (FR-008) -->
   <div
-    v-if="showStreak && !isLoading"
+    v-if="showStreak && !isLoading && !isError"
     class="mb-6"
   >
     <UCard
-      class="bg-gradient-to-br from-violet-500 to-emerald-500 text-white shadow-lg"
+      class="bg-gradient-to-br from-orange-600 to-green-600 text-white shadow-lg"
       :class="{ 'ring-2 ring-yellow-400': streak?.isAtRisk }"
     >
       <div class="flex items-center justify-between">

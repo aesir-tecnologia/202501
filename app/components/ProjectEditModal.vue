@@ -5,10 +5,12 @@ import type { ProjectColor } from '~/schemas/projects';
 
 const props = defineProps<{
   project: ProjectRow
+  isTogglingActive?: boolean
 }>();
 
 const emit = defineEmits<{
   archive: [project: ProjectRow]
+  toggleActive: [project: ProjectRow]
 }>();
 
 const toast = useToast();
@@ -23,6 +25,10 @@ function closeModal() {
 function handleArchiveClick() {
   closeModal();
   emit('archive', props.project);
+}
+
+function handleToggleActive() {
+  emit('toggleActive', props.project);
 }
 
 async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number | null, colorTag: ProjectColor | null }) {
@@ -70,20 +76,44 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
         />
 
         <template #footer>
-          <div class="flex justify-between items-center pt-4 border-t border-neutral-200 dark:border-neutral-800">
-            <UTooltip text="Archive this project">
-              <span>
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  icon="i-lucide-archive"
-                  class="transition-all duration-200"
-                  @click="handleArchiveClick"
+          <div class="flex flex-col gap-4 pt-4 border-t border-neutral-200 dark:border-neutral-800">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-stone-700 dark:text-stone-300">
+                  Project Status
+                </span>
+                <USwitch
+                  :model-value="project.is_active ?? true"
+                  :loading="isTogglingActive"
+                  size="lg"
+                  checked-icon="i-lucide-check"
+                  unchecked-icon="i-lucide-power-off"
+                  @update:model-value="handleToggleActive"
+                />
+                <span
+                  class="text-sm font-medium"
+                  :class="project.is_active ? 'text-green-600 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
                 >
-                  Archive Project
-                </UButton>
-              </span>
-            </UTooltip>
+                  {{ project.is_active ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <UTooltip text="Archive this project">
+                <span>
+                  <UButton
+                    color="neutral"
+                    variant="ghost"
+                    icon="i-lucide-archive"
+                    class="transition-all duration-200"
+                    @click="handleArchiveClick"
+                  >
+                    Archive Project
+                  </UButton>
+                </span>
+              </UTooltip>
+            </div>
           </div>
         </template>
       </UCard>

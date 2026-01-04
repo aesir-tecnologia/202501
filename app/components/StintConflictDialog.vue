@@ -169,7 +169,7 @@ const statusTextClass = computed(() =>
             </p>
           </div>
 
-          <p class="text-sm text-slate-600 dark:text-slate-400">
+          <p class="text-sm text-stone-600 dark:text-stone-400">
             You're about to start a stint on <strong>{{ newProjectName }}</strong>.
           </p>
 
