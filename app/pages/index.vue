@@ -63,7 +63,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-ink-900 text-white antialiased">
+  <div class="bg-[#fffbf5] dark:bg-stone-900 text-stone-800 dark:text-stone-50 antialiased">
     <!-- Skip to content link for accessibility -->
     <a
       href="#main-content"
@@ -73,36 +73,36 @@ onUnmounted(() => {
     </a>
 
     <!-- Header -->
-    <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-ink-900/70 border-b border-white/10">
+    <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-[#fffbf5]/80 dark:supports-[backdrop-filter]:bg-stone-900/80 border-b border-stone-200 dark:border-stone-700/50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div
-            class="h-8 w-8 rounded-lg bg-gradient-to-tr from-primary-500 to-secondary-500 grid place-items-center font-extrabold"
+            class="h-8 w-8 rounded-lg bg-gradient-to-tr from-orange-600 to-green-600 grid place-items-center font-extrabold text-white"
             aria-hidden="true"
           >
             L
           </div>
-          <span class="font-semibold tracking-tight">LifeStint</span>
+          <span class="font-semibold tracking-tight font-serif text-stone-900 dark:text-stone-50">LifeStint</span>
         </div>
         <nav
-          class="hidden md:flex items-center gap-7 text-sm text-ink-200"
+          class="hidden md:flex items-center gap-7 text-sm text-stone-600 dark:text-stone-300"
           aria-label="Main navigation"
         >
           <a
             href="#how"
-            class="hover:text-white transition-colors"
+            class="hover:text-stone-900 dark:hover:text-white transition-colors"
           >How it works</a>
           <a
             href="#analytics"
-            class="hover:text-white transition-colors"
+            class="hover:text-stone-900 dark:hover:text-white transition-colors"
           >Analytics</a>
           <a
             href="#pricing"
-            class="hover:text-white transition-colors"
+            class="hover:text-stone-900 dark:hover:text-white transition-colors"
           >Pricing</a>
           <a
             href="#faq"
-            class="hover:text-white transition-colors"
+            class="hover:text-stone-900 dark:hover:text-white transition-colors"
           >FAQ</a>
         </nav>
         <div class="flex items-center gap-3">
@@ -112,28 +112,28 @@ onUnmounted(() => {
               <template v-if="user">
                 <NuxtLink
                   to="/dashboard"
-                  class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-sm font-semibold shadow-focus"
+                  class="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold shadow-md"
                 >Dashboard</NuxtLink>
               </template>
               <template v-else>
                 <NuxtLink
                   to="/auth/login"
-                  class="hidden sm:inline-block px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm"
+                  class="hidden sm:inline-block px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-sm"
                 >Sign in</NuxtLink>
                 <NuxtLink
                   to="/auth/register"
-                  class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-sm font-semibold shadow-focus"
+                  class="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold shadow-md"
                 >Start free</NuxtLink>
               </template>
             </template>
             <template #fallback>
               <NuxtLink
                 to="/auth/login"
-                class="hidden sm:inline-block px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm"
+                class="hidden sm:inline-block px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-sm"
               >Sign in</NuxtLink>
               <NuxtLink
                 to="/auth/register"
-                class="px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-sm font-semibold shadow-focus"
+                class="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold shadow-md"
               >Start free</NuxtLink>
             </template>
           </ClientOnly>
@@ -144,20 +144,20 @@ onUnmounted(() => {
     <!-- Hero -->
     <main id="main-content">
       <section
-        class="hero noise relative overflow-hidden"
+        class="hero-warm relative overflow-hidden"
         aria-label="Hero section"
       >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
           <div class="grid lg:grid-cols-12 gap-10 items-center">
             <div class="lg:col-span-6">
-              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 badge text-sm text-ink-200 fade-up stagger-1">
+              <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-700/50 text-sm text-orange-800 dark:text-orange-200 fade-up stagger-1">
                 Built for freelancers, consultants, and independents
               </div>
-              <h1 class="mt-5 text-4xl sm:text-5xl xl:text-6xl font-semibold leading-tight fade-up stagger-2">
+              <h1 class="mt-5 text-4xl sm:text-5xl xl:text-6xl font-semibold leading-tight fade-up stagger-2 font-serif text-stone-900 dark:text-stone-50">
                 One stint at a time.<br>Zero context switching.
               </h1>
-              <p class="mt-5 text-ink-100 text-lg max-w-2xl fade-up stagger-3">
-                <strong class="text-white">Defend your premium rates with credible focus
+              <p class="mt-5 text-stone-600 dark:text-stone-300 text-lg max-w-2xl fade-up stagger-3">
+                <strong class="text-stone-900 dark:text-white">Defend your premium rates with credible focus
                   evidence.</strong>
                 LifeStint combines project-level tracking with professional reporting—no surveillance,
                 no administrative overhead, just demonstrable work quality.
@@ -166,7 +166,7 @@ onUnmounted(() => {
               <div class="mt-8 flex flex-col sm:flex-row gap-3 fade-up stagger-4">
                 <a
                   href="#cta"
-                  class="inline-flex items-center justify-center rounded-xl bg-secondary-500 hover:bg-secondary-600 text-ink-900 font-semibold px-6 py-3"
+                  class="inline-flex items-center justify-center rounded-xl bg-green-700 hover:bg-green-800 text-white font-semibold px-6 py-3 shadow-md"
                 >
                   Start your first stint
                   <svg
@@ -184,31 +184,31 @@ onUnmounted(() => {
                 </a>
                 <a
                   href="#how"
-                  class="inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 px-6 py-3 font-medium"
+                  class="inline-flex items-center justify-center rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 px-6 py-3 font-medium text-stone-900 dark:text-stone-100"
                 >
                   Watch the 30s tour
                 </a>
               </div>
 
-              <div class="mt-8 grid grid-cols-3 gap-4 text-sm text-ink-200">
-                <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-5">
-                  <div class="text-2xl font-semibold text-white number-roll">
+              <div class="mt-8 grid grid-cols-3 gap-4 text-sm text-stone-600 dark:text-stone-300">
+                <div class="rounded-lg bg-white dark:bg-stone-800 p-3 text-center hover-lift fade-up stagger-5 shadow-sm ring-1 ring-stone-200 dark:ring-stone-700">
+                  <div class="text-2xl font-semibold text-stone-900 dark:text-white number-roll">
                     1
                   </div>
                   <div class="mt-1">
                     Active session
                   </div>
                 </div>
-                <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-6">
-                  <div class="text-2xl font-semibold text-white number-roll">
+                <div class="rounded-lg bg-white dark:bg-stone-800 p-3 text-center hover-lift fade-up stagger-6 shadow-sm ring-1 ring-stone-200 dark:ring-stone-700">
+                  <div class="text-2xl font-semibold text-stone-900 dark:text-white number-roll">
                     0
                   </div>
                   <div class="mt-1">
                     Admin overhead
                   </div>
                 </div>
-                <div class="rounded-lg bg-white/5 p-3 text-center hover-lift fade-up stagger-6">
-                  <div class="text-2xl font-semibold text-white number-roll">
+                <div class="rounded-lg bg-white dark:bg-stone-800 p-3 text-center hover-lift fade-up stagger-6 shadow-sm ring-1 ring-stone-200 dark:ring-stone-700">
+                  <div class="text-2xl font-semibold text-stone-900 dark:text-white number-roll">
                     ∞
                   </div>
                   <div class="mt-1">
@@ -222,99 +222,99 @@ onUnmounted(() => {
             <div class="lg:col-span-6">
               <div class="relative floating">
                 <div
-                  class="absolute -inset-6 blur-3xl opacity-40 pulse-slow"
-                  style="background: radial-gradient(400px 160px at 60% 40%, rgb(var(--color-primary-500) / 0.35), transparent 60%);"
+                  class="absolute -inset-6 blur-3xl opacity-30 dark:opacity-40 pulse-slow"
+                  style="background: radial-gradient(400px 160px at 60% 40%, rgba(194, 65, 12, 0.35), transparent 60%);"
                 />
-                <div class="relative rounded-2xl bg-ink-800/70 ring-1 ring-white/10 shadow-card p-4 scale-in shimmer">
+                <div class="relative rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 shadow-lg p-4 scale-in shimmer">
                   <div class="flex items-center justify-between">
-                    <div class="text-sm text-ink-300">
+                    <div class="text-sm text-stone-500 dark:text-stone-400">
                       Dashboard — Today
                     </div>
-                    <div class="text-xs text-ink-300">
+                    <div class="text-xs text-stone-500 dark:text-stone-400">
                       Synced
                     </div>
                   </div>
                   <div class="mt-4 grid sm:grid-cols-2 gap-4">
                     <!-- Card 1 -->
-                    <div class="rounded-xl bg-white/5 p-4 ring-1 ring-white/10">
+                    <div class="rounded-xl bg-stone-50 dark:bg-stone-900 p-4 ring-1 ring-stone-200 dark:ring-stone-700">
                       <div class="flex items-center justify-between">
-                        <div class="font-medium">
+                        <div class="font-medium text-stone-900 dark:text-stone-50">
                           Client Atlas
                         </div>
-                        <span class="text-xs px-2 py-1 rounded-full bg-secondary-500/15 text-secondary-300">Active</span>
+                        <span class="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Active</span>
                       </div>
                       <div class="mt-3">
-                        <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                        <div class="w-full h-2 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
                           <div
-                            class="h-2 rounded-full bg-secondary-400 progress-animate"
+                            class="h-2 rounded-full bg-lime-500 progress-animate"
                             style="--progress-width: 72%; width: 72%;"
                           />
                         </div>
-                        <div class="mt-2 text-xs text-ink-300">
+                        <div class="mt-2 text-xs text-stone-500 dark:text-stone-400">
                           2 of 3 stints • 28:12 remaining
                         </div>
                       </div>
-                      <button class="mt-3 w-full rounded-lg bg-secondary-500 hover:bg-secondary-600 text-ink-900 font-semibold py-2 glow-on-hover pulse-slow">
+                      <button class="mt-3 w-full rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold py-2 glow-on-hover pulse-slow">
                         Resume
                       </button>
                     </div>
                     <!-- Card 2 -->
-                    <div class="rounded-xl bg-white/5 p-4 ring-1 ring-white/10">
+                    <div class="rounded-xl bg-stone-50 dark:bg-stone-900 p-4 ring-1 ring-stone-200 dark:ring-stone-700">
                       <div class="flex items-center justify-between">
-                        <div class="font-medium">
+                        <div class="font-medium text-stone-900 dark:text-stone-50">
                           Orion Migrations
                         </div>
-                        <span class="text-xs px-2 py-1 rounded-full bg-white/10">Idle</span>
+                        <span class="text-xs px-2 py-1 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300">Idle</span>
                       </div>
                       <div class="mt-3">
-                        <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                        <div class="w-full h-2 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
                           <div
-                            class="h-2 rounded-full bg-primary-500 progress-animate"
+                            class="h-2 rounded-full bg-orange-500 progress-animate"
                             style="--progress-width: 33%; width: 33%;"
                           />
                         </div>
-                        <div class="mt-2 text-xs text-ink-300">
+                        <div class="mt-2 text-xs text-stone-500 dark:text-stone-400">
                           1 of 3 stints
                         </div>
                       </div>
-                      <button class="mt-3 w-full rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-medium py-2">
+                      <button class="mt-3 w-full rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium py-2">
                         Start stint
                       </button>
                     </div>
                     <!-- Heatmap -->
-                    <div class="sm:col-span-2 rounded-xl bg-white/5 p-4 ring-1 ring-white/10">
+                    <div class="sm:col-span-2 rounded-xl bg-stone-50 dark:bg-stone-900 p-4 ring-1 ring-stone-200 dark:ring-stone-700">
                       <div class="flex items-center justify-between">
-                        <div class="font-medium">
+                        <div class="font-medium text-stone-900 dark:text-stone-50">
                           Consistency heatmap
                         </div>
-                        <div class="text-xs text-ink-300">
+                        <div class="text-xs text-stone-500 dark:text-stone-400">
                           Last 10 weeks
                         </div>
                       </div>
                       <div class="mt-3 grid grid-cols-14 gap-1">
                         <!-- simple faux map -->
-                        <div class="h-3 w-3 rounded bg-ink-700" />
-                        <div class="h-3 w-3 rounded bg-primary-900" />
-                        <div class="h-3 w-3 rounded bg-primary-700" />
-                        <div class="h-3 w-3 rounded bg-primary-600" />
-                        <div class="h-3 w-3 rounded bg-primary-500" />
-                        <div class="h-3 w-3 rounded bg-primary-700" />
-                        <div class="h-3 w-3 rounded bg-primary-800" />
-                        <div class="h-3 w-3 rounded bg-ink-700" />
-                        <div class="h-3 w-3 rounded bg-primary-600" />
-                        <div class="h-3 w-3 rounded bg-primary-500" />
-                        <div class="h-3 w-3 rounded bg-primary-700" />
-                        <div class="h-3 w-3 rounded bg-primary-900" />
-                        <div class="h-3 w-3 rounded bg-ink-700" />
-                        <div class="h-3 w-3 rounded bg-primary-700" />
+                        <div class="h-3 w-3 rounded bg-stone-300 dark:bg-stone-700" />
+                        <div class="h-3 w-3 rounded bg-orange-200 dark:bg-orange-900" />
+                        <div class="h-3 w-3 rounded bg-orange-400 dark:bg-orange-700" />
+                        <div class="h-3 w-3 rounded bg-orange-500 dark:bg-orange-600" />
+                        <div class="h-3 w-3 rounded bg-orange-600 dark:bg-orange-500" />
+                        <div class="h-3 w-3 rounded bg-orange-400 dark:bg-orange-700" />
+                        <div class="h-3 w-3 rounded bg-orange-300 dark:bg-orange-800" />
+                        <div class="h-3 w-3 rounded bg-stone-300 dark:bg-stone-700" />
+                        <div class="h-3 w-3 rounded bg-orange-500 dark:bg-orange-600" />
+                        <div class="h-3 w-3 rounded bg-orange-600 dark:bg-orange-500" />
+                        <div class="h-3 w-3 rounded bg-orange-400 dark:bg-orange-700" />
+                        <div class="h-3 w-3 rounded bg-orange-200 dark:bg-orange-900" />
+                        <div class="h-3 w-3 rounded bg-stone-300 dark:bg-stone-700" />
+                        <div class="h-3 w-3 rounded bg-orange-400 dark:bg-orange-700" />
                       </div>
-                      <div class="mt-3 text-xs text-ink-300">
+                      <div class="mt-3 text-xs text-stone-500 dark:text-stone-400">
                         Streak 14 days • Completion 90%
                       </div>
                     </div>
                   </div>
                 </div>
-                <p class="mt-3 text-center text-xs text-ink-300">
+                <p class="mt-3 text-center text-xs text-stone-500 dark:text-stone-400">
                   Mock preview — not actual UI
                 </p>
               </div>
@@ -327,26 +327,26 @@ onUnmounted(() => {
     <!-- How it works -->
     <section
       id="how"
-      class="relative"
+      class="relative bg-[#fef7ed] dark:bg-stone-800/50"
       aria-labelledby="how-it-works-title"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div class="text-center max-w-3xl mx-auto mb-10">
           <h2
             id="how-it-works-title"
-            class="text-3xl sm:text-4xl font-semibold"
+            class="text-3xl sm:text-4xl font-semibold font-serif text-stone-900 dark:text-stone-50"
           >
             Run your day in stints
           </h2>
-          <p class="mt-3 text-ink-200 text-lg">
+          <p class="mt-3 text-stone-600 dark:text-stone-300 text-lg">
             Predetermined focused work sessions that prevent multitasking and demonstrate consistent
             productivity to your clients.
           </p>
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-1 hover-lift">
-            <div class="h-10 w-10 rounded-lg bg-secondary-500/10 ring-1 ring-secondary-500/20 grid place-items-center text-secondary-400 rotate-in">
+          <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-1 hover-lift shadow-sm">
+            <div class="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/30 ring-1 ring-green-200 dark:ring-green-700/50 grid place-items-center text-green-700 dark:text-green-400 rotate-in">
               <svg
                 class="h-5 w-5"
                 fill="none"
@@ -361,17 +361,17 @@ onUnmounted(() => {
                 />
               </svg>
             </div>
-            <div class="mt-4 font-semibold text-white">
+            <div class="mt-4 font-semibold text-stone-900 dark:text-stone-50">
               Single Active Stint Enforcement
             </div>
-            <p class="mt-2 text-sm text-ink-200">
+            <p class="mt-2 text-sm text-stone-600 dark:text-stone-300">
               Only one active stint at a time across all devices. No multitasking, no context
               switching—just focused work.
             </p>
           </div>
 
-          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-2 hover-lift">
-            <div class="h-10 w-10 rounded-lg bg-primary-500/10 ring-1 ring-primary-500/20 grid place-items-center text-primary-400 rotate-in">
+          <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-2 hover-lift shadow-sm">
+            <div class="h-10 w-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 ring-1 ring-orange-200 dark:ring-orange-700/50 grid place-items-center text-orange-700 dark:text-orange-400 rotate-in">
               <svg
                 class="h-5 w-5"
                 fill="none"
@@ -386,17 +386,17 @@ onUnmounted(() => {
                 />
               </svg>
             </div>
-            <div class="mt-4 font-semibold text-white">
+            <div class="mt-4 font-semibold text-stone-900 dark:text-stone-50">
               Project-Level Goals
             </div>
-            <p class="mt-2 text-sm text-ink-200">
+            <p class="mt-2 text-sm text-stone-600 dark:text-stone-300">
               Set expected daily stints (1-8 per day) for each project. Track "2 of 3 stints today" with
               visual progress bars.
             </p>
           </div>
 
-          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-3 hover-lift">
-            <div class="h-10 w-10 rounded-lg bg-purple-500/10 ring-1 ring-purple-500/20 grid place-items-center text-purple-400 rotate-in">
+          <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-3 hover-lift shadow-sm">
+            <div class="h-10 w-10 rounded-lg bg-lime-100 dark:bg-lime-900/30 ring-1 ring-lime-200 dark:ring-lime-700/50 grid place-items-center text-lime-700 dark:text-lime-400 rotate-in">
               <svg
                 class="h-5 w-5"
                 fill="none"
@@ -411,17 +411,17 @@ onUnmounted(() => {
                 />
               </svg>
             </div>
-            <div class="mt-4 font-semibold text-white">
+            <div class="mt-4 font-semibold text-stone-900 dark:text-stone-50">
               Real-Time Cross-Device Sync
             </div>
-            <p class="mt-2 text-sm text-ink-200">
+            <p class="mt-2 text-sm text-stone-600 dark:text-stone-300">
               Start on desktop, continue on mobile. Active stints sync instantly across all devices with
               conflict resolution.
             </p>
           </div>
 
-          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-4 hover-lift">
-            <div class="h-10 w-10 rounded-lg bg-amberx-500/10 ring-1 ring-amberx-500/20 grid place-items-center text-amberx-400 rotate-in">
+          <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-4 hover-lift shadow-sm">
+            <div class="h-10 w-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 ring-1 ring-amber-200 dark:ring-amber-700/50 grid place-items-center text-amber-700 dark:text-amber-400 rotate-in">
               <svg
                 class="h-5 w-5"
                 fill="none"
@@ -436,17 +436,17 @@ onUnmounted(() => {
                 />
               </svg>
             </div>
-            <div class="mt-4 font-semibold text-white">
+            <div class="mt-4 font-semibold text-stone-900 dark:text-stone-50">
               Professional Focus Ledger
             </div>
-            <p class="mt-2 text-sm text-ink-200">
+            <p class="mt-2 text-sm text-stone-600 dark:text-stone-300">
               Export CSV reports showing focus consistency per project—client-ready evidence without
               surveillance metrics.
             </p>
           </div>
 
-          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-5 hover-lift">
-            <div class="h-10 w-10 rounded-lg bg-red-500/10 ring-1 ring-red-500/20 grid place-items-center text-red-400 rotate-in">
+          <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-5 hover-lift shadow-sm">
+            <div class="h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/30 ring-1 ring-red-200 dark:ring-red-700/50 grid place-items-center text-red-700 dark:text-red-400 rotate-in">
               <svg
                 class="h-5 w-5"
                 fill="none"
@@ -461,17 +461,17 @@ onUnmounted(() => {
                 />
               </svg>
             </div>
-            <div class="mt-4 font-semibold text-white">
+            <div class="mt-4 font-semibold text-stone-900 dark:text-stone-50">
               Streak Tracking & Habit Building
             </div>
-            <p class="mt-2 text-sm text-ink-200">
+            <p class="mt-2 text-sm text-stone-600 dark:text-stone-300">
               Maintain daily streaks with visual heatmaps. 1-day grace period keeps you motivated without
               harsh penalties.
             </p>
           </div>
 
-          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-6 hover-lift">
-            <div class="h-10 w-10 rounded-lg bg-cyan-500/10 ring-1 ring-cyan-500/20 grid place-items-center text-cyan-400 rotate-in">
+          <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-6 hover-lift shadow-sm">
+            <div class="h-10 w-10 rounded-lg bg-stone-100 dark:bg-stone-700 ring-1 ring-stone-200 dark:ring-stone-600 grid place-items-center text-stone-700 dark:text-stone-300 rotate-in">
               <svg
                 class="h-5 w-5"
                 fill="none"
@@ -486,10 +486,10 @@ onUnmounted(() => {
                 />
               </svg>
             </div>
-            <div class="mt-4 font-semibold text-white">
+            <div class="mt-4 font-semibold text-stone-900 dark:text-stone-50">
               Zero Administrative Overhead
             </div>
-            <p class="mt-2 text-sm text-ink-200">
+            <p class="mt-2 text-sm text-stone-600 dark:text-stone-300">
               No categories, tags, or pre-work required. Start tracking in under 60 seconds with one-click
               project creation.
             </p>
@@ -499,46 +499,46 @@ onUnmounted(() => {
     </section>
 
     <!-- Competitive differentiation -->
-    <section class="relative bg-gradient-to-b from-transparent to-ink-800/50">
+    <section class="relative">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div class="text-center max-w-3xl mx-auto mb-10 fade-up">
-          <h2 class="text-3xl sm:text-4xl font-semibold">
+          <h2 class="text-3xl sm:text-4xl font-semibold font-serif text-stone-900 dark:text-stone-50">
             Why not just use a time tracker?
           </h2>
-          <p class="mt-3 text-ink-200 text-lg">
+          <p class="mt-3 text-stone-600 dark:text-stone-300 text-lg">
             Traditional time trackers optimize for billing compliance. LifeStint optimizes for demonstrable
             focus quality.
           </p>
         </div>
 
-        <div class="overflow-x-auto rounded-2xl bg-white/5 ring-1 ring-white/10 scale-in">
+        <div class="overflow-x-auto rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 scale-in shadow-sm">
           <table class="w-full text-sm border-collapse min-w-[600px]">
             <thead>
-              <tr class="border-b border-white/10">
-                <th class="text-left p-4 font-medium text-ink-300 bg-ink-900/50">
+              <tr class="border-b border-stone-200 dark:border-stone-700">
+                <th class="text-left p-4 font-medium text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-stone-900/50">
                   Feature
                 </th>
-                <th class="p-4 text-center bg-ink-900/50">
-                  <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-500/10 ring-1 ring-primary-500/20">
-                    <span class="font-semibold text-primary-300">LifeStint</span>
+                <th class="p-4 text-center bg-stone-50 dark:bg-stone-900/50">
+                  <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/30 ring-1 ring-orange-200 dark:ring-orange-700/50">
+                    <span class="font-semibold text-orange-700 dark:text-orange-300">LifeStint</span>
                   </div>
                 </th>
-                <th class="p-4 text-center font-medium text-ink-300 bg-ink-900/50">
+                <th class="p-4 text-center font-medium text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-stone-900/50">
                   Toggl / Harvest
                 </th>
-                <th class="p-4 text-center font-medium text-ink-300 bg-ink-900/50">
+                <th class="p-4 text-center font-medium text-stone-500 dark:text-stone-400 bg-stone-50 dark:bg-stone-900/50">
                   Forest / Pomodoro
                 </th>
               </tr>
             </thead>
-            <tbody class="text-ink-200">
-              <tr class="border-b border-white/10">
-                <td class="p-4 font-medium text-white">
+            <tbody class="text-stone-600 dark:text-stone-300">
+              <tr class="border-b border-stone-200 dark:border-stone-700">
+                <td class="p-4 font-medium text-stone-900 dark:text-stone-50">
                   Single active session enforcement
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-secondary-400 mx-auto"
+                    class="h-5 w-5 text-green-600 dark:text-green-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -553,7 +553,7 @@ onUnmounted(() => {
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-red-400 mx-auto"
+                    class="h-5 w-5 text-red-500 dark:text-red-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -568,7 +568,7 @@ onUnmounted(() => {
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-red-400 mx-auto"
+                    class="h-5 w-5 text-red-500 dark:text-red-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -582,13 +582,13 @@ onUnmounted(() => {
                   </svg>
                 </td>
               </tr>
-              <tr class="border-b border-white/10">
-                <td class="p-4 font-medium text-white">
+              <tr class="border-b border-stone-200 dark:border-stone-700">
+                <td class="p-4 font-medium text-stone-900 dark:text-stone-50">
                   Project-level focus tracking
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-secondary-400 mx-auto"
+                    class="h-5 w-5 text-green-600 dark:text-green-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -603,7 +603,7 @@ onUnmounted(() => {
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-red-400 mx-auto"
+                    class="h-5 w-5 text-red-500 dark:text-red-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -618,7 +618,7 @@ onUnmounted(() => {
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-red-400 mx-auto"
+                    class="h-5 w-5 text-red-500 dark:text-red-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -632,13 +632,13 @@ onUnmounted(() => {
                   </svg>
                 </td>
               </tr>
-              <tr class="border-b border-white/10">
-                <td class="p-4 font-medium text-white">
+              <tr class="border-b border-stone-200 dark:border-stone-700">
+                <td class="p-4 font-medium text-stone-900 dark:text-stone-50">
                   Professional client reports
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-secondary-400 mx-auto"
+                    class="h-5 w-5 text-green-600 dark:text-green-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -656,7 +656,7 @@ onUnmounted(() => {
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-red-400 mx-auto"
+                    class="h-5 w-5 text-red-500 dark:text-red-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -670,13 +670,13 @@ onUnmounted(() => {
                   </svg>
                 </td>
               </tr>
-              <tr class="border-b border-white/10">
-                <td class="p-4 font-medium text-white">
+              <tr class="border-b border-stone-200 dark:border-stone-700">
+                <td class="p-4 font-medium text-stone-900 dark:text-stone-50">
                   Zero administrative overhead
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-secondary-400 mx-auto"
+                    class="h-5 w-5 text-green-600 dark:text-green-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -694,7 +694,7 @@ onUnmounted(() => {
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-secondary-400 mx-auto"
+                    class="h-5 w-5 text-green-600 dark:text-green-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -708,13 +708,13 @@ onUnmounted(() => {
                   </svg>
                 </td>
               </tr>
-              <tr class="border-b border-white/10">
-                <td class="p-4 font-medium text-white">
+              <tr class="border-b border-stone-200 dark:border-stone-700">
+                <td class="p-4 font-medium text-stone-900 dark:text-stone-50">
                   No surveillance metrics
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-secondary-400 mx-auto"
+                    class="h-5 w-5 text-green-600 dark:text-green-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -732,7 +732,7 @@ onUnmounted(() => {
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-secondary-400 mx-auto"
+                    class="h-5 w-5 text-green-600 dark:text-green-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -747,12 +747,12 @@ onUnmounted(() => {
                 </td>
               </tr>
               <tr>
-                <td class="p-4 font-medium text-white">
+                <td class="p-4 font-medium text-stone-900 dark:text-stone-50">
                   Real-time cross-device sync
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-secondary-400 mx-auto"
+                    class="h-5 w-5 text-green-600 dark:text-green-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -767,7 +767,7 @@ onUnmounted(() => {
                 </td>
                 <td class="p-4 text-center">
                   <svg
-                    class="h-5 w-5 text-secondary-400 mx-auto"
+                    class="h-5 w-5 text-green-600 dark:text-green-400 mx-auto"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -793,24 +793,24 @@ onUnmounted(() => {
     <!-- Analytics deep dive -->
     <section
       id="analytics"
-      class="relative"
+      class="relative bg-[#fef7ed] dark:bg-stone-800/50"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div class="rounded-3xl bg-gradient-to-br from-ink-800 to-ink-700 ring-1 ring-white/10 p-6 sm:p-10">
+        <div class="rounded-3xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 sm:p-10 shadow-lg">
           <div class="grid lg:grid-cols-2 gap-10 items-center">
             <div>
-              <h3 class="text-3xl font-semibold">
+              <h3 class="text-3xl font-semibold font-serif text-stone-900 dark:text-stone-50">
                 Focus evidence clients respect
               </h3>
-              <p class="mt-3 text-ink-200 text-lg">
+              <p class="mt-3 text-stone-600 dark:text-stone-300 text-lg">
                 Unlike traditional time trackers that feel like surveillance, LifeStint generates
                 professional Focus Ledgers that demonstrate work quality and consistency—the credible
                 evidence clients need without the Big Brother feeling.
               </p>
-              <ul class="mt-6 space-y-3 text-ink-200">
+              <ul class="mt-6 space-y-3 text-stone-600 dark:text-stone-300">
                 <li class="flex gap-3">
                   <svg
-                    class="mt-0.5 h-5 w-5 text-secondary-400 flex-shrink-0"
+                    class="mt-0.5 h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -826,7 +826,7 @@ onUnmounted(() => {
                 </li>
                 <li class="flex gap-3">
                   <svg
-                    class="mt-0.5 h-5 w-5 text-primary-400 flex-shrink-0"
+                    class="mt-0.5 h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -842,7 +842,7 @@ onUnmounted(() => {
                 </li>
                 <li class="flex gap-3">
                   <svg
-                    class="mt-0.5 h-5 w-5 text-purple-400 flex-shrink-0"
+                    class="mt-0.5 h-5 w-5 text-lime-600 dark:text-lime-400 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -858,7 +858,7 @@ onUnmounted(() => {
                 </li>
                 <li class="flex gap-3">
                   <svg
-                    class="mt-0.5 h-5 w-5 text-amberx-400 flex-shrink-0"
+                    class="mt-0.5 h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -876,66 +876,66 @@ onUnmounted(() => {
             </div>
             <!-- Ledger mock -->
             <div>
-              <div class="rounded-2xl bg-white/5 p-5 ring-1 ring-white/10 shadow-card">
+              <div class="rounded-2xl bg-stone-50 dark:bg-stone-900 p-5 ring-1 ring-stone-200 dark:ring-stone-700 shadow-sm">
                 <div class="flex items-center justify-between">
-                  <div class="font-medium">
+                  <div class="font-medium text-stone-900 dark:text-stone-50">
                     Focus Ledger — Week 32
                   </div>
                   <div class="flex gap-2">
-                    <span class="px-2 py-1 rounded bg-white/10 text-xs">PDF</span>
-                    <span class="px-2 py-1 rounded bg-white/10 text-xs">Share</span>
+                    <span class="px-2 py-1 rounded bg-stone-200 dark:bg-stone-700 text-xs text-stone-700 dark:text-stone-300">PDF</span>
+                    <span class="px-2 py-1 rounded bg-stone-200 dark:bg-stone-700 text-xs text-stone-700 dark:text-stone-300">Share</span>
                   </div>
                 </div>
                 <div class="mt-4 grid grid-cols-3 gap-3 text-sm">
-                  <div class="rounded-lg bg-ink-900/60 p-3">
-                    <div class="text-ink-300">
+                  <div class="rounded-lg bg-white dark:bg-stone-800 p-3 ring-1 ring-stone-200 dark:ring-stone-700">
+                    <div class="text-stone-500 dark:text-stone-400">
                       Total stints
                     </div>
-                    <div class="text-2xl font-semibold mt-1">
+                    <div class="text-2xl font-semibold mt-1 text-stone-900 dark:text-stone-50">
                       22
                     </div>
                   </div>
-                  <div class="rounded-lg bg-ink-900/60 p-3">
-                    <div class="text-ink-300">
+                  <div class="rounded-lg bg-white dark:bg-stone-800 p-3 ring-1 ring-stone-200 dark:ring-stone-700">
+                    <div class="text-stone-500 dark:text-stone-400">
                       Focused hours
                     </div>
-                    <div class="text-2xl font-semibold mt-1">
+                    <div class="text-2xl font-semibold mt-1 text-stone-900 dark:text-stone-50">
                       15.6
                     </div>
                   </div>
-                  <div class="rounded-lg bg-ink-900/60 p-3">
-                    <div class="text-ink-300">
+                  <div class="rounded-lg bg-white dark:bg-stone-800 p-3 ring-1 ring-stone-200 dark:ring-stone-700">
+                    <div class="text-stone-500 dark:text-stone-400">
                       Completion
                     </div>
-                    <div class="text-2xl font-semibold mt-1">
+                    <div class="text-2xl font-semibold mt-1 text-stone-900 dark:text-stone-50">
                       87%
                     </div>
                   </div>
                 </div>
                 <div class="mt-4">
-                  <div class="text-xs text-ink-300">
+                  <div class="text-xs text-stone-500 dark:text-stone-400">
                     Distribution
                   </div>
-                  <div class="mt-2 w-full h-2 rounded-full bg-white/10 grid grid-cols-12 overflow-hidden">
-                    <div class="bg-primary-500 col-span-5" />
-                    <div class="bg-secondary-500 col-span-4" />
-                    <div class="bg-amberx-500 col-span-3" />
+                  <div class="mt-2 w-full h-2 rounded-full bg-stone-200 dark:bg-stone-700 grid grid-cols-12 overflow-hidden">
+                    <div class="bg-orange-500 col-span-5" />
+                    <div class="bg-green-500 col-span-4" />
+                    <div class="bg-amber-500 col-span-3" />
                   </div>
-                  <div class="mt-2 grid grid-cols-3 text-xs text-ink-300">
+                  <div class="mt-2 grid grid-cols-3 text-xs text-stone-500 dark:text-stone-400">
                     <div class="flex items-center gap-2">
-                      <span class="h-2.5 w-2.5 rounded-full bg-primary-500" /> Client A 42%
+                      <span class="h-2.5 w-2.5 rounded-full bg-orange-500" /> Client A 42%
                     </div>
                     <div class="flex items-center gap-2">
-                      <span class="h-2.5 w-2.5 rounded-full bg-secondary-500" /> Client B 33%
+                      <span class="h-2.5 w-2.5 rounded-full bg-green-500" /> Client B 33%
                     </div>
                     <div class="flex items-center gap-2">
-                      <span class="h-2.5 w-2.5 rounded-full bg-amberx-500" /> Client C 25%
+                      <span class="h-2.5 w-2.5 rounded-full bg-amber-500" /> Client C 25%
                     </div>
                   </div>
                 </div>
-                <div class="mt-5 rounded-xl bg-white/5 p-4 text-sm">
-                  “We defend retainers with a transparent focus ledger, not a timesheet. Clients love
-                  the clarity.”
+                <div class="mt-5 rounded-xl bg-orange-50 dark:bg-orange-900/20 p-4 text-sm text-stone-700 dark:text-stone-300 ring-1 ring-orange-200 dark:ring-orange-800/50">
+                  "We defend retainers with a transparent focus ledger, not a timesheet. Clients love
+                  the clarity."
                 </div>
               </div>
             </div>
@@ -944,41 +944,41 @@ onUnmounted(() => {
 
         <!-- Use case examples -->
         <div class="mt-14 grid md:grid-cols-2 gap-6">
-          <div class="rounded-2xl bg-gradient-to-br from-secondary-500/10 to-primary-500/10 ring-1 ring-secondary-500/20 p-6 slide-in-left hover-lift">
+          <div class="rounded-2xl bg-gradient-to-br from-green-100 dark:from-green-900/20 to-orange-100 dark:to-orange-900/20 ring-1 ring-green-200 dark:ring-green-800/50 p-6 slide-in-left hover-lift">
             <div class="flex gap-4">
-              <div class="h-12 w-12 rounded-full bg-secondary-500/20 ring-2 ring-secondary-500/30 flex-shrink-0 grid place-items-center text-2xl bounce-subtle">
+              <div class="h-12 w-12 rounded-full bg-green-200 dark:bg-green-900/50 ring-2 ring-green-300 dark:ring-green-700 flex-shrink-0 grid place-items-center text-2xl bounce-subtle">
                 👩‍💻
               </div>
               <div>
-                <div class="font-semibold text-lg text-white">
+                <div class="font-semibold text-lg text-stone-900 dark:text-stone-50">
                   "I used to lose 2 hours daily to context switching"
                 </div>
-                <p class="mt-2 text-sm text-ink-200">
+                <p class="mt-2 text-sm text-stone-600 dark:text-stone-300">
                   "Now I complete 14 stints per week with 87% consistency. My clients see the ledger
                   and trust I'm focused on their work—no questions asked."
                 </p>
-                <div class="mt-3 text-xs text-ink-300">
+                <div class="mt-3 text-xs text-stone-500 dark:text-stone-400">
                   — Sarah, Independent Software Consultant
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="rounded-2xl bg-gradient-to-br from-purple-500/10 to-primary-500/10 ring-1 ring-purple-500/20 p-6 slide-in-right hover-lift">
+          <div class="rounded-2xl bg-gradient-to-br from-orange-100 dark:from-orange-900/20 to-amber-100 dark:to-amber-900/20 ring-1 ring-orange-200 dark:ring-orange-800/50 p-6 slide-in-right hover-lift">
             <div class="flex gap-4">
-              <div class="h-12 w-12 rounded-full bg-purple-500/20 ring-2 ring-purple-500/30 flex-shrink-0 grid place-items-center text-2xl bounce-subtle">
+              <div class="h-12 w-12 rounded-full bg-orange-200 dark:bg-orange-900/50 ring-2 ring-orange-300 dark:ring-orange-700 flex-shrink-0 grid place-items-center text-2xl bounce-subtle">
                 🎯
               </div>
               <div>
-                <div class="font-semibold text-lg text-white">
+                <div class="font-semibold text-lg text-stone-900 dark:text-stone-50">
                   "Finally, evidence that doesn't feel like surveillance"
                 </div>
-                <p class="mt-2 text-sm text-ink-200">
+                <p class="mt-2 text-sm text-stone-600 dark:text-stone-300">
                   "I send weekly Focus Ledgers to my retainer clients. They appreciate the
                   transparency without feeling like I'm being monitored. It's helped me justify my
                   rates."
                 </p>
-                <div class="mt-3 text-xs text-ink-300">
+                <div class="mt-3 text-xs text-stone-500 dark:text-stone-400">
                   — Marcus, Design Agency Remote Worker
                 </div>
               </div>
@@ -989,30 +989,30 @@ onUnmounted(() => {
         <!-- CTA banner -->
         <div
           id="cta"
-          class="mt-10 rounded-2xl bg-gradient-to-r from-primary-500 to-secondary-500 p-8 sm:p-10 text-center scale-in animate-gradient glow-on-hover"
+          class="mt-10 rounded-2xl bg-[#fffbf5] dark:bg-stone-800 border-3 border-orange-500 dark:border-orange-600 p-8 sm:p-10 text-center scale-in"
         >
-          <h3 class="text-3xl font-bold text-white">
+          <h3 class="text-3xl font-bold text-stone-900 dark:text-stone-50 font-serif">
             Start demonstrating your focus quality
           </h3>
-          <p class="mt-3 text-white/90 text-lg max-w-2xl mx-auto">
+          <p class="mt-3 text-stone-600 dark:text-stone-300 text-lg max-w-2xl mx-auto">
             Join consultants and freelancers who defend their premium rates with credible focus evidence—not
             surveillance.
           </p>
           <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
             <NuxtLink
               to="/auth/register"
-              class="inline-flex items-center justify-center rounded-xl bg-white text-ink-900 hover:bg-white/90 font-semibold px-8 py-3.5 shadow-lg transition-all"
+              class="inline-flex items-center justify-center rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-semibold px-8 py-3.5 shadow-lg transition-all"
             >
               Start your first stint — Free
             </NuxtLink>
             <a
               href="#how"
-              class="inline-flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium px-8 py-3.5 backdrop-blur-sm transition-all"
+              class="inline-flex items-center justify-center rounded-xl bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 font-medium px-8 py-3.5 transition-all"
             >
               See how it works
             </a>
           </div>
-          <p class="mt-4 text-sm text-white/70">
+          <p class="mt-4 text-sm text-stone-500 dark:text-stone-400">
             Free forever for 2 projects • No credit card required • Takes 60 seconds to start
           </p>
         </div>
@@ -1026,10 +1026,10 @@ onUnmounted(() => {
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div class="text-center">
-          <h3 class="text-3xl sm:text-4xl font-semibold">
+          <h3 class="text-3xl sm:text-4xl font-semibold font-serif text-stone-900 dark:text-stone-50">
             Simple pricing for serious focus
           </h3>
-          <p class="mt-3 text-ink-200 text-lg">
+          <p class="mt-3 text-stone-600 dark:text-stone-300 text-lg">
             Generous free tier to get started. Upgrade when you need unlimited projects and professional
             exports.
           </p>
@@ -1037,21 +1037,21 @@ onUnmounted(() => {
 
         <div class="mt-10 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           <!-- Free -->
-          <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-7 fade-up stagger-1 hover-lift">
-            <div class="text-sm font-medium text-ink-300 uppercase tracking-wide">
+          <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-7 fade-up stagger-1 hover-lift shadow-sm">
+            <div class="text-sm font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">
               Free
             </div>
             <div class="mt-3 flex items-baseline gap-2">
-              <span class="text-4xl font-bold">$0</span>
-              <span class="text-ink-300">forever</span>
+              <span class="text-4xl font-bold text-stone-900 dark:text-stone-50">$0</span>
+              <span class="text-stone-500 dark:text-stone-400">forever</span>
             </div>
-            <p class="mt-3 text-sm text-ink-200">
+            <p class="mt-3 text-sm text-stone-600 dark:text-stone-300">
               Perfect for trying out LifeStint and managing a couple of key projects.
             </p>
-            <ul class="mt-6 space-y-3 text-sm text-ink-200">
+            <ul class="mt-6 space-y-3 text-sm text-stone-600 dark:text-stone-300">
               <li class="flex gap-3">
                 <svg
-                  class="h-5 w-5 text-secondary-400 flex-shrink-0"
+                  class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1063,11 +1063,11 @@ onUnmounted(() => {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span><strong class="text-white">2 active projects</strong></span>
+                <span><strong class="text-stone-900 dark:text-stone-50">2 active projects</strong></span>
               </li>
               <li class="flex gap-3">
                 <svg
-                  class="h-5 w-5 text-secondary-400 flex-shrink-0"
+                  class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1083,7 +1083,7 @@ onUnmounted(() => {
               </li>
               <li class="flex gap-3">
                 <svg
-                  class="h-5 w-5 text-secondary-400 flex-shrink-0"
+                  class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1099,7 +1099,7 @@ onUnmounted(() => {
               </li>
               <li class="flex gap-3">
                 <svg
-                  class="h-5 w-5 text-secondary-400 flex-shrink-0"
+                  class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1115,7 +1115,7 @@ onUnmounted(() => {
               </li>
               <li class="flex gap-3">
                 <svg
-                  class="h-5 w-5 text-secondary-400 flex-shrink-0"
+                  class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1132,30 +1132,30 @@ onUnmounted(() => {
             </ul>
             <NuxtLink
               to="/auth/register"
-              class="mt-6 block w-full text-center rounded-xl bg-white text-ink-900 hover:bg-white/90 py-3 font-semibold transition-colors"
+              class="mt-6 block w-full text-center rounded-xl bg-stone-900 dark:bg-white text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-stone-100 py-3 font-semibold transition-colors"
             >
               Get started free
             </NuxtLink>
           </div>
           <!-- Pro -->
-          <div class="rounded-2xl bg-gradient-to-br from-primary-500/20 to-secondary-500/20 ring-2 ring-primary-400/30 p-7 relative fade-up stagger-2 hover-lift shimmer">
-            <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-primary-500 text-white text-xs font-semibold">
+          <div class="rounded-2xl bg-gradient-to-br from-orange-100 dark:from-orange-900/30 to-green-100 dark:to-green-900/30 ring-2 ring-orange-300 dark:ring-orange-700/50 p-7 relative fade-up stagger-2 hover-lift shimmer">
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-orange-600 text-white text-xs font-semibold">
               MOST POPULAR
             </div>
-            <div class="text-sm font-medium text-primary-300 uppercase tracking-wide">
+            <div class="text-sm font-medium text-orange-700 dark:text-orange-300 uppercase tracking-wide">
               Pro
             </div>
             <div class="mt-3 flex items-baseline gap-2">
-              <span class="text-4xl font-bold text-white">$12</span>
-              <span class="text-ink-300">/month</span>
+              <span class="text-4xl font-bold text-stone-900 dark:text-stone-50">$12</span>
+              <span class="text-stone-500 dark:text-stone-400">/month</span>
             </div>
-            <p class="mt-3 text-sm text-ink-200">
+            <p class="mt-3 text-sm text-stone-600 dark:text-stone-300">
               For consultants who need to manage multiple clients and demonstrate consistent work quality.
             </p>
-            <ul class="mt-6 space-y-3 text-sm text-ink-200">
+            <ul class="mt-6 space-y-3 text-sm text-stone-600 dark:text-stone-300">
               <li class="flex gap-3">
                 <svg
-                  class="h-5 w-5 text-secondary-400 flex-shrink-0"
+                  class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1167,11 +1167,11 @@ onUnmounted(() => {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span><strong class="text-white">Unlimited active projects</strong></span>
+                <span><strong class="text-stone-900 dark:text-stone-50">Unlimited active projects</strong></span>
               </li>
               <li class="flex gap-3">
                 <svg
-                  class="h-5 w-5 text-secondary-400 flex-shrink-0"
+                  class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1183,11 +1183,11 @@ onUnmounted(() => {
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span><strong class="text-white">Unlimited Focus Ledger CSV exports</strong></span>
+                <span><strong class="text-stone-900 dark:text-stone-50">Unlimited Focus Ledger CSV exports</strong></span>
               </li>
               <li class="flex gap-3">
                 <svg
-                  class="h-5 w-5 text-secondary-400 flex-shrink-0"
+                  class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1203,7 +1203,7 @@ onUnmounted(() => {
               </li>
               <li class="flex gap-3">
                 <svg
-                  class="h-5 w-5 text-secondary-400 flex-shrink-0"
+                  class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1219,7 +1219,7 @@ onUnmounted(() => {
               </li>
               <li class="flex gap-3">
                 <svg
-                  class="h-5 w-5 text-secondary-400 flex-shrink-0"
+                  class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1235,7 +1235,7 @@ onUnmounted(() => {
               </li>
               <li class="flex gap-3">
                 <svg
-                  class="h-5 w-5 text-secondary-400 flex-shrink-0"
+                  class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -1252,11 +1252,11 @@ onUnmounted(() => {
             </ul>
             <NuxtLink
               to="/auth/register"
-              class="mt-6 block w-full text-center rounded-xl bg-primary-500 hover:bg-primary-600 py-3 font-semibold shadow-focus transition-colors text-white"
+              class="mt-6 block w-full text-center rounded-xl bg-orange-600 hover:bg-orange-700 py-3 font-semibold shadow-md transition-colors text-white"
             >
               Start Pro trial
             </NuxtLink>
-            <p class="mt-3 text-center text-xs text-ink-300">
+            <p class="mt-3 text-center text-xs text-stone-500 dark:text-stone-400">
               14-day free trial • Cancel anytime
             </p>
           </div>
@@ -1267,73 +1267,73 @@ onUnmounted(() => {
     <!-- FAQ -->
     <section
       id="faq"
-      class="relative"
+      class="relative bg-[#fef7ed] dark:bg-stone-800/50"
     >
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <h3 class="text-3xl sm:text-4xl font-semibold text-center">
+        <h3 class="text-3xl sm:text-4xl font-semibold text-center font-serif text-stone-900 dark:text-stone-50">
           Frequently asked questions
         </h3>
         <div class="mt-10 grid md:grid-cols-2 gap-6">
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-1 hover-lift">
-            <div class="font-semibold text-lg text-white">
+          <div class="rounded-xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-1 hover-lift shadow-sm">
+            <div class="font-semibold text-lg text-stone-900 dark:text-stone-50">
               What makes LifeStint different from Toggl or Harvest?
             </div>
-            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
+            <p class="mt-3 text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
               Unlike traditional time trackers that require categories and tags, LifeStint focuses on
-              <strong class="text-white">focus quality, not billing hours</strong>.
+              <strong class="text-stone-900 dark:text-stone-50">focus quality, not billing hours</strong>.
               We technically enforce single active sessions to prevent multitasking and provide
               professional reports that demonstrate work consistency—not surveillance data.
             </p>
           </div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-2 hover-lift">
-            <div class="font-semibold text-lg text-white">
+          <div class="rounded-xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-2 hover-lift shadow-sm">
+            <div class="font-semibold text-lg text-stone-900 dark:text-stone-50">
               Do clients see my screen or keystrokes?
             </div>
-            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
-              <strong class="text-white">Absolutely not.</strong> No surveillance, no screenshots, no
+            <p class="mt-3 text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+              <strong class="text-stone-900 dark:text-stone-50">Absolutely not.</strong> No surveillance, no screenshots, no
               keystroke logging. Focus Ledger exports show only stint dates,
               durations, project names, and optional notes—clean, professional evidence of consistent work
               habits.
             </p>
           </div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-3 hover-lift">
-            <div class="font-semibold text-lg text-white">
+          <div class="rounded-xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-3 hover-lift shadow-sm">
+            <div class="font-semibold text-lg text-stone-900 dark:text-stone-50">
               How does the single active stint enforcement work?
             </div>
-            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
+            <p class="mt-3 text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
               You can only have one active stint at a time across all your devices. Starting a new stint
-              requires ending the current one. This <strong class="text-white">technical guardrail
+              requires ending the current one. This <strong class="text-stone-900 dark:text-stone-50">technical guardrail
                 prevents context switching</strong>
               and ensures genuine focused work—something Pomodoro apps and time trackers don't enforce.
             </p>
           </div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-4 hover-lift">
-            <div class="font-semibold text-lg text-white">
+          <div class="rounded-xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-4 hover-lift shadow-sm">
+            <div class="font-semibold text-lg text-stone-900 dark:text-stone-50">
               What happens if I need to pause or stop early?
             </div>
-            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
+            <p class="mt-3 text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
               Pause anytime for breaks—pause time is tracked separately. Stop manually if you finish early
               and optionally add notes.
               Auto-completion happens after 4 hours max (prevents accidental overnight runs). Interrupted
               stints are preserved for analytics but don't count toward daily goals.
             </p>
           </div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-5 hover-lift">
-            <div class="font-semibold text-lg text-white">
+          <div class="rounded-xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-5 hover-lift shadow-sm">
+            <div class="font-semibold text-lg text-stone-900 dark:text-stone-50">
               How do daily targets and streaks work?
             </div>
-            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
+            <p class="mt-3 text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
               Set expected daily stints (1-8) per project. Track "2 of 3 stints today" with visual
               progress. Progress resets at midnight in your timezone.
-              <strong class="text-white">Streaks track consecutive days</strong> with at least one
+              <strong class="text-stone-900 dark:text-stone-50">Streaks track consecutive days</strong> with at least one
               completed stint, with a 1-day grace period.
             </p>
           </div>
-          <div class="rounded-xl bg-white/5 ring-1 ring-white/10 p-6 hover:bg-white/[0.07] transition-colors fade-up stagger-6 hover-lift">
-            <div class="font-semibold text-lg text-white">
+          <div class="rounded-xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 hover:ring-stone-300 dark:hover:ring-stone-600 transition-colors fade-up stagger-6 hover-lift shadow-sm">
+            <div class="font-semibold text-lg text-stone-900 dark:text-stone-50">
               Does it work offline and across devices?
             </div>
-            <p class="mt-3 text-sm text-ink-200 leading-relaxed">
+            <p class="mt-3 text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
               Yes! Start on desktop, continue on mobile—real-time sync keeps everything in sync. Offline
               stint tracking works with smart conflict resolution.
               Timer runs in background tabs using Web Workers for accuracy, and server-side
@@ -1345,26 +1345,26 @@ onUnmounted(() => {
     </section>
 
     <!-- Footer -->
-    <footer class="border-t border-white/10">
+    <footer class="border-t border-stone-200 dark:border-stone-700">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-ink-300">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-stone-500 dark:text-stone-400">
           <div>© {{ new Date().getFullYear() }} LifeStint</div>
           <nav class="flex items-center gap-5">
             <a
               href="#"
-              class="hover:text-white"
+              class="hover:text-stone-900 dark:hover:text-white"
             >Privacy</a>
             <a
               href="#"
-              class="hover:text-white"
+              class="hover:text-stone-900 dark:hover:text-white"
             >Terms</a>
             <a
               href="#"
-              class="hover:text-white"
+              class="hover:text-stone-900 dark:hover:text-white"
             >Security</a>
             <a
               href="#"
-              class="hover:text-white"
+              class="hover:text-stone-900 dark:hover:text-white"
             >Contact</a>
           </nav>
         </div>
@@ -1384,12 +1384,16 @@ onUnmounted(() => {
    - Very Slow: 6s (floating, gradient shifts)
    ============================================================================ */
 
-/* Hero background with animation */
-.hero {
-    background: radial-gradient(1000px 340px at 20% -10%, rgb(var(--color-primary-500) / 0.25), transparent 60%),
-    radial-gradient(800px 280px at 80% -20%, rgb(var(--color-primary-700) / 0.25), transparent 60%),
-    linear-gradient(180deg, #0b1020 0%, #141b2f 100%);
+/* Hero background with warm theme */
+.hero-warm {
+    background: radial-gradient(1000px 340px at 20% -10%, rgba(194, 65, 12, 0.1), transparent 60%),
+    radial-gradient(800px 280px at 80% -20%, rgba(22, 101, 52, 0.08), transparent 60%);
     animation: subtle-pulse 6s ease-in-out infinite;
+}
+
+:root.dark .hero-warm {
+    background: radial-gradient(1000px 340px at 20% -10%, rgba(234, 88, 12, 0.2), transparent 60%),
+    radial-gradient(800px 280px at 80% -20%, rgba(34, 197, 94, 0.1), transparent 60%);
 }
 
 @keyframes subtle-pulse {
@@ -1399,22 +1403,6 @@ onUnmounted(() => {
     50% {
         opacity: 0.95;
     }
-}
-
-.noise::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: .08;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ccircle cx='2' cy='2' r='1' fill='white'/%3E%3C/svg%3E");
-    background-size: 12px 12px;
-    mix-blend-mode: soft-light;
-}
-
-.badge {
-    border: 1px solid rgba(255, 255, 255, .14);
-    animation: badge-glow 3s ease-in-out infinite;
 }
 
 @keyframes badge-glow {

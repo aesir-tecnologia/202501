@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useProjectsQuery, useArchivedProjectsQuery } from '~/composables/useProjects';
+import { useProjectsQuery, useArchivedProjectsQuery, useToggleProjectActive } from '~/composables/useProjects';
 import type { ProjectRow } from '~/lib/supabase/projects';
 
 definePageMeta({
@@ -43,6 +43,9 @@ const showEditModal = ref(false);
 const showArchiveModal = ref(false);
 const selectedProject = ref<ProjectRow | null>(null);
 
+const toast = useToast();
+const { mutateAsync: toggleActive, isPending: isTogglingActive } = useToggleProjectActive();
+
 function openCreateModal() {
   showCreateModal.value = true;
 }
@@ -55,6 +58,25 @@ function openEditModal(project: ProjectRow) {
 function openArchiveModal(project: ProjectRow) {
   selectedProject.value = project;
   showArchiveModal.value = true;
+}
+
+async function handleToggleActive(project: ProjectRow) {
+  try {
+    await toggleActive(project.id);
+    const newStatus = project.is_active ? 'inactive' : 'active';
+    toast.add({
+      title: project.is_active ? 'Project deactivated' : 'Project activated',
+      description: `${project.name} is now ${newStatus}`,
+      color: 'success',
+    });
+  }
+  catch (error) {
+    toast.add({
+      title: 'Failed to toggle project status',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      color: 'error',
+    });
+  }
 }
 </script>
 
@@ -149,7 +171,9 @@ function openArchiveModal(project: ProjectRow) {
       v-if="selectedProject"
       v-model:open="showEditModal"
       :project="selectedProject"
+      :is-toggling-active="isTogglingActive"
       @archive="openArchiveModal"
+      @toggle-active="handleToggleActive"
     />
 
     <ProjectArchiveModal

@@ -406,10 +406,10 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
     <div class="space-y-6">
       <!-- Page Header -->
       <div>
-        <h1 class="text-3xl font-semibold text-gray-900 dark:text-gray-100">
+        <h1 class="text-3xl font-semibold text-stone-800 dark:text-stone-50">
           Reports
         </h1>
-        <p class="mt-2 text-gray-600 dark:text-gray-400">
+        <p class="mt-2 text-stone-600 dark:text-stone-400">
           Generate detailed reports and export your work data
         </p>
       </div>
@@ -421,9 +421,9 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
       >
         <Icon
           name="i-lucide-loader-2"
-          class="h-8 w-8 mx-auto animate-spin text-gray-400"
+          class="h-8 w-8 mx-auto animate-spin text-stone-400"
         />
-        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">
           Loading reports...
         </p>
       </div>
@@ -434,14 +434,14 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
         class="space-y-6"
       >
         <!-- Filters Section -->
-        <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+        <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
           <template #header>
             <div class="flex items-center gap-2">
               <Icon
                 name="i-lucide-filter"
                 class="h-5 w-5"
               />
-              <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+              <h2 class="text-lg font-medium text-stone-800 dark:text-stone-50">
                 Filters
               </h2>
             </div>
@@ -496,7 +496,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
             >
               <select
                 v-model="selectedProjectId"
-                class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-400"
+                class="w-full rounded-md border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400"
               >
                 <option :value="null">
                   All Projects
@@ -515,20 +515,20 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
 
         <!-- Summary Section -->
         <div>
-          <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 class="text-2xl font-semibold text-stone-800 dark:text-stone-50 mb-4">
             Summary
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
               <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-brand-100 dark:bg-brand-900/30">
+                <div class="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
                   <Icon
                     name="i-lucide-target"
-                    class="h-5 w-5 text-brand-600 dark:text-brand-400"
+                    class="h-5 w-5 text-orange-600 dark:text-orange-400"
                   />
                 </div>
                 <div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                  <p class="text-sm text-stone-600 dark:text-stone-400">
                     Total Stints
                   </p>
                   <p class="text-2xl font-bold">
@@ -538,16 +538,16 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
               </div>
             </UCard>
 
-            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
               <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-mint-100 dark:bg-mint-900/30">
+                <div class="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
                   <Icon
                     name="i-lucide-clock"
-                    class="h-5 w-5 text-mint-600 dark:text-mint-400"
+                    class="h-5 w-5 text-green-600 dark:text-green-400"
                   />
                 </div>
                 <div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                  <p class="text-sm text-stone-600 dark:text-stone-400">
                     Total Time
                   </p>
                   <p class="text-2xl font-bold">
@@ -557,16 +557,16 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
               </div>
             </UCard>
 
-            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
               <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-amberx-100 dark:bg-amberx-900/30">
+                <div class="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
                   <Icon
                     name="i-lucide-trending-up"
-                    class="h-5 w-5 text-amberx-600 dark:text-amberx-400"
+                    class="h-5 w-5 text-amber-600 dark:text-amber-400"
                   />
                 </div>
                 <div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                  <p class="text-sm text-stone-600 dark:text-stone-400">
                     Average Duration
                   </p>
                   <p class="text-2xl font-bold">
@@ -576,7 +576,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
               </div>
             </UCard>
 
-            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
               <div class="flex items-center gap-3">
                 <div class="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
                   <Icon
@@ -585,7 +585,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                   />
                 </div>
                 <div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                  <p class="text-sm text-stone-600 dark:text-stone-400">
                     Projects Worked
                   </p>
                   <p class="text-2xl font-bold">
@@ -598,14 +598,14 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
         </div>
 
         <!-- Export Section -->
-        <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+        <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
           <template #header>
             <div class="flex items-center gap-2">
               <Icon
                 name="i-lucide-download"
                 class="h-5 w-5"
               />
-              <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+              <h2 class="text-lg font-medium text-stone-800 dark:text-stone-50">
                 Export Reports
               </h2>
             </div>
@@ -640,7 +640,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
             </UButton>
           </div>
 
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">
+          <p class="text-sm text-stone-500 dark:text-stone-400 mt-3">
             {{ filteredStints.length }} {{ filteredStints.length === 1 ? 'stint' : 'stints' }} in selected range
           </p>
         </UCard>
@@ -648,7 +648,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
         <!-- Project Breakdown -->
         <UCard
           v-if="projectBreakdown.length > 0"
-          class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70"
+          class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800"
         >
           <template #header>
             <div class="flex items-center gap-2">
@@ -656,7 +656,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                 name="i-lucide-bar-chart-3"
                 class="h-5 w-5"
               />
-              <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+              <h2 class="text-lg font-medium text-stone-800 dark:text-stone-50">
                 Project Breakdown
               </h2>
             </div>
@@ -679,11 +679,11 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                     {{ item.project.name }}
                   </span>
                 </div>
-                <div class="text-sm text-gray-600 dark:text-gray-400">
+                <div class="text-sm text-stone-600 dark:text-stone-400">
                   {{ item.stintCount }} {{ item.stintCount === 1 ? 'stint' : 'stints' }} · {{ formatTime(item.totalTimeMinutes) }}
                 </div>
               </div>
-              <div class="relative h-2 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
+              <div class="relative h-2 bg-stone-100 dark:bg-stone-800 rounded overflow-hidden">
                 <div
                   class="h-full transition-all duration-500"
                   :class="`bg-${item.project.color_tag || 'brand'}-500`"
@@ -697,7 +697,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
         <!-- Daily Breakdown -->
         <UCard
           v-if="dailyBreakdown.length > 0"
-          class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70"
+          class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800"
         >
           <template #header>
             <div class="flex items-center gap-2">
@@ -714,14 +714,14 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead>
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                  <th class="text-left py-2 px-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                <tr class="border-b border-stone-200 dark:border-stone-700">
+                  <th class="text-left py-2 px-3 text-sm font-medium text-stone-600 dark:text-stone-400">
                     Date
                   </th>
-                  <th class="text-left py-2 px-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <th class="text-left py-2 px-3 text-sm font-medium text-stone-600 dark:text-stone-400">
                     Stints
                   </th>
-                  <th class="text-left py-2 px-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <th class="text-left py-2 px-3 text-sm font-medium text-stone-600 dark:text-stone-400">
                     Total Time
                   </th>
                 </tr>
@@ -730,7 +730,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                 <tr
                   v-for="day in dailyBreakdown"
                   :key="day.date"
-                  class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  class="border-b border-stone-100 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800/50"
                 >
                   <td class="py-2 px-3 text-sm">
                     {{ formatDate(day.date) }}
@@ -750,7 +750,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
         <!-- Detailed Stint List -->
         <UCard
           v-if="filteredStints.length > 0"
-          class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70"
+          class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800"
         >
           <template #header>
             <div class="flex items-center gap-2">
@@ -767,17 +767,17 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead>
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                  <th class="text-left py-2 px-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                <tr class="border-b border-stone-200 dark:border-stone-700">
+                  <th class="text-left py-2 px-3 text-sm font-medium text-stone-600 dark:text-stone-400">
                     Date
                   </th>
-                  <th class="text-left py-2 px-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <th class="text-left py-2 px-3 text-sm font-medium text-stone-600 dark:text-stone-400">
                     Project
                   </th>
-                  <th class="text-left py-2 px-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <th class="text-left py-2 px-3 text-sm font-medium text-stone-600 dark:text-stone-400">
                     Duration
                   </th>
-                  <th class="text-left py-2 px-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <th class="text-left py-2 px-3 text-sm font-medium text-stone-600 dark:text-stone-400">
                     Notes
                   </th>
                 </tr>
@@ -786,7 +786,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                 <tr
                   v-for="stint in filteredStints"
                   :key="stint.id"
-                  class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  class="border-b border-stone-100 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800/50"
                 >
                   <td class="py-2 px-3 text-sm">
                     {{ stint.ended_at ? formatDate(stint.ended_at) : '-' }}
@@ -804,7 +804,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                   <td class="py-2 px-3 text-sm">
                     {{ stint.actual_duration ? formatTime(Math.round(stint.actual_duration / 60)) : '-' }}
                   </td>
-                  <td class="py-2 px-3 text-sm text-gray-600 dark:text-gray-400">
+                  <td class="py-2 px-3 text-sm text-stone-600 dark:text-stone-400">
                     {{ stint.notes || '-' }}
                   </td>
                 </tr>
@@ -816,17 +816,17 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
         <!-- Empty State -->
         <UCard
           v-if="filteredStints.length === 0"
-          class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70"
+          class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800"
         >
           <div class="text-center py-12">
             <Icon
               name="i-lucide-file-x"
-              class="h-12 w-12 mx-auto text-gray-400 mb-4"
+              class="h-12 w-12 mx-auto text-stone-400 mb-4"
             />
-            <p class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <p class="text-lg font-medium text-stone-800 dark:text-stone-50">
               No stints found
             </p>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            <p class="text-sm text-stone-500 dark:text-stone-400 mt-2">
               Try adjusting your date range or project filter
             </p>
           </div>

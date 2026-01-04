@@ -287,10 +287,10 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
     <div class="space-y-6">
       <!-- Page Header -->
       <div>
-        <h1 class="text-3xl font-semibold text-gray-900 dark:text-gray-100">
+        <h1 class="text-3xl font-semibold text-stone-800 dark:text-stone-50">
           Analytics
         </h1>
-        <p class="mt-2 text-gray-600 dark:text-gray-400">
+        <p class="mt-2 text-stone-600 dark:text-stone-400">
           Review your work patterns and track your progress
         </p>
       </div>
@@ -302,9 +302,9 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
       >
         <Icon
           name="i-lucide-loader-2"
-          class="h-8 w-8 mx-auto animate-spin text-gray-400 dark:text-gray-500"
+          class="h-8 w-8 mx-auto animate-spin text-stone-400 dark:text-stone-500"
         />
-        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">
           Loading analytics...
         </p>
       </div>
@@ -315,7 +315,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
         class="space-y-6"
       >
         <!-- Streak Section -->
-        <UCard class="bg-gradient-to-br from-brand-500 to-mint-500 text-white shadow-lg">
+        <UCard class="bg-gradient-to-br from-orange-600 to-green-600 text-white shadow-lg">
           <div class="flex items-center justify-between">
             <div>
               <div class="flex items-center gap-2 mb-2">
@@ -347,20 +347,20 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
 
         <!-- Today's Summary -->
         <div>
-          <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 class="text-2xl font-semibold text-stone-800 dark:text-stone-50 mb-4">
             Today's Summary
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
               <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-brand-100 dark:bg-brand-900/30">
+                <div class="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
                   <Icon
                     name="i-lucide-target"
-                    class="h-5 w-5 text-brand-600 dark:text-brand-400"
+                    class="h-5 w-5 text-orange-600 dark:text-orange-400"
                   />
                 </div>
                 <div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                  <p class="text-sm text-stone-600 dark:text-stone-400">
                     Stints Completed
                   </p>
                   <p class="text-2xl font-bold">
@@ -370,16 +370,16 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
               </div>
             </UCard>
 
-            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
               <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-mint-100 dark:bg-mint-900/30">
+                <div class="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
                   <Icon
                     name="i-lucide-clock"
-                    class="h-5 w-5 text-mint-600 dark:text-mint-400"
+                    class="h-5 w-5 text-green-600 dark:text-green-400"
                   />
                 </div>
                 <div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                  <p class="text-sm text-stone-600 dark:text-stone-400">
                     Total Focus Time
                   </p>
                   <p class="text-2xl font-bold">
@@ -389,16 +389,16 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
               </div>
             </UCard>
 
-            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
               <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-amberx-100 dark:bg-amberx-900/30">
+                <div class="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
                   <Icon
                     name="i-lucide-trending-up"
-                    class="h-5 w-5 text-amberx-600 dark:text-amberx-400"
+                    class="h-5 w-5 text-amber-600 dark:text-amber-400"
                   />
                 </div>
                 <div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                  <p class="text-sm text-stone-600 dark:text-stone-400">
                     Average Duration
                   </p>
                   <p class="text-2xl font-bold">
@@ -408,16 +408,16 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
               </div>
             </UCard>
 
-            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
               <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-mint-100 dark:bg-mint-900/30">
+                <div class="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
                   <Icon
                     name="i-lucide-calendar-check"
-                    class="h-5 w-5 text-mint-600 dark:text-mint-400"
+                    class="h-5 w-5 text-green-600 dark:text-green-400"
                   />
                 </div>
                 <div>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                  <p class="text-sm text-stone-600 dark:text-stone-400">
                     Daily Goals Met
                   </p>
                   <p class="text-2xl font-bold">
@@ -431,16 +431,16 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
           <!-- Projects Worked Today -->
           <UCard
             v-if="todayProjectsWorked.length > 0"
-            class="mt-4 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70"
+            class="mt-4 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800"
           >
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">
+            <h3 class="text-lg font-medium text-stone-800 dark:text-stone-50 mb-3">
               Projects Worked Today
             </h3>
             <div class="space-y-2">
               <div
                 v-for="item in todayProjectsWorked"
                 :key="item.project.id"
-                class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                class="flex items-center justify-between p-2 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors"
               >
                 <div class="flex items-center gap-3">
                   <div
@@ -453,7 +453,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                   </span>
                 </div>
                 <div class="flex items-center gap-4">
-                  <span class="text-sm text-gray-600 dark:text-gray-400">
+                  <span class="text-sm text-stone-600 dark:text-stone-400">
                     {{ item.stintCount }} {{ item.stintCount === 1 ? 'stint' : 'stints' }}
                   </span>
                   <UBadge
@@ -471,12 +471,12 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
 
         <!-- Weekly Overview -->
         <div>
-          <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 class="text-2xl font-semibold text-stone-800 dark:text-stone-50 mb-4">
             Weekly Overview
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
+              <p class="text-sm text-stone-600 dark:text-stone-400 mb-1">
                 Total Stints
               </p>
               <p class="text-2xl font-bold">
@@ -484,8 +484,8 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
               </p>
             </UCard>
 
-            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
+              <p class="text-sm text-stone-600 dark:text-stone-400 mb-1">
                 Total Focus Time
               </p>
               <p class="text-2xl font-bold">
@@ -493,8 +493,8 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
               </p>
             </UCard>
 
-            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
+              <p class="text-sm text-stone-600 dark:text-stone-400 mb-1">
                 Most Productive Day
               </p>
               <p class="text-2xl font-bold">
@@ -504,8 +504,8 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
           </div>
 
           <!-- Weekly Chart -->
-          <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+          <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
+            <h3 class="text-lg font-medium text-stone-800 dark:text-stone-50 mb-4">
               Stints Per Day
             </h3>
             <div class="space-y-3">
@@ -518,10 +518,10 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                   {{ day.day }}
                 </div>
                 <div class="flex-1">
-                  <div class="relative h-8 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
+                  <div class="relative h-8 bg-stone-100 dark:bg-stone-800 rounded overflow-hidden">
                     <div
-                      class="h-full bg-brand-500 transition-all duration-500 flex items-center justify-end pr-2"
-                      :class="day.isToday ? 'ring-2 ring-brand-300' : ''"
+                      class="h-full bg-orange-600 transition-all duration-500 flex items-center justify-end pr-2"
+                      :class="day.isToday ? 'ring-2 ring-orange-300' : ''"
                       :style="{ width: maxWeekStints > 0 ? `${(day.stintCount / Math.max(maxWeekStints, 1)) * 100}%` : '0%' }"
                     >
                       <span
@@ -533,7 +533,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                     </div>
                   </div>
                 </div>
-                <div class="w-20 text-sm text-gray-600 dark:text-gray-400 text-right">
+                <div class="w-20 text-sm text-stone-600 dark:text-stone-400 text-right">
                   {{ formatTime(day.totalTimeMinutes) }}
                 </div>
               </div>
@@ -543,9 +543,9 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
           <!-- Project Breakdown -->
           <UCard
             v-if="projectBreakdown.length > 0"
-            class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70"
+            class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800"
           >
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+            <h3 class="text-lg font-medium text-stone-800 dark:text-stone-50 mb-4">
               Top Projects This Week
             </h3>
             <div class="space-y-3">
@@ -565,11 +565,11 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                       {{ item.project.name }}
                     </span>
                   </div>
-                  <div class="text-sm text-gray-600 dark:text-gray-400">
+                  <div class="text-sm text-stone-600 dark:text-stone-400">
                     {{ item.stintCount }} {{ item.stintCount === 1 ? 'stint' : 'stints' }} · {{ formatTime(item.totalTime) }}
                   </div>
                 </div>
-                <div class="relative h-2 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
+                <div class="relative h-2 bg-stone-100 dark:bg-stone-800 rounded overflow-hidden">
                   <div
                     class="h-full transition-all duration-500"
                     :class="`bg-${item.project.color_tag || 'brand'}-500`"
