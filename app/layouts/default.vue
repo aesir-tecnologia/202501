@@ -5,32 +5,77 @@ const supabase = useSupabaseClient();
 const toast = useToast();
 const colorMode = useColorMode();
 
-const isDark = computed(() => colorMode.value === 'dark');
+const isDark = computed({
+  get: () => colorMode.value === 'dark',
+  set: (value: boolean) => {
+    colorMode.preference = value ? 'dark' : 'light';
+  },
+});
 
-function toggleDarkMode() {
-  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
-}
+const user = useSupabaseUser();
+
+const userInitials = computed(() => {
+  const email = user.value?.email || '';
+  const name = user.value?.user_metadata?.full_name || email;
+  if (!name) return 'U';
+  return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+});
+
+const userDisplayName = computed(() => {
+  return user.value?.user_metadata?.full_name || user.value?.email || 'User';
+});
+
+const isMobileMenuOpen = ref(false);
+
+const userMenuItems = computed(() => [
+  [
+    {
+      label: userDisplayName.value,
+      slot: 'account' as const,
+      disabled: true,
+    },
+  ],
+  [
+    {
+      label: 'Settings',
+      icon: 'i-lucide-settings',
+      to: '/settings',
+    },
+  ],
+  [
+    {
+      label: isDark.value ? 'Light mode' : 'Dark mode',
+      icon: isDark.value ? 'i-lucide-sun' : 'i-lucide-moon',
+      onSelect() {
+        isDark.value = !isDark.value;
+      },
+    },
+  ],
+  [
+    {
+      label: 'Log out',
+      icon: 'i-lucide-log-out',
+      color: 'error' as const,
+      onSelect: signOut,
+    },
+  ],
+]);
 
 const items = computed(() => [
   {
-    label: 'Dashboard',
+    label: 'Today',
     to: '/dashboard',
-    active: route.path === '/dashboard',
+    icon: 'i-lucide-calendar',
   },
   {
     label: 'Analytics',
     to: '/analytics',
-    active: route.path === '/analytics',
+    icon: 'i-lucide-bar-chart-2',
   },
   {
     label: 'Reports',
     to: '/reports',
-    active: route.path === '/reports',
-  },
-  {
-    label: 'Settings',
-    to: '/settings',
-    active: route.path === '/settings',
+    icon: 'i-lucide-file-text',
   },
 ]);
 
@@ -60,95 +105,136 @@ const formattedTime = computed(() => {
 </script>
 
 <template>
-  <div>
-    <header class="flex items-center justify-between px-6 lg:px-10 py-4 border-b border-stone-200 dark:border-stone-700/50 bg-[#fffbf5]/80 dark:bg-stone-900/80 backdrop-blur-md sticky top-0 z-50 supports-[backdrop-filter]:bg-[#fffbf5]/60 dark:supports-[backdrop-filter]:bg-stone-900/60">
-      <div
-        class="flex items-center gap-3 group cursor-pointer"
-        @click="navigateTo('/')"
-      >
-        <h1 class="text-xl font-bold text-stone-900 dark:text-white tracking-tight font-serif">
-          LifeStint
-        </h1>
-      </div>
+  <div class="min-h-screen bg-[#fffbf5] dark:bg-stone-900">
+    <!-- Header wrapper for mobile nav positioning -->
+    <div class="relative sticky top-0 z-50 border-b border-stone-200 dark:border-stone-700/50 bg-[#fffbf5]/80 dark:bg-stone-900/80 backdrop-blur-md supports-[backdrop-filter]:bg-[#fffbf5]/60 dark:supports-[backdrop-filter]:bg-stone-900/60">
+      <header class="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 lg:px-10 lg:max-w-[1400px] lg:mx-auto lg:w-full">
+        <!-- Header Left: Hamburger + Logo -->
+        <div class="flex items-center gap-3">
+          <!-- Mobile Hamburger Button -->
+          <button
+            class="md:hidden w-11 h-11 flex items-center justify-center rounded-xl
+                   text-stone-600 dark:text-stone-400
+                   hover:text-stone-900 dark:hover:text-white hover:bg-[#fef7ed] dark:hover:bg-[#1f1b18]
+                   transition-colors"
+            aria-label="Toggle menu"
+            @click="isMobileMenuOpen = !isMobileMenuOpen"
+          >
+            <UIcon
+              :name="isMobileMenuOpen ? 'i-lucide-x' : 'i-lucide-menu'"
+              class="w-6 h-6"
+            />
+          </button>
 
-      <nav class="hidden md:flex items-center gap-1 bg-stone-100/50 dark:bg-stone-800/40 p-1.5 rounded-full border border-stone-200 dark:border-stone-700/50 shadow-inner relative">
-        <div
-          v-for="item in items"
-          :key="item.to"
-          class="relative z-10"
-        >
+          <!-- Logo -->
+          <div
+            class="flex items-center group cursor-pointer"
+            @click="navigateTo('/')"
+          >
+            <h1 class="text-xl md:text-2xl font-semibold tracking-tight font-serif">
+              <span class="text-stone-900 dark:text-white">Life</span><span class="text-orange-600 dark:text-orange-500 italic">Stint</span>
+            </h1>
+          </div>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex gap-1 bg-[#fef7ed] dark:bg-[#1f1b18] p-1 rounded-full">
           <NuxtLink
+            v-for="item in items"
+            :key="item.to"
             :to="item.to"
-            class="px-5 py-1.5 text-sm font-medium rounded-full transition-colors duration-300 block relative"
+            class="px-5 py-2.5 text-sm font-medium rounded-full transition-all duration-200"
             :class="[
-              item.active
-                ? 'text-orange-700 dark:text-white'
-                : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white',
+              route.path === item.to
+                ? 'bg-orange-700 dark:bg-orange-600 text-white'
+                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white',
             ]"
           >
             {{ item.label }}
-            <span
-              v-if="item.active"
-              class="absolute inset-0 bg-orange-50 dark:bg-orange-500/20 rounded-full shadow-sm ring-1 ring-orange-100 dark:ring-orange-500/30 -z-10"
-              style="view-transition-name: nav-item-active"
-            />
           </NuxtLink>
-        </div>
-      </nav>
+        </nav>
 
-      <div class="flex items-center gap-3">
-        <!-- Global Timer (client-only to prevent hydration mismatch) -->
-        <ClientOnly>
-          <div
-            v-if="activeStint && activeStint.status !== 'completed'"
-            class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
-            :class="isPaused
-              ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
-              : 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-400 shadow-[0_0_10px_rgba(22,163,74,0.2)]'"
-          >
+        <div class="flex items-center gap-3">
+          <!-- Global Timer (client-only to prevent hydration mismatch) -->
+          <ClientOnly>
             <div
-              v-if="!isPaused"
-              class="relative flex h-2 w-2 mr-0.5"
+              v-if="activeStint && activeStint.status !== 'completed'"
+              class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
+              :class="isPaused
+                ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
+                : 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-400 shadow-[0_0_10px_rgba(22,163,74,0.2)]'"
             >
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+              <div
+                v-if="!isPaused"
+                class="relative flex h-2 w-2 mr-0.5"
+              >
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+              </div>
+              <UIcon
+                :name="isPaused ? 'i-lucide-pause' : 'i-lucide-clock'"
+                class="w-4 h-4"
+              />
+              <span class="font-mono font-bold tabular-nums text-sm">{{ formattedTime }}</span>
             </div>
-            <UIcon
-              :name="isPaused ? 'i-lucide-pause' : 'i-lucide-clock'"
-              class="w-4 h-4"
-            />
-            <span class="font-mono font-bold tabular-nums text-sm">{{ formattedTime }}</span>
-          </div>
-        </ClientOnly>
+          </ClientOnly>
 
-        <div class="h-6 w-px bg-stone-200 dark:bg-stone-700 mx-2 hidden sm:block" />
-        <button
-          class="text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors p-2.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 flex items-center justify-center"
-          aria-label="Toggle dark mode"
-          @click="toggleDarkMode"
-        >
-          <UIcon
-            :name="isDark ? 'i-lucide-moon' : 'i-lucide-sun'"
-            class="w-[18px] h-[18px]"
-          />
-        </button>
-        <button
-          aria-label="Sign out"
-          class="text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition-colors p-2.5 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center justify-center"
-          @click="signOut"
-        >
-          <UIcon
-            name="i-lucide-log-out"
-            class="w-[18px] h-[18px]"
-          />
-        </button>
-        <div class="hidden sm:block">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-green-500 ring-2 ring-white/10 cursor-pointer" />
+          <!-- User Dropdown Menu -->
+          <UDropdownMenu
+            :items="userMenuItems"
+            :content="{ align: 'end' }"
+            :ui="{ content: 'w-56' }"
+          >
+            <button
+              class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full
+                     bg-gradient-to-br from-orange-700 to-amber-600 dark:from-orange-600 dark:to-amber-400
+                     text-white font-semibold text-sm flex items-center justify-center
+                     hover:scale-105 transition-transform"
+              aria-label="User menu"
+            >
+              {{ userInitials }}
+            </button>
+          </UDropdownMenu>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <UMain class="pt-6">
+      <!-- Mobile Navigation Drawer -->
+      <Transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-2"
+      >
+        <nav
+          v-if="isMobileMenuOpen"
+          class="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-stone-900
+                 border-b border-stone-200 dark:border-stone-700 shadow-lg p-2"
+        >
+          <NuxtLink
+            v-for="item in items"
+            :key="item.to"
+            :to="item.to"
+            class="flex items-center gap-3 px-4 py-3.5 rounded-xl text-[15px] font-medium transition-colors"
+            :class="[
+              route.path === item.to
+                ? 'bg-[#fef7ed] dark:bg-[#1f1b18] text-orange-700 dark:text-orange-500'
+                : 'text-stone-600 dark:text-stone-300 hover:bg-[#fef7ed] dark:hover:bg-[#1f1b18] hover:text-stone-900 dark:hover:text-white',
+            ]"
+            @click="isMobileMenuOpen = false"
+          >
+            <UIcon
+              :name="item.icon"
+              class="w-5 h-5"
+            />
+            {{ item.label }}
+          </NuxtLink>
+        </nav>
+      </Transition>
+    </div>
+
+    <UMain>
       <slot />
     </UMain>
   </div>
