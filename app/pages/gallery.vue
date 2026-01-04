@@ -6,7 +6,7 @@ import type { DailyProgress } from '~/types/progress';
 import type { DualConflictInfo } from '~/components/StintConflictDialog.vue';
 
 definePageMeta({
-  layout: 'gallery',
+  layout: 'component-gallery',
   ssr: false,
 });
 
