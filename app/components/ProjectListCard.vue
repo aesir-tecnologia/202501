@@ -405,7 +405,8 @@ function handleCompleteStint() {
   border-radius: 50%;
   flex-shrink: 0;
   background: transparent;
-  border: 3.5px solid;
+  border-width: 3.5px;
+  border-style: solid;
 }
 
 .project-info {

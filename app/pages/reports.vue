@@ -578,10 +578,10 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
 
             <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
               <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                <div class="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
                   <Icon
                     name="i-lucide-folder"
-                    class="h-5 w-5 text-purple-600 dark:text-purple-400"
+                    class="h-5 w-5 text-green-600 dark:text-green-400"
                   />
                 </div>
                 <div>

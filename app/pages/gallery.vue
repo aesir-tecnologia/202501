@@ -559,10 +559,10 @@ const mockDualConflict: DualConflictInfo = {
                 @click="showEditModal = true"
               >
                 <div class="flex items-center gap-3 mb-2">
-                  <div class="p-2 rounded-lg bg-blue-100 dark:bg-blue-500/20">
+                  <div class="p-2 rounded-lg bg-orange-100 dark:bg-orange-500/20">
                     <UIcon
                       name="i-lucide-pencil"
-                      class="w-5 h-5 text-blue-600 dark:text-blue-400"
+                      class="w-5 h-5 text-orange-600 dark:text-orange-400"
                     />
                   </div>
                   <span class="font-semibold text-stone-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
