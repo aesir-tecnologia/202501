@@ -32,7 +32,7 @@ useSeoMeta({
         Terms of Service
       </h1>
       <p class="mt-2 text-stone-500 dark:text-stone-400">
-        Last updated: {{ new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' , year: 'numeric' }) }}
+        Last updated: {{ new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) }}
       </p>
 
       <div class="mt-8 prose prose-stone dark:prose-invert max-w-none">

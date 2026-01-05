@@ -179,7 +179,6 @@ onUnmounted(() => {
                   </svg>
                 </NuxtLink>
               </div>
-
             </div>
 
             <!-- Focus Timer Visualization -->
@@ -277,8 +276,12 @@ onUnmounted(() => {
                       </svg>
                     </div>
                     <div class="text-left">
-                      <div class="text-xs text-stone-500 dark:text-stone-400">Today</div>
-                      <div class="text-sm font-semibold text-stone-900 dark:text-white">2 of 3 stints</div>
+                      <div class="text-xs text-stone-500 dark:text-stone-400">
+                        Today
+                      </div>
+                      <div class="text-sm font-semibold text-stone-900 dark:text-white">
+                        2 of 3 stints
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -301,8 +304,12 @@ onUnmounted(() => {
                       </svg>
                     </div>
                     <div class="text-left">
-                      <div class="text-xs text-stone-500 dark:text-stone-400">Streak</div>
-                      <div class="text-sm font-semibold text-stone-900 dark:text-white">14 days</div>
+                      <div class="text-xs text-stone-500 dark:text-stone-400">
+                        Streak
+                      </div>
+                      <div class="text-sm font-semibold text-stone-900 dark:text-white">
+                        14 days
+                      </div>
                     </div>
                   </div>
                 </div>
