@@ -62,6 +62,8 @@ export default defineNuxtConfig({
         '/auth/forgot-password',
         '/auth/reset-password',
         '/auth/verify-email',
+        '/legal/privacy',
+        '/legal/terms',
         '/design-showcase',
       ],
       ignore: ['/dashboard', '/analytics', '/reports', '/settings', '/auth/callback', '/api/**'],
@@ -123,7 +125,7 @@ export default defineNuxtConfig({
     redirectOptions: {
       login: '/auth/login',
       callback: '/auth/callback',
-      exclude: ['/', '/auth/*'],
+      exclude: ['/', '/auth/*', '/legal/*'],
       cookieRedirect: false,
     },
   },

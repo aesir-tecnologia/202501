@@ -75,14 +75,10 @@ onUnmounted(() => {
     <!-- Header -->
     <header class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-[#fffbf5]/80 dark:supports-[backdrop-filter]:bg-stone-900/80 border-b border-stone-200 dark:border-stone-700/50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div
-            class="h-8 w-8 rounded-lg bg-gradient-to-tr from-orange-600 to-green-600 grid place-items-center font-extrabold text-white"
-            aria-hidden="true"
-          >
-            L
-          </div>
-          <span class="font-semibold tracking-tight font-serif text-stone-900 dark:text-stone-50">LifeStint</span>
+        <div class="flex items-center">
+          <span class="text-xl font-semibold tracking-tight font-serif">
+            <span class="text-stone-900 dark:text-white">Life</span><span class="text-orange-600 dark:text-orange-500 italic">Stint</span>
+          </span>
         </div>
         <nav
           class="hidden md:flex items-center gap-7 text-sm text-stone-600 dark:text-stone-300"
@@ -163,9 +159,9 @@ onUnmounted(() => {
                 no administrative overhead, just demonstrable work quality.
               </p>
 
-              <div class="mt-8 flex flex-col sm:flex-row gap-3 fade-up stagger-4">
-                <a
-                  href="#cta"
+              <div class="mt-8 fade-up stagger-4">
+                <NuxtLink
+                  to="/auth/register"
                   class="inline-flex items-center justify-center rounded-xl bg-green-700 hover:bg-green-800 text-white font-semibold px-6 py-3 shadow-md"
                 >
                   Start your first stint
@@ -181,142 +177,135 @@ onUnmounted(() => {
                       d="M17 8l4 4-4 4M3 12h18"
                     />
                   </svg>
-                </a>
-                <a
-                  href="#how"
-                  class="inline-flex items-center justify-center rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 px-6 py-3 font-medium text-stone-900 dark:text-stone-100"
-                >
-                  Watch the 30s tour
-                </a>
+                </NuxtLink>
               </div>
 
-              <div class="mt-8 grid grid-cols-3 gap-4 text-sm text-stone-600 dark:text-stone-300">
-                <div class="rounded-lg bg-white dark:bg-stone-800 p-3 text-center hover-lift fade-up stagger-5 shadow-sm ring-1 ring-stone-200 dark:ring-stone-700">
-                  <div class="text-2xl font-semibold text-stone-900 dark:text-white number-roll">
-                    1
-                  </div>
-                  <div class="mt-1">
-                    Active session
-                  </div>
-                </div>
-                <div class="rounded-lg bg-white dark:bg-stone-800 p-3 text-center hover-lift fade-up stagger-6 shadow-sm ring-1 ring-stone-200 dark:ring-stone-700">
-                  <div class="text-2xl font-semibold text-stone-900 dark:text-white number-roll">
-                    0
-                  </div>
-                  <div class="mt-1">
-                    Admin overhead
-                  </div>
-                </div>
-                <div class="rounded-lg bg-white dark:bg-stone-800 p-3 text-center hover-lift fade-up stagger-6 shadow-sm ring-1 ring-stone-200 dark:ring-stone-700">
-                  <div class="text-2xl font-semibold text-stone-900 dark:text-white number-roll">
-                    ∞
-                  </div>
-                  <div class="mt-1">
-                    Client credibility
-                  </div>
-                </div>
-              </div>
             </div>
 
-            <!-- Product mock stack -->
+            <!-- Focus Timer Visualization -->
             <div class="lg:col-span-6">
-              <div class="relative floating">
+              <div class="relative flex items-center justify-center">
+                <!-- Ambient glow -->
                 <div
-                  class="absolute -inset-6 blur-3xl opacity-30 dark:opacity-40 pulse-slow"
-                  style="background: radial-gradient(400px 160px at 60% 40%, rgba(194, 65, 12, 0.35), transparent 60%);"
+                  class="absolute w-80 h-80 blur-3xl opacity-20 dark:opacity-30 pulse-slow"
+                  style="background: radial-gradient(circle, rgba(234, 88, 12, 0.5), transparent 70%);"
                 />
-                <div class="relative rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 shadow-lg p-4 scale-in shimmer">
-                  <div class="flex items-center justify-between">
-                    <div class="text-sm text-stone-500 dark:text-stone-400">
-                      Dashboard — Today
+
+                <!-- Timer ring -->
+                <div class="relative scale-in">
+                  <svg
+                    class="w-64 h-64 sm:w-80 sm:h-80 transform -rotate-90"
+                    viewBox="0 0 200 200"
+                  >
+                    <!-- Background ring -->
+                    <circle
+                      cx="100"
+                      cy="100"
+                      r="90"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="8"
+                      class="text-stone-200 dark:text-stone-700"
+                    />
+                    <!-- Progress ring -->
+                    <circle
+                      cx="100"
+                      cy="100"
+                      r="90"
+                      fill="none"
+                      stroke="url(#timer-gradient)"
+                      stroke-width="8"
+                      stroke-linecap="round"
+                      stroke-dasharray="565.48"
+                      stroke-dashoffset="141.37"
+                      class="timer-progress"
+                    />
+                    <defs>
+                      <linearGradient
+                        id="timer-gradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="100%"
+                        y2="0%"
+                      >
+                        <stop
+                          offset="0%"
+                          stop-color="#ea580c"
+                        />
+                        <stop
+                          offset="100%"
+                          stop-color="#16a34a"
+                        />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+
+                  <!-- Center content -->
+                  <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <div class="text-5xl sm:text-6xl font-mono font-bold text-stone-900 dark:text-white tabular-nums">
+                      28:12
                     </div>
-                    <div class="text-xs text-stone-500 dark:text-stone-400">
-                      Synced
+                    <div class="mt-2 text-sm text-stone-500 dark:text-stone-400">
+                      Focus time remaining
                     </div>
-                  </div>
-                  <div class="mt-4 grid sm:grid-cols-2 gap-4">
-                    <!-- Card 1 -->
-                    <div class="rounded-xl bg-stone-50 dark:bg-stone-900 p-4 ring-1 ring-stone-200 dark:ring-stone-700">
-                      <div class="flex items-center justify-between">
-                        <div class="font-medium text-stone-900 dark:text-stone-50">
-                          Client Atlas
-                        </div>
-                        <span class="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">Active</span>
-                      </div>
-                      <div class="mt-3">
-                        <div class="w-full h-2 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
-                          <div
-                            class="h-2 rounded-full bg-lime-500 progress-animate"
-                            style="--progress-width: 72%; width: 72%;"
-                          />
-                        </div>
-                        <div class="mt-2 text-xs text-stone-500 dark:text-stone-400">
-                          2 of 3 stints • 28:12 remaining
-                        </div>
-                      </div>
-                      <button class="mt-3 w-full rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold py-2 glow-on-hover pulse-slow">
-                        Resume
-                      </button>
-                    </div>
-                    <!-- Card 2 -->
-                    <div class="rounded-xl bg-stone-50 dark:bg-stone-900 p-4 ring-1 ring-stone-200 dark:ring-stone-700">
-                      <div class="flex items-center justify-between">
-                        <div class="font-medium text-stone-900 dark:text-stone-50">
-                          Orion Migrations
-                        </div>
-                        <span class="text-xs px-2 py-1 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300">Idle</span>
-                      </div>
-                      <div class="mt-3">
-                        <div class="w-full h-2 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
-                          <div
-                            class="h-2 rounded-full bg-orange-500 progress-animate"
-                            style="--progress-width: 33%; width: 33%;"
-                          />
-                        </div>
-                        <div class="mt-2 text-xs text-stone-500 dark:text-stone-400">
-                          1 of 3 stints
-                        </div>
-                      </div>
-                      <button class="mt-3 w-full rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-medium py-2">
-                        Start stint
-                      </button>
-                    </div>
-                    <!-- Heatmap -->
-                    <div class="sm:col-span-2 rounded-xl bg-stone-50 dark:bg-stone-900 p-4 ring-1 ring-stone-200 dark:ring-stone-700">
-                      <div class="flex items-center justify-between">
-                        <div class="font-medium text-stone-900 dark:text-stone-50">
-                          Consistency heatmap
-                        </div>
-                        <div class="text-xs text-stone-500 dark:text-stone-400">
-                          Last 10 weeks
-                        </div>
-                      </div>
-                      <div class="mt-3 grid grid-cols-14 gap-1">
-                        <!-- simple faux map -->
-                        <div class="h-3 w-3 rounded bg-stone-300 dark:bg-stone-700" />
-                        <div class="h-3 w-3 rounded bg-orange-200 dark:bg-orange-900" />
-                        <div class="h-3 w-3 rounded bg-orange-400 dark:bg-orange-700" />
-                        <div class="h-3 w-3 rounded bg-orange-500 dark:bg-orange-600" />
-                        <div class="h-3 w-3 rounded bg-orange-600 dark:bg-orange-500" />
-                        <div class="h-3 w-3 rounded bg-orange-400 dark:bg-orange-700" />
-                        <div class="h-3 w-3 rounded bg-orange-300 dark:bg-orange-800" />
-                        <div class="h-3 w-3 rounded bg-stone-300 dark:bg-stone-700" />
-                        <div class="h-3 w-3 rounded bg-orange-500 dark:bg-orange-600" />
-                        <div class="h-3 w-3 rounded bg-orange-600 dark:bg-orange-500" />
-                        <div class="h-3 w-3 rounded bg-orange-400 dark:bg-orange-700" />
-                        <div class="h-3 w-3 rounded bg-orange-200 dark:bg-orange-900" />
-                        <div class="h-3 w-3 rounded bg-stone-300 dark:bg-stone-700" />
-                        <div class="h-3 w-3 rounded bg-orange-400 dark:bg-orange-700" />
-                      </div>
-                      <div class="mt-3 text-xs text-stone-500 dark:text-stone-400">
-                        Streak 14 days • Completion 90%
-                      </div>
+                    <div class="mt-4 flex items-center gap-2">
+                      <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
+                      </span>
+                      <span class="text-sm font-medium text-green-600 dark:text-green-400">In focus</span>
                     </div>
                   </div>
                 </div>
-                <p class="mt-3 text-center text-xs text-stone-500 dark:text-stone-400">
-                  Mock preview — not actual UI
-                </p>
+
+                <!-- Floating benefit badges -->
+                <div class="absolute -top-2 -right-4 sm:top-4 sm:right-0 floating-badge-1">
+                  <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-stone-800 shadow-lg ring-1 ring-stone-200 dark:ring-stone-700">
+                    <div class="h-8 w-8 rounded-lg bg-green-100 dark:bg-green-900/30 grid place-items-center">
+                      <svg
+                        class="h-4 w-4 text-green-600 dark:text-green-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <div class="text-left">
+                      <div class="text-xs text-stone-500 dark:text-stone-400">Today</div>
+                      <div class="text-sm font-semibold text-stone-900 dark:text-white">2 of 3 stints</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="absolute -bottom-2 -left-4 sm:bottom-8 sm:-left-8 floating-badge-2">
+                  <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-stone-800 shadow-lg ring-1 ring-stone-200 dark:ring-stone-700">
+                    <div class="h-8 w-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 grid place-items-center">
+                      <svg
+                        class="h-4 w-4 text-orange-600 dark:text-orange-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+                        />
+                      </svg>
+                    </div>
+                    <div class="text-left">
+                      <div class="text-xs text-stone-500 dark:text-stone-400">Streak</div>
+                      <div class="text-sm font-semibold text-stone-900 dark:text-white">14 days</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -998,19 +987,13 @@ onUnmounted(() => {
             Join consultants and freelancers who defend their premium rates with credible focus evidence—not
             surveillance.
           </p>
-          <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <div class="mt-6">
             <NuxtLink
               to="/auth/register"
               class="inline-flex items-center justify-center rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-semibold px-8 py-3.5 shadow-lg transition-all"
             >
               Start your first stint — Free
             </NuxtLink>
-            <a
-              href="#how"
-              class="inline-flex items-center justify-center rounded-xl bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 font-medium px-8 py-3.5 transition-all"
-            >
-              See how it works
-            </a>
           </div>
           <p class="mt-4 text-sm text-stone-500 dark:text-stone-400">
             Free forever for 2 projects • No credit card required • Takes 60 seconds to start
@@ -1035,7 +1018,7 @@ onUnmounted(() => {
           </p>
         </div>
 
-        <div class="mt-10 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div class="mt-10 pt-4 grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           <!-- Free -->
           <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-7 fade-up stagger-1 hover-lift shadow-sm">
             <div class="text-sm font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">
@@ -1138,7 +1121,7 @@ onUnmounted(() => {
             </NuxtLink>
           </div>
           <!-- Pro -->
-          <div class="rounded-2xl bg-gradient-to-br from-orange-100 dark:from-orange-900/30 to-green-100 dark:to-green-900/30 ring-2 ring-orange-300 dark:ring-orange-700/50 p-7 relative fade-up stagger-2 hover-lift shimmer">
+          <div class="rounded-2xl bg-gradient-to-br from-orange-100 dark:from-orange-900/30 to-green-100 dark:to-green-900/30 ring-2 ring-orange-300 dark:ring-orange-700/50 p-7 relative fade-up stagger-2 hover-lift">
             <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-orange-600 text-white text-xs font-semibold">
               MOST POPULAR
             </div>
@@ -1348,24 +1331,31 @@ onUnmounted(() => {
     <footer class="border-t border-stone-200 dark:border-stone-700">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-stone-500 dark:text-stone-400">
-          <div>© {{ new Date().getFullYear() }} LifeStint</div>
+          <div class="flex items-center gap-2">
+            <span class="font-semibold tracking-tight font-serif">
+              <span class="text-stone-900 dark:text-white">Life</span><span class="text-orange-600 dark:text-orange-500 italic">Stint</span>
+            </span>
+            <span>© {{ new Date().getFullYear() }}</span>
+          </div>
           <nav class="flex items-center gap-5">
-            <a
-              href="#"
+            <NuxtLink
+              to="/legal/privacy"
               class="hover:text-stone-900 dark:hover:text-white"
-            >Privacy</a>
-            <a
-              href="#"
+            >
+              Privacy
+            </NuxtLink>
+            <NuxtLink
+              to="/legal/terms"
               class="hover:text-stone-900 dark:hover:text-white"
-            >Terms</a>
+            >
+              Terms
+            </NuxtLink>
             <a
-              href="#"
+              href="mailto:hello@lifestint.com"
               class="hover:text-stone-900 dark:hover:text-white"
-            >Security</a>
-            <a
-              href="#"
-              class="hover:text-stone-900 dark:hover:text-white"
-            >Contact</a>
+            >
+              Contact
+            </a>
           </nav>
         </div>
       </div>
@@ -1496,6 +1486,47 @@ onUnmounted(() => {
     }
     50% {
         transform: translateY(-20px);
+    }
+}
+
+/* Floating badge animations */
+.floating-badge-1 {
+    animation: float-badge-1 4s ease-in-out infinite;
+}
+
+.floating-badge-2 {
+    animation: float-badge-2 5s ease-in-out infinite;
+}
+
+@keyframes float-badge-1 {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(-8px, -12px);
+    }
+}
+
+@keyframes float-badge-2 {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(8px, -10px);
+    }
+}
+
+/* Timer progress animation */
+.timer-progress {
+    animation: timer-fill 1.5s ease-out forwards;
+}
+
+@keyframes timer-fill {
+    from {
+        stroke-dashoffset: 565.48;
+    }
+    to {
+        stroke-dashoffset: 141.37;
     }
 }
 
