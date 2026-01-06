@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useArchiveProject } from '~/composables/useProjects';
-import { hasActiveStint } from '~/lib/supabase/projects';
+import { useActiveStintCheck } from '~/composables/useActiveStintCheck';
 import type { ProjectRow } from '~/lib/supabase/projects';
 
 const props = defineProps<{
@@ -8,42 +8,17 @@ const props = defineProps<{
 }>();
 
 const toast = useToast();
-const client = useSupabaseClient();
 const { mutateAsync: archiveProject, isPending } = useArchiveProject();
 
-const hasActive = ref(false);
-const isCheckingActive = ref(false);
 const isOpen = defineModel<boolean>('open');
+const projectId = computed(() => props.project.id);
+const { hasActive, isCheckingActive } = useActiveStintCheck(projectId, isOpen as Ref<boolean>);
 
-// Check for active stint when modal opens
-watch(isOpen, async (open) => {
-  if (open) {
-    isCheckingActive.value = true;
-    try {
-      const { data, error } = await hasActiveStint(client, props.project.id);
-      if (error) {
-        console.error('Failed to check active stint:', error);
-        hasActive.value = false;
-      }
-      else {
-        hasActive.value = data ?? false;
-      }
-    }
-    catch (error) {
-      console.error('Failed to check active stint:', error);
-      hasActive.value = false;
-    }
-    finally {
-      isCheckingActive.value = false;
-    }
-  }
-}, { immediate: true });
-
-function closeModal() {
+function closeModal(): void {
   isOpen.value = false;
 }
 
-async function handleArchive() {
+async function handleArchive(): Promise<void> {
   if (hasActive.value) {
     toast.add({
       title: 'Cannot archive project',

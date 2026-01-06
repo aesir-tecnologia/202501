@@ -119,7 +119,6 @@ const activeSection = ref<string | null>('project-list-card');
 
 const sections = [
   { id: 'project-list-card', label: 'ProjectListCard', icon: 'i-lucide-layout-list' },
-  { id: 'project-card-toolbar', label: 'ProjectCardToolbar', icon: 'i-lucide-settings-2' },
   { id: 'streak-banner', label: 'StreakBanner', icon: 'i-lucide-flame' },
   { id: 'stint-timer', label: 'StintTimer', icon: 'i-lucide-clock' },
   { id: 'project-form', label: 'ProjectForm', icon: 'i-lucide-file-edit' },
@@ -211,8 +210,6 @@ const mockDualConflict: DualConflictInfo = {
                     @pause-stint="noop"
                     @resume-stint="noop"
                     @complete-stint="noop"
-                    @resume-paused-stint="noop"
-                    @abandon-paused-stint="noop"
                   />
                 </ul>
               </div>
@@ -235,8 +232,6 @@ const mockDualConflict: DualConflictInfo = {
                     @pause-stint="noop"
                     @resume-stint="noop"
                     @complete-stint="noop"
-                    @resume-paused-stint="noop"
-                    @abandon-paused-stint="noop"
                   />
                 </ul>
               </div>
@@ -259,79 +254,8 @@ const mockDualConflict: DualConflictInfo = {
                     @pause-stint="noop"
                     @resume-stint="noop"
                     @complete-stint="noop"
-                    @resume-paused-stint="noop"
-                    @abandon-paused-stint="noop"
                   />
                 </ul>
-              </div>
-            </div>
-          </section>
-
-          <!-- ProjectCardToolbar Section -->
-          <section
-            id="project-card-toolbar"
-            class="scroll-mt-24"
-          >
-            <div class="mb-6">
-              <h2 class="text-2xl font-bold font-serif text-stone-900 dark:text-white mb-2">
-                ProjectCardToolbar
-              </h2>
-              <p class="text-stone-600 dark:text-stone-400">
-                Toolbar component for project activation toggle and settings access.
-              </p>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-6">
-              <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 space-y-4">
-                <div class="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
-                  Desktop variant - Active
-                </div>
-                <ProjectCardToolbar
-                  :is-active="true"
-                  :is-toggling="false"
-                  variant="desktop"
-                  @toggle-active="noop"
-                  @edit="noop"
-                />
-              </div>
-
-              <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 space-y-4">
-                <div class="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
-                  Desktop variant - Inactive
-                </div>
-                <ProjectCardToolbar
-                  :is-active="false"
-                  :is-toggling="false"
-                  variant="desktop"
-                  @toggle-active="noop"
-                  @edit="noop"
-                />
-              </div>
-
-              <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 space-y-4">
-                <div class="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
-                  Mobile variant - Active
-                </div>
-                <ProjectCardToolbar
-                  :is-active="true"
-                  :is-toggling="false"
-                  variant="mobile"
-                  @toggle-active="noop"
-                  @edit="noop"
-                />
-              </div>
-
-              <div class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 space-y-4">
-                <div class="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
-                  Loading state
-                </div>
-                <ProjectCardToolbar
-                  :is-active="true"
-                  :is-toggling="true"
-                  variant="desktop"
-                  @toggle-active="noop"
-                  @edit="noop"
-                />
               </div>
             </div>
           </section>

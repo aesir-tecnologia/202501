@@ -275,7 +275,7 @@ function handleComplete() {
   transform: translateX(-50%);
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, var(--accent-primary-glow, rgba(194, 65, 12, 0.2)) 0%, transparent 60%);
+  background: radial-gradient(circle, var(--accent-primary-glow) 0%, transparent 60%);
   pointer-events: none;
   opacity: 0.4;
 }
@@ -285,10 +285,6 @@ function handleComplete() {
     width: 500px;
     height: 500px;
   }
-}
-
-.dark .ambient-glow {
-  --accent-primary-glow: rgba(234, 88, 12, 0.25);
 }
 
 /* Session Header */
@@ -463,18 +459,14 @@ function handleComplete() {
   color: var(--text-primary);
   letter-spacing: 0.02em;
   line-height: 1;
-  text-shadow: 0 0 40px var(--accent-primary-glow, rgba(194, 65, 12, 0.15));
+  text-shadow: 0 0 40px var(--accent-primary-glow);
 }
 
 @media (min-width: 768px) {
   .timer-display {
     font-size: 72px;
-    text-shadow: 0 0 60px var(--accent-primary-glow, rgba(194, 65, 12, 0.15));
+    text-shadow: 0 0 60px var(--accent-primary-glow);
   }
-}
-
-.dark .timer-display {
-  --accent-primary-glow: rgba(234, 88, 12, 0.2);
 }
 
 .timer-display.is-paused {
@@ -482,7 +474,11 @@ function handleComplete() {
 }
 
 .timer-display.is-overtime {
-  color: #dc2626;
+  color: var(--accent-danger);
+}
+
+.dark .timer-display.is-overtime {
+  color: var(--accent-danger);
 }
 
 .timer-label {
@@ -611,8 +607,8 @@ function handleComplete() {
 }
 
 .ctrl-btn.danger {
-  border-color: #dc2626 !important;
-  color: #dc2626 !important;
+  border-color: var(--accent-danger) !important;
+  color: var(--accent-danger) !important;
 }
 
 .ctrl-btn.danger:hover {
