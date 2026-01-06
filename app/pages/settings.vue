@@ -313,23 +313,23 @@ const timezones = [
     <div class="space-y-6">
       <!-- Page Header -->
       <div>
-        <h1 class="text-3xl font-semibold text-gray-900 dark:text-gray-100">
+        <h1 class="text-3xl font-semibold text-stone-800 dark:text-stone-50">
           Settings
         </h1>
-        <p class="mt-2 text-gray-600 dark:text-gray-400">
+        <p class="mt-2 text-stone-600 dark:text-stone-400">
           Manage your account settings and preferences
         </p>
       </div>
 
       <!-- Account Section -->
-      <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+      <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
         <template #header>
           <div class="flex items-center gap-2">
             <Icon
               name="i-lucide-user"
               class="h-5 w-5"
             />
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h2 class="text-lg font-medium text-stone-800 dark:text-stone-50">
               Account
             </h2>
           </div>
@@ -349,9 +349,9 @@ const timezones = [
               <div class="flex items-center gap-1 mt-1">
                 <Icon
                   name="i-lucide-check-circle"
-                  class="h-4 w-4 text-mint-500"
+                  class="h-4 w-4 text-green-600"
                 />
-                <span class="text-xs text-gray-500 dark:text-gray-400">
+                <span class="text-xs text-stone-500 dark:text-stone-400">
                   Verified
                 </span>
               </div>
@@ -374,7 +374,7 @@ const timezones = [
           >
             <select
               v-model="accountForm.timezone"
-              class="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:focus:ring-brand-400"
+              class="w-full rounded-md border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400"
             >
               <option
                 v-for="tz in timezones"
@@ -405,14 +405,14 @@ const timezones = [
       </UCard>
 
       <!-- Preferences Section -->
-      <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+      <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
         <template #header>
           <div class="flex items-center gap-2">
             <Icon
               name="i-lucide-palette"
               class="h-5 w-5"
             />
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h2 class="text-lg font-medium text-stone-800 dark:text-stone-50">
               Preferences
             </h2>
           </div>
@@ -433,7 +433,7 @@ const timezones = [
               class="w-full"
             >
             <template #hint>
-              <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <div class="flex justify-between text-xs text-stone-500 dark:text-stone-400 mt-1">
                 <span>10m</span>
                 <span>{{ preferences.defaultStintDuration }}m</span>
                 <span>120m</span>
@@ -451,7 +451,7 @@ const timezones = [
                   v-model="preferences.theme"
                   type="radio"
                   value="light"
-                  class="w-4 h-4 text-brand-600 focus:ring-brand-500"
+                  class="w-4 h-4 text-orange-700 focus:ring-orange-500"
                 >
                 <span>Light</span>
               </label>
@@ -460,7 +460,7 @@ const timezones = [
                   v-model="preferences.theme"
                   type="radio"
                   value="dark"
-                  class="w-4 h-4 text-brand-600 focus:ring-brand-500"
+                  class="w-4 h-4 text-orange-700 focus:ring-orange-500"
                 >
                 <span>Dark</span>
               </label>
@@ -469,7 +469,7 @@ const timezones = [
                   v-model="preferences.theme"
                   type="radio"
                   value="system"
-                  class="w-4 h-4 text-brand-600 focus:ring-brand-500"
+                  class="w-4 h-4 text-orange-700 focus:ring-orange-500"
                 >
                 <span>System</span>
               </label>
@@ -527,14 +527,14 @@ const timezones = [
       </UCard>
 
       <!-- Security Section -->
-      <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+      <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
         <template #header>
           <div class="flex items-center gap-2">
             <Icon
               name="i-lucide-shield"
               class="h-5 w-5"
             />
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h2 class="text-lg font-medium text-stone-800 dark:text-stone-50">
               Security
             </h2>
           </div>
@@ -542,12 +542,12 @@ const timezones = [
 
         <div class="space-y-4">
           <div>
-            <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">
+            <h3 class="text-sm font-medium text-stone-800 dark:text-stone-50 mb-3">
               Active Sessions
             </h3>
             <div
               v-if="activeSessions.length === 0"
-              class="text-sm text-gray-500 dark:text-gray-400"
+              class="text-sm text-stone-500 dark:text-stone-400"
             >
               <p>Current session only</p>
             </div>
@@ -558,7 +558,7 @@ const timezones = [
               <div
                 v-for="session in activeSessions"
                 :key="session.id"
-                class="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700"
+                class="flex items-center justify-between p-3 rounded-lg border border-stone-200 dark:border-stone-700"
               >
                 <div>
                   <div class="flex items-center gap-2">
@@ -574,7 +574,7 @@ const timezones = [
                       Current
                     </UBadge>
                   </div>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                  <p class="text-sm text-stone-500 dark:text-stone-400">
                     {{ session.location }} · {{ session.lastActive }}
                   </p>
                 </div>
@@ -601,14 +601,14 @@ const timezones = [
       </UCard>
 
       <!-- Privacy Section -->
-      <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+      <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
         <template #header>
           <div class="flex items-center gap-2">
             <Icon
               name="i-lucide-eye"
               class="h-5 w-5"
             />
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h2 class="text-lg font-medium text-stone-800 dark:text-stone-50">
               Privacy
             </h2>
           </div>
@@ -635,7 +635,7 @@ const timezones = [
             <USwitch v-model="analyticsOptOut" />
           </UFormField>
 
-          <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
+          <div class="pt-2 border-t border-stone-200 dark:border-stone-700">
             <UButton
               color="error"
               variant="outline"
@@ -652,7 +652,7 @@ const timezones = [
       </UCard>
 
       <!-- Subscription Section -->
-      <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+      <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
         <template #header>
           <div class="flex items-center gap-2">
             <Icon
@@ -690,16 +690,16 @@ const timezones = [
           <div class="space-y-3 pt-2">
             <div>
               <div class="flex items-center justify-between mb-1">
-                <span class="text-sm text-gray-600 dark:text-gray-400">
+                <span class="text-sm text-stone-600 dark:text-stone-400">
                   Active Projects
                 </span>
                 <span class="text-sm font-medium">
                   {{ subscription.activeProjects }} / {{ subscription.maxProjects }}
                 </span>
               </div>
-              <div class="h-2 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
+              <div class="h-2 bg-stone-100 dark:bg-stone-800 rounded overflow-hidden">
                 <div
-                  class="h-full bg-brand-500 transition-all duration-500"
+                  class="h-full bg-orange-600 transition-all duration-500"
                   :style="{ width: `${(subscription.activeProjects / subscription.maxProjects) * 100}%` }"
                 />
               </div>
@@ -707,16 +707,16 @@ const timezones = [
 
             <div>
               <div class="flex items-center justify-between mb-1">
-                <span class="text-sm text-gray-600 dark:text-gray-400">
+                <span class="text-sm text-stone-600 dark:text-stone-400">
                   Data Exports
                 </span>
                 <span class="text-sm font-medium">
                   {{ subscription.dataExports }} / {{ subscription.maxExports }}
                 </span>
               </div>
-              <div class="h-2 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
+              <div class="h-2 bg-stone-100 dark:bg-stone-800 rounded overflow-hidden">
                 <div
-                  class="h-full bg-mint-500 transition-all duration-500"
+                  class="h-full bg-green-600 transition-all duration-500"
                   :style="{ width: `${(subscription.dataExports / subscription.maxExports) * 100}%` }"
                 />
               </div>
@@ -728,101 +728,107 @@ const timezones = [
 
     <!-- Password Change Dialog -->
     <UModal
-      v-model="showPasswordDialog"
+      v-model:open="showPasswordDialog"
       title="Change Password"
+      :ui="{ footer: 'justify-end' }"
     >
-      <div class="space-y-4">
-        <UFormField
-          label="Current Password"
-          name="currentPassword"
-        >
-          <UInput
-            v-model="passwordForm.currentPassword"
-            type="password"
-            placeholder="Enter current password"
-          />
-        </UFormField>
-
-        <UFormField
-          label="New Password"
-          name="newPassword"
-        >
-          <UInput
-            v-model="passwordForm.newPassword"
-            type="password"
-            placeholder="Enter new password"
-          />
-        </UFormField>
-
-        <UFormField
-          label="Confirm New Password"
-          name="confirmPassword"
-        >
-          <UInput
-            v-model="passwordForm.confirmPassword"
-            type="password"
-            placeholder="Confirm new password"
-          />
-        </UFormField>
-
-        <div class="flex justify-end gap-3 pt-2">
-          <UButton
-            variant="ghost"
-            @click="showPasswordDialog = false"
+      <template #body>
+        <div class="space-y-4">
+          <UFormField
+            label="Current Password"
+            name="currentPassword"
           >
-            Cancel
-          </UButton>
-          <UButton
-            color="primary"
-            @click="changePassword"
+            <UInput
+              v-model="passwordForm.currentPassword"
+              type="password"
+              placeholder="Enter current password"
+            />
+          </UFormField>
+
+          <UFormField
+            label="New Password"
+            name="newPassword"
           >
-            Update Password
-          </UButton>
+            <UInput
+              v-model="passwordForm.newPassword"
+              type="password"
+              placeholder="Enter new password"
+            />
+          </UFormField>
+
+          <UFormField
+            label="Confirm New Password"
+            name="confirmPassword"
+          >
+            <UInput
+              v-model="passwordForm.confirmPassword"
+              type="password"
+              placeholder="Confirm new password"
+            />
+          </UFormField>
         </div>
-      </div>
+      </template>
+
+      <template #footer>
+        <UButton
+          variant="ghost"
+          @click="showPasswordDialog = false"
+        >
+          Cancel
+        </UButton>
+        <UButton
+          color="primary"
+          @click="changePassword"
+        >
+          Update Password
+        </UButton>
+      </template>
     </UModal>
 
     <!-- Delete Account Dialog -->
     <UModal
-      v-model="showDeleteAccountDialog"
+      v-model:open="showDeleteAccountDialog"
       title="Delete Account"
+      :ui="{ footer: 'justify-end' }"
     >
-      <div class="space-y-4">
-        <UAlert
-          color="error"
-          variant="soft"
-          icon="i-lucide-alert-triangle"
-        >
-          This action cannot be undone. All your data will be permanently deleted.
-        </UAlert>
-
-        <UFormField
-          label="Type your email to confirm"
-          name="deleteConfirm"
-        >
-          <UInput
-            v-model="deleteConfirmText"
-            type="email"
-            placeholder="your@email.com"
-          />
-        </UFormField>
-
-        <div class="flex justify-end gap-3 pt-2">
-          <UButton
-            variant="ghost"
-            @click="showDeleteAccountDialog = false"
-          >
-            Cancel
-          </UButton>
-          <UButton
+      <template #body>
+        <div class="space-y-4">
+          <UAlert
             color="error"
-            :disabled="deleteConfirmText !== accountForm.email"
-            @click="deleteAccount"
+            variant="soft"
+            icon="i-lucide-alert-triangle"
           >
-            Delete Account
-          </UButton>
+            This action cannot be undone. All your data will be permanently deleted.
+          </UAlert>
+
+          <UFormField
+            label="Type your email to confirm"
+            name="deleteConfirm"
+          >
+            <UInput
+              v-model="deleteConfirmText"
+              type="email"
+              placeholder="your@email.com"
+            />
+          </UFormField>
         </div>
-      </div>
+      </template>
+
+      <template #footer>
+        <UButton
+          variant="ghost"
+          @click="showDeleteAccountDialog = false"
+        >
+          Cancel
+        </UButton>
+        <UButton
+          color="error"
+          :disabled="deleteConfirmText !== accountForm.email"
+          @click="deleteAccount"
+        >
+          Delete Account
+        </UButton>
+      </template>
     </UModal>
   </UContainer>
 </template>

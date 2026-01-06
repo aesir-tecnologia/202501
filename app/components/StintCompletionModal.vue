@@ -42,54 +42,40 @@ watch(isOpen, (open) => {
     v-model:open="isOpen"
     title="Complete Stint"
     description="Add optional notes about what you accomplished during this stint."
+    :ui="{ footer: 'justify-end' }"
   >
-    <template #content>
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
-            Complete Stint
-          </h3>
-        </template>
+    <template #body>
+      <UTextarea
+        v-model="notes"
+        class="w-full"
+        placeholder="What did you accomplish during this stint?"
+        :maxlength="STINT.NOTES.MAX_LENGTH"
+        autoresize
+        :maxrows="4"
+        :rows="3"
+        autofocus
+      />
+      <div class="flex justify-end mt-1">
+        <span class="text-xs text-neutral-500 dark:text-neutral-400">
+          {{ remainingCharacters }} characters remaining
+        </span>
+      </div>
+    </template>
 
-        <div class="space-y-4">
-          <p class="text-sm text-neutral-600 dark:text-neutral-400">
-            Add optional notes about what you accomplished during this stint.
-          </p>
-
-          <div>
-            <UTextarea
-              v-model="notes"
-              placeholder="What did you accomplish during this stint?"
-              :maxlength="STINT.NOTES.MAX_LENGTH"
-              autoresize
-              :maxrows="4"
-              :rows="3"
-              autofocus
-            />
-            <div class="flex justify-end mt-1">
-              <span class="text-xs text-neutral-500 dark:text-neutral-400">
-                {{ remainingCharacters }} characters remaining
-              </span>
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-2 pt-4">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              @click="handleCancel"
-            >
-              Cancel
-            </UButton>
-            <UButton
-              color="primary"
-              @click="handleConfirm"
-            >
-              Complete Stint
-            </UButton>
-          </div>
-        </div>
-      </UCard>
+    <template #footer>
+      <UButton
+        color="neutral"
+        variant="ghost"
+        @click="handleCancel"
+      >
+        Cancel
+      </UButton>
+      <UButton
+        color="primary"
+        @click="handleConfirm"
+      >
+        Complete Stint
+      </UButton>
     </template>
   </UModal>
 </template>

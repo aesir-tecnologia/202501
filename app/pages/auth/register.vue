@@ -156,24 +156,34 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
 
 <template>
   <UApp>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200 dark:bg-gray-950">
-      <div class="max-w-md w-full space-y-8 text-gray-900 dark:text-gray-100">
+    <div class="min-h-screen flex items-center justify-center bg-[#fffbf5] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 dark:bg-stone-900">
+      <div class="max-w-md w-full space-y-8 text-stone-800 dark:text-stone-50">
         <div class="text-center space-y-3">
-          <h2 class="text-3xl font-bold">
+          <NuxtLink
+            to="/"
+            class="inline-flex items-center gap-2 text-stone-500 hover:text-orange-700 dark:text-stone-400 dark:hover:text-orange-500 transition-colors mb-4"
+          >
+            <UIcon
+              name="i-lucide-arrow-left"
+              class="size-4"
+            />
+            <span class="text-sm font-medium">Back to home</span>
+          </NuxtLink>
+          <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
             Create your account
           </h2>
-          <p class="text-sm text-gray-600 dark:text-gray-300">
+          <p class="text-sm text-stone-600 dark:text-stone-400">
             Already have an account?
             <NuxtLink
               to="/auth/login"
-              class="font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300"
+              class="font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
             >
               Sign in here
             </NuxtLink>
           </p>
         </div>
 
-        <UCard class="p-8 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+        <UCard class="p-8 bg-white shadow-warm border border-stone-200 rounded-2xl transition-colors duration-300 dark:border-stone-700 dark:bg-stone-800">
           <UForm
             :schema="registerSchema"
             :state="state"
@@ -233,7 +243,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
               class="text-xs space-y-1 -mt-4 mb-2"
             >
               <div
-                :class="hasMinLength ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+                :class="hasMinLength ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
                 class="flex items-center gap-1.5"
               >
                 <UIcon
@@ -243,7 +253,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
                 <span>At least 8 characters</span>
               </div>
               <div
-                :class="hasUppercase ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+                :class="hasUppercase ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
                 class="flex items-center gap-1.5"
               >
                 <UIcon
@@ -253,7 +263,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
                 <span>One uppercase letter</span>
               </div>
               <div
-                :class="hasLowercase ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+                :class="hasLowercase ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
                 class="flex items-center gap-1.5"
               >
                 <UIcon
@@ -263,7 +273,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
                 <span>One lowercase letter</span>
               </div>
               <div
-                :class="hasNumber ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+                :class="hasNumber ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
                 class="flex items-center gap-1.5"
               >
                 <UIcon
@@ -273,7 +283,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
                 <span>One number</span>
               </div>
               <div
-                :class="hasSpecialChar ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+                :class="hasSpecialChar ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
                 class="flex items-center gap-1.5"
               >
                 <UIcon
@@ -285,7 +295,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
             </div>
             <div
               v-else
-              class="text-xs text-gray-500 -mt-4 mb-2"
+              class="text-xs text-stone-500 dark:text-stone-400 -mt-4 mb-2"
             >
               Password must be at least 8 characters with uppercase, lowercase, number, and special
               character
@@ -297,7 +307,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
               class="-mt-2 mb-4"
             >
               <div class="flex items-center justify-between mb-1.5">
-                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
+                <span class="text-xs font-medium text-stone-700 dark:text-stone-300">
                   Password Strength:
                 </span>
                 <span
@@ -335,7 +345,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
               />
             </UFormField>
 
-            <div class="space-y-3 text-gray-600 dark:text-gray-300">
+            <div class="space-y-3 text-stone-600 dark:text-stone-400">
               <UCheckbox
                 v-model="state.acceptTerms"
                 :disabled="loading"
@@ -346,7 +356,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
                     I agree to the
                     <NuxtLink
                       to="/legal/terms"
-                      class="text-brand-600 hover:text-brand-500 font-medium dark:text-brand-400 dark:hover:text-brand-300"
+                      class="text-orange-700 hover:text-orange-800 font-medium dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
                       target="_blank"
                     >
                       Terms of Service
@@ -354,7 +364,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
                     and
                     <NuxtLink
                       to="/legal/privacy"
-                      class="text-brand-600 hover:text-brand-500 font-medium dark:text-brand-400 dark:hover:text-brand-300"
+                      class="text-orange-700 hover:text-orange-800 font-medium dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
                       target="_blank"
                     >
                       Privacy Policy

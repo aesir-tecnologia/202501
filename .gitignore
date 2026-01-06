@@ -46,3 +46,10 @@ node_modules/
 # tasks.json
 # tasks/ 
 .vercel
+
+# Claude Code local settings
+.claude/settings.json
+.claude/settings.local.json
+
+# Playwright MCP artifacts
+.playwright-mcp/

@@ -2,6 +2,29 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## ⛔ CRITICAL: No Assumptions Policy
+
+**DO NOT MAKE ASSUMPTIONS. EVER.**
+
+When given instructions, execute them EXACTLY as stated. If the instruction is ambiguous or could be interpreted multiple ways:
+
+1. **ASK for clarification** - Do not guess what the user meant
+2. **Do not selectively interpret** - "commit all changes" means ALL changes, not "the changes I think are relevant"
+3. **Do not filter or scope down** - If told to do X, do X completely, not a subset you deem appropriate
+4. **When in doubt, ask** - A clarifying question takes 5 seconds; redoing work takes minutes
+
+**Examples of assumption failures to avoid:**
+- ❌ "Commit all changes" → Only committing files I just edited
+- ❌ "Fix all errors" → Only fixing errors I think are important
+- ❌ "Update the tests" → Only updating tests for code I modified
+- ✅ "Commit all changes" → Commit ALL uncommitted changes, ask how to group them if unclear
+
+**If you catch yourself thinking "the user probably means..." — STOP and ASK.**
+
+---
+
 ## Project Overview
 
 LifeStint is a Nuxt 4 SSG application with Supabase authentication and database. It tracks focused work sessions (stints) for independent professionals across multiple client projects.
@@ -214,6 +237,42 @@ export const projectKeys = {
 - **Dark Mode:** Via Tailwind `dark:` variants, theme toggle uses `UColorModeButton`
 - **Config:** `colorMode` settings in `nuxt.config.ts` and `app.config.ts`
 
+> ⚠️ **CRITICAL: Nuxt UI 4 Documentation Requirement**
+>
+> Nuxt UI 4 is built on **Reka UI** (NOT Radix Vue or Headless UI). The API has significant breaking changes from Nuxt UI 2/3. **EVERY TIME** you use, edit, or modify a Nuxt UI component, you **MUST** check the official documentation first using the Context7 MCP tool:
+>
+> ```
+> mcp__plugin_context7_context7__query-docs with libraryId="/llmstxt/ui4_nuxt_llms_txt"
+> ```
+>
+> **Common API changes that WILL break if not checked:**
+> - Menu items: `click` → `onSelect` (DropdownMenu, CommandPalette, NavigationMenu)
+> - Form inputs: different prop names and event handlers
+> - Modal/Dialog: different slot and prop structure
+> - Many components have different default behaviors
+>
+> **Do NOT rely on memory or assume APIs match other UI libraries.**
+
+**Design System: "Focused Warmth + Deep Focus Hybrid"**
+
+The design system uses warm, natural tones that reinforce the "focused work" metaphor:
+
+| Role | Light Mode | Dark Mode | Tailwind |
+|------|------------|-----------|----------|
+| Primary | Terracotta | Orange | `orange-600/700` |
+| Secondary | Forest | Green | `green-600/700` |
+| Tertiary | Sage | Lime | `lime-500` |
+| Background | Warm Cream `#fffbf5` | Stone-900 | `bg-[#fffbf5]` / `stone-900` |
+| Text | Stone-800 | Stone-50 | `stone-800` / `stone-50` |
+| Borders | Stone-200 | Stone-700 | `stone-200` / `stone-700` |
+
+**Typography:**
+- **Headings:** Fraunces (serif) via `font-serif` class
+- **Body:** Instrument Sans via `font-sans` class
+- **Mono:** JetBrains Mono for timers/code
+
+**CSS Tokens:** Defined in `app/assets/css/tokens.css` with semantic CSS variables for both modes.
+
 ## Testing
 
 Tests are **co-located** with the files they test for better discoverability and maintainability.
@@ -311,7 +370,7 @@ See `README.md` for detailed deployment instructions.
 - **Vue Router 4.5.1** - Client-side routing (auto-generated from pages)
 
 ### UI & Styling
-- **Nuxt UI 4.2.0** - Component library built on Radix Vue primitives
+- **Nuxt UI 4.2.0** - Component library built on **Reka UI** primitives (NOT Radix Vue)
 - **Tailwind CSS 4.1.17** - Utility-first CSS (bundled with Nuxt UI)
 - **Lucide Icons 1.2.73** - Icon library (`@iconify-json/lucide`, bundled locally)
 - **Color Mode** - System-aware dark/light mode via Nuxt UI

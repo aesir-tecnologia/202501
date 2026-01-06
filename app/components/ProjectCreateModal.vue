@@ -39,21 +39,13 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
     title="New Project"
     description="Fill out the form below to create a new project"
   >
-    <template #content>
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
-            New Project
-          </h3>
-        </template>
-
-        <ProjectForm
-          mode="create"
-          :loading="isPending"
-          @submit="handleSubmit"
-          @cancel="closeModal"
-        />
-      </UCard>
+    <template #body>
+      <ProjectForm
+        mode="create"
+        :loading="isPending"
+        @submit="handleSubmit"
+        @cancel="closeModal"
+      />
     </template>
   </UModal>
 </template>

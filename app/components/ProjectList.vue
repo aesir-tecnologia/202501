@@ -321,54 +321,6 @@ async function handleResumeStint(stint: StintRow): Promise<void> {
   }
 }
 
-async function handleResumePausedStint(stint: StintRow): Promise<void> {
-  // Check if there's an active stint - can't resume while another is active
-  if (activeStint.value) {
-    toast.add({
-      title: 'Cannot Resume',
-      description: 'Stop or complete the active stint first before resuming the paused one.',
-      color: 'warning',
-      icon: 'i-lucide-alert-triangle',
-    });
-    return;
-  }
-
-  try {
-    await resumeStint(stint.id);
-    screenReaderAnnouncement.value = 'Paused stint resumed';
-    toast.add({ title: 'Stint resumed', color: 'success' });
-  }
-  catch (error) {
-    screenReaderAnnouncement.value = 'Failed to resume paused stint';
-    toast.add({
-      title: 'Failed to Resume',
-      description: error instanceof Error ? error.message : 'Could not resume stint. Please try again.',
-      color: 'error',
-      icon: 'i-lucide-alert-circle',
-    });
-  }
-}
-
-async function handleAbandonPausedStint(stint: StintRow): Promise<void> {
-  try {
-    await completeStint({
-      stintId: stint.id,
-      completionType: 'interrupted',
-    });
-    screenReaderAnnouncement.value = 'Paused stint abandoned';
-    toast.add({ title: 'Stint abandoned', color: 'neutral' });
-  }
-  catch (error) {
-    screenReaderAnnouncement.value = 'Failed to abandon stint';
-    toast.add({
-      title: 'Failed to Abandon',
-      description: error instanceof Error ? error.message : 'Could not abandon stint. Please try again.',
-      color: 'error',
-      icon: 'i-lucide-alert-circle',
-    });
-  }
-}
-
 function handleCompleteStint(stint: StintRow): void {
   stintToComplete.value = stint;
   showCompletionModal.value = true;
@@ -644,8 +596,6 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
         @pause-stint="handlePauseStint"
         @resume-stint="handleResumeStint"
         @complete-stint="handleCompleteStint"
-        @resume-paused-stint="handleResumePausedStint"
-        @abandon-paused-stint="handleAbandonPausedStint"
       />
     </ul>
 

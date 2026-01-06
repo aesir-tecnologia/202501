@@ -106,21 +106,21 @@ onMounted(() => {
 
 <template>
   <UApp>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 transition-colors duration-200 dark:bg-gray-950">
-      <div class="max-w-md w-full text-gray-900 dark:text-gray-100">
-        <UCard class="p-8 text-center bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-gray-800 dark:bg-gray-900/70">
+    <div class="min-h-screen flex items-center justify-center bg-[#fffbf5] transition-colors duration-300 dark:bg-stone-900">
+      <div class="max-w-md w-full text-stone-800 dark:text-stone-50">
+        <UCard class="p-8 text-center bg-white shadow-warm border border-stone-200 rounded-2xl transition-colors duration-300 dark:border-stone-700 dark:bg-stone-800">
           <div
             v-if="loading"
             class="space-y-4"
           >
             <UIcon
               name="i-lucide-loader-2"
-              class="w-8 h-8 mx-auto text-brand-600 animate-spin dark:text-brand-400"
+              class="w-8 h-8 mx-auto text-orange-600 animate-spin dark:text-orange-500"
             />
-            <h2 class="text-xl font-semibold">
+            <h2 class="text-xl font-serif font-semibold">
               Verifying your account...
             </h2>
-            <p class="text-gray-600 dark:text-gray-300">
+            <p class="text-stone-600 dark:text-stone-400">
               Please wait while we complete your authentication.
             </p>
           </div>
@@ -133,10 +133,10 @@ onMounted(() => {
               name="i-lucide-triangle-alert"
               class="w-8 h-8 mx-auto text-red-500 dark:text-red-400"
             />
-            <h2 class="text-xl font-semibold">
+            <h2 class="text-xl font-serif font-semibold">
               Authentication Error
             </h2>
-            <p class="text-gray-600 dark:text-gray-300">
+            <p class="text-stone-600 dark:text-stone-400">
               {{ error }}
             </p>
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -163,12 +163,12 @@ onMounted(() => {
           >
             <UIcon
               name="i-lucide-circle-check"
-              class="w-8 h-8 mx-auto text-mint-500 dark:text-mint-400"
+              class="w-8 h-8 mx-auto text-green-600 dark:text-green-500"
             />
-            <h2 class="text-xl font-semibold">
+            <h2 class="text-xl font-serif font-semibold">
               Welcome to LifeStint!
             </h2>
-            <p class="text-gray-600 dark:text-gray-300">
+            <p class="text-stone-600 dark:text-stone-400">
               Your account has been successfully verified. Redirecting to your dashboard...
             </p>
             <div class="flex justify-center">
