@@ -265,32 +265,34 @@ function exportCSV() {
     return;
   }
 
-  // CSV header
+  // CSV header (Focus Ledger format per spec)
   const headers = [
     'Date',
-    'Project',
+    'Project Name',
     'Started At',
     'Ended At',
-    'Duration (minutes)',
-    'Duration (hours)',
-    'Status',
+    'Planned Duration (minutes)',
+    'Actual Duration (minutes)',
+    'Pause Duration (minutes)',
+    'Completion Type',
     'Notes',
   ];
 
   // CSV rows
   const rows = filteredStints.value.map((stint) => {
     const project = projects.value.find(p => p.id === stint.project_id);
-    const durationMinutes = stint.actual_duration ? Math.round(stint.actual_duration / 60) : 0;
-    const durationHours = (durationMinutes / 60).toFixed(2);
+    const actualMinutes = stint.actual_duration ? Math.round(stint.actual_duration / 60) : 0;
+    const pauseMinutes = Math.round(stint.paused_duration / 60);
 
     return [
-      stint.ended_at ? formatDate(stint.ended_at) : '',
+      stint.ended_at ? stint.ended_at.split('T')[0] : '',
       project?.name || 'Unknown',
       stint.started_at ? formatDateTime(stint.started_at) : '',
       stint.ended_at ? formatDateTime(stint.ended_at) : '',
-      durationMinutes.toString(),
-      durationHours,
-      stint.status || '',
+      stint.planned_duration.toString(),
+      actualMinutes.toString(),
+      pauseMinutes.toString(),
+      stint.completion_type || '',
       (stint.notes || '').replace(/"/g, '""'), // Escape quotes
     ];
   });
@@ -306,7 +308,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `lifestint-report-${dateRange.value.start}-to-${dateRange.value.end}.csv`;
+  link.download = `LifeStint-Focus-Ledger_${dateRange.value.start}_${dateRange.value.end}.csv`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

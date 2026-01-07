@@ -80,33 +80,21 @@
   - Timer resumes from remaining working time
 - Pause/resume events broadcast in real-time
 - Paused stints do not auto-complete; user must manually resume or stop
-- **Stale paused stint handling:** Paused stints older than 24 hours are automatically completed:
-  - `ended_at`: The original `paused_at` timestamp (when user last paused)
-  - `actual_duration`: Working time before pause (`paused_at - started_at - paused_duration`)
-  - `completion_type`: "auto_stale"
-  - `excluded`: false (time counts toward daily progress)
-  - This prevents indefinitely paused stints from blocking new work while preserving valid work time
 
 ### Stop Stint Manually
 
 - "Stop" button visible during active stint
 - Completion modal appears with:
   - Notes field: "Add notes about this stint?" (0-500 characters, optional)
-  - Two action buttons:
-    - **"Complete"** (primary): Counts toward daily progress
-    - **"Discard"**: Excludes from daily progress, preserved for analytics
+  - **"Complete"** button (primary action)
 - Creates completion record:
   - `ended_at`: Server timestamp
   - `actual_duration`: Calculated from started_at to ended_at minus pause duration
   - `completion_type`: "manual"
-  - `excluded`: Boolean (true if user clicked "Discard")
   - `notes`: User input (optional)
-- If completed (not excluded):
+- On completion:
   - Progress updates on dashboard immediately
   - Celebration animation if daily goal reached
-- If discarded (excluded):
-  - Toast confirmation: "Stint saved but excluded from today's count"
-  - Data preserved in analytics for historical context
 
 ### Auto-Complete
 
@@ -118,7 +106,6 @@
   - `ended_at`: Server timestamp
   - `actual_duration`: Working time in seconds
   - `completion_type`: "auto"
-  - `excluded`: false (auto-completed stints always count)
 - If browser closed, server-side cron completes stint at planned end time
 - Paused stints do not auto-complete
 
@@ -130,7 +117,6 @@
   - If server stint was auto-completed (timer expired or cron): shows completion notification
   - If server has different active stint: shows conflict resolution dialog
 - All recorded time counts toward daily progress (network issues don't invalidate work)
-- User can exclude any completed stint from daily progress via the completion modal or stint history
 
 ### Single Active Stint Enforcement
 
@@ -143,9 +129,8 @@
 - Race condition handling: Server uses optimistic locking (version field on user record)
 - Cross-device: Real-time broadcasts ensure all devices show same active stint
 - **Conflict resolution completion:** When ending a stint via "End current stint and start new one":
-  - Shows quick completion modal with "Complete" and "Discard" options
+  - Shows quick completion modal with notes field
   - `completion_type`: "conflict_resolution"
-  - `excluded`: Based on user choice (defaults to false)
 
 ### Timer Accuracy
 
@@ -173,23 +158,12 @@ All duration fields in the database use **seconds** as the base unit:
 
 User-facing display converts to minutes/hours as appropriate.
 
-### Completion Types & Exclusion
+### Completion Types
 
 **Completion Types** (stored in `completion_type` field):
 - `manual`: User clicked "Stop" and completed normally
 - `auto`: Timer reached planned duration
-- `auto_stale`: Stale paused stint (>24 hours) auto-completed with time worked before pause
-- `conflict_resolution`: Ended via conflict dialog to start new stint on different project
-
-**Exclusion** (stored in `excluded` boolean field):
-- `false` (default): Stint counts toward daily progress and streaks
-- `true`: Stint preserved in analytics but excluded from all counting metrics
-- User sets exclusion via "Discard" button in completion modal
-- Excluded stints:
-  - Don't count toward daily progress ("X of Y stints today")
-  - Don't count toward streak maintenance
-  - Still appear in Focus Ledger exports (with "Excluded" column)
-  - Still visible in historical analytics for context
+- `interrupted`: Ended via conflict dialog to start new stint on different project
 
 ### Constraints
 
@@ -308,7 +282,7 @@ User-facing display converts to minutes/hours as appropriate.
 **Streak Tracking:**
 - Current streak: "🔥 12 day streak! Keep it going!"
 - Longest streak all-time
-- Streak definition: At least 1 non-excluded completed stint per day
+- Streak definition: At least 1 completed stint per day
 - Grace period: 1 day (can miss 1 day without breaking streak)
 - Timezone-aware: Streak calculated using user's timezone
 
@@ -323,7 +297,6 @@ User-facing display converts to minutes/hours as appropriate.
   - Actual Duration (minutes)
   - Pause Duration (minutes)
   - Completion Type
-  - Excluded (Yes/No)
   - Notes
 - Filename: `LifeStint-Focus-Ledger-[StartDate]-[EndDate].csv`
 - Date range selector: Last 7 days, Last 30 days, Last 90 days, Custom

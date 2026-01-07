@@ -226,6 +226,42 @@ const mostProductiveDay = computed(() => {
   return productiveDay?.day || 'N/A';
 });
 
+const longestStreakThisWeek = computed(() => {
+  if (weekStints.value.length === 0) return 0;
+
+  const uniqueDates = new Set<string>();
+  weekStints.value.forEach((stint) => {
+    if (stint.ended_at) {
+      const date = parseSafeDate(stint.ended_at);
+      if (date) {
+        uniqueDates.add(date.toISOString().split('T')[0]!);
+      }
+    }
+  });
+
+  if (uniqueDates.size === 0) return 0;
+
+  const sortedDates = Array.from(uniqueDates).sort();
+  let maxStreak = 1;
+  let currentRun = 1;
+
+  for (let i = 1; i < sortedDates.length; i++) {
+    const prev = new Date(sortedDates[i - 1]!);
+    const curr = new Date(sortedDates[i]!);
+    const diffDays = (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (diffDays === 1) {
+      currentRun++;
+      maxStreak = Math.max(maxStreak, currentRun);
+    }
+    else {
+      currentRun = 1;
+    }
+  }
+
+  return maxStreak;
+});
+
 // Project breakdown (top 5)
 const projectBreakdown = computed(() => {
   const projectStats = new Map<string, { project: ProjectRow, stintCount: number, totalTime: number }>();
@@ -474,7 +510,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
           <h2 class="text-2xl font-semibold text-stone-800 dark:text-stone-50 mb-4">
             Weekly Overview
           </h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
               <p class="text-sm text-stone-600 dark:text-stone-400 mb-1">
                 Total Stints
@@ -499,6 +535,15 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
               </p>
               <p class="text-2xl font-bold">
                 {{ mostProductiveDay }}
+              </p>
+            </UCard>
+
+            <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
+              <p class="text-sm text-stone-600 dark:text-stone-400 mb-1">
+                Longest Streak
+              </p>
+              <p class="text-2xl font-bold">
+                {{ longestStreakThisWeek }} {{ longestStreakThisWeek === 1 ? 'day' : 'days' }}
               </p>
             </UCard>
           </div>
