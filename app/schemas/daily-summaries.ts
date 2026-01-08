@@ -15,7 +15,6 @@ export const projectBreakdownItemSchema = z.object({
 
 export const dailySummarySchema = z.object({
   id: z.string().uuid(),
-  userId: z.string().uuid(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (expected YYYY-MM-DD)'),
   totalStints: z.number().int().nonnegative().max(DAILY_SUMMARY_SCHEMA_LIMITS.MAX_STINTS_PER_DAY),
   totalFocusSeconds: z.number().int().nonnegative().max(DAILY_SUMMARY_SCHEMA_LIMITS.MAX_FOCUS_SECONDS),

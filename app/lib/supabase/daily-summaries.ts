@@ -15,7 +15,6 @@ export interface DailySummaryResult {
   total_pause_seconds: number
   project_breakdown: Json
   completed_at: string
-  user_id?: string // Optional since RPC doesn't return it
 }
 
 export interface ProjectBreakdownItem {

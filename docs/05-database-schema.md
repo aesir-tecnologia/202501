@@ -533,6 +533,13 @@ INSERT INTO projects (user_id, name) VALUES ('other-user-uuid', 'Test');
 **aggregate_daily_summary(p_user_id UUID, p_date DATE)**
 - Pre-aggregates daily statistics for performance
 - Called by cron job at midnight user time
+- SECURITY DEFINER: only callable by service role/cron
+
+**get_daily_summaries(p_user_id UUID, p_start_date DATE, p_end_date DATE)**
+- Client-facing query for retrieving daily summaries within a date range
+- SECURITY INVOKER: RLS policies apply
+- Returns: `id`, `date`, `total_stints`, `total_focus_seconds`, `total_pause_seconds`, `project_breakdown`, `completed_at`
+- Note: `user_id` intentionally omitted from response (caller already provides it as parameter, RLS enforces access)
 
 **count_active_projects(p_user_id UUID)**
 - Returns count of active (non-archived) projects for a user
