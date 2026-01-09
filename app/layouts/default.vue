@@ -94,8 +94,13 @@ const signOut = async () => {
   navigateTo(appConfig.auth.home);
 };
 
-const { secondsRemaining, isPaused } = useStintTimer();
-const { data: activeStint } = useActiveStintQuery();
+const { secondsRemaining, isPaused } = import.meta.client
+  ? useStintTimer()
+  : { secondsRemaining: ref(0), isPaused: ref(true) };
+
+const { data: activeStint } = import.meta.client
+  ? useActiveStintQuery()
+  : { data: ref(null) };
 
 const formattedTime = computed(() => {
   const mins = Math.floor(secondsRemaining.value / 60);
