@@ -12,15 +12,20 @@
 
 ## User Profiles Table
 
-> **Note:** This table extends Supabase's built-in `auth.users` table. User authentication (email/password, email verification, sessions) is handled by Supabase Auth. This `user_profiles` table stores application-specific profile data.
+> **Note:** This table extends Supabase's built-in `auth.users` table. User authentication (email/password, email verification, sessions) is handled by Supabase Auth. This `user_profiles` table stores application-specific profile data and user preferences.
 
 ```sql
 CREATE TABLE user_profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
+  timezone TEXT NOT NULL DEFAULT 'UTC',
+  version INTEGER NOT NULL DEFAULT 1, -- Optimistic locking
+  -- User preferences (stored here instead of separate table for simplicity)
+  default_stint_duration INTEGER CHECK (default_stint_duration IS NULL OR (default_stint_duration >= 5 AND default_stint_duration <= 480)),
+  celebration_animation BOOLEAN NOT NULL DEFAULT true,
+  desktop_notifications BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  version INTEGER NOT NULL DEFAULT 1 -- Optimistic locking
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Index for email lookups
@@ -39,8 +44,15 @@ CREATE TRIGGER update_user_profiles_updated_at BEFORE UPDATE ON user_profiles
 -- Auto-create profile on user signup
 CREATE FUNCTION handle_new_user() RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO user_profiles (id, email)
-  VALUES (NEW.id, NEW.email)
+  INSERT INTO user_profiles (id, email, timezone, default_stint_duration, celebration_animation, desktop_notifications)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'timezone', 'UTC'),
+    NULL,  -- Use system default (120 min)
+    true,  -- Celebration animation enabled
+    false  -- Desktop notifications disabled by default
+  )
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
@@ -54,11 +66,18 @@ CREATE TRIGGER on_auth_user_created
 **Field Descriptions:**
 - `id`: References `auth.users(id)` - the Supabase Auth user ID
 - `email`: Synced from `auth.users.email` on profile creation
+- `timezone`: IANA timezone string (e.g., "America/New_York") for daily reset and analytics
 - `version`: Incremented on every update for optimistic locking (prevents race conditions)
+- `default_stint_duration`: Default stint duration in minutes (5-480). NULL means use system default (120 min)
+- `celebration_animation`: Show confetti animation when daily goal is reached
+- `desktop_notifications`: Enable browser notifications for stint completion
+
+**Note on Preferences:**
+- User preferences are stored directly in `user_profiles` rather than a separate table
+- Theme preference is handled client-side via Nuxt color-mode (not stored in database)
 
 **Note on Authentication:**
 - Email verification is handled by Supabase Auth (`auth.users.email_confirmed_at`)
-- User timezone is not currently stored; future implementation may add this field
 
 **Relationships:**
 - One-to-many with `projects` (CASCADE on delete)
@@ -219,43 +238,6 @@ $$ LANGUAGE plpgsql;
 **Relationships:**
 - Many-to-one with `projects` (CASCADE on delete)
 - Many-to-one with `user_profiles` (CASCADE on delete)
-
----
-
-## User Preferences Table (Future)
-
-> **Note:** This table is planned for a future release. User preferences are not currently implemented.
-
-```sql
-CREATE TABLE user_preferences (
-  user_id UUID PRIMARY KEY REFERENCES user_profiles(id) ON DELETE CASCADE,
-  default_stint_duration INTEGER NOT NULL DEFAULT 120,
-  celebration_sound BOOLEAN NOT NULL DEFAULT true,
-  celebration_animation BOOLEAN NOT NULL DEFAULT true,
-  desktop_notifications BOOLEAN NOT NULL DEFAULT true,
-  weekly_email_digest BOOLEAN NOT NULL DEFAULT false,
-  theme TEXT NOT NULL DEFAULT 'system' CHECK (theme IN ('light', 'dark', 'system')),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT valid_default_duration CHECK (default_stint_duration >= 5 AND default_stint_duration <= 480)
-);
-
--- RLS Policy
-ALTER TABLE user_preferences ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can manage own preferences" ON user_preferences FOR ALL USING (auth.uid() = user_id);
-
--- Trigger for updated_at
-CREATE TRIGGER set_preferences_updated_at BEFORE UPDATE ON user_preferences
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-```
-
-**Field Descriptions:**
-- `default_stint_duration`: Default for new projects (can be overridden per project)
-- `celebration_*`: Control completion animations and sounds
-- `desktop_notifications`: Browser notifications for stint completion
-- `theme`: UI theme preference
-
-**Relationships:**
-- One-to-one with `user_profiles` (CASCADE on delete)
 
 ---
 

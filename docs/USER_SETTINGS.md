@@ -54,37 +54,25 @@
 
 ### Default Stint Duration
 - **Type:** Number (minutes)
-- **Default:** `120` minutes
+- **Default:** `NULL` (uses system default of 120 minutes)
 - **Constraints:**
-  - Range: 5-480 minutes
+  - Range: 5-480 minutes (or NULL for system default)
   - Integer only
 - **Usage:** Used for new projects unless project has custom duration
-- **Storage:** `user_preferences.default_stint_duration`
-
-### Celebration Sound
-- **Type:** Boolean (toggle)
-- **Default:** `true` (enabled)
-- **Description:** Plays sound effect when daily goal is reached
-- **Storage:** `user_preferences.celebration_sound`
+- **Storage:** `user_profiles.default_stint_duration`
 
 ### Celebration Animation
 - **Type:** Boolean (toggle)
 - **Default:** `true` (enabled)
 - **Description:** Shows confetti animation when daily goal is reached
-- **Storage:** `user_preferences.celebration_animation`
+- **Storage:** `user_profiles.celebration_animation`
 
 ### Desktop Notifications
 - **Type:** Boolean (toggle)
-- **Default:** `true` (enabled)
+- **Default:** `false` (disabled)
 - **Description:** Browser notifications for stint completion
 - **Note:** Requires browser permission (requested on first stint start)
-- **Storage:** `user_preferences.desktop_notifications`
-
-### Weekly Email Digest
-- **Type:** Boolean (toggle)
-- **Default:** `false` (disabled)
-- **Description:** Weekly summary email sent every Monday at 8 AM UTC
-- **Storage:** `user_preferences.weekly_email_digest`
+- **Storage:** `user_profiles.desktop_notifications`
 
 ### Theme
 - **Type:** Select (radio buttons or dropdown)
@@ -94,7 +82,7 @@
   - `'dark'` - Dark mode
   - `'system'` - Follow system preference
 - **Constraints:** Must be one of the three valid options
-- **Storage:** `user_preferences.theme`
+- **Storage:** Browser localStorage via Nuxt color-mode (NOT stored in database)
 
 ---
 
@@ -175,13 +163,6 @@
 - **Format:** JSON file download
 - **Purpose:** GDPR compliance (Right to Data Portability)
 
-### Analytics Opt-Out
-- **Type:** Boolean (toggle)
-- **Default:** `false` (analytics enabled)
-- **Description:** Opt-out of analytics tracking (Mixpanel events)
-- **Note:** Mentioned in privacy considerations but not explicitly in schema
-- **Storage:** May need to add `user_preferences.analytics_opt_out` field
-
 ### Account Deletion
 - **Type:** Action button (destructive)
 - **Description:** Permanently delete account and all data
@@ -226,20 +207,18 @@
 ## Constraints Summary
 
 ### Numeric Ranges
-- **Default Stint Duration:** 5-480 minutes
+- **Default Stint Duration:** 5-480 minutes (or NULL for system default of 120)
 - **Custom Stint Duration:** 5-480 minutes (optional)
 - **Expected Daily Stints:** 1-12 per day
 - **Project Name Length:** 2-60 characters
 
 ### Boolean Defaults
-- **Celebration Sound:** `true`
 - **Celebration Animation:** `true`
-- **Desktop Notifications:** `true`
-- **Weekly Email Digest:** `false`
+- **Desktop Notifications:** `false`
 - **Project Active Status:** `true`
 
 ### Enum/Select Options
-- **Theme:** `'light'`, `'dark'`, `'system'` (default: `'system'`)
+- **Theme:** `'light'`, `'dark'`, `'system'` (default: `'system'`) - browser-local only
 - **Color Tags:** 8 colors: `'red'`, `'orange'`, `'amber'`, `'green'`, `'teal'`, `'blue'`, `'purple'`, `'pink'`
 
 ### Required Fields
@@ -250,7 +229,8 @@
 
 ### Optional Fields
 - **Full Name:** Optional
-- **Custom Stint Duration:** Optional (null = use default)
+- **Default Stint Duration:** Optional (NULL = use system default of 120 min)
+- **Custom Stint Duration:** Optional (null = use user's default)
 - **Color Tag:** Optional (null = no color)
 
 ---
@@ -264,12 +244,10 @@
 - Timezone (dropdown)
 
 ### Section 2: Preferences
-- Default Stint Duration (number input with slider)
-- Theme (radio buttons: Light / Dark / System)
-- Celebration Sound (toggle)
+- Default Stint Duration (number input with slider, 5-480 min or "Use default")
+- Theme (radio buttons: Light / Dark / System) - browser-local
 - Celebration Animation (toggle)
 - Desktop Notifications (toggle + permission status)
-- Weekly Email Digest (toggle)
 
 ### Section 3: Security
 - Active Sessions (list with logout options)
@@ -277,7 +255,6 @@
 
 ### Section 4: Privacy
 - Data Export (button → download JSON)
-- Analytics Opt-Out (toggle, if implemented)
 - Account Deletion (destructive button → confirmation modal)
 
 ### Section 5: Subscription
@@ -289,21 +266,17 @@
 
 ## Database Schema References
 
-### `user_profiles` Table (Current Implementation)
+### `user_profiles` Table
 - `id` (UUID, PRIMARY KEY, references `auth.users(id)`)
 - `email` (TEXT, UNIQUE, NOT NULL)
+- `timezone` (TEXT, NOT NULL, DEFAULT 'UTC')
 - `version` (INTEGER, NOT NULL, DEFAULT 1) - for optimistic locking
+- `default_stint_duration` (INTEGER, nullable, CHECK: 5-480 or NULL) - NULL means use system default (120 min)
+- `celebration_animation` (BOOLEAN, NOT NULL, DEFAULT true)
+- `desktop_notifications` (BOOLEAN, NOT NULL, DEFAULT false)
 - `created_at`, `updated_at` (TIMESTAMPTZ)
 
-> **Note:** Additional fields like `full_name` and `timezone` are planned for future implementation.
-
-### `user_preferences` Table
-- `default_stint_duration` (INTEGER, NOT NULL, DEFAULT 120, CHECK: 5-480)
-- `celebration_sound` (BOOLEAN, NOT NULL, DEFAULT true)
-- `celebration_animation` (BOOLEAN, NOT NULL, DEFAULT true)
-- `desktop_notifications` (BOOLEAN, NOT NULL, DEFAULT true)
-- `weekly_email_digest` (BOOLEAN, NOT NULL, DEFAULT false)
-- `theme` (TEXT, NOT NULL, DEFAULT 'system', CHECK: 'light'|'dark'|'system')
+> **Note:** Theme is handled client-side via Nuxt color-mode (localStorage), not stored in database. Additional fields like `full_name` are planned for future implementation.
 
 ### `projects` Table (Project Settings)
 - `name` (TEXT, NOT NULL, CHECK: length 2-60, UNIQUE per user)

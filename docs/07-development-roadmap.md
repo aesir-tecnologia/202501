@@ -24,7 +24,7 @@
    - User preferences table *(not implemented)*
    - Implement utility functions (update_updated_at_column) `COMPLETED`
 6. Set up CI/CD pipeline (GitHub Actions) `COMPLETED`
-7. Configure Sentry for error tracking *(not implemented)*
+7. Configure Sentry for error tracking `COMPLETED`
 8. Create basic UI shell (nav, layout, routing) `COMPLETED`
 
 **Deliverable:** Working authentication flow, empty dashboard, database ready for projects.
@@ -326,8 +326,9 @@
    - Preferences section (default stint duration, theme, notifications) *(UI only, not persisted)*
    - Privacy section (data export, account deletion) *(UI only, not functional)*
 2. Implement preference updates: *(not implemented)*
-   - Update user_preferences table
+   - Add preference columns to `user_profiles` table (default_stint_duration, celebration_animation, desktop_notifications)
    - Apply changes immediately (no page refresh)
+   - Theme handled client-side via Nuxt color-mode (not in database)
 3. Add password change flow: *(not implemented)*
    - Current password verification
    - New password with confirmation
@@ -343,7 +344,7 @@
    - Email confirmation
 6. Add theme switcher: `COMPLETED`
    - Light, Dark, System options
-   - Persists in user_preferences *(persists via localStorage only)*
+   - Persists via Nuxt color-mode (localStorage)
    - Applies immediately via CSS variables
 
 **Deliverable:** Settings page with full preference control and GDPR compliance.
