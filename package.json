@@ -22,6 +22,7 @@
     "@nuxt/eslint": "^1.9.0",
     "@nuxt/ui": "^4.0.0",
     "@nuxtjs/supabase": "^1.6.2",
+    "@sentry/nuxt": "^10.32.1",
     "@supabase/supabase-js": "^2.57.4",
     "@tanstack/vue-query": "^5.90.6",
     "@tanstack/vue-query-devtools": "^5.91.0",
@@ -44,5 +45,8 @@
     "happy-dom": "^20.0.11",
     "vitest": "^3.2.0",
     "vue-tsc": "^3.1.0"
+  },
+  "overrides": {
+    "@vercel/nft": "^0.27.4"
   }
 }

@@ -1,14 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: [
-    '@nuxt/eslint',
-    '@nuxt/test-utils',
-    '@nuxt/ui',
-    '@nuxtjs/supabase',
-  ],
+  modules: ['@nuxt/eslint', '@nuxt/test-utils', '@nuxt/ui', '@nuxtjs/supabase', '@sentry/nuxt/module'],
   ssr: true,
   pages: true,
   devtools: { enabled: true },
+
   app: {
     head: {
       meta: [
@@ -29,16 +25,20 @@ export default defineNuxtConfig({
     },
     viewTransition: true,
   },
+
   css: ['~/assets/css/main.css'],
+
   colorMode: {
     preference: 'system',
     fallback: 'light',
     classSuffix: '',
     dataValue: 'theme',
   },
+
   ui: {
     colorMode: true,
   },
+
   runtimeConfig: {
     public: {
       supabase: {
@@ -47,10 +47,13 @@ export default defineNuxtConfig({
       },
     },
   },
+
   devServer: {
     port: 3005,
   },
+
   compatibilityDate: '2025-07-15',
+
   nitro: {
     preset: 'static',
     prerender: {
@@ -85,6 +88,7 @@ export default defineNuxtConfig({
       },
     },
   },
+
   vite: {
     build: {
       sourcemap: false,
@@ -106,11 +110,13 @@ export default defineNuxtConfig({
       ],
     },
   },
+
   eslint: {
     config: {
       stylistic: true,
     },
   },
+
   icon: {
     serverBundle: {
       collections: ['lucide'],
@@ -121,6 +127,7 @@ export default defineNuxtConfig({
     },
     fallbackToApi: false,
   },
+
   supabase: {
     redirectOptions: {
       login: '/auth/login',
@@ -128,5 +135,15 @@ export default defineNuxtConfig({
       exclude: ['/', '/auth/*', '/legal/*'],
       cookieRedirect: false,
     },
+  },
+
+  sentry: {
+    org: 'aesir-tecnologia',
+    project: 'lifestint',
+    autoInjectServerSentry: 'top-level-import',
+  },
+
+  sourcemap: {
+    client: 'hidden',
   },
 });
