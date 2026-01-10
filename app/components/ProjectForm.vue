@@ -7,6 +7,7 @@ import { getColorClasses } from '~/utils/project-colors';
 const props = defineProps<{
   project?: ProjectRow
   mode: 'create' | 'edit'
+  hideButtons?: boolean
 }>();
 
 const emit = defineEmits<{
@@ -77,6 +78,11 @@ function selectColor(color: ProjectColor | null) {
 function handleCancel() {
   emit('cancel');
 }
+
+// Expose methods for external control
+defineExpose({
+  submit: handleSubmit,
+});
 </script>
 
 <template>
@@ -102,11 +108,12 @@ function handleCancel() {
       :error="errors.expectedDailyStints"
       help="How many stints do you aim to complete per day?"
     >
-      <UInput
-        v-model.number="formData.expectedDailyStints"
-        type="number"
-        min="1"
-        max="100"
+      <UInputNumber
+        v-model="formData.expectedDailyStints"
+        :min="PROJECT.DAILY_STINTS.MIN"
+        :max="PROJECT.DAILY_STINTS.MAX"
+        :step="1"
+        class="w-full"
         @blur="validateForm"
       />
     </UFormField>
@@ -116,11 +123,13 @@ function handleCancel() {
       :error="errors.customStintDuration"
       help="How long should each stint last?"
     >
-      <UInput
-        v-model.number="formData.customStintDuration"
-        type="number"
+      <UInputNumber
+        v-model="formData.customStintDuration"
         :min="PROJECT.CUSTOM_STINT_DURATION_MINUTES.MIN"
         :max="PROJECT.CUSTOM_STINT_DURATION_MINUTES.MAX"
+        :step="5"
+        class="w-full"
+        placeholder="Default: 120"
         @blur="validateForm"
       />
     </UFormField>
@@ -154,7 +163,7 @@ function handleCancel() {
           :key="color"
           type="button"
           :class="[
-            'w-10 h-10 rounded-md border-2 motion-safe:transition-all',
+            'w-10 h-10 rounded-md border-2 motion-safe:transition-all flex items-center justify-center',
             getColorClasses(color).bg,
             formData.colorTag === color
               ? `${getColorClasses(color).border} ring-2 ${getColorClasses(color).ring}`
@@ -162,15 +171,25 @@ function handleCancel() {
           ]"
           :aria-label="`Select ${color} color`"
           @click="selectColor(color)"
-        />
+        >
+          <Icon
+            v-if="formData.colorTag === color"
+            name="i-lucide-check"
+            class="h-5 w-5 text-white drop-shadow-sm"
+          />
+        </button>
       </div>
     </UFormField>
 
-    <div class="flex justify-end gap-2 pt-4">
+    <div
+      v-if="!hideButtons"
+      class="flex justify-end gap-3 pt-4"
+    >
       <UButton
         type="button"
         color="neutral"
         variant="ghost"
+        class="min-w-24"
         @click="handleCancel"
       >
         Cancel
@@ -178,6 +197,7 @@ function handleCancel() {
       <UButton
         type="submit"
         color="primary"
+        class="min-w-24"
       >
         {{ mode === 'create' ? 'New Project' : 'Save Changes' }}
       </UButton>

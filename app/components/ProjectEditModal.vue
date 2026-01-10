@@ -18,6 +18,16 @@ const { mutateAsync: updateProject, isPending } = useUpdateProject();
 
 const isOpen = defineModel<boolean>('open');
 
+const formRef = ref<{ submit: () => void } | null>(null);
+
+// Local state for immediate UI feedback on toggle
+const localIsActive = ref(props.project.is_active ?? true);
+
+// Sync local state when prop changes (e.g., after mutation completes)
+watch(() => props.project.is_active, (newValue) => {
+  localIsActive.value = newValue ?? true;
+});
+
 function closeModal() {
   isOpen.value = false;
 }
@@ -28,7 +38,13 @@ function handleArchiveClick() {
 }
 
 function handleToggleActive() {
+  // Optimistically update local state for immediate UI feedback
+  localIsActive.value = !localIsActive.value;
   emit('toggleActive', props.project);
+}
+
+function triggerSubmit() {
+  formRef.value?.submit();
 }
 
 async function handleSubmit(data: { name: string, expectedDailyStints: number, customStintDuration: number | null, colorTag: ProjectColor | null }) {
@@ -61,23 +77,22 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
   >
     <template #body>
       <ProjectForm
+        ref="formRef"
         :project="project"
         mode="edit"
-        :loading="isPending"
+        hide-buttons
         @submit="handleSubmit"
         @cancel="closeModal"
       />
     </template>
 
     <template #footer>
-      <div class="flex flex-col gap-4 w-full">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <span class="text-sm font-medium text-stone-700 dark:text-stone-300">
-              Project Status
-            </span>
+      <div class="flex items-center justify-between w-full gap-4">
+        <!-- Left side: Status and Archive -->
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
             <USwitch
-              :model-value="project.is_active ?? true"
+              :model-value="localIsActive"
               :loading="isTogglingActive"
               size="lg"
               checked-icon="i-lucide-check"
@@ -86,27 +101,43 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
             />
             <span
               class="text-sm font-medium"
-              :class="project.is_active ? 'text-green-600 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
+              :class="localIsActive ? 'text-green-600 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
             >
-              {{ project.is_active ? 'Active' : 'Inactive' }}
+              {{ localIsActive ? 'Active' : 'Inactive' }}
             </span>
           </div>
+
+          <UTooltip text="Archive this project">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              icon="i-lucide-archive"
+              size="sm"
+              @click="handleArchiveClick"
+            >
+              Archive
+            </UButton>
+          </UTooltip>
         </div>
 
-        <div class="flex justify-between items-center">
-          <UTooltip text="Archive this project">
-            <span>
-              <UButton
-                color="neutral"
-                variant="ghost"
-                icon="i-lucide-archive"
-                class="transition-all duration-200"
-                @click="handleArchiveClick"
-              >
-                Archive Project
-              </UButton>
-            </span>
-          </UTooltip>
+        <!-- Right side: Cancel and Save -->
+        <div class="flex items-center gap-3">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            class="min-w-20"
+            @click="closeModal"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            color="primary"
+            class="min-w-20"
+            :loading="isPending"
+            @click="triggerSubmit"
+          >
+            Save
+          </UButton>
         </div>
       </div>
     </template>
