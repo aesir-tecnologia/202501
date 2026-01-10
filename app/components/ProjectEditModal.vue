@@ -20,6 +20,14 @@ const isOpen = defineModel<boolean>('open');
 
 const formRef = ref<{ submit: () => void } | null>(null);
 
+// Local state for immediate UI feedback on toggle
+const localIsActive = ref(props.project.is_active ?? true);
+
+// Sync local state when prop changes (e.g., after mutation completes)
+watch(() => props.project.is_active, (newValue) => {
+  localIsActive.value = newValue ?? true;
+});
+
 function closeModal() {
   isOpen.value = false;
 }
@@ -30,6 +38,8 @@ function handleArchiveClick() {
 }
 
 function handleToggleActive() {
+  // Optimistically update local state for immediate UI feedback
+  localIsActive.value = !localIsActive.value;
   emit('toggleActive', props.project);
 }
 
@@ -83,7 +93,7 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2">
             <USwitch
-              :model-value="project.is_active ?? true"
+              :model-value="localIsActive"
               :loading="isTogglingActive"
               size="lg"
               checked-icon="i-lucide-check"
@@ -92,9 +102,9 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
             />
             <span
               class="text-sm font-medium"
-              :class="project.is_active ? 'text-green-600 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
+              :class="localIsActive ? 'text-green-600 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
             >
-              {{ project.is_active ? 'Active' : 'Inactive' }}
+              {{ localIsActive ? 'Active' : 'Inactive' }}
             </span>
           </div>
 
