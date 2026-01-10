@@ -69,10 +69,10 @@ describe('useStintTimer', () => {
 
   describe('worker message types', () => {
     it('should define incoming message types', () => {
-      type WorkerIncomingMessage =
-        | { type: 'tick', secondsRemaining: number }
-        | { type: 'complete' }
-        | { type: 'error', message: string };
+      type WorkerIncomingMessage
+        = | { type: 'tick', secondsRemaining: number }
+          | { type: 'complete' }
+          | { type: 'error', message: string };
 
       const tickMessage: WorkerIncomingMessage = { type: 'tick', secondsRemaining: 300 };
       const completeMessage: WorkerIncomingMessage = { type: 'complete' };
@@ -84,12 +84,12 @@ describe('useStintTimer', () => {
     });
 
     it('should define outgoing message types', () => {
-      type WorkerOutgoingMessage =
-        | { type: 'start', endTime: number, stintId: string }
-        | { type: 'pause' }
-        | { type: 'resume', endTime: number }
-        | { type: 'stop' }
-        | { type: 'sync', serverSecondsRemaining: number };
+      type WorkerOutgoingMessage
+        = | { type: 'start', endTime: number, stintId: string }
+          | { type: 'pause' }
+          | { type: 'resume', endTime: number }
+          | { type: 'stop' }
+          | { type: 'sync', serverSecondsRemaining: number };
 
       const startMessage: WorkerOutgoingMessage = {
         type: 'start',

@@ -48,6 +48,10 @@ export default defineNuxtConfig({
     },
   },
 
+  sourcemap: {
+    client: 'hidden',
+  },
+
   devServer: {
     port: 3005,
   },
@@ -128,6 +132,12 @@ export default defineNuxtConfig({
     fallbackToApi: false,
   },
 
+  sentry: {
+    org: 'aesir-tecnologia',
+    project: 'lifestint',
+    autoInjectServerSentry: 'top-level-import',
+  },
+
   supabase: {
     redirectOptions: {
       login: '/auth/login',
@@ -135,15 +145,5 @@ export default defineNuxtConfig({
       exclude: ['/', '/auth/*', '/legal/*'],
       cookieRedirect: false,
     },
-  },
-
-  sentry: {
-    org: 'aesir-tecnologia',
-    project: 'lifestint',
-    autoInjectServerSentry: 'top-level-import',
-  },
-
-  sourcemap: {
-    client: 'hidden',
   },
 });
