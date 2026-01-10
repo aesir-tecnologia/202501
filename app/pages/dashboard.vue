@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useProjectsQuery, useArchivedProjectsQuery, useToggleProjectActive } from '~/composables/useProjects';
 import { useActiveStintQuery, usePausedStintQuery, usePauseStint, useResumeStint, useStintsQuery } from '~/composables/useStints';
-import { useDailySummaryQuery, useWeeklyStatsQuery } from '~/composables/useDailySummaries';
+import { useDailySummaryQuery } from '~/composables/useDailySummaries';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import { parseSafeDate } from '~/utils/date-helpers';
@@ -62,7 +62,6 @@ const { data: allStints } = useStintsQuery();
 // Stats queries
 const today = computed(() => new Date().toISOString().split('T')[0] as string);
 const { data: dailySummary, isLoading: isLoadingDailySummary } = useDailySummaryQuery(today);
-const { data: weeklyStats, isLoading: isLoadingWeeklyStats } = useWeeklyStatsQuery();
 
 // Compute active project for timer hero
 const activeProject = computed(() => {
@@ -71,77 +70,56 @@ const activeProject = computed(() => {
   return projects.value.find(p => p.id === stint.project_id) || null;
 });
 
-// Compute daily progress for timer hero
+// Compute daily progress and stats from raw stint data
 const dailyProgress = computed(() => {
-  const today = startOfDay(new Date());
-  const tomorrow = addDays(today, 1);
+  const todayStart = startOfDay(new Date());
+  const tomorrow = addDays(todayStart, 1);
 
   let completed = 0;
   let expected = 0;
+  let focusSeconds = 0;
+  let pauseSeconds = 0;
 
   // Sum expected from active projects
   for (const project of activeProjects.value) {
     expected += project.expected_daily_stints ?? 0;
   }
 
-  // Count completed stints today
+  // Aggregate completed stints today
   if (allStints.value) {
     for (const stint of allStints.value) {
       if (stint.status !== 'completed' || !stint.ended_at) continue;
       const endedAt = parseSafeDate(stint.ended_at);
-      if (endedAt && endedAt >= today && endedAt < tomorrow) {
+      if (endedAt && endedAt >= todayStart && endedAt < tomorrow) {
         completed++;
+        focusSeconds += stint.actual_duration ?? 0;
+        pauseSeconds += stint.paused_duration ?? 0;
       }
     }
   }
 
-  return { completed, expected };
+  return { completed, expected, focusSeconds, pauseSeconds };
 });
 
-// Compute stats for TodaysStats component
+// Compute stats for TodaysStats component (with fallback to raw stint data)
 const completedStints = computed(() => dailySummary.value?.totalStints ?? dailyProgress.value.completed);
-const totalGoal = computed(() => dailyProgress.value.expected);
-const focusMinutes = computed(() => {
+const focusSeconds = computed(() => {
   if (dailySummary.value) {
-    return Math.round(dailySummary.value.totalFocusSeconds / 60);
+    return dailySummary.value.totalFocusSeconds;
   }
-  return 0;
+  return dailyProgress.value.focusSeconds;
 });
 
-const bestBlockMinutes = computed(() => {
-  if (!allStints.value) return 0;
-
-  const today = startOfDay(new Date());
-  const tomorrow = addDays(today, 1);
-
-  let maxDuration = 0;
-  for (const stint of allStints.value) {
-    if (stint.status !== 'completed' || !stint.ended_at) continue;
-    const endedAt = parseSafeDate(stint.ended_at);
-    if (endedAt && endedAt >= today && endedAt < tomorrow) {
-      const duration = stint.actual_duration ?? 0;
-      if (duration > maxDuration) {
-        maxDuration = duration;
-      }
-    }
+const breakSeconds = computed(() => {
+  if (dailySummary.value) {
+    return dailySummary.value.totalPauseSeconds;
   }
-  return Math.round(maxDuration / 60);
+  return dailyProgress.value.pauseSeconds;
 });
 
-const weeklyChange = computed(() => {
-  if (!weeklyStats.value || !dailySummary.value) return null;
+const totalSeconds = computed(() => focusSeconds.value + breakSeconds.value);
 
-  const todayFocus = dailySummary.value.totalFocusSeconds;
-  const weeklyAvgFocus = weeklyStats.value.daysTracked > 0
-    ? weeklyStats.value.totalFocusSeconds / weeklyStats.value.daysTracked
-    : 0;
-
-  if (weeklyAvgFocus === 0) return null;
-
-  return ((todayFocus - weeklyAvgFocus) / weeklyAvgFocus) * 100;
-});
-
-const isLoadingStats = computed(() => isLoadingDailySummary.value || isLoadingWeeklyStats.value);
+const isLoadingStats = computed(() => isLoadingDailySummary.value);
 
 // Helper functions
 function startOfDay(date: Date): Date {
@@ -311,10 +289,9 @@ function handleCompleteStint(stint: StintRow) {
           :active-project="activeProject"
           :daily-progress="dailyProgress"
           :completed-stints="completedStints"
-          :total-goal="totalGoal"
-          :focus-minutes="focusMinutes"
-          :best-block-minutes="bestBlockMinutes"
-          :weekly-change="weeklyChange"
+          :focus-seconds="focusSeconds"
+          :total-seconds="totalSeconds"
+          :break-seconds="breakSeconds"
           :is-loading-stats="isLoadingStats"
           @pause-stint="handlePauseStint"
           @resume-stint="handleResumeStint"

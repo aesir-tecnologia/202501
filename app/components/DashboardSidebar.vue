@@ -13,10 +13,9 @@ interface Props {
   activeProject: ProjectRow | null
   dailyProgress: DailyProgress
   completedStints: number
-  totalGoal: number
-  focusMinutes: number
-  bestBlockMinutes: number
-  weeklyChange: number | null
+  focusSeconds: number
+  totalSeconds: number
+  breakSeconds: number
   isLoadingStats?: boolean
 }
 
@@ -62,10 +61,9 @@ function handleComplete(stint: StintRow) {
     <!-- Today's Stats -->
     <TodaysStats
       :completed-stints="completedStints"
-      :total-goal="totalGoal"
-      :focus-minutes="focusMinutes"
-      :best-block-minutes="bestBlockMinutes"
-      :weekly-change="weeklyChange"
+      :focus-seconds="focusSeconds"
+      :total-seconds="totalSeconds"
+      :break-seconds="breakSeconds"
       :is-loading="isLoadingStats"
     />
   </aside>

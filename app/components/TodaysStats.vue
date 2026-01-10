@@ -1,10 +1,9 @@
 <script setup lang="ts">
 interface Props {
   completedStints: number
-  totalGoal: number
-  focusMinutes: number
-  bestBlockMinutes: number
-  weeklyChange: number | null
+  focusSeconds: number
+  totalSeconds: number
+  breakSeconds: number
   isLoading?: boolean
 }
 
@@ -12,45 +11,52 @@ const props = withDefaults(defineProps<Props>(), {
   isLoading: false,
 });
 
-const focusDisplay = computed(() => {
-  const hours = props.focusMinutes / 60;
-  if (hours >= 1) {
-    return { value: hours.toFixed(1), suffix: 'h' };
+function formatTime(totalSeconds: number): string {
+  if (totalSeconds === 0) return '-';
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const parts: string[] = [];
+
+  if (hours > 0) {
+    parts.push(`${hours}h`);
   }
-  return { value: Math.round(props.focusMinutes).toString(), suffix: 'm' };
-});
-
-const bestBlockDisplay = computed(() => {
-  if (props.bestBlockMinutes >= 60) {
-    const hours = Math.floor(props.bestBlockMinutes / 60);
-    const mins = props.bestBlockMinutes % 60;
-    if (mins === 0) {
-      return { value: hours.toString(), suffix: 'h' };
-    }
-    return { value: `${hours}h${mins}`, suffix: 'm' };
+  if (minutes > 0 || hours > 0) {
+    parts.push(`${minutes}m`);
   }
-  return { value: props.bestBlockMinutes.toString(), suffix: 'm' };
-});
+  parts.push(`${seconds}s`);
 
-const weeklyChangeDisplay = computed(() => {
-  if (props.weeklyChange === null) return null;
-  const sign = props.weeklyChange >= 0 ? '+' : '';
-  return `${sign}${Math.round(props.weeklyChange)}`;
-});
+  return parts.join(' ');
+}
 
-const weeklyChangePositive = computed(() => {
-  return props.weeklyChange !== null && props.weeklyChange >= 0;
-});
+const focusDisplay = computed(() => formatTime(props.focusSeconds));
+const totalDisplay = computed(() => formatTime(props.totalSeconds));
+const breakDisplay = computed(() => formatTime(props.breakSeconds));
 </script>
 
 <template>
   <div class="stats-card">
-    <h3 class="stats-title font-serif">
-      Today's Stats
-    </h3>
+    <!-- Hero Section: Focus Time -->
+    <div class="hero-section">
+      <div
+        v-if="isLoading"
+        class="hero-skeleton"
+      />
+      <template v-else>
+        <div class="hero-label">
+          Focus
+        </div>
+        <div class="hero-value">
+          {{ focusDisplay }}
+        </div>
+      </template>
+    </div>
 
-    <div class="stats-grid">
-      <!-- Daily Goal -->
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <!-- Sessions -->
       <div class="stat-item">
         <div
           v-if="isLoading"
@@ -58,69 +64,42 @@ const weeklyChangePositive = computed(() => {
         />
         <template v-else>
           <div class="stat-value">
-            {{ completedStints }}<span class="stat-suffix">/{{ totalGoal }}</span>
+            {{ completedStints || '-' }}
           </div>
           <div class="stat-label">
-            Daily Goal
+            Sessions
           </div>
         </template>
       </div>
 
-      <!-- Deep Focus -->
-      <div class="stat-item">
+      <!-- Total -->
+      <div class="stat-item stat-item--bordered">
         <div
           v-if="isLoading"
           class="stat-skeleton"
         />
         <template v-else>
           <div class="stat-value">
-            {{ focusDisplay.value }}<span class="stat-suffix">{{ focusDisplay.suffix }}</span>
+            {{ totalDisplay }}
           </div>
           <div class="stat-label">
-            Deep Focus
+            Total
           </div>
         </template>
       </div>
 
-      <!-- Best Block -->
-      <div class="stat-item">
+      <!-- Break -->
+      <div class="stat-item stat-item--bordered">
         <div
           v-if="isLoading"
           class="stat-skeleton"
         />
         <template v-else>
           <div class="stat-value">
-            {{ bestBlockMinutes > 0 ? bestBlockDisplay.value : '--' }}<span
-              v-if="bestBlockMinutes > 0"
-              class="stat-suffix"
-            >{{ bestBlockDisplay.suffix }}</span>
+            {{ breakDisplay }}
           </div>
           <div class="stat-label">
-            Best Block
-          </div>
-        </template>
-      </div>
-
-      <!-- vs Last Week -->
-      <div class="stat-item">
-        <div
-          v-if="isLoading"
-          class="stat-skeleton"
-        />
-        <template v-else>
-          <div
-            class="stat-value"
-            :class="weeklyChangePositive ? 'text-[var(--accent-secondary)]' : 'text-red-500'"
-          >
-            <template v-if="weeklyChangeDisplay !== null">
-              {{ weeklyChangeDisplay }}<span class="stat-suffix">%</span>
-            </template>
-            <template v-else>
-              --
-            </template>
-          </div>
-          <div class="stat-label">
-            vs Last Week
+            Break
           </div>
         </template>
       </div>
@@ -144,48 +123,78 @@ const weeklyChangePositive = computed(() => {
   }
 }
 
-.stats-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--text-primary);
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  padding-bottom: 16px;
   margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-light);
 }
 
 @media (min-width: 768px) {
-  .stats-title {
-    font-size: 18px;
+  .hero-section {
+    padding-bottom: 20px;
     margin-bottom: 20px;
   }
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+.hero-label {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  font-weight: 500;
 }
 
 @media (min-width: 768px) {
-  .stats-grid {
-    gap: 16px;
+  .hero-label {
+    font-size: 16px;
+    margin-bottom: 8px;
   }
+}
+
+.hero-value {
+  font-family: var(--font-mono);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+@media (min-width: 768px) {
+  .hero-value {
+    font-size: 48px;
+  }
+}
+
+.hero-skeleton {
+  height: 60px;
+  background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+  margin: 0 auto;
+  width: 60%;
+}
+
+/* Stats Row */
+.stats-row {
+  display: flex;
+  justify-content: space-between;
 }
 
 .stat-item {
+  flex: 1;
   text-align: center;
-  padding: 12px;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
+  padding: 0 8px;
 }
 
-@media (min-width: 768px) {
-  .stat-item {
-    padding: 16px;
-  }
+.stat-item--bordered {
+  border-left: 1px solid var(--border-light);
 }
 
 .stat-value {
   font-family: var(--font-mono);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.2;
@@ -193,22 +202,14 @@ const weeklyChangePositive = computed(() => {
 
 @media (min-width: 768px) {
   .stat-value {
-    font-size: 24px;
+    font-size: 22px;
   }
-}
-
-.stat-suffix {
-  font-size: 14px;
-  color: var(--text-muted);
-  font-weight: 400;
 }
 
 .stat-label {
   font-size: 11px;
   color: var(--text-muted);
   margin-top: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   font-weight: 500;
 }
 
@@ -219,7 +220,7 @@ const weeklyChangePositive = computed(() => {
 }
 
 .stat-skeleton {
-  height: 40px;
+  height: 36px;
   background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
