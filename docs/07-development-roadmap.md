@@ -178,15 +178,15 @@
    - Display as badge: "X of Y stints today"
 2. Add visual progress bar to project cards `COMPLETED`
 3. Implement streak counter: `PARTIAL`
-   - Calculate on dashboard load *(calculated in analytics page only)*
-   - Display on project cards: "🔥 5 day streak" *(not on cards)*
-   - Update in real-time when stint completed *(not implemented)*
-4. Build daily reset logic: *(not implemented)*
-   - pg_cron job (runs every hour)
-   - Query user_profiles whose local midnight passed in last hour
-   - Reset daily progress counters to 0
-   - Trigger daily summary aggregation
-   - Broadcast reset event via Realtime
+   - Calculate on dashboard load *(calculated in analytics page only; database function `calculate_streak_with_tz` exists but unused)*
+   - Display on project cards: "🔥 5 day streak" *(not on cards - only in analytics page)*
+   - Update in real-time when stint completed *(not implemented - no Realtime subscriptions)*
+4. Build daily reset logic: `MOSTLY COMPLETE`
+   - pg_cron job (runs every hour) `COMPLETED`
+   - Query user_profiles whose local midnight passed in last hour `COMPLETED`
+   - Reset daily progress counters to 0 *(N/A - progress computed from stints, no separate counters)*
+   - Trigger daily summary aggregation `COMPLETED`
+   - Broadcast reset event via Realtime *(not implemented)*
 5. Add celebration animations: *(not implemented)*
    - Confetti animation when daily goal reached
    - Celebration sound (optional, can disable)
@@ -201,8 +201,8 @@
    - Conflict resolution modal *(not implemented)*
 8. Implement timezone selection: `PARTIAL`
    - Detect browser timezone on registration `COMPLETED`
-   - Allow change in settings *(not implemented)*
-   - Update daily reset calculations *(not implemented)*
+   - Allow change in settings *(not implemented - UI exists but doesn't persist to database)*
+   - Update daily reset calculations `COMPLETED` *(pg_cron uses `user_profiles.timezone`)*
 
 **Deliverable:** Complete, polished dashboard with progress tracking and daily reset.
 

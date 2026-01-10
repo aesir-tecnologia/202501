@@ -13,14 +13,16 @@
 
 ---
 
-## Phase 3: Stint Management Core — 2 tasks remaining
+## Phase 3: Stint Management Core — 1 task remaining
 
-- [ ] Implement network loss detection with persistent offline banner (currently only shows toast after 3 failures)
 - [ ] Add Supabase Realtime subscriptions for stint events (currently uses 60-second polling)
 
 ---
 
-## Phase 5: Dashboard Experience & Daily Reset — 10 tasks remaining
+## Phase 5: Dashboard Experience & Daily Reset — 8 tasks remaining
+
+> ✅ **Daily reset is IMPLEMENTED.** Database functions, pg_cron job, composables, and dashboard UI are all complete.
+> Only missing: Realtime broadcast on reset (clients must refresh to see updates from other devices).
 
 ### Streak Display
 - [ ] Implement real-time streak updates when stint completes (push-based, not cache invalidation)
@@ -38,7 +40,7 @@
 - [ ] Add manual "Retry" button for failed server operations
 
 ### Timezone
-- [ ] Persist timezone selection to `user_profiles.timezone` column on save
+- [ ] Persist timezone selection to `user_profiles.timezone` column on save (UI exists but doesn't save; daily reset already uses this column)
 
 ---
 
@@ -65,19 +67,26 @@
 
 ---
 
-## Phase 8: Settings & Preferences — 1 task remaining
+## Phase 8: Settings & Preferences — 4 tasks remaining
 
 ### Database Persistence
 - [x] Add preference columns to `user_profiles` (migration in Phase 1)
 - [x] Replace localStorage reads/writes with Supabase queries in settings page
 - [x] Add TanStack Query composable for preferences (`usePreferences`)
 
+### Security
+- [ ] Implement password change flow (current password verification + new password with confirmation)
+
+### Privacy & GDPR
+- [ ] Build data export feature (export all user data as JSON: projects, stints, preferences)
+
 ### Account Management
-- [ ] Implement actual account soft-delete API call (currently placeholder comment)
+- [ ] Implement account soft-delete with confirmation modal and email notification
+- [ ] Add scheduled cleanup job for soft-deleted accounts (30-day retention)
 
 ---
 
-## Phase 9: Polish & Launch Prep — 15 tasks remaining (entire phase)
+## Phase 9: Polish & Launch Prep — 16 tasks remaining (entire phase)
 
 ### Performance
 - [ ] Implement route-based code splitting (lazy load analytics, reports, settings)
@@ -144,5 +153,5 @@
 
 ---
 
-**Last Validated:** January 9, 2026
-**Total Remaining Tasks:** 51
+**Last Validated:** January 10, 2026
+**Total Remaining Tasks:** 48
