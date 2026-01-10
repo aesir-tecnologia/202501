@@ -80,7 +80,6 @@ async function handleSubmit(data: { name: string, expectedDailyStints: number, c
         ref="formRef"
         :project="project"
         mode="edit"
-        :loading="isPending"
         hide-buttons
         @submit="handleSubmit"
         @cancel="closeModal"
