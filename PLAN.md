@@ -13,9 +13,73 @@
 
 ---
 
-## Phase 3: Stint Management Core — 1 task remaining
+## Phase 3: Stint Management Core — Complete ✓
 
-- [ ] Add Supabase Realtime subscriptions for stint events (currently uses 60-second polling)
+- [x] Add Supabase Realtime subscriptions for stint events (currently uses 60-second polling) ✅ COMPLETED
+
+<details>
+<summary><strong>📋 Implementation Plan: Supabase Realtime Subscriptions</strong></summary>
+
+### Scope
+- **App-wide** subscriptions (all authenticated pages)
+- **Complement** existing 60-second timer sync (keep as fallback)
+- **Tables**: `stints` + `daily_summaries`
+
+### Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `app/composables/useRealtimeSubscriptions.ts` | **CREATE** — Singleton composable |
+| `app/layouts/default.vue` | **MODIFY** — Add composable call at ~line 100 |
+| `app/composables/useRealtimeSubscriptions.test.ts` | **CREATE** — Unit tests |
+
+### Implementation Details
+
+**Step 1: Create `useRealtimeSubscriptions.ts`**
+
+Singleton composable following `useStintTimer.ts` pattern:
+- Global state object outside function (single subscription per user)
+- `watch()` on user for login/logout handling
+- Subscribe to `postgres_changes` for both tables with `user_id=eq.${userId}` filter
+- Cache invalidation via `queryClient.invalidateQueries(stintKeys.all)` / `dailySummaryKeys.all`
+- Debounced invalidation (100ms) to prevent rapid re-renders
+- Retry logic (3 attempts with exponential backoff) on subscription failure
+- Cleanup via `beforeunload` event
+
+**Step 2: Integrate in `default.vue`**
+
+Add after `useStintTimer()` call (line ~99):
+```typescript
+if (import.meta.client) {
+  useRealtimeSubscriptions();
+}
+```
+
+### Cache Invalidation Strategy
+
+| Event | Query Keys Invalidated |
+|-------|------------------------|
+| Any stint change | `stintKeys.all` (covers active, paused, lists, details) |
+| Any daily_summary change | `dailySummaryKeys.all` (covers lists, detail, weekly) |
+
+### Error Handling
+
+| Scenario | Handling |
+|----------|----------|
+| Subscription fails | Retry 3× with exponential backoff |
+| Max retries exceeded | Show warning toast, rely on polling fallback |
+| User logs out | Unsubscribe immediately |
+| Network disconnect | Supabase auto-reconnects |
+
+### Verification
+
+1. `supabase start` → `npm run dev`
+2. Open two browser tabs logged in as same user
+3. Start/pause/complete stint in tab A → verify tab B updates instantly
+4. Check console for `[Realtime]` logs
+5. Run tests: `npm test -- useRealtimeSubscriptions`
+
+</details>
 
 ---
 
@@ -144,7 +208,7 @@
 ### 🟡 Medium Priority (Feature Completeness)
 3. ~~Celebration animations (settings UI exists, no implementation)~~ ✅ COMPLETED
 4. Offline support (Phase 6) — entire phase
-5. Supabase Realtime subscriptions (enables multi-device sync)
+5. ~~Supabase Realtime subscriptions (enables multi-device sync)~~ ✅ COMPLETED
 
 ### 🟢 Low Priority (Polish)
 6. Empty state improvements (motivational quotes, inactive reminders)
@@ -154,4 +218,4 @@
 ---
 
 **Last Validated:** January 10, 2026
-**Total Remaining Tasks:** 45
+**Total Remaining Tasks:** 44

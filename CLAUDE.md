@@ -4,6 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+## ⛔ Do NOT Start Dev Server Automatically
+
+**Never run `npm run dev` or start the dev server unless the user explicitly asks.**
+
+The user manages their own dev server. Starting it automatically:
+- Can conflict with already-running instances
+- Uses up ports unnecessarily
+- Is not needed for most coding tasks
+
+---
+
 ## ⛔ CRITICAL: No Assumptions Policy
 
 **DO NOT MAKE ASSUMPTIONS. EVER.**

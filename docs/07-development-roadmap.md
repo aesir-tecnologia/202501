@@ -111,9 +111,9 @@
    - Network loss detection *(not implemented)*
    - Mark stint as interrupted `COMPLETED`
    - Preserve data for analytics `COMPLETED`
-10. Real-time UI updates: *(not implemented - uses polling instead)*
-    - Supabase Realtime subscription to stints table
-    - Broadcast stint events to all user's devices
+10. Real-time UI updates: `COMPLETED`
+    - Supabase Realtime subscription to stints table `COMPLETED`
+    - Broadcast stint events to all user's devices `COMPLETED`
     - Optimistic UI updates with rollback on conflict `COMPLETED`
 
 **Deliverable:** Fully functional stint tracking with pause/resume, single session enforcement, and real-time sync.
@@ -180,7 +180,7 @@
 3. Implement streak counter: `PARTIAL`
    - Calculate on dashboard load *(calculated in analytics page only; database function `calculate_streak_with_tz` exists but unused)*
    - Display on project cards: "🔥 5 day streak" *(not on cards - only in analytics page)*
-   - Update in real-time when stint completed *(not implemented - no Realtime subscriptions)*
+   - Update in real-time when stint completed `COMPLETED` *(via Realtime cache invalidation)*
 4. Build daily reset logic: `MOSTLY COMPLETE`
    - pg_cron job (runs every hour) `COMPLETED`
    - Query user_profiles whose local midnight passed in last hour `COMPLETED`

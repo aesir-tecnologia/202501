@@ -98,6 +98,10 @@ const { secondsRemaining, isPaused } = import.meta.client
   ? useStintTimer()
   : { secondsRemaining: ref(0), isPaused: ref(true) };
 
+if (import.meta.client) {
+  useRealtimeSubscriptions();
+}
+
 const { data: activeStint } = import.meta.client
   ? useActiveStintQuery()
   : { data: ref(null) };
