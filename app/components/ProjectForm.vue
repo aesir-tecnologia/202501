@@ -113,6 +113,7 @@ defineExpose({
         :min="PROJECT.DAILY_STINTS.MIN"
         :max="PROJECT.DAILY_STINTS.MAX"
         :step="1"
+        class="w-full"
         @blur="validateForm"
       />
     </UFormField>
@@ -127,6 +128,7 @@ defineExpose({
         :min="PROJECT.CUSTOM_STINT_DURATION_MINUTES.MIN"
         :max="PROJECT.CUSTOM_STINT_DURATION_MINUTES.MAX"
         :step="5"
+        class="w-full"
         placeholder="Default: 120"
         @blur="validateForm"
       />
