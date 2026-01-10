@@ -62,8 +62,17 @@ const subscription = ref({
 onMounted(async () => {
   if (user.value) {
     accountForm.value.email = user.value.email || '';
-    // Load additional user data from profile if available
-    // For now, we'll use auth user data
+
+    // Load timezone from user profile
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('timezone')
+      .eq('id', user.value.id)
+      .single();
+
+    if (profile?.timezone) {
+      accountForm.value.timezone = profile.timezone;
+    }
   }
 });
 
@@ -89,7 +98,16 @@ async function saveAccountChanges() {
       });
     }
 
-    // Save other account settings (would need user_profiles table)
+    // Save timezone to user_profiles
+    if (user.value?.id) {
+      const { error: tzError } = await supabase
+        .from('user_profiles')
+        .update({ timezone: accountForm.value.timezone })
+        .eq('id', user.value.id);
+
+      if (tzError) throw tzError;
+    }
+
     toast.add({
       title: 'Settings saved',
       color: 'success',
@@ -295,17 +313,44 @@ async function deleteAccount() {
   }
 }
 
-// Timezone options
-const timezones = [
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'Europe/London',
-  'Europe/Paris',
-  'Asia/Tokyo',
-  'Australia/Sydney',
-];
+// Timezone options - use browser's full list with user's timezone guaranteed
+const timezones = computed(() => {
+  const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  // Get all supported timezones from the browser
+  let allTimezones: string[] = [];
+  try {
+    allTimezones = Intl.supportedValuesOf('timeZone');
+  }
+  catch {
+    // Fallback for older browsers
+    allTimezones = [
+      'Africa/Cairo', 'Africa/Johannesburg', 'Africa/Lagos', 'Africa/Nairobi',
+      'America/Anchorage', 'America/Argentina/Buenos_Aires', 'America/Bogota',
+      'America/Chicago', 'America/Denver', 'America/Halifax', 'America/Lima',
+      'America/Los_Angeles', 'America/Mexico_City', 'America/New_York',
+      'America/Phoenix', 'America/Santiago', 'America/Sao_Paulo', 'America/Toronto',
+      'America/Vancouver', 'Asia/Bangkok', 'Asia/Colombo', 'Asia/Dubai',
+      'Asia/Hong_Kong', 'Asia/Jakarta', 'Asia/Jerusalem', 'Asia/Karachi',
+      'Asia/Kolkata', 'Asia/Kuala_Lumpur', 'Asia/Manila', 'Asia/Seoul',
+      'Asia/Shanghai', 'Asia/Singapore', 'Asia/Taipei', 'Asia/Tokyo',
+      'Atlantic/Reykjavik', 'Australia/Melbourne', 'Australia/Perth',
+      'Australia/Sydney', 'Europe/Amsterdam', 'Europe/Athens', 'Europe/Berlin',
+      'Europe/Brussels', 'Europe/Dublin', 'Europe/Helsinki', 'Europe/Istanbul',
+      'Europe/Lisbon', 'Europe/London', 'Europe/Madrid', 'Europe/Moscow',
+      'Europe/Paris', 'Europe/Prague', 'Europe/Rome', 'Europe/Stockholm',
+      'Europe/Vienna', 'Europe/Warsaw', 'Europe/Zurich', 'Pacific/Auckland',
+      'Pacific/Honolulu', 'UTC',
+    ];
+  }
+
+  // Ensure user's browser timezone is in the list
+  if (!allTimezones.includes(browserTimezone)) {
+    allTimezones = [browserTimezone, ...allTimezones];
+  }
+
+  return allTimezones;
+});
 </script>
 
 <template>

@@ -199,9 +199,9 @@
    - Network offline banner *(not implemented)*
    - Server error retry button *(not implemented)*
    - Conflict resolution modal *(not implemented)*
-8. Implement timezone selection: `PARTIAL`
+8. Implement timezone selection: `COMPLETED`
    - Detect browser timezone on registration `COMPLETED`
-   - Allow change in settings *(not implemented - UI exists but doesn't persist to database)*
+   - Allow change in settings `COMPLETED`
    - Update daily reset calculations `COMPLETED` *(pg_cron uses `user_profiles.timezone`)*
 
 **Deliverable:** Complete, polished dashboard with progress tracking and daily reset.

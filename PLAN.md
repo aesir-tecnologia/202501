@@ -19,7 +19,7 @@
 
 ---
 
-## Phase 5: Dashboard Experience & Daily Reset — 8 tasks remaining
+## Phase 5: Dashboard Experience & Daily Reset — 7 tasks remaining
 
 > ✅ **Daily reset is IMPLEMENTED.** Database functions, pg_cron job, composables, and dashboard UI are all complete.
 > Only missing: Realtime broadcast on reset (clients must refresh to see updates from other devices).
@@ -40,7 +40,7 @@
 - [ ] Add manual "Retry" button for failed server operations
 
 ### Timezone
-- [ ] Persist timezone selection to `user_profiles.timezone` column on save (UI exists but doesn't save; daily reset already uses this column)
+- [x] Persist timezone selection to `user_profiles.timezone` column on save ~~(UI exists but doesn't save; daily reset already uses this column)~~ COMPLETED
 
 ---
 
@@ -154,4 +154,4 @@
 ---
 
 **Last Validated:** January 10, 2026
-**Total Remaining Tasks:** 48
+**Total Remaining Tasks:** 47
