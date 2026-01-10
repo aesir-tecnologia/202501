@@ -323,12 +323,12 @@
 **Tasks:**
 1. Build settings page: `PARTIAL`
    - Account section (email, name) `COMPLETED`
-   - Preferences section (default stint duration, theme, notifications) *(UI only, not persisted)*
+   - Preferences section (default stint duration, theme, notifications) `COMPLETED`
    - Privacy section (data export, account deletion) *(UI only, not functional)*
-2. Implement preference updates: *(not implemented)*
-   - Add preference columns to `user_profiles` table (default_stint_duration, celebration_animation, desktop_notifications)
-   - Apply changes immediately (no page refresh)
-   - Theme handled client-side via Nuxt color-mode (not in database)
+2. Implement preference updates: `COMPLETED`
+   - Add preference columns to `user_profiles` table (default_stint_duration, celebration_animation, desktop_notifications) `COMPLETED`
+   - Apply changes immediately (optimistic updates via TanStack Query) `COMPLETED`
+   - Theme handled client-side via Nuxt color-mode (not in database) `COMPLETED`
 3. Add password change flow: *(not implemented)*
    - Current password verification
    - New password with confirmation

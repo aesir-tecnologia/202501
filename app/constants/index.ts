@@ -39,5 +39,14 @@ export const STREAK = {
   GRACE_PERIOD_DAYS: 1,
 } as const;
 
+// User Preferences Constants
+export const PREFERENCES = {
+  STINT_DURATION: {
+    MIN: 5,
+    MAX: 480,
+    DEFAULT: 120,
+  },
+} as const;
+
 // Type Exports
 export type ProjectColor = typeof PROJECT.COLORS[number];

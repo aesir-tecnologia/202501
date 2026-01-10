@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAuthUser } from '~/composables/useAuthUser';
+import { usePreferencesQuery, useUpdatePreferences } from '~/composables/usePreferences';
 import { useSupabaseClient } from '#imports';
+import { PREFERENCES } from '~/constants';
 
 definePageMeta({
   title: 'Settings',
@@ -23,15 +25,23 @@ const accountForm = ref({
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 });
 
-// Preferences
-const preferences = ref({
-  defaultStintDuration: 50,
-  theme: 'system',
-  celebrationSound: true,
-  celebrationAnimation: true,
-  desktopNotifications: false,
-  weeklyEmailDigest: false,
-});
+// Preferences - loaded from database
+const { data: preferencesData, isPending: isLoadingPreferences } = usePreferencesQuery();
+const updatePreferencesMutation = useUpdatePreferences();
+
+// Local UI state for form controls (synced with database data)
+const localDefaultStintDuration = ref<number>(PREFERENCES.STINT_DURATION.DEFAULT);
+const localCelebrationAnimation = ref(true);
+const localDesktopNotifications = ref(false);
+
+// Sync local state when preferences load
+watch(preferencesData, (data) => {
+  if (data) {
+    localDefaultStintDuration.value = data.defaultStintDuration ?? PREFERENCES.STINT_DURATION.DEFAULT;
+    localCelebrationAnimation.value = data.celebrationAnimation;
+    localDesktopNotifications.value = data.desktopNotifications;
+  }
+}, { immediate: true });
 
 // Security
 const activeSessions = ref<Array<{ id: string, device: string, location: string, lastActive: string, isCurrent: boolean }>>([]);
@@ -147,13 +157,15 @@ async function changePassword() {
 }
 
 // Preferences actions
-const isSavingPreferences = ref(false);
+const isSavingPreferences = computed(() => updatePreferencesMutation.isPending.value);
 
 async function savePreferences() {
-  isSavingPreferences.value = true;
   try {
-    // Save preferences (would need user_profiles table or localStorage)
-    localStorage.setItem('preferences', JSON.stringify(preferences.value));
+    await updatePreferencesMutation.mutateAsync({
+      defaultStintDuration: localDefaultStintDuration.value,
+      celebrationAnimation: localCelebrationAnimation.value,
+      desktopNotifications: localDesktopNotifications.value,
+    });
 
     toast.add({
       title: 'Preferences saved',
@@ -169,16 +181,13 @@ async function savePreferences() {
       icon: 'i-lucide-alert-circle',
     });
   }
-  finally {
-    isSavingPreferences.value = false;
-  }
 }
 
 async function requestNotificationPermission() {
   if ('Notification' in window) {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      preferences.value.desktopNotifications = true;
+      localDesktopNotifications.value = true;
       await savePreferences();
       toast.add({
         title: 'Notifications enabled',
@@ -220,16 +229,20 @@ async function logoutSession(_sessionId: string) {
 // Privacy actions
 function exportData() {
   // Export user data as JSON
-  const exportData = {
+  const exportDataPayload = {
     account: {
       email: accountForm.value.email,
       fullName: accountForm.value.fullName,
     },
-    preferences: preferences.value,
+    preferences: {
+      defaultStintDuration: localDefaultStintDuration.value,
+      celebrationAnimation: localCelebrationAnimation.value,
+      desktopNotifications: localDesktopNotifications.value,
+    },
     exportDate: new Date().toISOString(),
   };
 
-  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(exportDataPayload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -281,19 +294,6 @@ async function deleteAccount() {
     });
   }
 }
-
-// Load preferences from localStorage
-onMounted(() => {
-  const saved = localStorage.getItem('preferences');
-  if (saved) {
-    try {
-      preferences.value = { ...preferences.value, ...JSON.parse(saved) };
-    }
-    catch {
-      // Ignore parse errors
-    }
-  }
-});
 
 // Timezone options
 const timezones = [
@@ -422,21 +422,23 @@ const timezones = [
           <UFormField
             label="Default Stint Duration"
             name="defaultStintDuration"
-            :hint="`${preferences.defaultStintDuration} minutes`"
           >
-            <input
-              v-model.number="preferences.defaultStintDuration"
-              type="range"
-              min="10"
-              max="120"
-              step="5"
-              class="w-full"
-            >
-            <template #hint>
+            <template v-if="isLoadingPreferences">
+              <div class="h-8 bg-stone-100 dark:bg-stone-700 rounded animate-pulse" />
+            </template>
+            <template v-else>
+              <input
+                v-model.number="localDefaultStintDuration"
+                type="range"
+                :min="PREFERENCES.STINT_DURATION.MIN"
+                :max="PREFERENCES.STINT_DURATION.MAX"
+                step="5"
+                class="w-full"
+              >
               <div class="flex justify-between text-xs text-stone-500 dark:text-stone-400 mt-1">
-                <span>10m</span>
-                <span>{{ preferences.defaultStintDuration }}m</span>
-                <span>120m</span>
+                <span>{{ PREFERENCES.STINT_DURATION.MIN }}m</span>
+                <span>{{ localDefaultStintDuration }}m</span>
+                <span>{{ PREFERENCES.STINT_DURATION.MAX }}m</span>
               </div>
             </template>
           </UFormField>
@@ -444,61 +446,35 @@ const timezones = [
           <UFormField
             label="Theme"
             name="theme"
+            hint="Theme preference is stored locally in your browser"
           >
-            <div class="flex gap-4">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  v-model="preferences.theme"
-                  type="radio"
-                  value="light"
-                  class="w-4 h-4 text-orange-700 focus:ring-orange-500"
-                >
-                <span>Light</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  v-model="preferences.theme"
-                  type="radio"
-                  value="dark"
-                  class="w-4 h-4 text-orange-700 focus:ring-orange-500"
-                >
-                <span>Dark</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input
-                  v-model="preferences.theme"
-                  type="radio"
-                  value="system"
-                  class="w-4 h-4 text-orange-700 focus:ring-orange-500"
-                >
-                <span>System</span>
-              </label>
-            </div>
+            <UColorModeSelect />
           </UFormField>
 
           <div class="space-y-4">
             <UFormField
-              label="Celebration Sound"
-              name="celebrationSound"
-            >
-              <USwitch v-model="preferences.celebrationSound" />
-            </UFormField>
-
-            <UFormField
               label="Celebration Animation"
               name="celebrationAnimation"
+              hint="Show confetti when daily goal is reached"
             >
-              <USwitch v-model="preferences.celebrationAnimation" />
+              <USwitch
+                v-model="localCelebrationAnimation"
+                :disabled="isLoadingPreferences"
+              />
             </UFormField>
 
             <UFormField
               label="Desktop Notifications"
               name="desktopNotifications"
+              hint="Get notified when stints complete"
             >
               <div class="flex items-center gap-3">
-                <USwitch v-model="preferences.desktopNotifications" />
+                <USwitch
+                  v-model="localDesktopNotifications"
+                  :disabled="isLoadingPreferences"
+                />
                 <UButton
-                  v-if="!preferences.desktopNotifications"
+                  v-if="!localDesktopNotifications"
                   size="sm"
                   variant="ghost"
                   @click="requestNotificationPermission"
@@ -506,13 +482,6 @@ const timezones = [
                   Enable
                 </UButton>
               </div>
-            </UFormField>
-
-            <UFormField
-              label="Weekly Email Digest"
-              name="weeklyEmailDigest"
-            >
-              <USwitch v-model="preferences.weeklyEmailDigest" />
             </UFormField>
           </div>
 

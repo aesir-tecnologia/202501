@@ -287,10 +287,32 @@
 
 ---
 
+## Implementation Status
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Default Stint Duration | ✅ Implemented | Persisted to `user_profiles.default_stint_duration` |
+| Celebration Animation | ✅ Implemented | Persisted to `user_profiles.celebration_animation` |
+| Desktop Notifications | ✅ Implemented | Persisted to `user_profiles.desktop_notifications` |
+| Theme | ✅ Implemented | Browser localStorage via Nuxt color-mode |
+| Email Change | ⚠️ Partial | UI exists, sends verification email |
+| Password Change | ⚠️ Partial | UI exists, needs current password verification |
+| Timezone Change | ❌ Not Implemented | UI exists but not persisted |
+| Data Export | ⚠️ Partial | Exports basic JSON, needs full data |
+| Account Deletion | ❌ Not Implemented | UI placeholder only |
+
+### Code References
+- **Composable:** `app/composables/usePreferences.ts` - TanStack Query hooks for preferences
+- **Database Layer:** `app/lib/supabase/preferences.ts` - Supabase queries
+- **Schema:** `app/schemas/preferences.ts` - Zod validation
+- **Settings Page:** `app/pages/settings.vue` - UI implementation
+
+---
+
 ## Implementation Notes
 
 1. **Settings Page Location:** `/settings` route
-2. **Real-time Updates:** Changes to preferences should apply immediately (no page refresh)
+2. **Real-time Updates:** Changes apply immediately via optimistic updates (TanStack Query)
 3. **Validation:** Client-side validation with Zod schemas, server-side validation via PostgreSQL constraints
 4. **Error Handling:** Show toast notifications for validation errors or save failures
 5. **Loading States:** Show loading indicators during save operations

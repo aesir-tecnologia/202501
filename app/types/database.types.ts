@@ -197,7 +197,10 @@ export type Database = {
       }
       user_profiles: {
         Row: {
+          celebration_animation: boolean
           created_at: string | null
+          default_stint_duration: number | null
+          desktop_notifications: boolean
           email: string
           id: string
           timezone: string
@@ -205,7 +208,10 @@ export type Database = {
           version: number
         }
         Insert: {
+          celebration_animation?: boolean
           created_at?: string | null
+          default_stint_duration?: number | null
+          desktop_notifications?: boolean
           email: string
           id: string
           timezone?: string
@@ -213,7 +219,10 @@ export type Database = {
           version?: number
         }
         Update: {
+          celebration_animation?: boolean
           created_at?: string | null
+          default_stint_duration?: number | null
+          desktop_notifications?: boolean
           email?: string
           id?: string
           timezone?: string

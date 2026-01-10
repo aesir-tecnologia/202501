@@ -6,9 +6,9 @@
 
 ---
 
-## Phase 1: Foundation — 1 task remaining
+## Phase 1: Foundation — Complete ✓
 
-- [ ] Add preference columns to `user_profiles` table (default_stint_duration, celebration_animation, desktop_notifications)
+- [x] Add preference columns to `user_profiles` table (default_stint_duration, celebration_animation, desktop_notifications)
 - [x] Configure Sentry error tracking (`@sentry/nuxt` module + DSN setup)
 
 ---
@@ -65,12 +65,12 @@
 
 ---
 
-## Phase 8: Settings & Preferences — 4 tasks remaining
+## Phase 8: Settings & Preferences — 1 task remaining
 
 ### Database Persistence
-- [ ] Add preference columns to `user_profiles` (migration in Phase 1)
-- [ ] Replace localStorage reads/writes with Supabase queries in settings page
-- [ ] Add TanStack Query composable for preferences (`usePreferences`)
+- [x] Add preference columns to `user_profiles` (migration in Phase 1)
+- [x] Replace localStorage reads/writes with Supabase queries in settings page
+- [x] Add TanStack Query composable for preferences (`usePreferences`)
 
 ### Account Management
 - [ ] Implement actual account soft-delete API call (currently placeholder comment)
@@ -130,7 +130,7 @@
 
 ### 🔴 High Priority (Blocking Production)
 1. ~~Sentry error tracking~~ ✅ COMPLETED
-2. User preferences columns in `user_profiles` (settings don't sync across devices)
+2. ~~User preferences columns in `user_profiles`~~ ✅ COMPLETED
 
 ### 🟡 Medium Priority (Feature Completeness)
 3. Celebration animations (settings UI exists, no implementation)

@@ -140,12 +140,18 @@ TanStack Query (Vue Query) hooks for data fetching and mutations. Provides autom
 
 **Files:**
 - `app/composables/useProjects.ts` - Project queries and mutations
+- `app/composables/usePreferences.ts` - User preferences queries and mutations
 
 **Usage:**
 ```ts
 const { data: projects, isLoading } = useProjectsQuery()
 const { mutateAsync: createProject } = useCreateProject()
 await createProject({ name: 'Client Project', expectedDailyStints: 3 })
+
+// Preferences
+const { data: preferences } = usePreferencesQuery()
+const { mutateAsync: updatePreferences } = useUpdatePreferences()
+await updatePreferences({ celebrationAnimation: false })
 ```
 
 ### Error Handling & User Feedback
@@ -296,17 +302,21 @@ app/
 │       ├── projects.ts           # Source file
 │       ├── projects.test.ts      # Test file
 │       ├── stints.ts
-│       └── stints.test.ts
+│       ├── stints.test.ts
+│       ├── preferences.ts
+│       └── preferences.test.ts
 ├── composables/
 │   ├── useProjects.ts
 │   ├── useProjects.test.ts
 │   ├── useStints.ts
-│   └── useStints.test.ts
+│   ├── useStints.test.ts
+│   └── usePreferences.ts
 ├── schemas/
 │   ├── projects.ts
 │   ├── projects.test.ts
 │   ├── stints.ts
-│   └── stints.test.ts
+│   ├── stints.test.ts
+│   └── preferences.ts
 ```
 
 ## Environment Variables
