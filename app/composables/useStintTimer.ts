@@ -15,6 +15,7 @@ import { stintKeys } from '~/composables/useStints';
 import { streakKeys } from '~/composables/useStreaks';
 import { STINT } from '~/constants';
 import { isAuthError, withAuthRetry } from '~/utils/auth-recovery';
+import { useCelebration } from '~/composables/useCelebration';
 
 type StintRow = Database['public']['Tables']['stints']['Row'];
 
@@ -57,6 +58,7 @@ const globalTimerState = {
   toast: null as ReturnType<typeof useToast> | null,
   consecutiveSyncFailures: 0,
   syncWarningShown: false,
+  checkAndCelebrate: null as (() => void) | null,
 };
 
 // Worker creation retry state
@@ -72,11 +74,13 @@ export function useStintTimer() {
   const { data: activeStint } = useActiveStintQuery();
   const queryClient = useQueryClient();
   const toast = useToast();
+  const { checkAndCelebrate } = useCelebration();
 
   // Store references in global state for use in non-composable functions
   globalTimerState.queryClient = queryClient;
   globalTimerState.activeStintRef = activeStint;
   globalTimerState.toast = toast;
+  globalTimerState.checkAndCelebrate = checkAndCelebrate;
 
   // Only initialize once and only on client
   if (!globalTimerState.isInitialized && import.meta.client) {
@@ -561,9 +565,9 @@ async function handleTimerComplete(): Promise<void> {
     );
 
     if (!error && data) {
-      // Success - invalidate caches and show notification
+      // Success - refetch caches (await to ensure fresh data for celebration check)
       if (globalTimerState.queryClient) {
-        await globalTimerState.queryClient.invalidateQueries({
+        await globalTimerState.queryClient.refetchQueries({
           queryKey: stintKeys.all,
         });
 
@@ -582,6 +586,11 @@ async function handleTimerComplete(): Promise<void> {
 
       const projectName = project?.name || 'Project';
       showNotification(projectName);
+
+      // Check if daily goal was achieved and celebrate
+      if (globalTimerState.checkAndCelebrate) {
+        globalTimerState.checkAndCelebrate();
+      }
       return;
     }
 

@@ -221,6 +221,17 @@ export const projectKeys = {
 - **Targeted:** `invalidateQueries({ queryKey: projectKeys.detail(id) })` after specific updates
 - **Multiple:** Update both list and detail caches simultaneously when needed
 
+**⚠️ Cache Key Matching Gotcha:**
+TanStack Query uses the **full query key** for cache lookups. When reading cached data with `getQueryData()`, you must use the exact same key that was used to populate the cache:
+```ts
+// Dashboard populates cache with:
+useProjectsQuery({ includeInactive: true })  // key: ['projects', 'list', { includeInactive: true }]
+
+// To read that cached data, you MUST match the filter:
+queryClient.getQueryData(projectKeys.list({ includeInactive: true }))  // ✅ Works
+queryClient.getQueryData(projectKeys.list(undefined))                   // ❌ Returns undefined
+```
+
 **Timer Singleton:**
 `useStintTimer()` maintains a global singleton Web Worker for accurate time tracking, shared across all component instances.
 

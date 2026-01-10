@@ -19,7 +19,7 @@
 
 ---
 
-## Phase 5: Dashboard Experience & Daily Reset — 7 tasks remaining
+## Phase 5: Dashboard Experience & Daily Reset — 5 tasks remaining
 
 > ✅ **Daily reset is IMPLEMENTED.** Database functions, pg_cron job, composables, and dashboard UI are all complete.
 > Only missing: Realtime broadcast on reset (clients must refresh to see updates from other devices).
@@ -28,8 +28,8 @@
 - [ ] Implement real-time streak updates when stint completes (push-based, not cache invalidation)
 
 ### Celebration Features
-- [ ] Integrate confetti animation library (e.g., `canvas-confetti`) for daily goal completion
-- [ ] Create encouraging messages rotation system for goal achievement
+- [x] Integrate confetti animation library (e.g., `canvas-confetti`) for daily goal completion ✅ COMPLETED
+- [x] Create encouraging messages rotation system for goal achievement ✅ COMPLETED
 
 ### Empty States
 - [ ] Design "no stints today" state with motivational quote rotation
@@ -142,7 +142,7 @@
 2. ~~User preferences columns in `user_profiles`~~ ✅ COMPLETED
 
 ### 🟡 Medium Priority (Feature Completeness)
-3. Celebration animations (settings UI exists, no implementation)
+3. ~~Celebration animations (settings UI exists, no implementation)~~ ✅ COMPLETED
 4. Offline support (Phase 6) — entire phase
 5. Supabase Realtime subscriptions (enables multi-device sync)
 
@@ -154,4 +154,4 @@
 ---
 
 **Last Validated:** January 10, 2026
-**Total Remaining Tasks:** 47
+**Total Remaining Tasks:** 45

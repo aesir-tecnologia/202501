@@ -31,6 +31,7 @@ import {
 } from '~/schemas/stints';
 import { streakKeys, getBrowserTimezone } from '~/composables/useStreaks';
 import { updateStreakAfterCompletion } from '~/lib/supabase/streaks';
+import { useCelebration } from '~/composables/useCelebration';
 
 // ============================================================================
 // Query Key Factory
@@ -371,6 +372,7 @@ export function useUpdateStint() {
 export function useCompleteStint() {
   const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
   const queryClient = useQueryClient();
+  const { checkAndCelebrate } = useCelebration();
 
   return useMutation({
     mutationFn: async (payload: StintCompletionPayload) => {
@@ -486,6 +488,9 @@ export function useCompleteStint() {
 
       // Invalidate streak cache to trigger refetch and update UI
       queryClient.invalidateQueries({ queryKey: streakKeys.all });
+
+      // Check if daily goal was achieved and celebrate
+      checkAndCelebrate();
     },
   });
 }
