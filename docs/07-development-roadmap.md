@@ -1,12 +1,12 @@
 # LifeStint - Development Roadmap
 
 **Product Name:** LifeStint  
-**Document Version:** 4.0
-**Date:** December 2, 2025
+**Document Version:** 4.1
+**Date:** January 10, 2026
 
 ---
 
-## Phase 1: Foundation (Weeks 1-2) `PARTIAL`
+## Phase 1: Foundation (Weeks 1-2) `COMPLETED`
 
 **Goal:** Set up authentication, database, and development environment.
 
@@ -19,9 +19,9 @@
    - Login/logout
    - Password recovery
    - Session persistence
-5. Create database schema: `PARTIAL`
+5. Create database schema: `COMPLETED`
    - Users table with RLS `COMPLETED`
-   - User preferences table *(not implemented)*
+   - User preferences table `COMPLETED` *(integrated into user_profiles with celebration_animation, desktop_notifications, default_stint_duration, timezone columns)*
    - Implement utility functions (update_updated_at_column) `COMPLETED`
 6. Set up CI/CD pipeline (GitHub Actions) `COMPLETED`
 7. Configure Sentry for error tracking `COMPLETED`
@@ -178,8 +178,8 @@
    - Display as badge: "X of Y stints today"
 2. Add visual progress bar to project cards `COMPLETED`
 3. Implement streak counter: `PARTIAL`
-   - Calculate on dashboard load *(calculated in analytics page only; database function `calculate_streak_with_tz` exists but unused)*
-   - Display on project cards: "🔥 5 day streak" *(not on cards - only in analytics page)*
+   - Calculate on dashboard load `COMPLETED` *(via useStreakQuery composable with 5-minute cache)*
+   - Display on project cards: "🔥 5 day streak" *(not on cards - displayed in StreakBanner component on analytics page only)*
    - Update in real-time when stint completed `COMPLETED` *(via Realtime cache invalidation)*
 4. Build daily reset logic: `MOSTLY COMPLETE`
    - pg_cron job (runs every hour) `COMPLETED`
@@ -187,10 +187,11 @@
    - Reset daily progress counters to 0 *(N/A - progress computed from stints, no separate counters)*
    - Trigger daily summary aggregation `COMPLETED`
    - Broadcast reset event via Realtime *(not implemented)*
-5. Add celebration animations: *(not implemented)*
-   - Confetti animation when daily goal reached
-   - Celebration sound (optional, can disable)
-   - Encouraging messages
+5. Add celebration animations: `COMPLETED`
+   - Confetti animation when daily goal reached `COMPLETED` *(useCelebration.ts with canvas-confetti, fires from both sides for 3 seconds)*
+   - Celebration sound (optional, can disable) *(not implemented - decided against audio)*
+   - Encouraging messages `COMPLETED` *(10 rotating toast messages)*
+   - Respects user preference toggle `COMPLETED` *(celebration_animation in user_profiles)*
 6. Improve empty states: `PARTIAL`
    - No projects: Illustration + CTA `COMPLETED`
    - No stints today: Motivational quote *(not implemented)*
@@ -265,26 +266,26 @@
 
 ---
 
-## Phase 7: Analytics & Export (Weeks 12-13) `PARTIAL`
+## Phase 7: Analytics & Export (Weeks 12-13) `MOSTLY COMPLETE`
 
 **Goal:** Provide basic analytics and CSV export for professional reporting.
 
 **Tasks:**
-1. Create daily_summaries table *(not implemented)*
-2. Implement aggregation function: *(not implemented)*
-   - `aggregate_daily_summary()` SQL function
-   - pg_cron job (runs at midnight user time)
-   - Pre-calculate daily stats for performance
+1. Create daily_summaries table `COMPLETED` *(table exists with date, total_stints, total_focus_seconds, total_pause_seconds, project_breakdown, completed_at)*
+2. Implement aggregation function: `COMPLETED`
+   - `aggregate_daily_summary()` SQL function `COMPLETED`
+   - pg_cron job (runs at midnight user time) `COMPLETED`
+   - Pre-calculate daily stats for performance `COMPLETED`
 3. Build analytics page: `COMPLETED`
    - Daily summary section (today's stats)
    - Weekly summary section (7-day overview)
    - Simple bar chart (Chart.js)
    - Project breakdown list
 4. Implement streak tracking: `COMPLETED`
-   - `calculate_streak()` SQL function *(client-side calculation)*
-   - Display current streak prominently
-   - Show longest streak all-time
-   - Grace period logic (1 day) *(not implemented)*
+   - `calculate_streak()` SQL function `COMPLETED` *(calculate_streak_with_tz database function + client-side useStreakQuery)*
+   - Display current streak prominently `COMPLETED` *(StreakBanner component)*
+   - Show longest streak all-time `COMPLETED`
+   - Grace period logic (1 day) `COMPLETED` *(migration 20251216030405_fix_streak_grace_period.sql)*
 5. Build CSV export: `COMPLETED`
    - Client-side generation using Supabase queries
    - Query stints in date range via Supabase client
@@ -316,32 +317,32 @@
 
 ---
 
-## Phase 8: Settings & Preferences (Week 14) `PARTIAL`
+## Phase 8: Settings & Preferences (Week 14) `MOSTLY COMPLETE`
 
 **Goal:** Allow users to customize their experience.
 
 **Tasks:**
-1. Build settings page: `PARTIAL`
+1. Build settings page: `MOSTLY COMPLETE`
    - Account section (email, name) `COMPLETED`
    - Preferences section (default stint duration, theme, notifications) `COMPLETED`
-   - Privacy section (data export, account deletion) *(UI only, not functional)*
+   - Privacy section (data export, account deletion) `PARTIAL` *(data export functional, account deletion UI only)*
 2. Implement preference updates: `COMPLETED`
    - Add preference columns to `user_profiles` table (default_stint_duration, celebration_animation, desktop_notifications) `COMPLETED`
    - Apply changes immediately (optimistic updates via TanStack Query) `COMPLETED`
    - Theme handled client-side via Nuxt color-mode (not in database) `COMPLETED`
-3. Add password change flow: *(not implemented)*
-   - Current password verification
-   - New password with confirmation
-   - Email notification on change
-4. Build data export feature: *(not implemented)*
-   - Export all user data as JSON (GDPR compliance)
-   - Include projects, stints, preferences
-   - One-click download
-5. Implement account deletion: *(not implemented)*
-   - Confirmation modal with password
-   - Soft delete (mark deleted, don't purge immediately)
-   - Scheduled cleanup after 30 days
-   - Email confirmation
+3. Add password change flow: `COMPLETED`
+   - Current password verification *(handled by Supabase auth)*
+   - New password with confirmation `COMPLETED` *(settings.vue:137-175)*
+   - Email notification on change `COMPLETED` *(handled by Supabase auth)*
+4. Build data export feature: `PARTIAL`
+   - Export all user data as JSON (GDPR compliance) `COMPLETED` *(settings.vue:248-279, exports to lifestint-export-YYYY-MM-DD.json)*
+   - Include projects, stints, preferences `PARTIAL` *(currently exports account + preferences; projects/stints need addition)*
+   - One-click download `COMPLETED`
+5. Implement account deletion: `PARTIAL`
+   - Confirmation modal with password `COMPLETED` *(email verification modal in settings.vue:281-314)*
+   - Soft delete (mark deleted, don't purge immediately) *(not implemented - needs backend API)*
+   - Scheduled cleanup after 30 days *(not implemented)*
+   - Email confirmation *(not implemented)*
 6. Add theme switcher: `COMPLETED`
    - Light, Dark, System options
    - Persists via Nuxt color-mode (localStorage)

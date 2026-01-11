@@ -1,0 +1,73 @@
+name: Documentation Gap
+description: Report a discrepancy between documentation and actual implementation
+title: "[Docs] "
+labels: ["docs-sync-required", "documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template when you find a mismatch between what the documentation says and what's actually implemented (or vice versa).
+
+  - type: input
+    id: source-doc
+    attributes:
+      label: Source Document
+      description: Which documentation file contains the discrepancy?
+      placeholder: "docs/07-development-roadmap.md"
+    validations:
+      required: true
+
+  - type: input
+    id: source-item
+    attributes:
+      label: Specific Item
+      description: Which section, phase, or task is affected?
+      placeholder: "Phase 5, Task 3 - Celebration animations"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: gap-type
+    attributes:
+      label: Gap Type
+      description: What kind of discrepancy is this?
+      options:
+        - "Documented as 'not implemented' but actually exists in code"
+        - "Documented as 'completed' but missing or broken"
+        - "Documentation is outdated or incorrect"
+        - "Feature exists but not documented at all"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-state
+    attributes:
+      label: Current State
+      description: What does the documentation currently say?
+      placeholder: "The roadmap says 'Celebration animations: not implemented'"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-state
+    attributes:
+      label: Actual State
+      description: What is the reality in the codebase?
+      placeholder: "useCelebration.ts exists with full confetti implementation"
+    validations:
+      required: false
+
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: Suggested Documentation Update
+      description: How should the documentation be corrected?
+      placeholder: "Update Phase 5, Task 5 to show COMPLETED status with implementation notes"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ⚠️ **Reminder:** When this issue is resolved, the source documentation **MUST** be updated as part of the PR. The fix is not complete until docs are synced with reality.

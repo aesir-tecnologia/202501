@@ -53,6 +53,22 @@ Project documentation is available in the `docs/` folder, including:
 - Success metrics
 - Operations and compliance
 
+## Implementation Tracking
+
+**Use GitHub Issues for tracking implementation status** — not manual updates to `docs/07-development-roadmap.md`.
+
+- Create issues for features/tasks with clear acceptance criteria
+- Link PRs to issues using `Closes #123` or `Fixes #123` in PR description
+- Issues auto-close on merge, providing accurate completion tracking
+- The roadmap document (`docs/07-development-roadmap.md`) serves as a **high-level reference** only
+
+This prevents documentation drift where features get implemented but the roadmap falls out of sync.
+
+**Documentation-sourced issues:** When creating an issue from a documentation gap or discrepancy (e.g., roadmap says "not implemented" but should be, or vice versa):
+1. Reference the source document and specific item (e.g., `Source: docs/07-development-roadmap.md, Phase 5, Task 3`)
+2. Include in the issue body: `⚠️ Documentation update required: Update [document] when this issue is resolved.`
+3. **CRITICAL:** GitHub auto-closes issues on PR merge, but Claude Code MUST update the referenced documentation as part of the fix. The PR is not complete until docs are synced.
+
 ## GitHub Operations
 
 For GitHub CLI commands, issue types, and API usage, see **`.claude/GITHUB.md`**.
