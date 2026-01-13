@@ -2,7 +2,7 @@ import { computed, toValue, type MaybeRefOrGetter } from 'vue';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import type { UseQueryReturnType, UseMutationReturnType } from '@tanstack/vue-query';
 import { useDebounceFn } from '@vueuse/core';
-import type { TypedSupabaseClient } from '~/utils/supabase';
+import { useTypedSupabaseClient } from '~/utils/supabase';
 import {
   listProjects,
   getProject,
@@ -131,7 +131,7 @@ function toDbPayload(payload: ProjectCreatePayload | ProjectUpdatePayload): DbCr
 // ============================================================================
 
 export function useProjectsQuery(filters?: MaybeRefOrGetter<ProjectListFilters | undefined>) {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
 
   return useQuery({
     queryKey: computed(() => projectKeys.list(toValue(filters))),
@@ -145,7 +145,7 @@ export function useProjectsQuery(filters?: MaybeRefOrGetter<ProjectListFilters |
 }
 
 export function useProjectQuery(id: MaybeRefOrGetter<string>) {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const projectId = toValue(id);
 
   return useQuery({
@@ -160,7 +160,7 @@ export function useProjectQuery(id: MaybeRefOrGetter<string>) {
 }
 
 export function useArchivedProjectsQuery() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
 
   return useQuery({
     queryKey: projectKeys.archived(),
@@ -177,7 +177,7 @@ export function useArchivedProjectsQuery() {
 // ============================================================================
 
 export function useCreateProject() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -241,7 +241,7 @@ export function useCreateProject() {
 }
 
 export function useUpdateProject() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -324,7 +324,7 @@ export function useUpdateProject() {
  * ```
  */
 export function useDeleteProject() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -376,7 +376,7 @@ export function useDeleteProject() {
  * ```
  */
 export function useReorderProjects() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -485,7 +485,7 @@ export function useToggleProjectActive() {
  * ```
  */
 export function useArchiveProject() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -545,7 +545,7 @@ export function useArchiveProject() {
  * ```
  */
 export function useUnarchiveProject() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -605,7 +605,7 @@ export function useUnarchiveProject() {
  * ```
  */
 export function usePermanentlyDeleteProject() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/vue-query';
 import type { MaybeRef } from 'vue';
-import type { TypedSupabaseClient } from '~/utils/supabase';
+import { useTypedSupabaseClient } from '~/utils/supabase';
 import {
   listDailySummaries,
   getDailySummary,
@@ -50,7 +50,7 @@ function addComputedFields(summary: DailySummary): DailySummaryWithComputed {
 // ============================================================================
 
 export function useDailySummariesQuery(filters: MaybeRef<DailySummaryFilters>) {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
 
   return useQuery({
     queryKey: computed(() => dailySummaryKeys.list(toValue(filters))),
@@ -70,7 +70,7 @@ export function useDailySummariesQuery(filters: MaybeRef<DailySummaryFilters>) {
 }
 
 export function useDailySummaryQuery(date: MaybeRef<string>) {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
 
   return useQuery({
     queryKey: computed(() => dailySummaryKeys.detail(toValue(date))),
@@ -84,7 +84,7 @@ export function useDailySummaryQuery(date: MaybeRef<string>) {
 }
 
 export function useWeeklyStatsQuery() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
 
   return useQuery({
     queryKey: dailySummaryKeys.weekly(),

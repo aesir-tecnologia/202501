@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
-import type { TypedSupabaseClient } from '~/utils/supabase';
+import { useTypedSupabaseClient } from '~/utils/supabase';
 import {
   getPreferences,
   updatePreferences as updatePreferencesDb,
@@ -22,7 +22,7 @@ export const preferencesKeys = {
 // ============================================================================
 
 export function usePreferencesQuery() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
 
   return useQuery({
     queryKey: preferencesKeys.current(),
@@ -40,7 +40,7 @@ export function usePreferencesQuery() {
 // ============================================================================
 
 export function useUpdatePreferences() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
