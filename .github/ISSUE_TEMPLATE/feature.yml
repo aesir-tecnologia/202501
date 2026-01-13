@@ -1,0 +1,60 @@
+name: Feature Request
+description: Propose new functionality or enhancement
+title: ""
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Propose a new feature or enhancement. Right-size your issue — group related work together with checklists rather than creating many small issues.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem does this feature solve? What's missing or needed?
+      placeholder: "Describe the user need or pain point this addresses"
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know the feature is complete?
+      placeholder: |
+        - [ ] User can...
+        - [ ] System displays...
+        - [ ] Data persists correctly when...
+    validations:
+      required: false
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: Approach
+      description: How do you plan to implement it? (or "TBD" if undecided)
+      placeholder: "Describe the implementation approach"
+    validations:
+      required: false
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      description: Sub-tasks to complete (use checkboxes for tracking)
+      placeholder: |
+        - [ ] Design component/API
+        - [ ] Implement core functionality
+        - [ ] Add tests
+        - [ ] Update docs if needed
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Relevant links, prior discussion, design constraints, related issues
+    validations:
+      required: false

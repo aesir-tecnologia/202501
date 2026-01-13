@@ -1,0 +1,71 @@
+name: Bug Report
+description: Report something that is broken or not working as expected
+title: "[Bug] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report a bug — something that worked before but is now broken, or behavior that doesn't match expectations.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is broken or not working correctly?
+      placeholder: "Describe what you expected vs. what actually happened"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: How can this bug be reproduced?
+      placeholder: |
+        1. Go to...
+        2. Click on...
+        3. See error...
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know the bug is fixed?
+      placeholder: |
+        - [ ] Error no longer appears in console
+        - [ ] Feature works as expected when...
+    validations:
+      required: false
+
+  - type: textarea
+    id: approach
+    attributes:
+      label: Approach
+      description: How do you plan to fix it? (or "TBD" if investigating)
+      placeholder: "Describe the fix approach or investigation plan"
+    validations:
+      required: false
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: Tasks
+      description: Sub-tasks to complete (use checkboxes)
+      placeholder: |
+        - [ ] Investigate root cause
+        - [ ] Implement fix
+        - [ ] Add test coverage
+        - [ ] Update docs if needed
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Relevant links, error logs, screenshots, constraints
+    validations:
+      required: false
