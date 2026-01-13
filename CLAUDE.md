@@ -269,6 +269,9 @@ queryClient.getQueryData(projectKeys.list(undefined))                   // ❌ R
 - **Schema Validation:** Zod schemas validate at runtime and infer TypeScript types
 - **Type Exports:** Each data layer exports its own types (Row, Insert, Update)
 
+**Supabase Client Typing:**
+Use `useTypedSupabaseClient()` from `~/utils/supabase` instead of `useSupabaseClient()` in composables. The `@nuxtjs/supabase` module uses its own `Database` type via module augmentation, which doesn't align with our generated types. This helper encapsulates the necessary type assertion in one documented location.
+
 ### Middleware
 
 - `auth.ts` - Protects authenticated routes (client-side only, skips on server)

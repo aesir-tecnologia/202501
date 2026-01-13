@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/vue-query';
-import type { TypedSupabaseClient } from '~/utils/supabase';
+import { useTypedSupabaseClient } from '~/utils/supabase';
 import { getStreak } from '~/lib/supabase/streaks';
 
 // ============================================================================
@@ -65,7 +65,7 @@ export function getBrowserTimezone(): string {
  * ```
  */
 export function useStreakQuery() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const timezone = getBrowserTimezone();
 
   return useQuery({

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import type { UseQueryReturnType, UseMutationReturnType } from '@tanstack/vue-query';
-import type { TypedSupabaseClient } from '~/utils/supabase';
+import { useTypedSupabaseClient } from '~/utils/supabase';
 import {
   listStints,
   getStintById,
@@ -156,7 +156,7 @@ function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
  * ```
  */
 export function useStintsQuery(filters?: StintListFilters) {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
 
   return useQuery({
     queryKey: stintKeys.list(filters),
@@ -177,7 +177,7 @@ export function useStintsQuery(filters?: StintListFilters) {
  * ```
  */
 export function useStintQuery(id: MaybeRefOrGetter<string>) {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const stintId = toValue(id);
 
   return useQuery({
@@ -200,7 +200,7 @@ export function useStintQuery(id: MaybeRefOrGetter<string>) {
  * ```
  */
 export function useActiveStintQuery() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
 
   return useQuery({
     queryKey: stintKeys.active(),
@@ -226,7 +226,7 @@ export function useActiveStintQuery() {
  * ```
  */
 export function usePausedStintQuery() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
 
   return useQuery({
     queryKey: stintKeys.paused(),
@@ -255,7 +255,7 @@ export function usePausedStintQuery() {
  * ```
  */
 export function useUpdateStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -370,7 +370,7 @@ export function useUpdateStint() {
  * ```
  */
 export function useCompleteStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
   const { checkAndCelebrate } = useCelebration();
 
@@ -506,7 +506,7 @@ export function useCompleteStint() {
  * ```
  */
 export function useDeleteStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -578,7 +578,7 @@ export function useDeleteStint() {
  * ```
  */
 export function usePauseStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -688,7 +688,7 @@ export function usePauseStint() {
  * ```
  */
 export function useResumeStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -737,7 +737,7 @@ export function useResumeStint() {
  * ```
  */
 export function useStartStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -838,7 +838,7 @@ export function useStartStint() {
  * ```
  */
 export function useInterruptStint() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -983,7 +983,7 @@ function cleanupOldSyncTimes(): void {
 }
 
 export function useSyncStintCheck() {
-  const client = useSupabaseClient<TypedSupabaseClient>() as unknown as TypedSupabaseClient;
+  const client = useTypedSupabaseClient();
 
   return useMutation({
     mutationFn: async (stintId: string) => {
