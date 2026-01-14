@@ -8,7 +8,7 @@ import {
   listStints,
   getStintById,
   getActiveStint,
-  getPausedStint,
+  getPausedStints,
   createStint,
   updateStint,
   deleteStint,
@@ -190,37 +190,54 @@ describe('stints.ts - Integration Tests', () => {
     });
   });
 
-  describe('getPausedStint', () => {
-    it('should return paused stint when exists', async () => {
-      await createPausedStint(serviceClient, testProject.id, testUserId);
+  describe('getPausedStints', () => {
+    it('should return all paused stints for user ordered by paused_at DESC', async () => {
+      // Create two paused stints on different projects
+      const olderPausedAt = new Date(Date.now() - 60 * 1000);
+      const newerPausedAt = new Date();
 
-      const result = await getPausedStint(authenticatedClient);
+      await createPausedStint(serviceClient, testProject.id, testUserId, {
+        paused_at: olderPausedAt.toISOString(),
+      });
+
+      const otherProject = await createTestProject(serviceClient, testUserId, {
+        name: 'Other Project for Paused',
+      });
+      await createPausedStint(serviceClient, otherProject.id, testUserId, {
+        paused_at: newerPausedAt.toISOString(),
+      });
+
+      const result = await getPausedStints(authenticatedClient);
 
       expect(result.error).toBeNull();
-      expect(result.data).not.toBeNull();
-      expect(result.data!.status).toBe('paused');
+      expect(result.data).toHaveLength(2);
+      // Should be ordered by paused_at DESC (most recent first)
+      const stints = result.data!;
+      expect(new Date(stints[0]!.paused_at!).getTime()).toBeGreaterThan(
+        new Date(stints[1]!.paused_at!).getTime(),
+      );
     });
 
-    it('should return null when only active stint exists (paused only)', async () => {
+    it('should return empty array when only active stint exists', async () => {
       await createActiveStint(serviceClient, testProject.id, testUserId);
 
-      const result = await getPausedStint(authenticatedClient);
+      const result = await getPausedStints(authenticatedClient);
 
       expect(result.error).toBeNull();
-      expect(result.data).toBeNull();
+      expect(result.data).toEqual([]);
     });
 
-    it('should return null when no paused stint', async () => {
+    it('should return empty array when no paused stints', async () => {
       await createCompletedStint(serviceClient, testProject.id, testUserId);
 
-      const result = await getPausedStint(authenticatedClient);
+      const result = await getPausedStints(authenticatedClient);
 
       expect(result.error).toBeNull();
-      expect(result.data).toBeNull();
+      expect(result.data).toEqual([]);
     });
 
     it('should return auth error when user is not authenticated', async () => {
-      const result = await getPausedStint(unauthenticatedClient);
+      const result = await getPausedStints(unauthenticatedClient);
 
       expect(result.error).not.toBeNull();
       expect(result.error?.message).toContain('authenticated');
@@ -396,7 +413,7 @@ describe('stints.ts - Integration Tests', () => {
       expect(result.error?.message).toContain('authenticated');
     });
 
-    it('should return error when user already has a paused stint', async () => {
+    it('should allow pausing when other paused stints exist (Issue #46)', async () => {
       // Create a paused stint on project A
       await createPausedStint(serviceClient, testProject.id, testUserId);
 
@@ -406,11 +423,16 @@ describe('stints.ts - Integration Tests', () => {
       });
       const activeStint = await createActiveStint(serviceClient, otherProject.id, testUserId);
 
-      // Try to pause the active stint (should fail because we already have a paused stint)
+      // Pause the active stint (should succeed - unlimited paused stints allowed)
       const result = await pauseStint(authenticatedClient, activeStint.id);
 
-      expect(result.error).not.toBeNull();
-      expect(result.error?.message).toContain('already have a paused stint');
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('paused');
+
+      // Verify we now have two paused stints
+      const pausedResult = await getPausedStints(authenticatedClient);
+      expect(pausedResult.data).toHaveLength(2);
     });
   });
 
@@ -850,15 +872,15 @@ describe('stints.ts - Integration Tests', () => {
 
       // Verify both exist via authenticated client queries
       const activeResult = await getActiveStint(authenticatedClient);
-      const pausedResult = await getPausedStint(authenticatedClient);
+      const pausedResult = await getPausedStints(authenticatedClient);
 
       expect(activeResult.error).toBeNull();
       expect(activeResult.data).not.toBeNull();
       expect(activeResult.data!.status).toBe('active');
 
       expect(pausedResult.error).toBeNull();
-      expect(pausedResult.data).not.toBeNull();
-      expect(pausedResult.data!.status).toBe('paused');
+      expect(pausedResult.data).toHaveLength(1);
+      expect(pausedResult.data![0]!.status).toBe('paused');
     });
 
     it('should reject starting a stint when both active and paused exist (dual conflict)', async () => {
@@ -900,10 +922,10 @@ describe('stints.ts - Integration Tests', () => {
 
       // Verify we now have both active and paused
       const activeResult = await getActiveStint(authenticatedClient);
-      const pausedResult = await getPausedStint(authenticatedClient);
+      const pausedResult = await getPausedStints(authenticatedClient);
 
       expect(activeResult.data).not.toBeNull();
-      expect(pausedResult.data).not.toBeNull();
+      expect(pausedResult.data).toHaveLength(1);
     });
 
     it('should reject creating a second active stint at database level', async () => {
@@ -924,11 +946,11 @@ describe('stints.ts - Integration Tests', () => {
       expect(error?.code).toBe('23505');
     });
 
-    it('should reject creating a second paused stint at database level', async () => {
+    it('should allow creating multiple paused stints at database level (Issue #46)', async () => {
       await createPausedStint(serviceClient, testProject.id, testUserId);
       const otherProject = await createTestProject(serviceClient, testUserId, { name: 'Other' });
 
-      const { error } = await serviceClient
+      const { error, data } = await serviceClient
         .from('stints')
         .insert({
           user_id: testUserId,
@@ -937,10 +959,14 @@ describe('stints.ts - Integration Tests', () => {
           started_at: new Date().toISOString(),
           paused_at: new Date().toISOString(),
           planned_duration: 25,
-        });
+        })
+        .select()
+        .single();
 
-      expect(error).not.toBeNull();
-      expect(error?.code).toBe('23505');
+      // Should succeed - unlimited paused stints allowed
+      expect(error).toBeNull();
+      expect(data).not.toBeNull();
+      expect(data!.status).toBe('paused');
     });
   });
 
@@ -1030,8 +1056,8 @@ describe('stints.ts - Integration Tests', () => {
       const activeResult = await getActiveStint(authenticatedClient);
       expect(activeResult.data?.id).toBe(stintB.id);
 
-      const pausedResult = await getPausedStint(authenticatedClient);
-      expect(pausedResult.data?.id).toBe(stintA.id);
+      const pausedResult = await getPausedStints(authenticatedClient);
+      expect(pausedResult.data?.[0]?.id).toBe(stintA.id);
 
       // Step 4: Complete stint B
       const completeBResult = await completeStint(authenticatedClient, stintB.id, 'manual');
@@ -1113,6 +1139,103 @@ describe('stints.ts - Integration Tests', () => {
 
       // Cleanup
       await completeStint(authenticatedClient, stintA.id, 'manual');
+    });
+  });
+
+  describe('multi-pause workflow (Issue #46)', () => {
+    let projectA: ProjectRow;
+    let projectB: ProjectRow;
+    let projectC: ProjectRow;
+
+    beforeEach(async () => {
+      projectA = await createTestProject(serviceClient, testUserId, { name: 'Multi-Pause Project A' });
+      projectB = await createTestProject(serviceClient, testUserId, { name: 'Multi-Pause Project B' });
+      projectC = await createTestProject(serviceClient, testUserId, { name: 'Multi-Pause Project C' });
+    });
+
+    afterEach(async () => {
+      await serviceClient.from('stints').delete().eq('project_id', projectA.id);
+      await serviceClient.from('stints').delete().eq('project_id', projectB.id);
+      await serviceClient.from('stints').delete().eq('project_id', projectC.id);
+      await serviceClient.from('projects').delete().eq('id', projectA.id);
+      await serviceClient.from('projects').delete().eq('id', projectB.id);
+      await serviceClient.from('projects').delete().eq('id', projectC.id);
+    });
+
+    it('should allow pause-switch-pause-switch workflow with multiple paused stints', async () => {
+      // Step 1: Start stint on Project A
+      const startAResult = await startStint(authenticatedClient, projectA.id, 50);
+      expect(startAResult.error).toBeNull();
+      const stintA = startAResult.data!;
+
+      // Step 2: Pause stint A
+      await pauseStint(authenticatedClient, stintA.id);
+
+      // Step 3: Start stint on Project B
+      const startBResult = await startStint(authenticatedClient, projectB.id, 30);
+      expect(startBResult.error).toBeNull();
+      const stintB = startBResult.data!;
+
+      // Verify: 1 active (B) + 1 paused (A)
+      let pausedResult = await getPausedStints(authenticatedClient);
+      expect(pausedResult.data).toHaveLength(1);
+      expect(pausedResult.data![0]!.id).toBe(stintA.id);
+
+      // Step 4: Pause stint B (now we should have 2 paused stints)
+      const pauseBResult = await pauseStint(authenticatedClient, stintB.id);
+      expect(pauseBResult.error).toBeNull();
+      expect(pauseBResult.data!.status).toBe('paused');
+
+      // Verify: 0 active + 2 paused
+      pausedResult = await getPausedStints(authenticatedClient);
+      expect(pausedResult.data).toHaveLength(2);
+
+      const activeResult = await getActiveStint(authenticatedClient);
+      expect(activeResult.data).toBeNull();
+
+      // Step 5: Start stint on Project C
+      const startCResult = await startStint(authenticatedClient, projectC.id, 25);
+      expect(startCResult.error).toBeNull();
+      const stintC = startCResult.data!;
+
+      // Verify: 1 active (C) + 2 paused (A, B)
+      pausedResult = await getPausedStints(authenticatedClient);
+      expect(pausedResult.data).toHaveLength(2);
+
+      const finalActiveResult = await getActiveStint(authenticatedClient);
+      expect(finalActiveResult.data?.id).toBe(stintC.id);
+
+      // Cleanup
+      await completeStint(authenticatedClient, stintC.id, 'manual');
+      await completeStint(authenticatedClient, stintB.id, 'interrupted');
+      await completeStint(authenticatedClient, stintA.id, 'interrupted');
+    });
+
+    it('should return paused stints ordered by paused_at DESC (most recent first)', async () => {
+      // Start and pause stint A (older pause)
+      const startAResult = await startStint(authenticatedClient, projectA.id, 50);
+      const stintA = startAResult.data!;
+      await pauseStint(authenticatedClient, stintA.id);
+
+      // Wait a bit to ensure different timestamps
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Start and pause stint B (newer pause)
+      const startBResult = await startStint(authenticatedClient, projectB.id, 30);
+      const stintB = startBResult.data!;
+      await pauseStint(authenticatedClient, stintB.id);
+
+      // Get paused stints
+      const pausedResult = await getPausedStints(authenticatedClient);
+      expect(pausedResult.data).toHaveLength(2);
+
+      // Most recently paused (B) should be first
+      expect(pausedResult.data![0]!.id).toBe(stintB.id);
+      expect(pausedResult.data![1]!.id).toBe(stintA.id);
+
+      // Cleanup
+      await completeStint(authenticatedClient, stintB.id, 'interrupted');
+      await completeStint(authenticatedClient, stintA.id, 'interrupted');
     });
   });
 });

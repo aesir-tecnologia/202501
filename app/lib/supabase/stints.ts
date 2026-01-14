@@ -106,14 +106,15 @@ export async function getActiveStint(
 }
 
 /**
- * Get the currently paused stint (status = 'paused' only)
+ * Get all paused stints for the current user (status = 'paused')
  *
- * Returns the user's paused stint if one exists. With the pause-and-switch
- * feature, users can have both an active and a paused stint simultaneously.
+ * Returns all paused stints for the user, ordered by most recently paused first.
+ * With unlimited paused stints (Issue #46), users can have multiple paused stints
+ * alongside their active stint.
  */
-export async function getPausedStint(
+export async function getPausedStints(
   client: TypedSupabaseClient,
-): Promise<Result<StintRow | null>> {
+): Promise<Result<StintRow[]>> {
   const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
@@ -122,13 +123,13 @@ export async function getPausedStint(
     .select('*')
     .eq('user_id', userResult.data!)
     .eq('status', 'paused')
-    .maybeSingle<StintRow>();
+    .order('paused_at', { ascending: false });
 
   if (error) {
-    return { data: null, error: new Error(error.message || 'Failed to get paused stint') };
+    return { data: null, error: new Error(error.message || 'Failed to get paused stints') };
   }
 
-  return { data: data || null, error: null };
+  return { data: (data as StintRow[]) || [], error: null };
 }
 
 export async function createStint(
@@ -242,9 +243,6 @@ export async function pauseStint(
     }
     if (error.message?.includes('not found')) {
       return { data: null, error: new Error('Stint not found') };
-    }
-    if (error.message?.includes('already have a paused stint')) {
-      return { data: null, error: new Error('You already have a paused stint. Complete or abandon it first.') };
     }
     return { data: null, error: new Error(`Failed to pause stint: ${error.message || 'Unknown error'}`) };
   }
