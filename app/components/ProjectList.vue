@@ -5,9 +5,9 @@ import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
-import { useActiveStintQuery, usePausedStintQuery, useStartStint, usePauseStint, useResumeStint, useCompleteStint, useStintsQuery, stintKeys } from '~/composables/useStints';
+import { useActiveStintQuery, usePausedStintsMap, useStartStint, usePauseStint, useResumeStint, useCompleteStint, useStintsQuery, stintKeys } from '~/composables/useStints';
 import ProjectListCard from './ProjectListCard.vue';
-import StintConflictDialog, { type ConflictResolutionAction, type DualConflictInfo } from './StintConflictDialog.vue';
+import StintConflictDialog, { type ConflictResolutionAction } from './StintConflictDialog.vue';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { calculateRemainingSeconds } from '~/utils/stint-time';
 
@@ -35,7 +35,7 @@ const localProjects = ref<ProjectRow[]>([...props.projects]);
 const isDragging = ref(false);
 
 const { data: activeStint } = useActiveStintQuery();
-const { data: pausedStint } = usePausedStintQuery();
+const pausedStintsMap = usePausedStintsMap();
 const { mutateAsync: startStint, isPending: isStarting } = useStartStint();
 const { mutateAsync: pauseStint, isPending: isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint();
@@ -47,11 +47,9 @@ const stintToComplete = ref<StintRow | null>(null);
 const showConflictDialog = ref(false);
 const conflictStint = ref<{
   id: string
-  status: 'active' | 'paused'
   projectName: string
   remainingSeconds: number
 } | null>(null);
-const dualConflictInfo = ref<DualConflictInfo | null>(null);
 const pendingProject = ref<ProjectRow | null>(null);
 const isConflictResolving = ref(false);
 
@@ -199,28 +197,11 @@ async function handleToggleActive(project: ProjectRow) {
 }
 
 async function handleStartStint(project: ProjectRow): Promise<void> {
-  // Check for dual-conflict first - both active AND paused stints exist
-  if (activeStint.value && pausedStint.value) {
-    dualConflictInfo.value = {
-      activeStint: {
-        projectName: getProjectName(activeStint.value.project_id),
-        remainingSeconds: calculateRemainingSeconds(activeStint.value),
-      },
-      pausedStint: {
-        projectName: getProjectName(pausedStint.value.project_id),
-        remainingSeconds: calculateRemainingSeconds(pausedStint.value),
-      },
-    };
-    pendingProject.value = project;
-    showConflictDialog.value = true;
-    return;
-  }
-
-  // Check for active stint - blocks starting, must pause or complete first
+  // Only check for active stint - it blocks starting (must pause or complete first)
+  // Paused stints no longer block starting new stints (Issue #46)
   if (activeStint.value) {
     conflictStint.value = {
       id: activeStint.value.id,
-      status: 'active',
       projectName: getProjectName(activeStint.value.project_id),
       remainingSeconds: calculateRemainingSeconds(activeStint.value),
     };
@@ -229,20 +210,7 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
     return;
   }
 
-  // Check for paused stint - allowed but show dialog for awareness
-  if (pausedStint.value) {
-    conflictStint.value = {
-      id: pausedStint.value.id,
-      status: 'paused',
-      projectName: getProjectName(pausedStint.value.project_id),
-      remainingSeconds: calculateRemainingSeconds(pausedStint.value),
-    };
-    pendingProject.value = project;
-    showConflictDialog.value = true;
-    return;
-  }
-
-  // No conflicts, start directly
+  // No active stint, start directly (paused stints don't block)
   await doStartStint(project);
 }
 
@@ -268,7 +236,6 @@ async function doStartStint(project: ProjectRow): Promise<void> {
       const existingStint = errorWithConflict.conflict;
       conflictStint.value = {
         id: existingStint.id,
-        status: existingStint.status as 'active' | 'paused',
         projectName: getProjectName(existingStint.project_id),
         remainingSeconds: calculateRemainingSeconds(existingStint),
       };
@@ -358,14 +325,6 @@ async function handleCompletionConfirm(notes: string): Promise<void> {
 }
 
 async function handleConflictResolution(action: ConflictResolutionAction): Promise<void> {
-  // For dual-conflict dismissal, just close the dialog
-  if (action === 'dismiss-dual-conflict') {
-    showConflictDialog.value = false;
-    pendingProject.value = null;
-    dualConflictInfo.value = null;
-    return;
-  }
-
   if (!conflictStint.value) {
     console.error('[ProjectList] handleConflictResolution called without conflictStint', { action });
     toast.add({
@@ -453,77 +412,12 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
         }
         break;
 
-      case 'start-alongside':
-        try {
-          await doStartStint(currentPendingProject);
-          toast.add({ title: 'New stint started', color: 'success' });
-        }
-        catch (error) {
-          toast.add({
-            title: 'Failed to Start',
-            description: error instanceof Error ? error.message : 'Could not start new stint.',
-            color: 'error',
-            icon: 'i-lucide-alert-circle',
-          });
-        }
-        break;
-
-      case 'complete-paused-and-start':
-        try {
-          await completeStint({
-            stintId: currentConflictStint.id,
-            completionType: 'manual',
-          });
-        }
-        catch (completeError) {
-          toast.add({
-            title: 'Failed to Complete',
-            description: completeError instanceof Error ? completeError.message : 'Could not complete paused stint.',
-            color: 'error',
-            icon: 'i-lucide-alert-circle',
-          });
-          break;
-        }
-        try {
-          await doStartStint(currentPendingProject);
-          toast.add({ title: 'Completed paused and started new stint', color: 'success' });
-        }
-        catch (startError) {
-          toast.add({
-            title: 'Partial Completion',
-            description: `Paused stint completed, but couldn't start new stint: ${startError instanceof Error ? startError.message : 'Unknown error'}`,
-            color: 'warning',
-            icon: 'i-lucide-alert-triangle',
-          });
-        }
-        break;
-
-      case 'resume-paused':
-        try {
-          await resumeStint(currentConflictStint.id);
-          toast.add({ title: 'Resumed paused stint', color: 'success' });
-        }
-        catch (error) {
-          toast.add({
-            title: 'Failed to Resume',
-            description: error instanceof Error ? error.message : 'Could not resume stint.',
-            color: 'error',
-            icon: 'i-lucide-alert-circle',
-          });
-        }
-        break;
-
       case 'cancel':
         break;
 
       default: {
         const _exhaustiveCheck: never = action;
-        console.error('[ProjectList] Unhandled conflict resolution action:', action);
-        toast.add({
-          title: 'Unexpected Action',
-          description: `Action "${action}" is not implemented.`,
-          color: 'error',
-        });
+        console.error('[ProjectList] Unhandled conflict resolution action:', _exhaustiveCheck);
       }
     }
   }
@@ -532,7 +426,6 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
     showConflictDialog.value = false;
     pendingProject.value = null;
     conflictStint.value = null;
-    dualConflictInfo.value = null;
   }
 }
 </script>
@@ -576,7 +469,7 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
         :key="project.id"
         :project="project"
         :active-stint="activeStint ?? null"
-        :paused-stint="pausedStint ?? null"
+        :paused-stint="pausedStintsMap.get(project.id) ?? null"
         :daily-progress="dailyProgressMap.get(project.id) ?? {
           projectId: project.id,
           completed: 0,
@@ -609,10 +502,9 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
 
     <!-- Stint Conflict Dialog -->
     <StintConflictDialog
-      v-if="conflictStint || dualConflictInfo"
+      v-if="conflictStint"
       v-model:open="showConflictDialog"
       :existing-stint="conflictStint ?? undefined"
-      :dual-conflict="dualConflictInfo ?? undefined"
       :new-project-name="pendingProject?.name ?? 'New Project'"
       :is-pending="isConflictResolving"
       @resolve="handleConflictResolution"

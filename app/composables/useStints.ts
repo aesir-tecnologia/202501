@@ -5,7 +5,7 @@ import {
   listStints,
   getStintById,
   getActiveStint,
-  getPausedStint,
+  getPausedStints,
   updateStint as updateStintDb,
   deleteStint as deleteStintDb,
   pauseStint as pauseStintDb,
@@ -59,7 +59,7 @@ export interface StintListFilters {
 export type StintsQueryResult = UseQueryReturnType<StintRow[], Error>;
 export type StintQueryResult = UseQueryReturnType<StintRow | null, Error>;
 export type ActiveStintQueryResult = UseQueryReturnType<StintRow | null, Error>;
-export type PausedStintQueryResult = UseQueryReturnType<StintRow | null, Error>;
+export type PausedStintsQueryResult = UseQueryReturnType<StintRow[], Error>;
 
 export type CreateStintMutation = UseMutationReturnType<
   StintRow,
@@ -215,28 +215,55 @@ export function useActiveStintQuery() {
 }
 
 /**
- * Fetches the currently paused stint with automatic caching.
+ * Fetches all paused stints for the current user with automatic caching.
  *
- * With the pause-and-switch feature, users can have both an active stint
- * and a paused stint simultaneously. This query fetches only the paused stint.
+ * With unlimited paused stints (Issue #46), users can have multiple paused stints
+ * alongside their active stint. Returns an array ordered by most recently paused first.
  *
  * @example
  * ```ts
- * const { data: pausedStint, isLoading, error } = usePausedStintQuery()
+ * const { data: pausedStints, isLoading, error } = usePausedStintsQuery()
  * ```
  */
-export function usePausedStintQuery() {
+export function usePausedStintsQuery() {
   const client = useTypedSupabaseClient();
 
   return useQuery({
     queryKey: stintKeys.paused(),
     queryFn: async () => {
-      const { data, error } = await getPausedStint(client);
+      const { data, error } = await getPausedStints(client);
       if (error) throw error;
       return data;
     },
     staleTime: 60 * 1000,
     gcTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Returns a Map<projectId, StintRow> for efficient lookup of paused stints per project.
+ * Useful for ProjectList to pass the correct paused stint to each ProjectListCard.
+ * If multiple paused stints exist for the same project, returns the most recent one.
+ *
+ * @example
+ * ```ts
+ * const pausedStintsMap = usePausedStintsMap()
+ * const pausedStintForProject = pausedStintsMap.value.get(projectId)
+ * ```
+ */
+export function usePausedStintsMap() {
+  const { data: pausedStints } = usePausedStintsQuery();
+
+  return computed(() => {
+    const map = new Map<string, StintRow>();
+    if (pausedStints.value) {
+      for (const stint of pausedStints.value) {
+        if (!map.has(stint.project_id)) {
+          map.set(stint.project_id, stint);
+        }
+      }
+    }
+    return map;
   });
 }
 
@@ -287,7 +314,7 @@ export function useUpdateStint() {
       const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
       const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(id));
       const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
-      const previousPausedStint = queryClient.getQueryData<StintRow | null>(stintKeys.paused());
+      const previousPausedStints = queryClient.getQueryData<StintRow[]>(stintKeys.paused()) || [];
 
       // Optimistically update list
       if (previousStints) {
@@ -323,16 +350,24 @@ export function useUpdateStint() {
         });
       }
 
-      // Optimistically update paused stint if it matches
-      if (previousPausedStint && previousPausedStint.id === id) {
-        queryClient.setQueryData<StintRow | null>(stintKeys.paused(), {
-          ...previousPausedStint,
-          notes: data.notes !== undefined ? data.notes : previousPausedStint.notes,
-          updated_at: new Date().toISOString(),
-        });
+      // Optimistically update paused stints array if it contains this stint
+      const pausedStintIndex = previousPausedStints.findIndex(s => s.id === id);
+      if (pausedStintIndex !== -1) {
+        queryClient.setQueryData<StintRow[]>(
+          stintKeys.paused(),
+          previousPausedStints.map(s =>
+            s.id === id
+              ? {
+                  ...s,
+                  notes: data.notes !== undefined ? data.notes : s.notes,
+                  updated_at: new Date().toISOString(),
+                }
+              : s,
+          ),
+        );
       }
 
-      return { previousStints, previousStint, previousActiveStint, previousPausedStint };
+      return { previousStints, previousStint, previousActiveStint, previousPausedStints };
     },
     onError: (_err, { id }, context) => {
       // Rollback on error
@@ -345,8 +380,8 @@ export function useUpdateStint() {
       if (context?.previousActiveStint !== undefined) {
         queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
-      if (context?.previousPausedStint !== undefined) {
-        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStint);
+      if (context?.previousPausedStints) {
+        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStints);
       }
     },
     onSuccess: (_data, { id }) => {
@@ -407,7 +442,7 @@ export function useCompleteStint() {
       const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
       const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(payload.stintId));
       const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
-      const previousPausedStint = queryClient.getQueryData<StintRow | null>(stintKeys.paused());
+      const previousPausedStints = queryClient.getQueryData<StintRow[]>(stintKeys.paused()) || [];
 
       // Optimistically update list
       if (previousStints) {
@@ -445,12 +480,15 @@ export function useCompleteStint() {
         queryClient.setQueryData<StintRow | null>(stintKeys.active(), null);
       }
 
-      // Clear paused stint if completing a paused stint
-      if (previousPausedStint && previousPausedStint.id === payload.stintId) {
-        queryClient.setQueryData<StintRow | null>(stintKeys.paused(), null);
+      // Remove from paused stints array if completing a paused stint
+      if (previousPausedStints.some(s => s.id === payload.stintId)) {
+        queryClient.setQueryData<StintRow[]>(
+          stintKeys.paused(),
+          previousPausedStints.filter(s => s.id !== payload.stintId),
+        );
       }
 
-      return { previousStints, previousStint, previousActiveStint, previousPausedStint };
+      return { previousStints, previousStint, previousActiveStint, previousPausedStints };
     },
     onError: (_err, payload, context) => {
       // Rollback on error
@@ -463,8 +501,8 @@ export function useCompleteStint() {
       if (context?.previousActiveStint !== undefined) {
         queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
-      if (context?.previousPausedStint !== undefined) {
-        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStint);
+      if (context?.previousPausedStints) {
+        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStints);
       }
     },
     onSuccess: async (_data, payload) => {
@@ -526,7 +564,7 @@ export function useDeleteStint() {
       // Snapshot previous values
       const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
       const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
-      const previousPausedStint = queryClient.getQueryData<StintRow | null>(stintKeys.paused());
+      const previousPausedStints = queryClient.getQueryData<StintRow[]>(stintKeys.paused()) || [];
 
       // Optimistically remove from list
       if (previousStints) {
@@ -541,12 +579,15 @@ export function useDeleteStint() {
         queryClient.setQueryData<StintRow | null>(stintKeys.active(), null);
       }
 
-      // Clear paused stint if it matches the deleted stint
-      if (previousPausedStint && previousPausedStint.id === id) {
-        queryClient.setQueryData<StintRow | null>(stintKeys.paused(), null);
+      // Remove from paused stints array if it matches the deleted stint
+      if (previousPausedStints.some(s => s.id === id)) {
+        queryClient.setQueryData<StintRow[]>(
+          stintKeys.paused(),
+          previousPausedStints.filter(s => s.id !== id),
+        );
       }
 
-      return { previousStints, previousActiveStint, previousPausedStint };
+      return { previousStints, previousActiveStint, previousPausedStints };
     },
     onError: (_err, _id, context) => {
       // Rollback on error
@@ -556,8 +597,8 @@ export function useDeleteStint() {
       if (context?.previousActiveStint !== undefined) {
         queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
-      if (context?.previousPausedStint !== undefined) {
-        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStint);
+      if (context?.previousPausedStints) {
+        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStints);
       }
     },
     onSuccess: () => {
@@ -609,6 +650,7 @@ export function usePauseStint() {
       const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
       const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(stintId));
       const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
+      const previousPausedStints = queryClient.getQueryData<StintRow[]>(stintKeys.paused()) || [];
 
       // Optimistically update list
       if (previousStints) {
@@ -637,19 +679,22 @@ export function usePauseStint() {
         });
       }
 
-      // Clear active stint and set as paused stint
-      const previousPausedStint = queryClient.getQueryData<StintRow | null>(stintKeys.paused());
+      // Clear active stint and add to paused stints array
       if (previousActiveStint && previousActiveStint.id === stintId) {
         queryClient.setQueryData<StintRow | null>(stintKeys.active(), null);
-        queryClient.setQueryData<StintRow | null>(stintKeys.paused(), {
+        const newPausedStint: StintRow = {
           ...previousActiveStint,
           status: 'paused' as const,
           paused_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        });
+        };
+        queryClient.setQueryData<StintRow[]>(
+          stintKeys.paused(),
+          [newPausedStint, ...previousPausedStints],
+        );
       }
 
-      return { previousStints, previousStint, previousActiveStint, previousPausedStint };
+      return { previousStints, previousStint, previousActiveStint, previousPausedStints };
     },
     onError: (_err, stintId, context) => {
       // Rollback on error
@@ -662,8 +707,8 @@ export function usePauseStint() {
       if (context?.previousActiveStint !== undefined) {
         queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
-      if (context?.previousPausedStint !== undefined) {
-        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStint);
+      if (context?.previousPausedStints) {
+        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStints);
       }
     },
     onSuccess: (_data, stintId) => {
@@ -874,7 +919,7 @@ export function useInterruptStint() {
       const previousStints = queryClient.getQueryData<StintRow[]>(stintKeys.list(undefined));
       const previousStint = queryClient.getQueryData<StintRow>(stintKeys.detail(payload.stintId));
       const previousActiveStint = queryClient.getQueryData<StintRow | null>(stintKeys.active());
-      const previousPausedStint = queryClient.getQueryData<StintRow | null>(stintKeys.paused());
+      const previousPausedStints = queryClient.getQueryData<StintRow[]>(stintKeys.paused()) || [];
 
       // Optimistically update list
       if (previousStints) {
@@ -912,12 +957,15 @@ export function useInterruptStint() {
         queryClient.setQueryData<StintRow | null>(stintKeys.active(), null);
       }
 
-      // Clear paused stint if interrupting a paused stint
-      if (previousPausedStint && previousPausedStint.id === payload.stintId) {
-        queryClient.setQueryData<StintRow | null>(stintKeys.paused(), null);
+      // Remove from paused stints array if interrupting a paused stint
+      if (previousPausedStints.some(s => s.id === payload.stintId)) {
+        queryClient.setQueryData<StintRow[]>(
+          stintKeys.paused(),
+          previousPausedStints.filter(s => s.id !== payload.stintId),
+        );
       }
 
-      return { previousStints, previousStint, previousActiveStint, previousPausedStint };
+      return { previousStints, previousStint, previousActiveStint, previousPausedStints };
     },
     onError: (_err, payload, context) => {
       // Rollback on error
@@ -930,8 +978,8 @@ export function useInterruptStint() {
       if (context?.previousActiveStint !== undefined) {
         queryClient.setQueryData(stintKeys.active(), context.previousActiveStint);
       }
-      if (context?.previousPausedStint !== undefined) {
-        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStint);
+      if (context?.previousPausedStints) {
+        queryClient.setQueryData(stintKeys.paused(), context.previousPausedStints);
       }
     },
     onSuccess: (_data, payload) => {

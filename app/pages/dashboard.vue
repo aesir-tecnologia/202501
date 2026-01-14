@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useProjectsQuery, useArchivedProjectsQuery, useToggleProjectActive } from '~/composables/useProjects';
-import { useActiveStintQuery, usePausedStintQuery, usePauseStint, useResumeStint, useStintsQuery } from '~/composables/useStints';
+import { useActiveStintQuery, usePausedStintsQuery, usePauseStint, useResumeStint, useStintsQuery } from '~/composables/useStints';
 import { useDailySummaryQuery } from '~/composables/useDailySummaries';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
@@ -54,7 +54,7 @@ const { mutateAsync: toggleActive, isPending: isTogglingActive } = useToggleProj
 
 // Stint queries and mutations
 const { data: activeStint } = useActiveStintQuery();
-const { data: pausedStint } = usePausedStintQuery();
+const { data: pausedStints } = usePausedStintsQuery();
 const { mutateAsync: pauseStint, isPending: _isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: _isResuming } = useResumeStint();
 const { data: allStints } = useStintsQuery();
@@ -63,9 +63,9 @@ const { data: allStints } = useStintsQuery();
 const today = computed(() => new Date().toISOString().split('T')[0] as string);
 const { data: dailySummary, isLoading: isLoadingDailySummary } = useDailySummaryQuery(today);
 
-// Compute active project for timer hero
+// Compute active project for timer hero (uses most recent paused stint if no active)
 const activeProject = computed(() => {
-  const stint = activeStint.value || pausedStint.value;
+  const stint = activeStint.value || pausedStints.value?.[0];
   if (!stint) return null;
   return projects.value.find(p => p.id === stint.project_id) || null;
 });
@@ -285,7 +285,7 @@ function handleCompleteStint(stint: StintRow) {
         <DashboardSidebar
           class="order-1 lg:order-2 w-full"
           :active-stint="activeStint ?? null"
-          :paused-stint="pausedStint ?? null"
+          :paused-stint="pausedStints?.[0] ?? null"
           :active-project="activeProject"
           :daily-progress="dailyProgress"
           :completed-stints="completedStints"
