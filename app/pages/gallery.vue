@@ -3,7 +3,10 @@
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
-import type { DualConflictInfo } from '~/components/StintConflictDialog.vue';
+interface DualConflictInfo {
+  activeStint: { projectName: string; remainingSeconds: number }
+  pausedStint: { projectName: string; remainingSeconds: number }
+}
 
 definePageMeta({
   layout: 'component-gallery',
