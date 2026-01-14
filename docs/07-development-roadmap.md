@@ -1,8 +1,8 @@
 # LifeStint - Development Roadmap
 
 **Product Name:** LifeStint  
-**Document Version:** 4.1
-**Date:** January 10, 2026
+**Document Version:** 4.2
+**Date:** January 13, 2026
 
 ---
 
@@ -59,16 +59,20 @@
    - Active projects first, sorted by last stint time
    - Tab navigation (Active/Inactive/Archived)
 7. Handle edge cases: `COMPLETED`
-   - Empty state (no projects)
-   - Maximum projects limit (25 active)
-   - Name uniqueness validation
+   - Empty state (no projects) `COMPLETED`
+   - Name uniqueness validation `COMPLETED` *(case-insensitive unique constraint per user)*
 
 **Deliverable:** Full project management via dashboard, no separate project page needed.
+
+**Additional Features (beyond original spec):**
+- Drag-and-drop reordering via `sort_order` column
+- Color tagging with 8 color options (`color_tag` column)
+- Full archive/unarchive workflow with permanent deletion option
 
 **Dependencies:** Phase 1 complete (auth + database)
 
 **Testing:**
-- Unit tests for validation logic `COMPLETED`
+- Unit tests for validation logic `PARTIAL` *(projects.test.ts for database layer exists, but app/schemas/projects.test.ts missing)*
 - Integration tests for CRUD operations `COMPLETED`
 - E2E tests for modal workflows *(not implemented)*
 
@@ -118,6 +122,10 @@
 
 **Deliverable:** Fully functional stint tracking with pause/resume, single session enforcement, and real-time sync.
 
+**Additional Features (beyond original spec):**
+- Pause-and-switch: Users can have 1 active AND 1 paused stint simultaneously
+- StintConflictDialog for handling concurrent stint scenarios with multiple resolution options
+
 **Dependencies:** Phase 2 complete (projects exist)
 
 **Testing:**
@@ -138,14 +146,14 @@
    - Survives background tabs
    - Communicates with main thread via postMessage
 2. Build server-side auto-completion: `COMPLETED`
-   - pg_cron job (runs every 1 minute, minimum interval supported by pg_cron)
-   - Query stints where `started_at + planned_duration <= now()` and `status = 'active'`
-   - Call `complete_stint()` database function for matched stints
-   - Broadcast completion event via Realtime *(not implemented)*
+   - pg_cron job (runs every 2 minutes) `COMPLETED` *(schedule: `*/2 * * * *`)*
+   - Query stints where working_time >= planned_duration and status = 'active' `COMPLETED` *(pause-aware calculation)*
+   - Call `complete_stint()` database function for matched stints `COMPLETED`
+   - Broadcast completion event via Realtime `COMPLETED` *(via stints table subscription in 20260110200000_enable_realtime_subscriptions.sql)*
 3. Implement timer sync: `COMPLETED`
-   - Every 60 seconds, GET /api/stints/active
-   - Compare local timer with server time
-   - Correct drift if >5 seconds
+   - Every 60 seconds, sync with server via `syncStintCheck()` RPC
+   - Compare local timer with server time `COMPLETED`
+   - Correct drift if >5 seconds `COMPLETED` *(TIMER_DRIFT_THRESHOLD_SECONDS = 5)*
 4. Handle edge cases: `COMPLETED`
    - Browser closed during stint: Server auto-completes
    - Browser reopened after completion: Show completion UI retroactively
@@ -167,7 +175,7 @@
 
 ---
 
-## Phase 5: Dashboard Experience & Daily Reset (Weeks 9-10) `PARTIAL`
+## Phase 5: Dashboard Experience & Daily Reset (Weeks 9-10) `MOSTLY COMPLETE`
 
 **Goal:** Polish dashboard with progress tracking and daily reset.
 
@@ -177,16 +185,16 @@
    - Compare to expected_daily_stints
    - Display as badge: "X of Y stints today"
 2. Add visual progress bar to project cards `COMPLETED`
-3. Implement streak counter: `PARTIAL`
+3. Implement streak counter: `COMPLETED`
    - Calculate on dashboard load `COMPLETED` *(via useStreakQuery composable with 5-minute cache)*
-   - Display on project cards: "🔥 5 day streak" *(not on cards - displayed in StreakBanner component on analytics page only)*
-   - Update in real-time when stint completed `COMPLETED` *(via Realtime cache invalidation)*
-4. Build daily reset logic: `MOSTLY COMPLETE`
+   - Display streak prominently `COMPLETED` *(StreakBanner component on dashboard and analytics pages, not on individual project cards)*
+   - Update in real-time when stint completed `COMPLETED` *(via Realtime cache invalidation + updateStreakAfterCompletion RPC)*
+4. Build daily reset logic: `COMPLETED`
    - pg_cron job (runs every hour) `COMPLETED`
    - Query user_profiles whose local midnight passed in last hour `COMPLETED`
    - Reset daily progress counters to 0 *(N/A - progress computed from stints, no separate counters)*
    - Trigger daily summary aggregation `COMPLETED`
-   - Broadcast reset event via Realtime *(not implemented)*
+   - Broadcast changes via Realtime `COMPLETED` *(daily_summaries table added to realtime publication)*
 5. Add celebration animations: `COMPLETED`
    - Confetti animation when daily goal reached `COMPLETED` *(useCelebration.ts with canvas-confetti, fires from both sides for 3 seconds)*
    - Celebration sound (optional, can disable) *(not implemented - decided against audio)*
@@ -199,7 +207,7 @@
 7. Polish error handling: `PARTIAL`
    - Network offline banner *(not implemented)*
    - Server error retry button *(not implemented)*
-   - Conflict resolution modal *(not implemented)*
+   - Conflict resolution modal `COMPLETED` *(StintConflictDialog.vue handles real-time stint conflicts with pause-and-switch, complete-and-start options)*
 8. Implement timezone selection: `COMPLETED`
    - Detect browser timezone on registration `COMPLETED`
    - Allow change in settings `COMPLETED`
@@ -277,37 +285,45 @@
    - pg_cron job (runs at midnight user time) `COMPLETED`
    - Pre-calculate daily stats for performance `COMPLETED`
 3. Build analytics page: `COMPLETED`
-   - Daily summary section (today's stats)
-   - Weekly summary section (7-day overview)
-   - Simple bar chart (Chart.js)
-   - Project breakdown list
+   - Daily summary section (today's stats) `COMPLETED`
+   - Weekly summary section (7-day overview) `COMPLETED`
+   - Simple bar chart `COMPLETED` *(custom HTML/CSS horizontal bar chart, not Chart.js)*
+   - Project breakdown list `COMPLETED` *(top 5 projects with progress bars)*
 4. Implement streak tracking: `COMPLETED`
    - `calculate_streak()` SQL function `COMPLETED` *(calculate_streak_with_tz database function + client-side useStreakQuery)*
    - Display current streak prominently `COMPLETED` *(StreakBanner component)*
    - Show longest streak all-time `COMPLETED`
    - Grace period logic (1 day) `COMPLETED` *(migration 20251216030405_fix_streak_grace_period.sql)*
-5. Build CSV export: `COMPLETED`
-   - Client-side generation using Supabase queries
-   - Query stints in date range via Supabase client
-   - Convert timestamps to user timezone in browser
-   - Generate CSV with header and summary
-   - Trigger browser download
-6. Add export UI: `COMPLETED`
-   - Date range picker (presets + custom)
-   - "Export CSV" button
-   - Download triggers immediately
-   - Show loading state during generation
+5. Build CSV export: `COMPLETED` *(implemented on /reports page, not /analytics)*
+   - Client-side generation using Supabase queries `COMPLETED`
+   - Query stints in date range via Supabase client `COMPLETED`
+   - Convert timestamps to user timezone in browser `COMPLETED`
+   - Generate CSV with header and summary `COMPLETED`
+   - Trigger browser download `COMPLETED`
+   - Also supports JSON export `COMPLETED`
+6. Add export UI: `COMPLETED` *(on /reports page)*
+   - Date range picker (presets + custom) `COMPLETED` *(Last 7/30/90 days, This/Last month)*
+   - Project filter dropdown `COMPLETED`
+   - "Export CSV" and "Export JSON" buttons `COMPLETED`
+   - Download triggers immediately `COMPLETED`
+   - Show loading state during generation `COMPLETED`
 7. Polish analytics UI: `COMPLETED`
    - Responsive design (mobile-friendly)
    - Loading skeletons
    - Empty state (no data yet)
-8. Implement caching: *(not implemented)*
-   - Cache daily summaries (5-minute TTL)
-   - Invalidate cache on stint completion
+8. Implement caching: `PARTIAL`
+   - Cache daily summaries (5-minute TTL) `COMPLETED` *(via TanStack Query staleTime in useDailySummaries composable)*
+   - Invalidate cache on stint completion `COMPLETED` *(via Realtime subscriptions)*
+   - Note: Analytics page computes from raw stints, doesn't use pre-aggregated daily_summaries *(optimization opportunity)*
 
-**Deliverable:** Analytics page with CSV export for client reporting.
+**Deliverable:** Analytics page (/analytics) for stats visualization + Reports page (/reports) for CSV/JSON export.
 
-**Dependencies:** Phase 6 complete (offline support)
+**Planned Refactor:** Merge /analytics and /reports into single /analytics page with tabs:
+- **Overview tab**: Today/weekly stats, charts, streak (current analytics content)
+- **Export tab**: Date range picker, filters, CSV/JSON download (current reports content)
+- Rationale: Same user, same goal; export is an action on data, not a separate destination
+
+**Dependencies:** Phase 6 complete (offline support) *(Note: Phase 7 was implemented before Phase 6; offline support remains not implemented)*
 
 **Testing:**
 - Test streak calculations across date ranges *(not implemented)*
@@ -365,6 +381,12 @@
 **Goal:** Final polish, performance optimization, and launch preparation.
 
 **Tasks:**
+0. Merge Analytics and Reports pages:
+   - Combine /analytics and /reports into single /analytics page with UTabs
+   - Overview tab: current analytics content (stats, charts, streak)
+   - Export tab: current reports content (date picker, filters, CSV/JSON)
+   - Remove /reports route and update navigation
+   - Redirect /reports → /analytics for any existing links
 1. Performance optimization:
    - Code splitting (lazy load routes)
    - Image optimization

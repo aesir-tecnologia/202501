@@ -525,7 +525,7 @@ INSERT INTO projects (user_id, name) VALUES ('other-user-uuid', 'Test');
 
 **count_active_projects(p_user_id UUID)**
 - Returns count of active (non-archived) projects for a user
-- Used to enforce project limits
+- Used for analytics and display purposes
 
 ---
 
