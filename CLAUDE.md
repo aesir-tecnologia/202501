@@ -81,6 +81,15 @@ gh api repos/aesir-tecnologia/202501/issues/{NUMBER} -X PATCH -f type="Feature"
 gh api repos/aesir-tecnologia/202501/issues/{NUMBER} -X PATCH -f type="Task"
 ```
 
+## Contributing
+
+For branching strategy, commit conventions, and PR workflow, see **`CONTRIBUTING.md`**.
+
+Key points:
+- **Branch from `main`**, PR back to `main` (GitHub Flow)
+- **Branch naming:** `<type>/<issue>-<description>` (e.g., `feat/46-unlimited-paused-stints`)
+- **Commits:** Conventional Commits format (e.g., `feat(ui): add dark mode toggle`)
+
 ## Key Commands
 
 ### Development
