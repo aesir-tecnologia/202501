@@ -3,7 +3,6 @@
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
-import type { DualConflictInfo } from '~/components/StintConflictDialog.vue';
 
 definePageMeta({
   layout: 'component-gallery',
@@ -15,7 +14,6 @@ useSeoMeta({
   description: 'Visual showcase of all LifeStint Vue components',
 });
 
-// Mock data for component demonstrations
 const mockProjects: ProjectRow[] = [
   {
     id: '1',
@@ -98,7 +96,6 @@ const mockDailyProgress: Map<string, DailyProgress> = new Map([
   ['3', { projectId: '3', expected: 1, completed: 0, percentage: 0, isOverAchieving: false, isMet: false }],
 ]);
 
-// Computed versions for type safety in templates
 const projectAlpha = computed(() => mockProjects[0]!);
 const projectBeta = computed(() => mockProjects[1]!);
 const projectInternal = computed(() => mockProjects[2]!);
@@ -106,15 +103,12 @@ const progressAlpha = computed(() => mockDailyProgress.get('1')!);
 const progressBeta = computed(() => mockDailyProgress.get('2')!);
 const progressInternal = computed(() => mockDailyProgress.get('3')!);
 
-// Dialog state
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showArchiveModal = ref(false);
 const showCompletionModal = ref(false);
 const showConflictDialog = ref(false);
-const showDualConflictDialog = ref(false);
 
-// Active component section
 const activeSection = ref<string | null>('project-list-card');
 
 const sections = [
@@ -133,20 +127,12 @@ function scrollToSection(id: string) {
   }
 }
 
-// Mock handlers (do nothing in gallery)
 function noop() {}
 
-// Conflict dialog mock data
 const mockExistingStint = {
   id: 'stint-1',
-  status: 'active' as const,
   projectName: 'Client Alpha',
   remainingSeconds: 1800,
-};
-
-const mockDualConflict: DualConflictInfo = {
-  activeStint: { projectName: 'Client Alpha', remainingSeconds: 1800 },
-  pausedStint: { projectName: 'Project Beta', remainingSeconds: 900 },
 };
 </script>
 
@@ -557,26 +543,6 @@ const mockDualConflict: DualConflictInfo = {
                   Dialog for handling stint conflicts
                 </p>
               </button>
-
-              <button
-                class="rounded-2xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 text-left hover:ring-orange-300 dark:hover:ring-orange-500/50 transition-all group"
-                @click="showDualConflictDialog = true"
-              >
-                <div class="flex items-center gap-3 mb-2">
-                  <div class="p-2 rounded-lg bg-red-100 dark:bg-red-500/20">
-                    <UIcon
-                      name="i-lucide-alert-circle"
-                      class="w-5 h-5 text-red-600 dark:text-red-400"
-                    />
-                  </div>
-                  <span class="font-semibold text-stone-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
-                    Dual Conflict
-                  </span>
-                </div>
-                <p class="text-sm text-stone-500 dark:text-stone-400">
-                  Dialog when both active & paused stints exist
-                </p>
-              </button>
             </div>
 
             <!-- Modal instances (hidden until triggered) -->
@@ -611,13 +577,6 @@ const mockDualConflict: DualConflictInfo = {
               v-model:open="showConflictDialog"
               :existing-stint="mockExistingStint"
               new-project-name="Project Beta"
-              @resolve="noop"
-            />
-
-            <StintConflictDialog
-              v-model:open="showDualConflictDialog"
-              :dual-conflict="mockDualConflict"
-              new-project-name="Internal Tasks"
               @resolve="noop"
             />
           </section>

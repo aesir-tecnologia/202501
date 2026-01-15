@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useProjectsQuery, useArchivedProjectsQuery, useToggleProjectActive } from '~/composables/useProjects';
-import { useActiveStintQuery, usePausedStintQuery, usePauseStint, useResumeStint, useStintsQuery } from '~/composables/useStints';
+import { useActiveStintQuery, usePausedStintsQuery, usePauseStint, useResumeStint, useStintsQuery } from '~/composables/useStints';
 import { useDailySummaryQuery } from '~/composables/useDailySummaries';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
@@ -52,25 +52,21 @@ const stintToComplete = ref<StintRow | null>(null);
 const toast = useToast();
 const { mutateAsync: toggleActive, isPending: isTogglingActive } = useToggleProjectActive();
 
-// Stint queries and mutations
 const { data: activeStint } = useActiveStintQuery();
-const { data: pausedStint } = usePausedStintQuery();
+const { data: pausedStints } = usePausedStintsQuery();
 const { mutateAsync: pauseStint, isPending: _isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: _isResuming } = useResumeStint();
 const { data: allStints } = useStintsQuery();
 
-// Stats queries
 const today = computed(() => new Date().toISOString().split('T')[0] as string);
 const { data: dailySummary, isLoading: isLoadingDailySummary } = useDailySummaryQuery(today);
 
-// Compute active project for timer hero
 const activeProject = computed(() => {
-  const stint = activeStint.value || pausedStint.value;
+  const stint = activeStint.value || pausedStints.value?.[0];
   if (!stint) return null;
   return projects.value.find(p => p.id === stint.project_id) || null;
 });
 
-// Compute daily progress and stats from raw stint data
 const dailyProgress = computed(() => {
   const todayStart = startOfDay(new Date());
   const tomorrow = addDays(todayStart, 1);
@@ -101,7 +97,6 @@ const dailyProgress = computed(() => {
   return { completed, expected, focusSeconds, pauseSeconds };
 });
 
-// Compute stats for TodaysStats component (with fallback to raw stint data)
 const completedStints = computed(() => dailySummary.value?.totalStints ?? dailyProgress.value.completed);
 const focusSeconds = computed(() => {
   if (dailySummary.value) {
@@ -121,7 +116,6 @@ const totalSeconds = computed(() => focusSeconds.value + breakSeconds.value);
 
 const isLoadingStats = computed(() => isLoadingDailySummary.value);
 
-// Helper functions
 function startOfDay(date: Date): Date {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
@@ -134,7 +128,6 @@ function addDays(date: Date, days: number): Date {
   return d;
 }
 
-// Modal handlers
 function openCreateModal() {
   showCreateModal.value = true;
 }
@@ -168,7 +161,6 @@ async function handleToggleActive(project: ProjectRow) {
   }
 }
 
-// Stint action handlers
 async function handlePauseStint(stint: StintRow) {
   try {
     await pauseStint(stint.id);
@@ -285,7 +277,7 @@ function handleCompleteStint(stint: StintRow) {
         <DashboardSidebar
           class="order-1 lg:order-2 w-full"
           :active-stint="activeStint ?? null"
-          :paused-stint="pausedStint ?? null"
+          :paused-stint="pausedStints?.[0] ?? null"
           :active-project="activeProject"
           :daily-progress="dailyProgress"
           :completed-stints="completedStints"
