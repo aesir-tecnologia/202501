@@ -245,26 +245,32 @@ export function usePausedStintsQuery() {
  * Useful for ProjectList to pass the correct paused stint to each ProjectListCard.
  * If multiple paused stints exist for the same project, returns the most recent one.
  *
+ * Also exposes error and isLoading states from the underlying query to prevent
+ * silent failures - consumers can display appropriate UI when data fetch fails.
+ *
  * @example
  * ```ts
- * const pausedStintsMap = usePausedStintsMap()
+ * const { map: pausedStintsMap, error, isLoading } = usePausedStintsMap()
  * const pausedStintForProject = pausedStintsMap.value.get(projectId)
+ * if (error.value) { // handle error }
  * ```
  */
 export function usePausedStintsMap() {
-  const { data: pausedStints } = usePausedStintsQuery();
+  const { data: pausedStints, error, isLoading } = usePausedStintsQuery();
 
-  return computed(() => {
-    const map = new Map<string, StintRow>();
+  const map = computed(() => {
+    const result = new Map<string, StintRow>();
     if (pausedStints.value) {
       for (const stint of pausedStints.value) {
-        if (!map.has(stint.project_id)) {
-          map.set(stint.project_id, stint);
+        if (!result.has(stint.project_id)) {
+          result.set(stint.project_id, stint);
         }
       }
     }
-    return map;
+    return result;
   });
+
+  return { map, error, isLoading };
 }
 
 // ============================================================================
@@ -351,8 +357,7 @@ export function useUpdateStint() {
       }
 
       // Optimistically update paused stints array if it contains this stint
-      const pausedStintIndex = previousPausedStints.findIndex(s => s.id === id);
-      if (pausedStintIndex !== -1) {
+      if (previousPausedStints.some(s => s.id === id)) {
         queryClient.setQueryData<StintRow[]>(
           stintKeys.paused(),
           previousPausedStints.map(s =>

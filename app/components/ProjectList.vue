@@ -35,7 +35,7 @@ const localProjects = ref<ProjectRow[]>([...props.projects]);
 const isDragging = ref(false);
 
 const { data: activeStint } = useActiveStintQuery();
-const pausedStintsMap = usePausedStintsMap();
+const { map: pausedStintsMap } = usePausedStintsMap();
 const { mutateAsync: startStint, isPending: isStarting } = useStartStint();
 const { mutateAsync: pauseStint, isPending: isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint();
