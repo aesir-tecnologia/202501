@@ -262,7 +262,8 @@ export function usePausedStintsMap() {
     const result = new Map<string, StintRow>();
     if (pausedStints.value) {
       for (const stint of pausedStints.value) {
-        if (!result.has(stint.project_id)) {
+        const existing = result.get(stint.project_id);
+        if (!existing || (stint.paused_at && existing.paused_at && stint.paused_at > existing.paused_at)) {
           result.set(stint.project_id, stint);
         }
       }
