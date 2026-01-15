@@ -1,15 +1,24 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
 import { useSortable } from '@vueuse/integrations/useSortable';
+import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
+import {
+  stintKeys,
+  useActiveStintQuery,
+  useCompleteStint,
+  usePausedStintsMap,
+  usePauseStint,
+  useResumeStint,
+  useStartStint,
+  useStintsQuery,
+} from '~/composables/useStints';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
-import { useQueryClient } from '@tanstack/vue-query';
-import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
-import { useActiveStintQuery, usePausedStintsMap, useStartStint, usePauseStint, useResumeStint, useCompleteStint, useStintsQuery, stintKeys } from '~/composables/useStints';
-import ProjectListCard from './ProjectListCard.vue';
-import StintConflictDialog, { type ConflictResolutionAction } from './StintConflictDialog.vue';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { calculateRemainingSeconds } from '~/utils/stint-time';
+import ProjectListCard from './ProjectListCard.vue';
+import StintConflictDialog, { type ConflictResolutionAction } from './StintConflictDialog.vue';
 
 const props = defineProps<{
   projects: ProjectRow[]
@@ -149,7 +158,6 @@ const sortableProjects = computed({
   set: (val) => { localProjects.value = val; },
 });
 
-// Setup drag-and-drop (only functional when isDraggable is true via handle visibility)
 useSortable(activeListRef, sortableProjects, {
   animation: 150,
   handle: '.drag-handle',
@@ -208,8 +216,6 @@ async function handleToggleActive(project: ProjectRow) {
 }
 
 async function handleStartStint(project: ProjectRow): Promise<void> {
-  // Only check for active stint - it blocks starting (must pause or complete first)
-  // Paused stints no longer block starting new stints (Issue #46)
   if (activeStint.value) {
     conflictStint.value = {
       id: activeStint.value.id,
@@ -221,7 +227,6 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
     return;
   }
 
-  // No active stint, start directly (paused stints don't block)
   await doStartStint(project);
 }
 
@@ -427,8 +432,7 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
         break;
 
       default: {
-        const _exhaustiveCheck: never = action;
-        console.error('[ProjectList] Unhandled conflict resolution action:', _exhaustiveCheck);
+        console.error('[ProjectList] Unhandled conflict resolution action:', action);
       }
     }
   }

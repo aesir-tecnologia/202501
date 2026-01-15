@@ -14,7 +14,6 @@ useSeoMeta({
   description: 'Visual showcase of all LifeStint Vue components',
 });
 
-// Mock data for component demonstrations
 const mockProjects: ProjectRow[] = [
   {
     id: '1',
@@ -97,7 +96,6 @@ const mockDailyProgress: Map<string, DailyProgress> = new Map([
   ['3', { projectId: '3', expected: 1, completed: 0, percentage: 0, isOverAchieving: false, isMet: false }],
 ]);
 
-// Computed versions for type safety in templates
 const projectAlpha = computed(() => mockProjects[0]!);
 const projectBeta = computed(() => mockProjects[1]!);
 const projectInternal = computed(() => mockProjects[2]!);
@@ -105,14 +103,12 @@ const progressAlpha = computed(() => mockDailyProgress.get('1')!);
 const progressBeta = computed(() => mockDailyProgress.get('2')!);
 const progressInternal = computed(() => mockDailyProgress.get('3')!);
 
-// Dialog state
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showArchiveModal = ref(false);
 const showCompletionModal = ref(false);
 const showConflictDialog = ref(false);
 
-// Active component section
 const activeSection = ref<string | null>('project-list-card');
 
 const sections = [
@@ -131,10 +127,8 @@ function scrollToSection(id: string) {
   }
 }
 
-// Mock handlers (do nothing in gallery)
 function noop() {}
 
-// Conflict dialog mock data
 const mockExistingStint = {
   id: 'stint-1',
   projectName: 'Client Alpha',
