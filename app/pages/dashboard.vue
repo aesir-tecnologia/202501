@@ -63,7 +63,11 @@ const { data: allStints } = useStintsQuery();
 const today = computed(() => new Date().toISOString().split('T')[0] as string);
 const { data: dailySummary, isLoading: isLoadingDailySummary } = useDailySummaryQuery(today);
 
-// Compute active project for timer hero (uses most recent paused stint if no active)
+// Compute active project for timer hero:
+// - Prefer the currently active stint when present.
+// - Otherwise, use the most recent/first paused stint for display in the hero.
+//   Other paused stints remain accessible via the ProjectList cards but are not
+//   individually surfaced in this hero area.
 const activeProject = computed(() => {
   const stint = activeStint.value || pausedStints.value?.[0];
   if (!stint) return null;
