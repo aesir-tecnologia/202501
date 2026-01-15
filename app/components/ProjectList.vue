@@ -35,7 +35,7 @@ const localProjects = ref<ProjectRow[]>([...props.projects]);
 const isDragging = ref(false);
 
 const { data: activeStint } = useActiveStintQuery();
-const { map: pausedStintsMap } = usePausedStintsMap();
+const { map: pausedStintsMap, error: pausedStintsError } = usePausedStintsMap();
 const { mutateAsync: startStint, isPending: isStarting } = useStartStint();
 const { mutateAsync: pauseStint, isPending: isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint();
@@ -129,6 +129,17 @@ watch(isError, (hasError) => {
       title: 'Failed to reorder projects',
       description: error.value.message || 'An unexpected error occurred',
       color: 'error',
+    });
+  }
+});
+
+watch(pausedStintsError, (err) => {
+  if (err) {
+    toast.add({
+      title: 'Failed to load paused stints',
+      description: err.message || 'Could not fetch paused stints. Some project states may be incorrect.',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
     });
   }
 });
