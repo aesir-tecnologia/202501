@@ -21,11 +21,11 @@ DROP INDEX IF EXISTS idx_stints_single_paused_per_user;
 -- 2. Add non-unique index for performance (querying paused stints by user)
 -- -----------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_stints_paused_per_user
-ON public.stints(user_id, project_id)
+ON public.stints(user_id)
 WHERE status = 'paused';
 
 COMMENT ON INDEX idx_stints_paused_per_user IS
-  'Performance index for querying paused stints by user. Non-unique to allow multiple paused stints per user (Issue #46).';
+  'Performance index for querying paused stints by user_id. Partial index filters on status=paused to match getPausedStints query pattern (Issue #46).';
 
 -- -----------------------------------------------------------------------------
 -- 3. Update pause_stint Function - Remove existing paused stint check
