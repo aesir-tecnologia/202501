@@ -71,7 +71,7 @@ This prevents documentation drift where features get implemented but the roadmap
 
 ## GitHub Operations
 
-For GitHub CLI commands, issue types, and API usage, see **`.claude/GITHUB.md`**.
+For GitHub CLI commands, issue types, and API usage, see **`docs/ISSUE_WORKFLOW.md`**.
 
 Key commands:
 ```bash
