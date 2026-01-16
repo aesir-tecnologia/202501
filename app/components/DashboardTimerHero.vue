@@ -11,7 +11,6 @@ interface DailyProgress {
 
 interface Props {
   activeStint: StintRow | null
-  pausedStint: StintRow | null
   project: ProjectRow | null
   dailyProgress: DailyProgress
 }
@@ -26,10 +25,9 @@ const emit = defineEmits<{
 
 const { secondsRemaining, isPaused } = useStintTimer();
 
-const currentStint = computed(() => props.activeStint || props.pausedStint);
-const hasSession = computed(() => currentStint.value !== null);
+const hasSession = computed(() => props.activeStint !== null);
 const isRunning = computed(() => props.activeStint !== null && !isPaused.value);
-const isPausedState = computed(() => props.pausedStint !== null || isPaused.value);
+const isPausedState = computed(() => props.activeStint !== null && isPaused.value);
 
 const timerDisplay = computed(() => {
   const total = secondsRemaining.value;
@@ -40,7 +38,7 @@ const timerDisplay = computed(() => {
 });
 
 const sessionMeta = computed(() => {
-  const stint = currentStint.value;
+  const stint = props.activeStint;
   if (!stint) return null;
 
   const startedAt = parseSafeDate(stint.started_at);
@@ -87,23 +85,16 @@ const progressText = computed(() => {
   return `${completed}/${expected} stints`;
 });
 
-function handlePause() {
-  if (props.activeStint) {
-    emit('pause', props.activeStint);
-  }
+function handlePause(stint: StintRow) {
+  emit('pause', stint);
 }
 
-function handleResume() {
-  if (props.pausedStint) {
-    emit('resume', props.pausedStint);
-  }
+function handleResume(stint: StintRow) {
+  emit('resume', stint);
 }
 
-function handleComplete() {
-  const stint = currentStint.value;
-  if (stint) {
-    emit('complete', stint);
-  }
+function handleComplete(stint: StintRow) {
+  emit('complete', stint);
 }
 </script>
 
@@ -195,7 +186,7 @@ function handleComplete() {
           variant="outline"
           color="neutral"
           class="ctrl-btn warning"
-          @click="handlePause"
+          @click="handlePause(activeStint!)"
         >
           <Icon
             name="i-lucide-pause"
@@ -208,7 +199,7 @@ function handleComplete() {
           variant="outline"
           color="neutral"
           class="ctrl-btn success"
-          @click="handleResume"
+          @click="handleResume(activeStint!)"
         >
           <Icon
             name="i-lucide-play"
@@ -220,7 +211,7 @@ function handleComplete() {
           variant="outline"
           color="neutral"
           class="ctrl-btn danger"
-          @click="handleComplete"
+          @click="handleComplete(activeStint!)"
         >
           <Icon
             name="i-lucide-square"

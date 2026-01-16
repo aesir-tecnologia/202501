@@ -228,7 +228,8 @@ $$ LANGUAGE plpgsql;
 - Completed stints must have ended_at
 
 **Business Rules:**
-- Only one active/paused stint per user (enforced by unique partial index)
+- Only one active stint per user (enforced by unique partial index on status = 'active')
+- Unlimited paused stints allowed per user
 - Auto-completion triggered when working time reaches planned duration (active stints only)
 - Working time (seconds): `EXTRACT(EPOCH FROM (now() - started_at)) - paused_duration`
 - Comparison: `working_time_seconds >= planned_duration_minutes * 60`

@@ -167,7 +167,8 @@ User-facing display converts to minutes/hours as appropriate.
 
 ### Constraints
 
-- Only 1 active or paused stint per user across all devices
+- Only 1 active stint per user across all devices
+- Unlimited paused stints allowed (users can pause multiple projects)
 - Minimum stint duration: 5 minutes (300 seconds)
 - Maximum stint duration: 480 minutes (28,800 seconds)
 - **Minimum working time for completion:** 1 minute (60 seconds) - stints stopped before 1 minute of actual working time are discarded to prevent accidental micro-stints from polluting analytics

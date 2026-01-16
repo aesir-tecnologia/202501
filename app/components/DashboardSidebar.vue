@@ -9,7 +9,6 @@ interface DailyProgress {
 
 interface Props {
   activeStint: StintRow | null
-  pausedStint: StintRow | null
   activeProject: ProjectRow | null
   dailyProgress: DailyProgress
   completedStints: number
@@ -47,7 +46,6 @@ function handleComplete(stint: StintRow) {
     <!-- Timer Hero / Session Card -->
     <DashboardTimerHero
       :active-stint="activeStint"
-      :paused-stint="pausedStint"
       :project="activeProject"
       :daily-progress="dailyProgress"
       @pause="handlePause"
