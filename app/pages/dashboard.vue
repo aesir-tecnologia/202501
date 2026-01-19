@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useProjectsQuery, useArchivedProjectsQuery, useToggleProjectActive } from '~/composables/useProjects';
-import { useActiveStintQuery, usePauseStint, useResumeStint, useStintsQuery } from '~/composables/useStints';
+import { useActiveStintQuery, usePauseStint, useResumeStint, useStintsQuery, useCompleteStint } from '~/composables/useStints';
 import { useDailySummaryQuery } from '~/composables/useDailySummaries';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
@@ -55,6 +55,7 @@ const { mutateAsync: toggleActive, isPending: isTogglingActive } = useToggleProj
 const { data: activeStint } = useActiveStintQuery();
 const { mutateAsync: pauseStint, isPending: _isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: _isResuming } = useResumeStint();
+const { mutateAsync: completeStint, isPending: _isCompleting } = useCompleteStint();
 const { data: allStints } = useStintsQuery();
 
 const today = computed(() => new Date().toISOString().split('T')[0] as string);
@@ -200,6 +201,32 @@ function handleCompleteStint(stint: StintRow) {
   stintToComplete.value = stint;
   showCompletionModal.value = true;
 }
+
+async function handleConfirmComplete(notes: string) {
+  if (!stintToComplete.value) return;
+  try {
+    await completeStint({
+      stintId: stintToComplete.value.id,
+      completionType: 'manual',
+      notes: notes || undefined,
+    });
+    toast.add({
+      title: 'Stint completed',
+      description: 'Great work! Your stint has been recorded.',
+      color: 'success',
+    });
+  }
+  catch (error) {
+    toast.add({
+      title: 'Failed to complete stint',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      color: 'error',
+    });
+  }
+  finally {
+    stintToComplete.value = null;
+  }
+}
 </script>
 
 <template>
@@ -314,6 +341,7 @@ function handleCompleteStint(stint: StintRow) {
       v-if="stintToComplete"
       v-model:open="showCompletionModal"
       :stint-id="stintToComplete.id"
+      @confirm="handleConfirmComplete"
     />
   </div>
 </template>
