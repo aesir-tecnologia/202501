@@ -27,6 +27,10 @@ const userDisplayName = computed(() => {
 
 const isMobileMenuOpen = ref(false);
 
+watch(() => route.path, () => {
+  isMobileMenuOpen.value = false;
+});
+
 const userMenuItems = computed(() => [
   [
     {
@@ -147,21 +151,15 @@ const formattedTime = computed(() => {
         </div>
 
         <!-- Desktop Navigation -->
-        <nav class="hidden md:flex gap-1 bg-[#fef7ed] dark:bg-[#1f1b18] p-1 rounded-full">
-          <NuxtLink
-            v-for="item in items"
-            :key="item.to"
-            :to="item.to"
-            class="px-5 py-2.5 text-sm font-medium rounded-full transition-all duration-200"
-            :class="[
-              route.path === item.to
-                ? 'bg-orange-700 dark:bg-orange-600 text-white'
-                : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white',
-            ]"
-          >
-            {{ item.label }}
-          </NuxtLink>
-        </nav>
+        <UNavigationMenu
+          :items="items"
+          variant="pill"
+          class="hidden md:flex"
+          :ui="{
+            root: 'bg-[#fef7ed] dark:bg-[#1f1b18] p-1 rounded-full gap-1',
+            link: 'px-5 py-2.5 text-sm font-medium rounded-full text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all duration-200 data-[state=active]:bg-orange-700 dark:data-[state=active]:bg-orange-600 data-[state=active]:text-white',
+          }"
+        />
 
         <div class="flex items-center gap-3">
           <!-- Global Timer (client-only to prevent hydration mismatch) -->
@@ -221,24 +219,17 @@ const formattedTime = computed(() => {
           class="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-stone-900
                  border-b border-stone-200 dark:border-stone-700 shadow-lg p-2"
         >
-          <NuxtLink
-            v-for="item in items"
-            :key="item.to"
-            :to="item.to"
-            class="flex items-center gap-3 px-4 py-3.5 rounded-xl text-[15px] font-medium transition-colors"
-            :class="[
-              route.path === item.to
-                ? 'bg-[#fef7ed] dark:bg-[#1f1b18] text-orange-700 dark:text-orange-500'
-                : 'text-stone-600 dark:text-stone-300 hover:bg-[#fef7ed] dark:hover:bg-[#1f1b18] hover:text-stone-900 dark:hover:text-white',
-            ]"
-            @click="isMobileMenuOpen = false"
-          >
-            <UIcon
-              :name="item.icon"
-              class="w-5 h-5"
-            />
-            {{ item.label }}
-          </NuxtLink>
+          <UNavigationMenu
+            :items="items"
+            orientation="vertical"
+            variant="pill"
+            :highlight="false"
+            :ui="{
+              root: 'w-full',
+              link: 'px-4 py-3.5 rounded-xl text-[15px] font-medium transition-colors text-stone-600 dark:text-stone-300 hover:bg-[#fef7ed] dark:hover:bg-[#1f1b18] hover:text-stone-900 dark:hover:text-white data-[state=active]:bg-[#fef7ed] dark:data-[state=active]:bg-[#1f1b18] data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-500',
+              linkLeadingIcon: 'w-5 h-5',
+            }"
+          />
         </nav>
       </Transition>
     </div>
