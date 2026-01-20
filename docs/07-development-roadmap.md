@@ -127,7 +127,7 @@
 **Deliverable:** Fully functional stint tracking with pause/resume, single session enforcement, and real-time sync.
 
 **Additional Features (beyond original spec):**
-- Pause-and-switch: Users can have 1 active AND 1 paused stint simultaneously
+- Pause-and-switch: Users can have 1 active stint AND unlimited paused stints simultaneously
 - StintConflictDialog for handling concurrent stint scenarios with multiple resolution options
 
 **Dependencies:** Phase 2 complete (projects exist)

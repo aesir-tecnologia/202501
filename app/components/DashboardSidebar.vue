@@ -9,19 +9,11 @@ interface DailyProgress {
 
 interface Props {
   activeStint: StintRow | null
-  pausedStint: StintRow | null
   activeProject: ProjectRow | null
   dailyProgress: DailyProgress
-  completedStints: number
-  focusSeconds: number
-  totalSeconds: number
-  breakSeconds: number
-  isLoadingStats?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
-  isLoadingStats: false,
-});
+defineProps<Props>();
 
 const emit = defineEmits<{
   pauseStint: [stint: StintRow]
@@ -47,7 +39,6 @@ function handleComplete(stint: StintRow) {
     <!-- Timer Hero / Session Card -->
     <DashboardTimerHero
       :active-stint="activeStint"
-      :paused-stint="pausedStint"
       :project="activeProject"
       :daily-progress="dailyProgress"
       @pause="handlePause"
@@ -58,14 +49,8 @@ function handleComplete(stint: StintRow) {
     <!-- Streak Banner (self-contained, fetches own data) -->
     <StreakBanner class="!mb-0" />
 
-    <!-- Today's Stats -->
-    <TodaysStats
-      :completed-stints="completedStints"
-      :focus-seconds="focusSeconds"
-      :total-seconds="totalSeconds"
-      :break-seconds="breakSeconds"
-      :is-loading="isLoadingStats"
-    />
+    <!-- Achievement Card (self-contained, fetches own data) -->
+    <AchievementCard />
   </aside>
 </template>
 

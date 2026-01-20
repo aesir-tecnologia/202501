@@ -1,4 +1,5 @@
 import confetti from 'canvas-confetti';
+import { startOfDay, addDays } from 'date-fns';
 import { useQueryClient } from '@tanstack/vue-query';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { projectKeys } from '~/composables/useProjects';
@@ -8,18 +9,6 @@ import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { PreferencesData } from '~/lib/supabase/preferences';
 import { DEFAULT_PREFERENCES } from '~/schemas/preferences';
-
-function startOfDay(date: Date): Date {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function addDays(date: Date, days: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
-}
 
 const ENCOURAGING_MESSAGES = [
   'Daily goal crushed! 🎯',

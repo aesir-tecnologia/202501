@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useProjectsQuery, useArchivedProjectsQuery, useToggleProjectActive } from '~/composables/useProjects';
-import { useActiveStintQuery, usePausedStintsQuery, usePauseStint, useResumeStint, useStintsQuery } from '~/composables/useStints';
-import { useDailySummaryQuery } from '~/composables/useDailySummaries';
+import { useActiveStintQuery, usePauseStint, useResumeStint, useStintsQuery, useCompleteStint } from '~/composables/useStints';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
+import { startOfDay, addDays } from 'date-fns';
 import { parseSafeDate } from '~/utils/date-helpers';
 
 definePageMeta({
@@ -53,16 +53,13 @@ const toast = useToast();
 const { mutateAsync: toggleActive, isPending: isTogglingActive } = useToggleProjectActive();
 
 const { data: activeStint } = useActiveStintQuery();
-const { data: pausedStints } = usePausedStintsQuery();
 const { mutateAsync: pauseStint, isPending: _isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: _isResuming } = useResumeStint();
+const { mutateAsync: completeStint, isPending: _isCompleting } = useCompleteStint();
 const { data: allStints } = useStintsQuery();
 
-const today = computed(() => new Date().toISOString().split('T')[0] as string);
-const { data: dailySummary, isLoading: isLoadingDailySummary } = useDailySummaryQuery(today);
-
 const activeProject = computed(() => {
-  const stint = activeStint.value || pausedStints.value?.[0];
+  const stint = activeStint.value;
   if (!stint) return null;
   return projects.value.find(p => p.id === stint.project_id) || null;
 });
@@ -73,60 +70,23 @@ const dailyProgress = computed(() => {
 
   let completed = 0;
   let expected = 0;
-  let focusSeconds = 0;
-  let pauseSeconds = 0;
 
-  // Sum expected from active projects
   for (const project of activeProjects.value) {
     expected += project.expected_daily_stints ?? 0;
   }
 
-  // Aggregate completed stints today
   if (allStints.value) {
     for (const stint of allStints.value) {
       if (stint.status !== 'completed' || !stint.ended_at) continue;
       const endedAt = parseSafeDate(stint.ended_at);
       if (endedAt && endedAt >= todayStart && endedAt < tomorrow) {
         completed++;
-        focusSeconds += stint.actual_duration ?? 0;
-        pauseSeconds += stint.paused_duration ?? 0;
       }
     }
   }
 
-  return { completed, expected, focusSeconds, pauseSeconds };
+  return { completed, expected };
 });
-
-const completedStints = computed(() => dailySummary.value?.totalStints ?? dailyProgress.value.completed);
-const focusSeconds = computed(() => {
-  if (dailySummary.value) {
-    return dailySummary.value.totalFocusSeconds;
-  }
-  return dailyProgress.value.focusSeconds;
-});
-
-const breakSeconds = computed(() => {
-  if (dailySummary.value) {
-    return dailySummary.value.totalPauseSeconds;
-  }
-  return dailyProgress.value.pauseSeconds;
-});
-
-const totalSeconds = computed(() => focusSeconds.value + breakSeconds.value);
-
-const isLoadingStats = computed(() => isLoadingDailySummary.value);
-
-function startOfDay(date: Date): Date {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function addDays(date: Date, days: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
-}
 
 function openCreateModal() {
   showCreateModal.value = true;
@@ -200,6 +160,32 @@ async function handleResumeStint(stint: StintRow) {
 function handleCompleteStint(stint: StintRow) {
   stintToComplete.value = stint;
   showCompletionModal.value = true;
+}
+
+async function handleConfirmComplete(notes: string) {
+  if (!stintToComplete.value) return;
+  try {
+    await completeStint({
+      stintId: stintToComplete.value.id,
+      completionType: 'manual',
+      notes: notes || undefined,
+    });
+    toast.add({
+      title: 'Stint completed',
+      description: 'Great work! Your stint has been recorded.',
+      color: 'success',
+    });
+  }
+  catch (error) {
+    toast.add({
+      title: 'Failed to complete stint',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      color: 'error',
+    });
+  }
+  finally {
+    stintToComplete.value = null;
+  }
 }
 </script>
 
@@ -277,14 +263,8 @@ function handleCompleteStint(stint: StintRow) {
         <DashboardSidebar
           class="order-1 lg:order-2 w-full"
           :active-stint="activeStint ?? null"
-          :paused-stint="pausedStints?.[0] ?? null"
           :active-project="activeProject"
           :daily-progress="dailyProgress"
-          :completed-stints="completedStints"
-          :focus-seconds="focusSeconds"
-          :total-seconds="totalSeconds"
-          :break-seconds="breakSeconds"
-          :is-loading-stats="isLoadingStats"
           @pause-stint="handlePauseStint"
           @resume-stint="handleResumeStint"
           @complete-stint="handleCompleteStint"
@@ -316,6 +296,7 @@ function handleCompleteStint(stint: StintRow) {
       v-if="stintToComplete"
       v-model:open="showCompletionModal"
       :stint-id="stintToComplete.id"
+      @confirm="handleConfirmComplete"
     />
   </div>
 </template>
