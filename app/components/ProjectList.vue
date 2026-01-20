@@ -15,6 +15,7 @@ import {
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
+import { startOfDay, addDays } from 'date-fns';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { calculateRemainingSeconds } from '~/utils/stint-time';
 import ProjectListCard from './ProjectListCard.vue';
@@ -64,20 +65,8 @@ const isConflictResolving = ref(false);
 
 const { data: allStints } = useStintsQuery();
 
-function startOfDay(date: Date): Date {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
 function getProjectName(projectId: string): string {
   return props.projects.find(p => p.id === projectId)?.name || 'Unknown Project';
-}
-
-function addDays(date: Date, days: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
 }
 
 function computeAllDailyProgress(
