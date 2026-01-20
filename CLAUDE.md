@@ -8,11 +8,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Never run `npm run dev` or start the dev server unless the user explicitly asks.**
 
-The user manages their own dev server. Starting it automatically:
-- Can conflict with already-running instances
-- Uses up ports unnecessarily
-- Is not needed for most coding tasks
-
 ---
 
 ## ⛔ CRITICAL: No Assumptions Policy
@@ -55,31 +50,11 @@ Project documentation is available in the `docs/` folder, including:
 
 ## Implementation Tracking
 
-**Use GitHub Issues for tracking implementation status** — not manual updates to `docs/07-development-roadmap.md`.
+**Use GitHub Issues for tracking implementation status** — not manual updates to `docs/07-development-roadmap.md`. Link PRs to issues using `Closes #123` in the PR description.
 
-- Create issues for features/tasks with clear acceptance criteria
-- Link PRs to issues using `Closes #123` or `Fixes #123` in PR description
-- Issues auto-close on merge, providing accurate completion tracking
-- The roadmap document (`docs/07-development-roadmap.md`) serves as a **high-level reference** only
+For issue workflow details, CLI commands, and best practices, see **`docs/ISSUE_WORKFLOW.md`**.
 
-This prevents documentation drift where features get implemented but the roadmap falls out of sync.
-
-**Documentation-sourced issues:** When creating an issue from a documentation gap or discrepancy (e.g., roadmap says "not implemented" but should be, or vice versa):
-1. Reference the source document and specific item (e.g., `Source: docs/07-development-roadmap.md, Phase 5, Task 3`)
-2. Include in the issue body: `⚠️ Documentation update required: Update [document] when this issue is resolved.`
-3. **CRITICAL:** GitHub auto-closes issues on PR merge, but Claude Code MUST update the referenced documentation as part of the fix. The PR is not complete until docs are synced.
-
-## GitHub Operations
-
-For GitHub CLI commands, issue types, and API usage, see **`docs/ISSUE_WORKFLOW.md`**.
-
-Key commands:
-```bash
-# Set issue type (gh CLI doesn't support --type flag yet)
-gh api repos/aesir-tecnologia/202501/issues/{NUMBER} -X PATCH -f type="Bug"
-gh api repos/aesir-tecnologia/202501/issues/{NUMBER} -X PATCH -f type="Feature"
-gh api repos/aesir-tecnologia/202501/issues/{NUMBER} -X PATCH -f type="Task"
-```
+> **Claude-specific:** When resolving documentation-sourced issues (marked `docs-sync-required`), always update the referenced documentation as part of the PR. The PR is not complete until docs are synced.
 
 ## Key Commands
 
@@ -279,10 +254,7 @@ Use `useTypedSupabaseClient()` from `~/utils/supabase` instead of `useSupabaseCl
 
 ### Styling
 
-- **Nuxt UI 4** component library with Tailwind CSS
-- **Icons:** Lucide icons bundled locally (no CDN)
-- **Dark Mode:** Via Tailwind `dark:` variants, theme toggle uses `UColorModeButton`
-- **Config:** `colorMode` settings in `nuxt.config.ts` and `app.config.ts`
+**Nuxt UI 4** with Tailwind CSS. For colors, typography, tokens, and component patterns, see **`docs/DESIGN_SYSTEM.md`**.
 
 > ⚠️ **CRITICAL: Nuxt UI 4 Documentation Requirement**
 >
@@ -296,29 +268,8 @@ Use `useTypedSupabaseClient()` from `~/utils/supabase` instead of `useSupabaseCl
 > - Menu items: `click` → `onSelect` (DropdownMenu, CommandPalette, NavigationMenu)
 > - Form inputs: different prop names and event handlers
 > - Modal/Dialog: different slot and prop structure
-> - Many components have different default behaviors
 >
 > **Do NOT rely on memory or assume APIs match other UI libraries.**
-
-**Design System: "Focused Warmth + Deep Focus Hybrid"**
-
-The design system uses warm, natural tones that reinforce the "focused work" metaphor:
-
-| Role | Light Mode | Dark Mode | Tailwind |
-|------|------------|-----------|----------|
-| Primary | Terracotta | Orange | `orange-600/700` |
-| Secondary | Forest | Green | `green-600/700` |
-| Tertiary | Sage | Lime | `lime-500` |
-| Background | Warm Cream `#fffbf5` | Stone-900 | `bg-[#fffbf5]` / `stone-900` |
-| Text | Stone-800 | Stone-50 | `stone-800` / `stone-50` |
-| Borders | Stone-200 | Stone-700 | `stone-200` / `stone-700` |
-
-**Typography:**
-- **Headings:** Fraunces (serif) via `font-serif` class
-- **Body:** Instrument Sans via `font-sans` class
-- **Mono:** JetBrains Mono for timers/code
-
-**CSS Tokens:** Defined in `app/assets/css/tokens.css` with semantic CSS variables for both modes.
 
 ## Testing
 
@@ -450,12 +401,3 @@ See `README.md` for detailed deployment instructions.
 - **Nitro** - Static site generation engine (Nuxt 4 built-in)
 - **Vite** - Build tool and dev server (Nuxt 4 built-in)
 - **Target Platform** - Vercel or any static hosting provider
-
-## Active Technologies
-- TypeScript 5.9.3 with Vue 3.5.24 Composition API + Nuxt 4.2.1 (SSG), @nuxtjs/supabase 1.6.2, @supabase/supabase-js 2.57.4, @tanstack/vue-query 5.90.6, Zod (via schemas) (001-migrate-edge-functions)
-- PostgreSQL via Supabase with Row Level Security (RLS), local development via Docker (001-migrate-edge-functions)
-- TypeScript 5.9.3 with Vue 3.5.24 Composition API + Nuxt 4.2.1 (SSG) + @nuxtjs/supabase 1.6.2, @supabase/supabase-js 2.57.4, @tanstack/vue-query 5.90.6, Zod (005-daily-reset)
-- TypeScript 5.9.3 with Vue 3.5.24 Composition API + Nuxt 4.2.1 (SSG) + @nuxtjs/supabase 1.6.2, @supabase/supabase-js 2.57.4, @tanstack/vue-query 5.90.6, Zod, Nuxt UI 4.2.0 (006-suspend-switch)
-
-## Recent Changes
-- 001-migrate-edge-functions: Added TypeScript 5.9.3 with Vue 3.5.24 Composition API + Nuxt 4.2.1 (SSG), @nuxtjs/supabase 1.6.2, @supabase/supabase-js 2.57.4, @tanstack/vue-query 5.90.6, Zod (via schemas)

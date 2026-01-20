@@ -308,6 +308,26 @@ Before closing, check:
 - [ ] If `docs-sync-required` label exists, update the docs
 - [ ] All checklist items completed or explicitly deferred
 
+### Documentation-Sourced Issues
+
+When creating an issue from a documentation gap or discrepancy (e.g., roadmap says "not implemented" but feature exists, or vice versa):
+
+1. **Reference the source** — Include document path and specific item
+   ```
+   Source: docs/07-development-roadmap.md, Phase 5, Task 3
+   ```
+
+2. **Flag for doc update** — Add to issue body:
+   ```
+   ⚠️ Documentation update required: Update [document] when this issue is resolved.
+   ```
+
+3. **Apply label** — Add `docs-sync-required` label
+
+4. **Close the loop** — When resolving the issue, update the referenced documentation as part of the PR. The issue isn't complete until docs are synced.
+
+**Why this matters:** GitHub auto-closes issues on PR merge, but the documentation update can be forgotten. This workflow ensures docs stay accurate.
+
 ### When Work Gets Blocked
 
 1. Add `blocked` label
