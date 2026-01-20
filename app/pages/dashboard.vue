@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useProjectsQuery, useArchivedProjectsQuery, useToggleProjectActive } from '~/composables/useProjects';
 import { useActiveStintQuery, usePauseStint, useResumeStint, useStintsQuery, useCompleteStint } from '~/composables/useStints';
-import { useDailySummaryQuery } from '~/composables/useDailySummaries';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import { parseSafeDate } from '~/utils/date-helpers';
@@ -58,9 +57,6 @@ const { mutateAsync: resumeStint, isPending: _isResuming } = useResumeStint();
 const { mutateAsync: completeStint, isPending: _isCompleting } = useCompleteStint();
 const { data: allStints } = useStintsQuery();
 
-const today = computed(() => new Date().toISOString().split('T')[0] as string);
-const { data: dailySummary, isLoading: isLoadingDailySummary } = useDailySummaryQuery(today);
-
 const activeProject = computed(() => {
   const stint = activeStint.value;
   if (!stint) return null;
@@ -73,48 +69,23 @@ const dailyProgress = computed(() => {
 
   let completed = 0;
   let expected = 0;
-  let focusSeconds = 0;
-  let pauseSeconds = 0;
 
-  // Sum expected from active projects
   for (const project of activeProjects.value) {
     expected += project.expected_daily_stints ?? 0;
   }
 
-  // Aggregate completed stints today
   if (allStints.value) {
     for (const stint of allStints.value) {
       if (stint.status !== 'completed' || !stint.ended_at) continue;
       const endedAt = parseSafeDate(stint.ended_at);
       if (endedAt && endedAt >= todayStart && endedAt < tomorrow) {
         completed++;
-        focusSeconds += stint.actual_duration ?? 0;
-        pauseSeconds += stint.paused_duration ?? 0;
       }
     }
   }
 
-  return { completed, expected, focusSeconds, pauseSeconds };
+  return { completed, expected };
 });
-
-const completedStints = computed(() => dailySummary.value?.totalStints ?? dailyProgress.value.completed);
-const focusSeconds = computed(() => {
-  if (dailySummary.value) {
-    return dailySummary.value.totalFocusSeconds;
-  }
-  return dailyProgress.value.focusSeconds;
-});
-
-const breakSeconds = computed(() => {
-  if (dailySummary.value) {
-    return dailySummary.value.totalPauseSeconds;
-  }
-  return dailyProgress.value.pauseSeconds;
-});
-
-const totalSeconds = computed(() => focusSeconds.value + breakSeconds.value);
-
-const isLoadingStats = computed(() => isLoadingDailySummary.value);
 
 function startOfDay(date: Date): Date {
   const d = new Date(date);
@@ -305,11 +276,6 @@ async function handleConfirmComplete(notes: string) {
           :active-stint="activeStint ?? null"
           :active-project="activeProject"
           :daily-progress="dailyProgress"
-          :completed-stints="completedStints"
-          :focus-seconds="focusSeconds"
-          :total-seconds="totalSeconds"
-          :break-seconds="breakSeconds"
-          :is-loading-stats="isLoadingStats"
           @pause-stint="handlePauseStint"
           @resume-stint="handleResumeStint"
           @complete-stint="handleCompleteStint"
