@@ -3,7 +3,6 @@ import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
 import { PROJECT, STINT, type ProjectColor } from '~/constants';
-import { calculateRemainingSeconds } from '~/utils/stint-time';
 
 const props = defineProps<{
   project: ProjectRow
@@ -67,27 +66,7 @@ const hasPausedStint = computed(() => {
   return props.pausedStint?.project_id === props.project.id;
 });
 
-const { isPaused, secondsRemaining } = useStintTimer();
-
-const formattedTime = computed(() => {
-  if (!hasActiveStint.value && !hasPausedStint.value) return '--:--';
-
-  let seconds = secondsRemaining.value;
-
-  if (hasPausedStint.value && !hasActiveStint.value && props.pausedStint) {
-    seconds = calculateRemainingSeconds(props.pausedStint);
-  }
-
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-});
-
-const timerDisplayState = computed(() => {
-  if (hasActiveStint.value && !isPaused.value) return 'running';
-  if (hasPausedStint.value || isPaused.value) return 'paused';
-  return 'idle';
-});
+const { isPaused } = useStintTimer();
 
 const metaText = computed(() => {
   if (hasActiveStint.value && !isPaused.value) {
@@ -219,25 +198,6 @@ function handleCompleteStint() {
       >
         {{ metaText }}
       </div>
-    </div>
-
-    <div
-      class="timer-display"
-      :class="timerDisplayState"
-    >
-      <span
-        v-if="timerDisplayState === 'running'"
-        class="pulse-dot"
-      >
-        <span class="ping" />
-        <span class="dot" />
-      </span>
-      <UIcon
-        v-else-if="timerDisplayState === 'paused'"
-        name="i-lucide-pause"
-        class="w-3 h-3"
-      />
-      <span class="tabular-nums">{{ formattedTime }}</span>
     </div>
 
     <span class="progress-badge">
@@ -437,84 +397,6 @@ function handleCompleteStint() {
   color: var(--color-stone-400);
 }
 
-.timer-display {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 100px;
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
-  border: 1px solid;
-  min-width: 70px;
-  justify-content: center;
-}
-
-.timer-display.idle {
-  background: transparent;
-  border-color: transparent;
-  color: var(--color-stone-400);
-}
-
-:root.dark .timer-display.idle {
-  color: var(--color-stone-500);
-}
-
-.timer-display.running {
-  color: #15803d;
-  background: rgba(22, 163, 74, 0.1);
-  border-color: rgba(22, 163, 74, 0.2);
-}
-
-:root.dark .timer-display.running {
-  color: #4ade80;
-  background: rgba(34, 197, 94, 0.1);
-  border-color: rgba(34, 197, 94, 0.2);
-}
-
-.timer-display.paused {
-  color: #b45309;
-  background: rgba(217, 119, 6, 0.1);
-  border-color: rgba(217, 119, 6, 0.2);
-}
-
-:root.dark .timer-display.paused {
-  color: #fbbf24;
-  background: rgba(251, 191, 36, 0.1);
-  border-color: rgba(251, 191, 36, 0.2);
-}
-
-.pulse-dot {
-  position: relative;
-  width: 8px;
-  height: 8px;
-}
-
-.pulse-dot .ping {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: #4ade80;
-  opacity: 0.75;
-  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.pulse-dot .dot {
-  position: relative;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #22c55e;
-}
-
-@keyframes ping {
-  75%, 100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
 .progress-badge {
   font-size: 12px;
   font-weight: 600;
@@ -681,10 +563,6 @@ function handleCompleteStint() {
   opacity: 0.4;
 }
 
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
 @media (max-width: 640px) {
   .card-v27 {
     flex-wrap: wrap;
@@ -703,10 +581,6 @@ function handleCompleteStint() {
 
   .project-color {
     order: 0;
-  }
-
-  .timer-display {
-    order: 2;
   }
 
   .progress-badge {
