@@ -99,16 +99,16 @@ export default defineNuxtConfig({
         output: {
           manualChunks: (id) => {
             if (id.includes('@sentry')) {
-              return 'sentry'
+              return 'sentry';
             }
             if (id.includes('@supabase')) {
-              return 'supabase'
+              return 'supabase';
             }
             if (id.includes('@tanstack')) {
-              return 'tanstack'
+              return 'tanstack';
             }
             if (id.includes('@vueuse')) {
-              return 'vueuse'
+              return 'vueuse';
             }
           },
         },
