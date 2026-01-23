@@ -184,6 +184,9 @@ function handleStintChange(
   _payload: RealtimePostgresChangesPayload<StintRow>,
 ): void {
   debouncedInvalidate('stints', stintKeys.all);
+  // Also invalidate daily summaries since get_daily_summaries() queries
+  // the stints table directly for today's live data
+  debouncedInvalidate('daily-summaries', dailySummaryKeys.all);
 }
 
 function handleDailySummaryChange(
