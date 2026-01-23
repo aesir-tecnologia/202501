@@ -33,7 +33,9 @@ The LifeStint documentation is organized into 9 focused documents plus a master 
 
 ### Additional Resources
 
+- **[CI_CD.md](CI_CD.md)** - CI/CD pipeline, automated migrations, deployment workflow
 - **[DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)** - Design tokens, component guidelines, UI patterns
+- **[ISSUE_WORKFLOW.md](ISSUE_WORKFLOW.md)** - GitHub issue management and workflow
 
 ---
 
@@ -84,8 +86,15 @@ The LifeStint documentation is organized into 9 focused documents plus a master 
 - Relevant document being updated
 - Check document dependencies before updating
 
+### For CI/CD & Deployment Work
+
+**Load:**
+- [CI_CD.md](CI_CD.md) - Pipeline configuration, migrations, secrets
+- [04-technical-architecture.md](./04-technical-architecture.md) - Infrastructure overview
+- [09-operations-compliance.md](./09-operations-compliance.md) - Migration strategy details
+
 ---
 
-**Last Updated:** October 24, 2025  
-**Document Version:** 3.0
+**Last Updated:** January 23, 2026
+**Document Version:** 3.1
 

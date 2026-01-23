@@ -326,6 +326,30 @@ Get credentials from `supabase status` after running `supabase start`.
 
 ## Deployment
 
+### CI/CD Pipeline
+
+The project uses GitHub Actions for automated testing and deployment. See **`docs/CI_CD.md`** for complete documentation.
+
+**Pipeline Flow:**
+1. **Lint + Type Check** - Runs on all PRs and pushes to main
+2. **Test** - Runs against local Supabase instance in CI
+3. **Deploy Preview** - PRs get a Vercel preview deployment
+4. **Deploy Production** - Push to main triggers:
+   - Database migrations via `supabase db push`
+   - Frontend deployment to Vercel
+
+**Required GitHub Secrets:**
+| Secret | Purpose |
+|--------|---------|
+| `SUPABASE_ACCESS_TOKEN` | CLI authentication |
+| `SUPABASE_PROJECT_ID` | Production project reference |
+| `SUPABASE_DB_PASSWORD` | Database password |
+| `VERCEL_TOKEN` | Vercel API access |
+| `VERCEL_ORG_ID` | Vercel organization |
+| `VERCEL_PROJECT_ID` | Vercel project |
+
+### Manual Deployment
+
 - **Target Platform:** Vercel (or any static hosting)
 - **Build Command:** `npm run generate`
 - **Output Directory:** `.output/public`
@@ -346,6 +370,7 @@ See `README.md` for detailed deployment instructions.
    - Create migration in `supabase/migrations/`
    - Apply to local database: `supabase db reset`
    - Regenerate types from local schema: `npm run supabase:types`
+   - **Production migrations are automatically applied** when merged to main (via CI/CD)
 
 2. **Adding Features:**
    - Update database layer (`app/lib/supabase/`)
@@ -357,11 +382,12 @@ See `README.md` for detailed deployment instructions.
    - Write tests alongside implementation
    - Run `npm test` during development (uses local Supabase)
    - Verify with `npm run test:run` before committing
+   - CI runs tests against local Supabase with migrations applied
 
 4. **Deployment:**
-   - Test SSG build: `npm run generate && npm run serve`
-   - Verify auth flows work on static preview
-   - Deploy to Vercel
+   - Push to main branch triggers automated deployment
+   - CI pipeline: Lint → Type Check → Test → Deploy Migrations → Deploy Frontend
+   - Manual verification: `npm run generate && npm run serve`
 
 ## Tech Stack
 

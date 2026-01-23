@@ -353,19 +353,42 @@ Storage uploads → 100 per hour
 
 **Supabase Migrations** (SQL files in `/supabase/migrations`)
 
-### Migration Process
+For complete CI/CD pipeline documentation, see **[CI_CD.md](./CI_CD.md)**.
 
-1. Develop schema changes in migration files
-2. Generate migration file: `supabase migration new <name>`
-3. Test migration in local database: `supabase db reset`
-4. Verify migration success (check tables, indexes, RLS policies)
-5. Regenerate TypeScript types: `npm run supabase:types`
+### Automated Migration Process
+
+Migrations are automatically applied to production when code is merged to main:
+
+1. **Development:**
+   - Generate migration file: `supabase migration new <name>`
+   - Write migration SQL in the generated file
+   - Test locally: `supabase db reset`
+   - Regenerate types: `npm run supabase:types`
+
+2. **CI Pipeline:**
+   - CI runs tests against local Supabase with all migrations applied
+   - This validates migrations before they reach production
+
+3. **Production Deployment:**
+   - On push to main, CI runs `supabase db push` to apply pending migrations
+   - Migrations run **before** frontend deployment
+   - Frontend code can rely on new schema being available
+
+### Safety Guarantees
+
+| Protection | How It Works |
+|------------|--------------|
+| Transactional | PostgreSQL rolls back entire migration if any statement fails |
+| Pre-tested | CI runs migrations locally before production |
+| Type-safe | Generated types catch schema mismatches at compile time |
+| Backed up | Supabase creates daily backups automatically |
 
 ### Rollback Plan
 
-- Each migration includes `-- REVERT` section
+- Each migration should include `-- ROLLBACK` comments with revert SQL
 - For local development: `supabase db reset` restores to clean state
 - Migration files versioned in Git for rollback history
+- Production rollback: Create new migration that reverses changes
 
 ### Zero-Downtime Migrations
 
@@ -374,6 +397,26 @@ Storage uploads → 100 per hour
 - Run data migration (if needed)
 - Deploy application code that requires new schema
 - Remove old columns (if applicable)
+
+### Writing Safe Migrations
+
+**Do:**
+```sql
+-- Add column with default (no table lock)
+ALTER TABLE projects ADD COLUMN archived_at timestamptz;
+
+-- Add index concurrently
+CREATE INDEX CONCURRENTLY idx_name ON table (column);
+```
+
+**Avoid:**
+```sql
+-- Dropping columns without verification
+ALTER TABLE projects DROP COLUMN field;
+
+-- Adding NOT NULL without default to existing table
+ALTER TABLE projects ADD COLUMN required_field text NOT NULL;
+```
 
 ---
 

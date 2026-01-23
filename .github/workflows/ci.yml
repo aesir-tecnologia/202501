@@ -138,6 +138,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Database migrations (run before frontend deployment)
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Check pending migrations
+        id: migrations
+        run: |
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+          echo "Checking for pending migrations..."
+          supabase migration list --linked
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Push database migrations to production
+        run: |
+          echo "Pushing migrations to production database..."
+          supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      # Frontend deployment
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

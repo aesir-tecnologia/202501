@@ -339,12 +339,20 @@ The codebase follows a strict three-layer data access pattern:
 
 ### CI/CD
 
+For complete pipeline documentation, see **[CI_CD.md](./CI_CD.md)**.
+
 - **GitHub Actions**
-  - On push to `main`: Deploy to Staging
-  - On release tag: Deploy to Production
-  - Automated tests: Unit, integration, E2E (Playwright)
+  - On PR to `main`: Run lint, type-check, tests; deploy preview to Vercel
+  - On push to `main`: Run full pipeline → deploy migrations → deploy frontend
+  - Automated tests: Unit, integration (against local Supabase)
   - Lint checks: ESLint, TypeScript
   - Build time: <5 minutes
+
+- **Database Migrations (Automated)**
+  - Migrations in `supabase/migrations/` auto-deploy on push to main
+  - CI tests validate migrations before production
+  - Migrations run before frontend deployment
+  - Uses `supabase db push` via CLI
 
 ### Backups
 

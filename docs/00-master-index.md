@@ -276,6 +276,9 @@ This documentation is organized into 9 focused documents, each serving a specifi
 - **Project timeline?** → [07-development-roadmap.md](./07-development-roadmap.md)
 - **Success metrics?** → [08-success-metrics.md](./08-success-metrics.md)
 - **Operations info?** → [09-operations-compliance.md](./09-operations-compliance.md)
+- **CI/CD pipeline?** → [CI_CD.md](./CI_CD.md)
+- **Design tokens?** → [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md)
+- **Issue workflow?** → [ISSUE_WORKFLOW.md](./ISSUE_WORKFLOW.md)
 
 ---
 
