@@ -94,9 +94,6 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    build: {
-      sourcemap: false,
-    },
     resolve: {
       alias: {
         // Force ESM resolution for supabase-js to avoid CommonJS "exports is not defined" error
