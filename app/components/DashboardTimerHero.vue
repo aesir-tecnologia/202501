@@ -168,7 +168,7 @@ function handleComplete(stint: StintRow) {
             v-for="(segment, index) in progressSegments"
             :key="index"
             class="progress-segment"
-            :class="[segment, { 'is-running': segment === 'current' && isRunning }]"
+            :class="[segment, { 'is-running': segment === 'current' && isRunning, 'is-paused': segment === 'current' && isPausedState }]"
           />
         </div>
       </div>
@@ -492,6 +492,10 @@ function handleComplete(stint: StintRow) {
 .progress-segment.current.is-running {
   background: var(--accent-secondary);
   animation: pulse-segment 1.5s ease-in-out infinite;
+}
+
+.progress-segment.current.is-paused {
+  background: var(--accent-amber);
 }
 
 @keyframes pulse-segment {
