@@ -65,18 +65,18 @@ const activeProject = computed(() => {
 });
 
 const dailyProgress = computed(() => {
+  const project = activeProject.value;
+  if (!project) return { completed: 0, expected: 0 };
+
+  const expected = project.expected_daily_stints ?? 0;
+  let completed = 0;
+
   const todayStart = startOfDay(new Date());
   const tomorrow = addDays(todayStart, 1);
 
-  let completed = 0;
-  let expected = 0;
-
-  for (const project of activeProjects.value) {
-    expected += project.expected_daily_stints ?? 0;
-  }
-
   if (allStints.value) {
     for (const stint of allStints.value) {
+      if (stint.project_id !== project.id) continue;
       if (stint.status !== 'completed' || !stint.ended_at) continue;
       const endedAt = parseSafeDate(stint.ended_at);
       if (endedAt && endedAt >= todayStart && endedAt < tomorrow) {
