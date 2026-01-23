@@ -94,6 +94,26 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            if (id.includes('@sentry')) {
+              return 'sentry'
+            }
+            if (id.includes('@supabase')) {
+              return 'supabase'
+            }
+            if (id.includes('@tanstack')) {
+              return 'tanstack'
+            }
+            if (id.includes('@vueuse')) {
+              return 'vueuse'
+            }
+          },
+        },
+      },
+    },
     resolve: {
       alias: {
         // Force ESM resolution for supabase-js to avoid CommonJS "exports is not defined" error
