@@ -115,12 +115,6 @@ function handleComplete(stint: StintRow) {
         <h2 class="session-project font-serif">
           {{ project.name }}
         </h2>
-        <span
-          class="session-status"
-          :class="isRunning ? 'running' : 'paused'"
-        >
-          {{ isRunning ? 'Running' : 'Paused' }}
-        </span>
       </div>
 
       <!-- Session Metadata -->
@@ -166,7 +160,7 @@ function handleComplete(stint: StintRow) {
         class="session-progress"
       >
         <div class="progress-header">
-          <span class="progress-label">Today's progress</span>
+          <span class="progress-label">Project progress</span>
           <span class="progress-count">{{ progressText }}</span>
         </div>
         <div class="progress-bar">
@@ -174,7 +168,7 @@ function handleComplete(stint: StintRow) {
             v-for="(segment, index) in progressSegments"
             :key="index"
             class="progress-segment"
-            :class="segment"
+            :class="[segment, { 'is-running': segment === 'current' && isRunning, 'is-paused': segment === 'current' && isPausedState }]"
           />
         </div>
       </div>
@@ -280,10 +274,7 @@ function handleComplete(stint: StintRow) {
 
 /* Session Header */
 .session-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+  text-align: center;
   margin-bottom: 16px;
 }
 
@@ -304,64 +295,6 @@ function handleComplete(stint: StintRow) {
   .session-project {
     font-size: 22px;
   }
-}
-
-.session-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 100px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-@media (min-width: 768px) {
-  .session-status {
-    gap: 8px;
-    padding: 6px 14px;
-    font-size: 12px;
-  }
-}
-
-.session-status::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-@media (min-width: 768px) {
-  .session-status::before {
-    width: 8px;
-    height: 8px;
-  }
-}
-
-.session-status.running {
-  background: rgba(34, 197, 94, 0.1);
-  color: var(--accent-secondary);
-}
-
-.session-status.running::before {
-  background: var(--accent-secondary);
-  animation: pulse 1.5s ease-in-out infinite;
-}
-
-.session-status.paused {
-  background: rgba(217, 119, 6, 0.1);
-  color: var(--accent-amber);
-}
-
-.session-status.paused::before {
-  background: var(--accent-amber);
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.3); }
 }
 
 /* Session Metadata */
@@ -553,9 +486,21 @@ function handleComplete(stint: StintRow) {
 }
 
 .progress-segment.current {
-  background: linear-gradient(90deg, var(--accent-primary) 60%, var(--bg-tertiary) 60%);
-  position: relative;
-  overflow: hidden;
+  background: var(--bg-tertiary);
+}
+
+.progress-segment.current.is-running {
+  background: var(--accent-secondary);
+  animation: pulse-segment 1.5s ease-in-out infinite;
+}
+
+.progress-segment.current.is-paused {
+  background: var(--accent-amber);
+}
+
+@keyframes pulse-segment {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 /* Control Buttons */
