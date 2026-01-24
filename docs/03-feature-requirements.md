@@ -287,7 +287,19 @@ User-facing display converts to minutes/hours as appropriate.
 - Grace period: 1 day (can miss 1 day without breaking streak)
 - Timezone-aware: Streak calculated using user's timezone
 
-**Focus Ledger Export:**
+### Constraints
+
+- Analytics limited to last 90 days in free tier, unlimited in Pro
+- Charts use cached data (refreshes every 5 minutes)
+
+---
+
+## 5. Focus Ledger Export
+
+**Purpose:** Provide professional evidence of focused work with minimal reporting overhead.
+
+### Export Capabilities
+
 - "Export CSV" button in analytics view
 - Generates CSV with columns:
   - Date (YYYY-MM-DD in user's timezone)
@@ -306,13 +318,11 @@ User-facing display converts to minutes/hours as appropriate.
 
 ### Constraints
 
-- Analytics limited to last 90 days in free tier, unlimited in Pro
 - CSV exports limited to 10 per month in free tier, unlimited in Pro
-- Charts use cached data (refreshes every 5 minutes)
 
 ---
 
-## 5. User Authentication & Security
+## 6. User Authentication & Security
 
 ### Registration
 
