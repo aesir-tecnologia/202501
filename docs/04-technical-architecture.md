@@ -1,50 +1,49 @@
 # LifeStint - Technical Architecture
 
-**Product Name:** LifeStint  
-**Document Version:** 4.0
-**Date:** December 2, 2025
+**Product Name:** LifeStint
+**Document Version:** 4.1
+**Date:** January 24, 2026
 
 ---
 
 ## System Overview
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    Client Layer                      │
-│  ┌──────────────┐  ┌──────────────┐  ┌───────────┐ │
-│  │ Vue 3 + Nuxt │  │ TanStack     │  │ Tailwind  │ │
-│  │  Components  │  │ Query        │  │    CSS    │ │
-│  └──────────────┘  └──────────────┘  └───────────┘ │
-│  ┌──────────────────────────────────────────────┐  │
-│  │        Supabase Client (JS SDK)               │  │
-│  │   Auth • Realtime • Database • Storage       │  │
-│  └──────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────┘
-                          │
-                  HTTPS / WebSocket
-                          │
-┌─────────────────────────────────────────────────────┐
-│                   Supabase Layer                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌───────────┐ │
-│  │  PostgreSQL  │  │   Realtime   │  │  Storage  │ │
-│  │  + RLS       │  │   Server     │  │           │ │
-│  └──────────────┘  └──────────────┘  └───────────┘ │
-│  ┌──────────────────────────────────────────────┐  │
-│  │      Database Functions & pg_cron             │  │
-│  │  • Auto-Complete Stint (pg_cron)             │  │
-│  │  • Daily Summary Aggregation (pg_cron)       │  │
-│  │  • Business Logic (PL/pgSQL Functions)       │  │
-│  └──────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────┘
-                          │
-                   External Services
-                          │
-┌─────────────────────────────────────────────────────┐
-│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
-│  │  Sentry  │  │ Mixpanel │  │   Email Service  │  │
-│  │  (Errors)│  │(Analytics)│  │   (Supabase)    │  │
-│  └──────────┘  └──────────┘  └──────────────────┘  │
-└─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph Client["Client Layer"]
+        Vue["Vue 3 + Nuxt 4"]
+        TQ["TanStack Query v5"]
+        UI["Nuxt UI 4 + Tailwind"]
+        Worker["Web Worker<br/>(Timer Singleton)"]
+
+        Vue --> TQ
+        Vue --> UI
+        Vue --> Worker
+    end
+
+    subgraph Supabase["Supabase Layer"]
+        PG["PostgreSQL 15<br/>+ RLS"]
+        RT["Realtime<br/>WebSocket"]
+        Auth["Supabase Auth<br/>JWT + Refresh"]
+        Storage["Storage"]
+
+        subgraph Jobs["Scheduled Jobs (pg_cron)"]
+            AC["auto_complete_stints<br/>*/2 * * * *"]
+            DS["daily_summary<br/>0 1 * * *"]
+        end
+
+        PG --> Jobs
+    end
+
+    subgraph External["External Services"]
+        Sentry["Sentry<br/>Error Tracking"]
+        Mixpanel["Mixpanel<br/>Analytics"]
+        Vercel["Vercel<br/>Static Hosting"]
+    end
+
+    Client <-->|"HTTPS/WSS"| Supabase
+    Client -->|"Errors"| Sentry
+    Client -.->|"Deploy"| Vercel
 ```
 
 ---
@@ -95,34 +94,52 @@
 
 The codebase follows a strict three-layer data access pattern:
 
+```mermaid
+flowchart TB
+    subgraph Components["Component Layer"]
+        C1["Vue Components"]
+        C2["try/catch + toast.add()"]
+    end
+
+    subgraph Composables["Composable Layer (app/composables/)"]
+        Q["useQuery / useMutation"]
+        Z["Zod Validation"]
+        O["Optimistic Updates"]
+        T["toDbPayload()<br/>camelCase → snake_case"]
+
+        Q --> Z
+        Z --> O
+        O --> T
+    end
+
+    subgraph Schemas["Schema Layer (app/schemas/)"]
+        S1["projectCreateSchema"]
+        S2["stintStartSchema"]
+        S3["preferencesSchema"]
+    end
+
+    subgraph Database["Database Layer (app/lib/supabase/)"]
+        D1["listProjects()"]
+        D2["createStint()"]
+        D3["Result&lt;T&gt; Pattern"]
+        RLS["Row Level Security"]
+
+        D1 --> RLS
+        D2 --> RLS
+    end
+
+    Components --> Composables
+    Composables --> Schemas
+    Composables --> Database
+
+    Database -->|"{ data, error }"| Composables
+    Composables -->|"throw Error"| Components
 ```
-┌─────────────────────────────────────────────────────────┐
-│                  Component Layer                         │
-│    Uses composables, handles UI state and errors        │
-└────────────────────────┬────────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────────┐
-│               Composable Layer (app/composables/)        │
-│  • TanStack Query hooks for caching & mutations         │
-│  • Zod validation before mutations                      │
-│  • Optimistic updates with automatic rollback           │
-│  • camelCase → snake_case transformation                │
-└────────────────────────┬────────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────────┐
-│                Schema Layer (app/schemas/)               │
-│  • Zod schemas for validation                           │
-│  • Type inference for TypeScript                        │
-│  • Shared constants and limits                          │
-└────────────────────────┬────────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────────┐
-│              Database Layer (app/lib/supabase/)          │
-│  • Direct Supabase queries with type safety             │
-│  • User authentication enforcement                      │
-│  • Result<T> return pattern for error handling          │
-└─────────────────────────────────────────────────────────┘
-```
+
+**Key Patterns:**
+- `toDbPayload()`: Transforms camelCase schema fields to snake_case database columns
+- `Result<T>`: All database functions return `{ data, error }` for consistent error handling
+- Errors propagate up: Database → Composable (throws) → Component (try/catch + toast)
 
 ### Styling
 
@@ -132,7 +149,7 @@ The codebase follows a strict three-layer data access pattern:
   - Dark mode variants
   - Semantic color palette (primary, secondary, success, warning, error, neutral)
 
-### Charts (Post-MVP)
+### Charts
 
 - **Chart.js**
   - Bar charts for daily/weekly summaries
@@ -161,9 +178,41 @@ The codebase follows a strict three-layer data access pattern:
 ### Background Processing
 
 - **Web Workers**
-  - Timer accuracy in background tabs
+  - **Timer Worker** (`app/workers/timer.worker.ts`)
+    - Singleton pattern shared across components via `useStintTimer()`
+    - Accurate countdown independent of main thread (works in background tabs)
+    - Server sync every 60 seconds with drift detection (5s threshold)
+    - Auto-completion with retry logic (3 attempts with auth recovery)
+    - Browser notification on completion
   - CSV generation (offload from main thread)
   - Notification scheduling
+
+```mermaid
+sequenceDiagram
+    participant Main as Main Thread<br/>(useStintTimer)
+    participant Worker as Web Worker<br/>(timer.worker.ts)
+    participant Server as Supabase<br/>(syncStintCheck)
+
+    Main->>Worker: postMessage({ type: 'start', endTime, stintId })
+
+    loop Every 1 second
+        Worker->>Worker: Calculate remaining time
+        Worker->>Main: postMessage({ type: 'tick', secondsRemaining })
+    end
+
+    loop Every 60 seconds
+        Main->>Server: syncStintCheck()
+        Server-->>Main: serverSecondsRemaining
+        Main->>Worker: postMessage({ type: 'sync', serverSecondsRemaining })
+        Note over Worker: Correct drift if > 5s difference
+    end
+
+    alt Timer Completes
+        Worker->>Main: postMessage({ type: 'complete' })
+        Main->>Server: completeStint(stintId, 'auto')
+        Main->>Main: Show browser notification
+    end
+```
 
 ### Build & Dev
 
@@ -191,7 +240,7 @@ The codebase follows a strict three-layer data access pattern:
   - Email verification workflow
   - Password reset with secure tokens
   - Session management across devices
-  - OAuth providers (future: Google, Microsoft)
+  - OAuth providers: Google, Microsoft
 
 ### Real-Time Sync
 
@@ -205,7 +254,7 @@ The codebase follows a strict three-layer data access pattern:
 
 - **Supabase Storage**
   - CSV export temporary files
-  - User-uploaded files (future: stint attachments)
+  - User-uploaded files (stint attachments)
   - Auto-cleanup of temp files (24-hour retention)
 
 ### Server-Side Logic
@@ -226,15 +275,20 @@ The codebase follows a strict three-layer data access pattern:
 
 ### Database Functions
 
-- **PostgreSQL Functions** (PL/pgSQL)
-  - `calculate_streak`: Computes current streak for user
-  - `aggregate_daily_stats`: Pre-calculates daily summaries (runs at midnight)
-  - `validate_stint_start`: Server-side validation for race conditions
-  - `resolve_stint_conflict`: Conflict resolution algorithm
+- **PostgreSQL Functions** (PL/pgSQL, SECURITY DEFINER)
+  - `validate_stint_start`: Server-side validation for race conditions and version check
+  - `complete_stint`: Calculates actual_duration and marks stint completed
+  - `pause_stint` / `resume_stint`: Handles pause state and duration accumulation
+  - `auto_complete_expired_stints`: pg_cron job that completes stints past planned duration
+  - `calculate_streak_with_tz`: Timezone-aware streak calculation with grace period
+  - `update_user_streak`: Updates streak after stint completion
+  - `aggregate_daily_summary`: Pre-calculates daily summaries per user
+  - `increment_user_version`: Optimistic locking version bump
 
 ### Scheduled Jobs
 
 - **pg_cron** (PostgreSQL extension)
+  - Auto-complete stints: `*/2 * * * *` (every 2 minutes)
   - Daily aggregation: `0 1 * * *` (1 AM UTC)
   - Cleanup old sessions: `0 2 * * *` (2 AM UTC)
   - Email digests: `0 8 * * 1` (8 AM UTC every Monday)
@@ -278,7 +332,7 @@ The codebase follows a strict three-layer data access pattern:
   - User feedback widget
   - Alert rules: >10 errors in 5 min → Slack notification
 
-### Analytics (Post-MVP)
+### Analytics
 
 - **Mixpanel**
   - User events: stint_started, stint_completed, project_created
@@ -299,7 +353,7 @@ The codebase follows a strict three-layer data access pattern:
 
 ### Uptime Monitoring
 
-- **BetterUptime** (future)
+- **BetterUptime**
   - HTTP checks every 30 seconds
   - WebSocket connection health
   - Database query performance
@@ -340,6 +394,40 @@ The codebase follows a strict three-layer data access pattern:
 ### CI/CD
 
 For complete pipeline documentation, see **[CI_CD.md](./CI_CD.md)**.
+
+```mermaid
+flowchart LR
+    subgraph Trigger["Triggers"]
+        PR["Pull Request"]
+        Push["Push to main"]
+    end
+
+    subgraph Checks["Parallel Checks"]
+        Lint["ESLint"]
+        Type["TypeScript"]
+    end
+
+    subgraph Test["Test Job"]
+        SB["Start Supabase<br/>(local)"]
+        VT["Vitest run"]
+        SB --> VT
+    end
+
+    subgraph Deploy["Deployment"]
+        Preview["Vercel Preview<br/>(PR only)"]
+        Migrate["supabase db push"]
+        Prod["Vercel Production"]
+
+        Migrate --> Prod
+    end
+
+    PR --> Checks
+    Push --> Checks
+    Checks --> Test
+
+    Test -->|"PR"| Preview
+    Test -->|"main"| Migrate
+```
 
 - **GitHub Actions**
   - On PR to `main`: Run lint, type-check, tests; deploy preview to Vercel
@@ -403,7 +491,7 @@ For complete pipeline documentation, see **[CI_CD.md](./CI_CD.md)**.
 - **CCPA:**
   - Do Not Sell opt-out
   - Data access requests
-- **SOC 2:** (future, via Supabase certification)
+- **SOC 2:** Via Supabase certification
 
 ---
 
