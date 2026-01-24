@@ -227,7 +227,6 @@ async function doStartStint(project: ProjectRow): Promise<void> {
     });
 
     screenReaderAnnouncement.value = `Started working on ${project.name}`;
-    toast.add({ title: 'Stint started', color: 'success' });
   }
   catch (error) {
     const errorWithConflict = error as Error & { conflict?: StintRow };
@@ -263,7 +262,6 @@ async function handlePauseStint(stint: StintRow): Promise<void> {
   try {
     await pauseStint(stint.id);
     screenReaderAnnouncement.value = 'Stint paused';
-    toast.add({ title: 'Stint paused', color: 'success' });
   }
   catch (error) {
     screenReaderAnnouncement.value = 'Failed to pause stint';
@@ -280,7 +278,6 @@ async function handleResumeStint(stint: StintRow): Promise<void> {
   try {
     await resumeStint(stint.id);
     screenReaderAnnouncement.value = 'Stint resumed';
-    toast.add({ title: 'Stint resumed', color: 'success' });
   }
   catch (error) {
     screenReaderAnnouncement.value = 'Failed to resume stint';
@@ -375,7 +372,6 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
         }
         try {
           await doStartStint(currentPendingProject);
-          toast.add({ title: 'Switched projects', color: 'success' });
         }
         catch (startError) {
           toast.add({
@@ -405,7 +401,6 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
         }
         try {
           await doStartStint(currentPendingProject);
-          toast.add({ title: 'Completed and started new stint', color: 'success' });
         }
         catch (startError) {
           toast.add({
