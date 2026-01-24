@@ -76,11 +76,6 @@ const items = computed(() => [
     to: '/analytics',
     icon: 'i-lucide-bar-chart-2',
   },
-  {
-    label: 'Reports',
-    to: '/reports',
-    icon: 'i-lucide-file-text',
-  },
 ]);
 
 const signOut = async () => {
