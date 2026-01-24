@@ -124,11 +124,6 @@ async function handleToggleActive(project: ProjectRow) {
 async function handlePauseStint(stint: StintRow) {
   try {
     await pauseStint(stint.id);
-    toast.add({
-      title: 'Stint paused',
-      description: 'Take a break, you can resume anytime.',
-      color: 'success',
-    });
   }
   catch (error) {
     toast.add({
@@ -142,11 +137,6 @@ async function handlePauseStint(stint: StintRow) {
 async function handleResumeStint(stint: StintRow) {
   try {
     await resumeStint(stint.id);
-    toast.add({
-      title: 'Stint resumed',
-      description: 'Welcome back! Timer is running.',
-      color: 'success',
-    });
   }
   catch (error) {
     toast.add({
@@ -169,11 +159,6 @@ async function handleConfirmComplete(notes: string) {
       stintId: stintToComplete.value.id,
       completionType: 'manual',
       notes: notes || undefined,
-    });
-    toast.add({
-      title: 'Stint completed',
-      description: 'Great work! Your stint has been recorded.',
-      color: 'success',
     });
   }
   catch (error) {
