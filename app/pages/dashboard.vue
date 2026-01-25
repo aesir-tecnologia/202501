@@ -179,8 +179,11 @@ async function handleConfirmComplete(notes: string) {
     <UContainer class="py-6 lg:py-8">
       <!-- 2-column grid layout -->
       <div class="flex flex-col lg:grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 items-start">
-        <!-- Main Content: Projects (order-2 on mobile, order-1 on desktop) -->
-        <section class="order-2 lg:order-1 w-full space-y-6">
+        <!-- Main Content: Projects (order depends on active session on mobile, always first on desktop) -->
+        <section
+          class="w-full space-y-6 lg:order-1"
+          :class="activeStint ? 'order-2' : 'order-1'"
+        >
           <!-- Header -->
           <div class="flex items-center justify-between">
             <h2 class="text-xl lg:text-2xl font-semibold font-serif text-stone-900 dark:text-stone-50">
@@ -244,9 +247,10 @@ async function handleConfirmComplete(notes: string) {
           </UTabs>
         </section>
 
-        <!-- Sidebar (order-1 on mobile, order-2 on desktop) -->
+        <!-- Sidebar (order depends on active session on mobile, always second on desktop) -->
         <DashboardSidebar
-          class="order-1 lg:order-2 w-full"
+          class="w-full lg:order-2"
+          :class="activeStint ? 'order-1' : 'order-2'"
           :active-stint="activeStint ?? null"
           :active-project="activeProject"
           :daily-progress="dailyProgress"

@@ -252,6 +252,12 @@ function handleComplete(stint: StintRow) {
   }
 }
 
+@media (max-width: 767.98px) {
+  .session-card:not(.has-session) {
+    display: none;
+  }
+}
+
 /* Ambient glow effect */
 .ambient-glow {
   position: absolute;
