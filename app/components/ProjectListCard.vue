@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useIntervalFn } from '@vueuse/core';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
@@ -37,9 +38,14 @@ function formatTime(date: Date): string {
   return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
-function formatRelativeTime(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
+const now = ref(new Date());
+
+useIntervalFn(() => {
+  now.value = new Date();
+}, 30000);
+
+function formatRelativeTime(date: Date, currentTime: Date): string {
+  const diffMs = currentTime.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
 
   if (diffMins < 1) return 'just now';
@@ -79,7 +85,7 @@ const metaText = computed(() => {
   if (hasPausedStint.value || (hasActiveStint.value && isPaused.value)) {
     const pausedAt = parseSafeDate(props.pausedStint?.paused_at || props.activeStint?.paused_at);
     if (pausedAt) {
-      return `Paused ${formatRelativeTime(pausedAt)}`;
+      return `Paused ${formatRelativeTime(pausedAt, now.value)}`;
     }
   }
 
@@ -167,6 +173,7 @@ function handleCompleteStint() {
     class="card-v27"
     :class="{
       'state-running': hasActiveStint && !isPaused,
+      'state-paused': hasPausedStint || (hasActiveStint && isPaused),
       'state-inactive': !project.is_active,
     }"
   >
@@ -180,10 +187,16 @@ function handleCompleteStint() {
       />
     </div>
 
-    <div
-      class="project-color"
-      :class="colorRingClass"
-    />
+    <div class="project-color-wrapper">
+      <div
+        class="project-color"
+        :class="colorRingClass"
+      />
+      <span
+        v-if="hasPausedStint || (hasActiveStint && isPaused)"
+        class="paused-indicator"
+      />
+    </div>
 
     <div class="project-info">
       <div class="project-name">
@@ -322,6 +335,16 @@ function handleCompleteStint() {
   box-shadow: 0 2px 12px rgba(22, 163, 74, 0.1);
 }
 
+.card-v27.state-paused {
+  box-shadow: 0 2px 12px rgba(217, 119, 6, 0.12);
+  border-color: rgba(217, 119, 6, 0.2);
+}
+
+:root.dark .card-v27.state-paused {
+  box-shadow: 0 2px 16px rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.15);
+}
+
 .card-v27.state-inactive {
   opacity: 0.7;
   filter: saturate(0.85);
@@ -359,6 +382,11 @@ function handleCompleteStint() {
   color: var(--color-stone-400);
 }
 
+.project-color-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .project-color {
   width: 18px;
   height: 18px;
@@ -367,6 +395,42 @@ function handleCompleteStint() {
   background: transparent;
   border-width: 3.5px;
   border-style: solid;
+}
+
+.paused-indicator {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 12px;
+  display: flex;
+  gap: 2px;
+  animation: indicator-pulse 2s ease-in-out infinite;
+}
+
+.paused-indicator::before,
+.paused-indicator::after {
+  content: '';
+  width: 3px;
+  height: 100%;
+  background: #b45309;
+  border-radius: 1px;
+}
+
+:root.dark .paused-indicator::before,
+:root.dark .paused-indicator::after {
+  background: #fbbf24;
+}
+
+@keyframes indicator-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
 }
 
 .project-info {
@@ -579,7 +643,7 @@ function handleCompleteStint() {
     order: 0;
   }
 
-  .project-color {
+  .project-color-wrapper {
     order: 0;
   }
 
