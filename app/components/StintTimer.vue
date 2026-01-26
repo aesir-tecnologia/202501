@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { StintRow } from '~/lib/supabase/stints';
+import { formatStintTime } from '~/utils/stint-time';
 
 const props = defineProps<{
   stint: StintRow | null
@@ -8,12 +9,8 @@ const props = defineProps<{
 // Get timer state from singleton composable
 const { secondsRemaining, isPaused, timerCompleted } = useStintTimer();
 
-// Format time as MM:SS
-const formattedTime = computed(() => {
-  const mins = Math.floor(secondsRemaining.value / 60);
-  const secs = secondsRemaining.value % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-});
+// Format time using shared utility
+const formattedTime = computed(() => formatStintTime(secondsRemaining.value));
 
 // Calculate pause duration (live updating)
 const pausedDuration = ref<string>('');
