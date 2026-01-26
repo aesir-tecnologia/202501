@@ -219,7 +219,6 @@ User-facing display converts to minutes/hours as appropriate.
 - Countdown timer format:
   - Under 1 hour: `MM:SS` (e.g., `45:23`, `25:00`)
   - 1 hour or more: `H:MM:SS` (e.g., `1:29:59`, `2:00:00`)
-  - Overtime: negative prefix (e.g., `-02:15`, `-1:02:15`)
 - Duration metadata format:
   - Under 1 hour: `Xm` (e.g., `45m`)
   - 1 hour or more: `Xh Ym` (e.g., `1h 30m`)

@@ -184,14 +184,6 @@ describe('stint-time utils', () => {
     it('formats 90 minutes as 1:30:00', () => {
       expect(formatStintTime(90 * 60)).toBe('1:30:00');
     });
-
-    it('formats negative seconds (overtime) with sign', () => {
-      expect(formatStintTime(-135)).toBe('-02:15');
-    });
-
-    it('formats negative overtime over 1 hour with sign and hours', () => {
-      expect(formatStintTime(-3661)).toBe('-1:01:01');
-    });
   });
 
   describe('formatStintTimeCompact', () => {

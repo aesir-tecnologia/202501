@@ -339,8 +339,6 @@ Consistent time display across the application follows these human-readable patt
 |-----------|--------|---------|
 | Under 1 hour | `MM:SS` | `45:23`, `25:00` |
 | 1 hour or more | `H:MM:SS` | `1:29:59`, `2:00:00` |
-| Overtime (under 1 hour) | `-MM:SS` | `-02:15` |
-| Overtime (1 hour or more) | `-H:MM:SS` | `-1:02:15` |
 
 **Rationale:** Hiding hours when under 1 hour reduces visual clutter for the common case (focus sessions are typically under 60 minutes), while still providing precise time awareness when needed for longer sessions.
 
@@ -364,7 +362,7 @@ date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
 ### Implementation Reference
 
-See `DashboardTimerHero.vue` for the canonical implementation of these patterns.
+See `app/utils/stint-time.ts` (`formatStintTime`) for the canonical implementation of timer formatting; UI usage examples can be found in `DashboardTimerHero.vue`.
 
 ---
 
