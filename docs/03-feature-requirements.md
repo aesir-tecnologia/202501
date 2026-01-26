@@ -216,7 +216,12 @@ User-facing display converts to minutes/hours as appropriate.
 ### Active Stint Highlighting
 
 - Pulsing green dot indicator next to countdown timer
-- Countdown timer displayed in MM:SS format
+- Countdown timer format:
+  - Under 1 hour: `MM:SS` (e.g., `45:23`, `25:00`)
+  - 1 hour or more: `H:MM:SS` (e.g., `1:29:59`, `2:00:00`)
+- Duration metadata format:
+  - Under 1 hour: `Xm` (e.g., `45m`)
+  - 1 hour or more: `Xh Ym` (e.g., `1h 30m`)
 - Pause/Stop buttons prominently displayed
 - Timer badge shows "Running" or "Paused" state with color coding
 - Other project cards show disabled Start button with "Busy" status pill

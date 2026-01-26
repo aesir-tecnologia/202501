@@ -310,8 +310,13 @@ The design system uses a distinctive typographic hierarchy with three font famil
 
 **Timer Display (Monospace):**
 ```vue
+<!-- Under 1 hour: MM:SS -->
 <div class="font-mono text-5xl font-semibold tabular-nums text-stone-900 dark:text-stone-50">
-  02:34:18
+  25:00
+</div>
+<!-- 1 hour or more: H:MM:SS -->
+<div class="font-mono text-5xl font-semibold tabular-nums text-stone-900 dark:text-stone-50">
+  1:30:00
 </div>
 ```
 
@@ -321,6 +326,43 @@ The design system uses a distinctive typographic hierarchy with three font famil
   Project Name
 </label>
 ```
+
+---
+
+## Time & Duration Formatting
+
+Consistent time display across the application follows these human-readable patterns:
+
+### Countdown Timer (Active Session)
+
+| Condition | Format | Example |
+|-----------|--------|---------|
+| Under 1 hour | `MM:SS` | `45:23`, `25:00` |
+| 1 hour or more | `H:MM:SS` | `1:29:59`, `2:00:00` |
+
+**Rationale:** Hiding hours when under 1 hour reduces visual clutter for the common case (focus sessions are typically under 60 minutes), while still providing precise time awareness when needed for longer sessions.
+
+### Duration Display (Metadata Labels)
+
+| Condition | Format | Example |
+|-----------|--------|---------|
+| Under 1 hour | `Xm` | `45m` |
+| 1 hour or more | `Xh Ym` | `1h 30m` |
+
+**Rationale:** Human-readable format with explicit units is more scannable than colon-separated values for static duration labels.
+
+### Clock Times
+
+Clock times (start time, end time) use the browser's locale formatting:
+
+```typescript
+date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+// Example: "10:30 AM" or "14:30" depending on locale
+```
+
+### Implementation Reference
+
+See `app/utils/stint-time.ts` (`formatStintTime`) for the canonical implementation of timer formatting; UI usage examples can be found in `DashboardTimerHero.vue`.
 
 ---
 
@@ -698,7 +740,7 @@ The timer display uses a distinctive orange glow effect:
 
 ```vue
 <div class="timer-glow rounded-2xl p-8">
-  <span class="font-mono text-5xl tabular-nums">02:34:18</span>
+  <span class="font-mono text-5xl tabular-nums">25:00</span>
 </div>
 ```
 

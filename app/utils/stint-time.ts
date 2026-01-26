@@ -71,19 +71,24 @@ export function calculateRemainingSeconds(stint: StintRow, referenceTime?: Date)
 }
 
 /**
- * Format seconds as MM:SS display string.
+ * Format seconds as timer display string.
+ * Shows MM:SS when under 1 hour, H:MM:SS when 1 hour or more.
+ * Examples: 25:00, 45:23, 1:30:00
  */
 export function formatStintTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
+  const hours = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
 /**
- * Format seconds as M:SS for compact display.
+ * @deprecated Use {@link formatStintTime} instead.
  */
 export function formatStintTimeCompact(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return formatStintTime(seconds);
 }

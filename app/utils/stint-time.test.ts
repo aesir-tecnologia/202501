@@ -173,30 +173,24 @@ describe('stint-time utils', () => {
       expect(formatStintTime(600)).toBe('10:00');
     });
 
-    it('formats over 60 minutes', () => {
-      expect(formatStintTime(3661)).toBe('61:01');
+    it('formats over 60 minutes with hours', () => {
+      expect(formatStintTime(3661)).toBe('1:01:01');
     });
 
     it('formats 25 minutes (standard stint)', () => {
       expect(formatStintTime(25 * 60)).toBe('25:00');
     });
+
+    it('formats 90 minutes as 1:30:00', () => {
+      expect(formatStintTime(90 * 60)).toBe('1:30:00');
+    });
   });
 
   describe('formatStintTimeCompact', () => {
-    it('formats 0 seconds as 0:00', () => {
-      expect(formatStintTimeCompact(0)).toBe('0:00');
-    });
-
-    it('formats seconds with padding', () => {
-      expect(formatStintTimeCompact(5)).toBe('0:05');
-    });
-
-    it('formats minutes without leading zero', () => {
-      expect(formatStintTimeCompact(65)).toBe('1:05');
-    });
-
-    it('formats 10 minutes', () => {
-      expect(formatStintTimeCompact(600)).toBe('10:00');
+    it('delegates to formatStintTime', () => {
+      expect(formatStintTimeCompact(0)).toBe('00:00');
+      expect(formatStintTimeCompact(65)).toBe('01:05');
+      expect(formatStintTimeCompact(3661)).toBe('1:01:01');
     });
   });
 });

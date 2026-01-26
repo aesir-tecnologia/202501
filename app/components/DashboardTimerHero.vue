@@ -3,6 +3,7 @@ import type { StintRow } from '~/lib/supabase/stints';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import { useStintTimer } from '~/composables/useStintTimer';
 import { parseSafeDate } from '~/utils/date-helpers';
+import { formatStintTime } from '~/utils/stint-time';
 
 interface DailyProgress {
   completed: number
@@ -29,13 +30,7 @@ const hasSession = computed(() => props.activeStint !== null);
 const isRunning = computed(() => props.activeStint !== null && !isPaused.value);
 const isPausedState = computed(() => props.activeStint !== null && isPaused.value);
 
-const timerDisplay = computed(() => {
-  const total = secondsRemaining.value;
-  const mins = Math.floor(Math.abs(total) / 60);
-  const secs = Math.abs(total) % 60;
-  const sign = total < 0 ? '-' : '';
-  return `${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-});
+const timerDisplay = computed(() => formatStintTime(secondsRemaining.value));
 
 const sessionMeta = computed(() => {
   const stint = props.activeStint;
@@ -50,39 +45,18 @@ const sessionMeta = computed(() => {
 
   const endTime = new Date(startedAt.getTime() + (plannedMinutes * 60 * 1000) + (pausedSeconds * 1000));
 
+  const totalMinutes = plannedMinutes + pausedMinutes;
+  const durationHours = Math.floor(totalMinutes / 60);
+  const durationMins = totalMinutes % 60;
+  const formattedDuration = durationHours > 0
+    ? `${durationHours}h ${durationMins}m`
+    : `${totalMinutes}m`;
+
   return {
     started: startedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    duration: plannedMinutes,
-    pausedMinutes,
+    duration: formattedDuration,
     ends: endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   };
-});
-
-const progressSegments = computed(() => {
-  const { completed, expected } = props.dailyProgress;
-  if (expected === 0) return [];
-
-  const segments: Array<'completed' | 'current' | 'remaining'> = [];
-  const currentSessionActive = hasSession.value ? 1 : 0;
-
-  for (let i = 0; i < expected; i++) {
-    if (i < completed) {
-      segments.push('completed');
-    }
-    else if (i === completed && currentSessionActive) {
-      segments.push('current');
-    }
-    else {
-      segments.push('remaining');
-    }
-  }
-
-  return segments;
-});
-
-const progressText = computed(() => {
-  const { completed, expected } = props.dailyProgress;
-  return `${completed}/${expected} stints`;
 });
 
 function handlePause(stint: StintRow) {
@@ -127,12 +101,7 @@ function handleComplete(stint: StintRow) {
           <span class="meta-label">Started</span>
         </div>
         <div class="meta-item">
-          <span class="meta-value">
-            {{ sessionMeta.duration }}m<span
-              v-if="sessionMeta.pausedMinutes > 0"
-              class="meta-paused"
-            >+{{ sessionMeta.pausedMinutes }}</span>
-          </span>
+          <span class="meta-value">{{ sessionMeta.duration }}</span>
           <span class="meta-label">Duration</span>
         </div>
         <div class="meta-item">
@@ -154,32 +123,13 @@ function handleComplete(stint: StintRow) {
         </div>
       </div>
 
-      <!-- Progress Bar -->
-      <div
-        v-if="dailyProgress.expected > 0"
-        class="session-progress"
-      >
-        <div class="progress-header">
-          <span class="progress-label">Project progress</span>
-          <span class="progress-count">{{ progressText }}</span>
-        </div>
-        <div class="progress-bar">
-          <div
-            v-for="(segment, index) in progressSegments"
-            :key="index"
-            class="progress-segment"
-            :class="[segment, { 'is-running': segment === 'current' && isRunning, 'is-paused': segment === 'current' && isPausedState }]"
-          />
-        </div>
-      </div>
-
       <!-- Control Buttons -->
       <div class="session-controls">
         <UButton
           v-if="isRunning"
           variant="outline"
-          color="neutral"
-          class="ctrl-btn warning"
+          color="warning"
+          class="ctrl-btn"
           @click="handlePause(activeStint!)"
         >
           <Icon
@@ -191,8 +141,8 @@ function handleComplete(stint: StintRow) {
         <UButton
           v-else
           variant="outline"
-          color="neutral"
-          class="ctrl-btn success"
+          color="success"
+          class="ctrl-btn"
           @click="handleResume(activeStint!)"
         >
           <Icon
@@ -203,8 +153,8 @@ function handleComplete(stint: StintRow) {
         </UButton>
         <UButton
           variant="outline"
-          color="neutral"
-          class="ctrl-btn danger"
+          color="error"
+          class="ctrl-btn"
           @click="handleComplete(activeStint!)"
         >
           <Icon
@@ -348,18 +298,6 @@ function handleComplete(stint: StintRow) {
   }
 }
 
-.meta-paused {
-  font-size: 12px;
-  color: var(--accent-amber);
-  font-weight: 500;
-}
-
-@media (min-width: 768px) {
-  .meta-paused {
-    font-size: 14px;
-  }
-}
-
 .meta-label {
   font-size: 10px;
   font-weight: 500;
@@ -425,90 +363,6 @@ function handleComplete(stint: StintRow) {
   }
 }
 
-/* Progress Bar */
-.session-progress {
-  margin-bottom: 24px;
-}
-
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.progress-label {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-@media (min-width: 768px) {
-  .progress-label {
-    font-size: 13px;
-  }
-}
-
-.progress-count {
-  font-size: 13px;
-  color: var(--text-secondary);
-  font-weight: 600;
-}
-
-@media (min-width: 768px) {
-  .progress-count {
-    font-size: 14px;
-  }
-}
-
-.progress-bar {
-  display: flex;
-  gap: 6px;
-}
-
-@media (min-width: 768px) {
-  .progress-bar {
-    gap: 8px;
-  }
-}
-
-.progress-segment {
-  flex: 1;
-  height: 8px;
-  border-radius: 100px;
-  background: var(--bg-tertiary);
-  transition: all 0.3s ease;
-}
-
-@media (min-width: 768px) {
-  .progress-segment {
-    height: 10px;
-  }
-}
-
-.progress-segment.completed {
-  background: var(--accent-tertiary);
-  box-shadow: 0 2px 8px rgba(132, 204, 22, 0.2);
-}
-
-.progress-segment.current {
-  background: var(--bg-tertiary);
-}
-
-.progress-segment.current.is-running {
-  background: var(--accent-secondary);
-  animation: pulse-segment 1.5s ease-in-out infinite;
-}
-
-.progress-segment.current.is-paused {
-  background: var(--accent-amber);
-}
-
-@keyframes pulse-segment {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
 /* Control Buttons */
 .session-controls {
   display: flex;
@@ -528,33 +382,6 @@ function handleComplete(stint: StintRow) {
     padding: 14px 28px !important;
     font-size: 14px !important;
   }
-}
-
-.ctrl-btn.warning {
-  border-color: var(--accent-amber) !important;
-  color: var(--accent-amber) !important;
-}
-
-.ctrl-btn.warning:hover {
-  background: rgba(217, 119, 6, 0.1) !important;
-}
-
-.ctrl-btn.success {
-  border-color: var(--accent-secondary) !important;
-  color: var(--accent-secondary) !important;
-}
-
-.ctrl-btn.success:hover {
-  background: rgba(34, 197, 94, 0.1) !important;
-}
-
-.ctrl-btn.danger {
-  border-color: var(--accent-danger) !important;
-  color: var(--accent-danger) !important;
-}
-
-.ctrl-btn.danger:hover {
-  background: rgba(220, 38, 38, 0.1) !important;
 }
 
 /* Empty State */
