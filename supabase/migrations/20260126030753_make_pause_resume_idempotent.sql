@@ -23,6 +23,7 @@ CREATE OR REPLACE FUNCTION pause_stint(p_stint_id UUID)
 RETURNS public.stints
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_stint public.stints%ROWTYPE;
@@ -74,7 +75,7 @@ END;
 $$;
 
 COMMENT ON FUNCTION pause_stint(UUID) IS
-  'Pauses an active stint. Semi-idempotent: returns gracefully if stint already completed/interrupted (race condition handling for GitHub #24).';
+  'Pauses an active stint for the authenticated owner. Multiple paused stints are allowed per user (Issue #46). Semi-idempotent: if the stint has already reached a terminal state (completed/interrupted), returns the current row without error (race condition handling for GitHub #24).';
 
 -- -----------------------------------------------------------------------------
 -- 2. Update resume_stint Function
@@ -83,6 +84,7 @@ CREATE OR REPLACE FUNCTION resume_stint(p_stint_id UUID)
 RETURNS public.stints
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_stint public.stints%ROWTYPE;
@@ -154,4 +156,4 @@ END;
 $$;
 
 COMMENT ON FUNCTION resume_stint(UUID) IS
-  'Resumes a paused stint. Semi-idempotent: returns gracefully if stint already completed/interrupted (race condition handling for GitHub #24).';
+  'Resumes a paused stint for the authenticated owner. Fails if the stint is not paused or another active stint exists for the user. Semi-idempotent: if the stint has already reached a terminal state (completed/interrupted), returns the current row without error (race condition handling for GitHub #24).';
