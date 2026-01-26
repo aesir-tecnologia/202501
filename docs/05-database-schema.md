@@ -426,10 +426,10 @@ CREATE EXTENSION IF NOT EXISTS pg_cron;
 Automatically completes stints that have exceeded their planned duration.
 
 ```sql
--- Runs every 2 minutes
+-- Runs every 1 minute (pg_cron minimum interval)
 SELECT cron.schedule(
   'auto-complete-stints',
-  '*/2 * * * *',
+  '* * * * *',
   $$SELECT auto_complete_expired_stints()$$
 );
 ```
@@ -621,7 +621,7 @@ INSERT INTO projects (user_id, name) VALUES ('other-user-uuid', 'Test');
 ### Auto-Completion Functions
 
 **auto_complete_expired_stints()**
-- Called by pg_cron every 2 minutes
+- Called by pg_cron every 1 minute
 - Finds all active stints past planned duration
 - Calls `complete_stint` for each expired stint
 - Returns: `completed_count`, `error_count`, `completed_stint_ids`
