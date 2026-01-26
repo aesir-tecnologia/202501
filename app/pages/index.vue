@@ -186,8 +186,7 @@ onUnmounted(() => {
               <div class="relative flex items-center justify-center">
                 <!-- Ambient glow -->
                 <div
-                  class="absolute w-80 h-80 blur-3xl opacity-20 dark:opacity-30 pulse-slow"
-                  style="background: radial-gradient(circle, rgba(234, 88, 12, 0.5), transparent 70%);"
+                  class="absolute w-80 h-80 blur-3xl opacity-20 dark:opacity-30 pulse-slow timer-ambient-glow"
                 />
 
                 <!-- Timer ring -->
@@ -1391,6 +1390,11 @@ onUnmounted(() => {
 :root.dark .hero-warm {
     background: radial-gradient(1000px 340px at 20% -10%, rgba(234, 88, 12, 0.2), transparent 60%),
     radial-gradient(800px 280px at 80% -20%, rgba(34, 197, 94, 0.1), transparent 60%);
+}
+
+/* Timer visualization ambient glow - uses design system tokens */
+.timer-ambient-glow {
+    background: radial-gradient(circle, var(--accent-primary-glow), transparent 70%);
 }
 
 @keyframes subtle-pulse {
