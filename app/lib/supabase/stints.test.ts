@@ -390,12 +390,32 @@ describe('stints.ts - Integration Tests', () => {
       expect(result.error?.message).toContain('not active');
     });
 
-    it('should return error when stint is completed', async () => {
+    it('should be semi-idempotent and return stint when already completed (GitHub #24)', async () => {
       const stint = await createCompletedStint(serviceClient, testProject.id, testUserId);
 
       const result = await pauseStint(authenticatedClient, stint.id);
 
-      expect(result.error).not.toBeNull();
+      // Semi-idempotent: returns the completed stint instead of error
+      // This prevents race condition errors when auto-complete runs during pause
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('completed');
+      expect(result.data!.id).toBe(stint.id);
+    });
+
+    it('should be semi-idempotent and return stint when already interrupted (GitHub #24)', async () => {
+      const stint = await createCompletedStint(serviceClient, testProject.id, testUserId, {
+        status: 'interrupted',
+        completion_type: 'interrupted',
+      });
+
+      const result = await pauseStint(authenticatedClient, stint.id);
+
+      // Semi-idempotent: returns the interrupted stint instead of error
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('interrupted');
+      expect(result.data!.id).toBe(stint.id);
     });
 
     it('should return error when stint not found', async () => {
@@ -460,12 +480,32 @@ describe('stints.ts - Integration Tests', () => {
       expect(result.error?.message).toContain('not paused');
     });
 
-    it('should return error when stint is completed', async () => {
+    it('should be semi-idempotent and return stint when already completed (GitHub #24)', async () => {
       const stint = await createCompletedStint(serviceClient, testProject.id, testUserId);
 
       const result = await resumeStint(authenticatedClient, stint.id);
 
-      expect(result.error).not.toBeNull();
+      // Semi-idempotent: returns the completed stint instead of error
+      // This prevents race condition errors when auto-complete runs during resume
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('completed');
+      expect(result.data!.id).toBe(stint.id);
+    });
+
+    it('should be semi-idempotent and return stint when already interrupted (GitHub #24)', async () => {
+      const stint = await createCompletedStint(serviceClient, testProject.id, testUserId, {
+        status: 'interrupted',
+        completion_type: 'interrupted',
+      });
+
+      const result = await resumeStint(authenticatedClient, stint.id);
+
+      // Semi-idempotent: returns the interrupted stint instead of error
+      expect(result.error).toBeNull();
+      expect(result.data).not.toBeNull();
+      expect(result.data!.status).toBe('interrupted');
+      expect(result.data!.id).toBe(stint.id);
     });
 
     it('should return error when stint not found', async () => {
