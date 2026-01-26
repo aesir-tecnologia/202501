@@ -266,7 +266,7 @@ sequenceDiagram
   - Validation handled via Zod schemas on client, database constraints on server
 
 - **Scheduled Tasks via pg_cron**
-  - `auto_complete_stints`: Auto-completes stints at planned end time (runs every 2 min)
+  - `auto_complete_stints`: Auto-completes stints at planned end time (runs every 1 min)
   - `aggregate_daily_stats`: Pre-calculates daily summaries (runs at midnight)
 
 - **CSV Export**
@@ -288,7 +288,7 @@ sequenceDiagram
 ### Scheduled Jobs
 
 - **pg_cron** (PostgreSQL extension)
-  - Auto-complete stints: `*/2 * * * *` (every 2 minutes)
+  - Auto-complete stints: `* * * * *` (every 1 minute)
   - Daily aggregation: `0 1 * * *` (1 AM UTC)
   - Cleanup old sessions: `0 2 * * *` (2 AM UTC)
   - Email digests: `0 8 * * 1` (8 AM UTC every Monday)

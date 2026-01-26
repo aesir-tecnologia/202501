@@ -325,7 +325,7 @@ self.onmessage = (e) => {
 
 ### Auto-Completion Fallback
 
-- pg_cron job runs every 2 minutes (`*/2 * * * *`)
+- pg_cron job runs every 1 minute (`* * * * *`)
 - Queries active stints where working time has reached planned duration:
   ```sql
   SELECT * FROM stints
