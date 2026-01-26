@@ -1,12 +1,8 @@
 import * as Sentry from '@sentry/nuxt';
 
 Sentry.init({
-  // If set up, you can use your runtime config here
-  // dsn: useRuntimeConfig().public.sentry.dsn,
   dsn: 'https://5a5cbfb4beed2524e792c0fe58ce805b@o4504073906159616.ingest.us.sentry.io/4510676196392960',
-
-  // We recommend adjusting this value in production, or using tracesSampler
-  // for finer control
+  enabled: import.meta.env.PROD,
   tracesSampleRate: 1.0,
 
   // This sets the sample rate to be 10%. You may want this to be 100% while
