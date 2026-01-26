@@ -125,7 +125,7 @@ BEGIN
     RAISE EXCEPTION 'Stint is not paused';
   END IF;
 
-  -- Check for existing active stint
+  -- Check for existing active stint (first-pass check, not concurrency-safe)
   SELECT * INTO v_active_stint
   FROM public.stints
   WHERE user_id = v_stint.user_id
@@ -137,19 +137,34 @@ BEGIN
     RAISE EXCEPTION 'Cannot resume while another stint is active';
   END IF;
 
-  -- Calculate pause duration and accumulate
+  -- Validate paused_at is set (defensive check for data integrity)
+  IF v_stint.paused_at IS NULL THEN
+    RAISE EXCEPTION 'Cannot resume stint: paused_at is NULL for paused stint';
+  END IF;
+
+  -- Calculate pause duration and accumulate (clamp negative durations to zero)
   v_pause_start := v_stint.paused_at;
-  v_pause_duration := EXTRACT(EPOCH FROM (NOW() - v_pause_start))::INTEGER;
+  v_pause_duration := GREATEST(
+    EXTRACT(EPOCH FROM (NOW() - v_pause_start))::INTEGER,
+    0
+  );
 
   -- Update stint to active and accumulate paused duration
-  UPDATE public.stints
-  SET
-    status = 'active'::stint_status,
-    paused_duration = paused_duration + v_pause_duration,
-    paused_at = NULL,
-    updated_at = NOW()
-  WHERE id = p_stint_id
-  RETURNING * INTO v_stint;
+  -- Wrap in exception handler for concurrency safety (unique_violation)
+  BEGIN
+    UPDATE public.stints
+    SET
+      status = 'active'::stint_status,
+      paused_duration = paused_duration + v_pause_duration,
+      paused_at = NULL,
+      updated_at = NOW()
+    WHERE id = p_stint_id
+    RETURNING * INTO v_stint;
+  EXCEPTION
+    WHEN unique_violation THEN
+      -- Handle race where another active stint was created concurrently
+      RAISE EXCEPTION 'Cannot resume while another stint is active';
+  END;
 
   RETURN v_stint;
 END;
