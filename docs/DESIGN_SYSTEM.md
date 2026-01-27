@@ -904,6 +904,24 @@ toast.add({
 </div>
 ```
 
+### Stint Action Buttons
+
+Project list cards use custom-styled action buttons for stint control:
+
+| Button | Color | Purpose |
+|--------|-------|---------|
+| **Start (Play)** | Green | Begin a new stint - uses `.play-btn` class |
+| **Resume** | Amber | Continue a paused stint - uses `.action-btn.resume` class |
+| **Pause** | Amber | Pause running stint - uses `.action-btn.pause` class |
+| **Stop** | Red | End current stint - uses `.action-btn.stop` class |
+
+**Color Rationale (Traffic Light Convention):**
+- **Green** = Go/Start (begin fresh work)
+- **Amber** = Caution (paused state, resume/pause actions)
+- **Red** = Stop (end session)
+
+**Implementation:** These buttons use custom CSS classes in `ProjectListCard.vue` with hardcoded color values for precise control over the subtle backgrounds and borders.
+
 ---
 
 ## Design Tokens Summary

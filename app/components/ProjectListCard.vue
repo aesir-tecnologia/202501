@@ -26,11 +26,14 @@ const emit = defineEmits<{
   completeStint: [stint: StintRow]
 }>();
 
-function formatDuration(minutes: number | null): string {
-  const duration = minutes ?? STINT.DURATION_MINUTES.DEFAULT;
-  if (duration < 60) return `${duration}m`;
-  const hours = Math.floor(duration / 60);
-  const mins = duration % 60;
+function formatDuration(seconds: number | null): string {
+  // Database stores seconds, convert to minutes for display
+  // Default is STINT.DURATION_SECONDS.DEFAULT (7200 = 120 min)
+  const durationSeconds = seconds ?? STINT.DURATION_SECONDS.DEFAULT;
+  const minutes = Math.round(durationSeconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
   return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
 }
 
@@ -598,28 +601,28 @@ function handleCompleteStint() {
   justify-content: center;
   width: 44px;
   height: 44px;
-  background: rgba(194, 65, 12, 0.05);
-  color: #c2410c;
-  border: 1px solid rgba(194, 65, 12, 0.25);
+  background: rgba(22, 101, 52, 0.05);
+  color: #166534;
+  border: 1px solid rgba(22, 101, 52, 0.25);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .play-btn:hover:not(:disabled) {
-  background: rgba(194, 65, 12, 0.15);
-  border-color: rgba(194, 65, 12, 0.4);
+  background: rgba(22, 101, 52, 0.15);
+  border-color: rgba(22, 101, 52, 0.4);
 }
 
 :root.dark .play-btn {
-  background: rgba(234, 88, 12, 0.05);
-  color: #fb923c;
-  border-color: rgba(234, 88, 12, 0.25);
+  background: rgba(34, 197, 94, 0.05);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.25);
 }
 
 :root.dark .play-btn:hover:not(:disabled) {
-  background: rgba(234, 88, 12, 0.15);
-  border-color: rgba(234, 88, 12, 0.4);
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
 }
 
 .play-btn:disabled {
