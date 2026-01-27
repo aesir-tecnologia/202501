@@ -15,7 +15,6 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$
 export const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(AUTH.PASSWORD.MIN_LENGTH, `Password must be at least ${AUTH.PASSWORD.MIN_LENGTH} characters`),
-  remember: z.boolean().optional(),
 });
 
 export type LoginPayload = z.infer<typeof loginSchema>;

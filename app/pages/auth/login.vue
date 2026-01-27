@@ -18,12 +18,12 @@ const supabase = useSupabaseClient();
 const state = reactive<LoginPayload>({
   email: '',
   password: '',
-  remember: false,
 });
 
 const loading = ref(false);
 const error = ref('');
 const success = ref('');
+const showPassword = ref(false);
 
 async function handleLogin(event: FormSubmitEvent<LoginPayload>) {
   loading.value = true;
@@ -88,17 +88,17 @@ watch(() => state.password, () => {
     <div class="min-h-screen flex items-center justify-center bg-[#fffbf5] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 dark:bg-stone-900">
       <div class="max-w-md w-full space-y-8 text-stone-800 dark:text-stone-50">
         <!-- Header Section -->
-        <div class="text-center space-y-3">
+        <div class="text-center space-y-4">
+          <!-- Logo -->
           <NuxtLink
             to="/"
-            class="inline-flex items-center gap-2 text-stone-500 hover:text-orange-700 dark:text-stone-400 dark:hover:text-orange-500 transition-colors mb-4"
+            class="block"
           >
-            <UIcon
-              name="i-lucide-arrow-left"
-              class="size-4"
-            />
-            <span class="text-sm font-medium">Back to home</span>
+            <span class="text-2xl font-serif">
+              <span class="text-stone-900 dark:text-white">Life</span><span class="italic text-orange-600 dark:text-orange-500">Stint</span>
+            </span>
           </NuxtLink>
+
           <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
             Welcome back
           </h2>
@@ -114,7 +114,7 @@ watch(() => state.password, () => {
         </div>
 
         <!-- Form Card -->
-        <UCard class="p-8 bg-white shadow-warm border border-stone-200 rounded-2xl transition-colors duration-300 dark:border-stone-700 dark:bg-stone-800">
+        <UCard class="p-8 bg-white shadow-warm border border-stone-200 rounded-2xl transition-colors duration-300 dark:border-stone-700 dark:bg-stone-800 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <UForm
             :schema="loginSchema"
             :state="state"
@@ -132,6 +132,7 @@ watch(() => state.password, () => {
                 type="email"
                 placeholder="Enter your email"
                 autocomplete="email"
+                icon="i-lucide-mail"
                 :disabled="loading"
                 class="w-full"
                 size="lg"
@@ -146,26 +147,32 @@ watch(() => state.password, () => {
             >
               <UInput
                 v-model="state.password"
-                type="password"
+                :type="showPassword ? 'text' : 'password'"
                 placeholder="Enter your password"
                 autocomplete="current-password"
+                icon="i-lucide-lock"
                 :disabled="loading"
                 class="w-full"
                 size="lg"
-              />
+                :ui="{ trailing: 'pe-1' }"
+              >
+                <template #trailing>
+                  <UButton
+                    color="neutral"
+                    variant="link"
+                    size="sm"
+                    :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                    :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                    :aria-pressed="showPassword"
+                    :disabled="loading"
+                    @click="showPassword = !showPassword"
+                  />
+                </template>
+              </UInput>
             </UFormField>
 
-            <!-- Remember & Forgot -->
-            <div class="flex items-center justify-between">
-              <UCheckbox
-                v-model="state.remember"
-                :disabled="loading"
-              >
-                <template #label>
-                  <span class="text-sm text-stone-600 dark:text-stone-400">Remember me</span>
-                </template>
-              </UCheckbox>
-
+            <!-- Forgot Password -->
+            <div class="text-right">
               <NuxtLink
                 to="/auth/forgot-password"
                 class="text-sm font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
