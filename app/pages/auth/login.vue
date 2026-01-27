@@ -5,6 +5,10 @@ import { loginSchema, type LoginPayload } from '~/schemas/auth';
 definePageMeta({
   layout: false,
   middleware: 'guest',
+  pageTransition: {
+    name: 'auth-transition',
+    mode: 'out-in',
+  },
 });
 
 useSeoMeta({
@@ -84,137 +88,139 @@ watch(() => state.password, () => {
 </script>
 
 <template>
-  <UApp>
-    <div class="min-h-screen flex items-center justify-center bg-[#fffbf5] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 dark:bg-stone-900">
-      <div class="max-w-md w-full space-y-8 text-stone-800 dark:text-stone-50">
-        <!-- Header Section -->
-        <div class="text-center space-y-4">
-          <!-- Logo -->
-          <NuxtLink
-            to="/"
-            class="block"
-          >
-            <span class="text-2xl font-serif">
-              <span class="text-stone-900 dark:text-white">Life</span><span class="italic text-orange-600 dark:text-orange-500">Stint</span>
-            </span>
-          </NuxtLink>
-
-          <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
-            Welcome back
-          </h2>
-          <p class="text-sm text-stone-600 dark:text-stone-400">
-            Don't have an account?
+  <div>
+    <UApp>
+      <div class="min-h-screen flex items-center justify-center bg-[#fffbf5] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 dark:bg-stone-900">
+        <div class="max-w-md w-full space-y-8 text-stone-800 dark:text-stone-50">
+          <!-- Header Section -->
+          <div class="text-center space-y-4">
+            <!-- Logo -->
             <NuxtLink
-              to="/auth/register"
-              class="font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
+              to="/"
+              class="block"
             >
-              Sign up here
+              <span class="text-2xl font-serif">
+                <span class="text-stone-900 dark:text-white">Life</span><span class="italic text-orange-600 dark:text-orange-500">Stint</span>
+              </span>
             </NuxtLink>
-          </p>
-        </div>
 
-        <!-- Form Card -->
-        <UCard class="p-8 bg-white shadow-warm border border-stone-200 rounded-2xl transition-colors duration-300 dark:border-stone-700 dark:bg-stone-800 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <UForm
-            :schema="loginSchema"
-            :state="state"
-            class="space-y-6"
-            @submit="handleLogin"
-          >
-            <!-- Email Field -->
-            <UFormField
-              label="Email address"
-              name="email"
-              required
-            >
-              <UInput
-                v-model="state.email"
-                type="email"
-                placeholder="Enter your email"
-                autocomplete="email"
-                icon="i-lucide-mail"
-                :disabled="loading"
-                class="w-full"
-                size="lg"
-              />
-            </UFormField>
-
-            <!-- Password Field -->
-            <UFormField
-              label="Password"
-              name="password"
-              required
-            >
-              <UInput
-                v-model="state.password"
-                :type="showPassword ? 'text' : 'password'"
-                placeholder="Enter your password"
-                autocomplete="current-password"
-                icon="i-lucide-lock"
-                :disabled="loading"
-                class="w-full"
-                size="lg"
-                :ui="{ trailing: 'pe-1' }"
-              >
-                <template #trailing>
-                  <UButton
-                    color="neutral"
-                    variant="link"
-                    size="sm"
-                    :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                    :aria-label="showPassword ? 'Hide password' : 'Show password'"
-                    :aria-pressed="showPassword"
-                    :disabled="loading"
-                    @click="showPassword = !showPassword"
-                  />
-                </template>
-              </UInput>
-            </UFormField>
-
-            <!-- Forgot Password -->
-            <div class="text-right">
+            <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
+              Welcome back
+            </h2>
+            <p class="text-sm text-stone-600 dark:text-stone-400">
+              Don't have an account?
               <NuxtLink
-                to="/auth/forgot-password"
-                class="text-sm font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
+                to="/auth/register"
+                class="font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
               >
-                Forgot your password?
+                Sign up here
               </NuxtLink>
-            </div>
+            </p>
+          </div>
 
-            <!-- Submit Button -->
-            <UButton
-              type="submit"
-              color="primary"
-              :loading="loading"
-              :disabled="loading"
-              class="w-full"
-              size="lg"
+          <!-- Form Card -->
+          <UCard class="p-8 bg-white shadow-warm border border-stone-200 rounded-2xl transition-colors duration-300 dark:border-stone-700 dark:bg-stone-800 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <UForm
+              :schema="loginSchema"
+              :state="state"
+              class="space-y-6"
+              @submit="handleLogin"
             >
-              {{ loading ? 'Signing in...' : 'Sign in' }}
-            </UButton>
-          </UForm>
+              <!-- Email Field -->
+              <UFormField
+                label="Email address"
+                name="email"
+                required
+              >
+                <UInput
+                  v-model="state.email"
+                  type="email"
+                  placeholder="Enter your email"
+                  autocomplete="email"
+                  icon="i-lucide-mail"
+                  :disabled="loading"
+                  class="w-full"
+                  size="lg"
+                />
+              </UFormField>
 
-          <!-- Error Alert -->
-          <UAlert
-            v-if="error"
-            icon="i-lucide-triangle-alert"
-            color="error"
-            variant="soft"
-            :title="error"
-            class="mt-4"
-          />
+              <!-- Password Field -->
+              <UFormField
+                label="Password"
+                name="password"
+                required
+              >
+                <UInput
+                  v-model="state.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  icon="i-lucide-lock"
+                  :disabled="loading"
+                  class="w-full"
+                  size="lg"
+                  :ui="{ trailing: 'pe-1' }"
+                >
+                  <template #trailing>
+                    <UButton
+                      color="neutral"
+                      variant="link"
+                      size="sm"
+                      :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                      :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                      :aria-pressed="showPassword"
+                      :disabled="loading"
+                      @click="showPassword = !showPassword"
+                    />
+                  </template>
+                </UInput>
+              </UFormField>
 
-          <!-- Success Alert -->
-          <UAlert
-            v-if="success"
-            icon="i-lucide-circle-check"
-            color="success"
-            variant="soft"
-            :title="success"
-            class="mt-4"
-          />
-        </UCard>
+              <!-- Forgot Password -->
+              <div class="text-right">
+                <NuxtLink
+                  to="/auth/forgot-password"
+                  class="text-sm font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
+                >
+                  Forgot your password?
+                </NuxtLink>
+              </div>
+
+              <!-- Submit Button -->
+              <UButton
+                type="submit"
+                color="primary"
+                :loading="loading"
+                :disabled="loading"
+                class="w-full"
+                size="lg"
+              >
+                {{ loading ? 'Signing in...' : 'Sign in' }}
+              </UButton>
+            </UForm>
+
+            <!-- Error Alert -->
+            <UAlert
+              v-if="error"
+              icon="i-lucide-triangle-alert"
+              color="error"
+              variant="soft"
+              :title="error"
+              class="mt-4"
+            />
+
+            <!-- Success Alert -->
+            <UAlert
+              v-if="success"
+              icon="i-lucide-circle-check"
+              color="success"
+              variant="soft"
+              :title="success"
+              class="mt-4"
+            />
+          </UCard>
+        </div>
       </div>
-    </div>
-  </UApp>
+    </UApp>
+  </div>
 </template>

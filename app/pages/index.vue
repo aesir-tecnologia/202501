@@ -12,6 +12,10 @@ const ANIMATION_CONFIG = {
 
 definePageMeta({
   layout: false,
+  pageTransition: {
+    name: 'auth-transition',
+    mode: 'out-in',
+  },
 });
 
 useSeoMeta({

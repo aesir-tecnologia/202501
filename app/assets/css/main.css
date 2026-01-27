@@ -21,3 +21,20 @@ html {
   animation-duration: 300ms;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Page Transitions - Auth Flow */
+.auth-transition-enter-active,
+.auth-transition-leave-active {
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-transition-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.auth-transition-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
