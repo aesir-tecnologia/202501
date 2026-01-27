@@ -26,15 +26,12 @@ const emit = defineEmits<{
   completeStint: [stint: StintRow]
 }>();
 
-function formatDuration(seconds: number | null): string {
-  // Database stores seconds, convert to minutes for display
-  // Default is STINT.DURATION_SECONDS.DEFAULT (7200 = 120 min)
-  const durationSeconds = seconds ?? STINT.DURATION_SECONDS.DEFAULT;
-  const minutes = Math.round(durationSeconds / 60);
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+function formatDuration(minutes: number | null): string {
+  const mins = minutes ?? STINT.DURATION_MINUTES.DEFAULT;
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60);
+  const remainder = mins % 60;
+  return remainder > 0 ? `${hours}h ${remainder}m` : `${hours}h`;
 }
 
 function formatTime(date: Date): string {

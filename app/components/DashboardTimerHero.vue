@@ -28,17 +28,23 @@ const { secondsRemaining, isPaused } = useStintTimer();
 
 const hasSession = computed(() => props.activeStint !== null);
 const isRunning = computed(() => props.activeStint !== null && !isPaused.value);
-const isPausedState = computed(() => props.activeStint !== null && isPaused.value);
 
 // Snapshot refs - preserve last known values during hide animation
 const snapshotProjectName = ref<string | null>(null);
 const snapshotTimerDisplay = ref('00:00');
 const snapshotMeta = ref<{
-  started: string;
-  plannedDuration: string;
-  pausedMinutes: number;
-  ends: string;
+  started: string
+  plannedDuration: string
+  pausedDisplay: string
+  ends: string
 } | null>(null);
+
+function formatPausedTime(seconds: number): string {
+  if (seconds <= 0) return '';
+  if (seconds < 60) return `+${seconds}s`;
+  const minutes = Math.round(seconds / 60);
+  return `+${minutes}m`;
+}
 const snapshotIsOvertime = ref(false);
 const snapshotIsPaused = ref(false);
 
@@ -83,7 +89,6 @@ watch(
 
     const plannedMinutes = stint.planned_duration || 30;
     const pausedSeconds = stint.paused_duration || 0;
-    const pausedMinutes = Math.round(pausedSeconds / 60);
 
     const endTime = new Date(startedAt.getTime() + (plannedMinutes * 60 * 1000) + (pausedSeconds * 1000));
 
@@ -96,7 +101,7 @@ watch(
     snapshotMeta.value = {
       started: startedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       plannedDuration: formattedPlannedDuration,
-      pausedMinutes,
+      pausedDisplay: formatPausedTime(pausedSeconds),
       ends: endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
   },
@@ -151,9 +156,9 @@ function handleComplete(stint: StintRow) {
         <div class="meta-item">
           <span class="meta-value">
             {{ displayMeta.plannedDuration }}<span
-              v-if="displayMeta.pausedMinutes > 0"
+              v-if="displayMeta.pausedDisplay"
               class="text-(--ui-text-muted)"
-            > +{{ displayMeta.pausedMinutes }}</span>
+            > {{ displayMeta.pausedDisplay }}</span>
           </span>
           <span class="meta-label">Duration</span>
         </div>
