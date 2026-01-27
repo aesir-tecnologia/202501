@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { z } from 'zod';
 import type { FormSubmitEvent } from '@nuxt/ui';
+import { loginSchema, type LoginPayload } from '~/schemas/auth';
 
 definePageMeta({
   layout: false,
@@ -15,15 +15,7 @@ useSeoMeta({
 const appConfig = useAppConfig();
 const supabase = useSupabaseClient();
 
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  remember: z.boolean().optional(),
-});
-
-type LoginSchema = z.output<typeof loginSchema>;
-
-const state = reactive<LoginSchema>({
+const state = reactive<LoginPayload>({
   email: '',
   password: '',
   remember: false,
@@ -33,7 +25,7 @@ const loading = ref(false);
 const error = ref('');
 const success = ref('');
 
-async function handleLogin(event: FormSubmitEvent<LoginSchema>) {
+async function handleLogin(event: FormSubmitEvent<LoginPayload>) {
   loading.value = true;
   error.value = '';
   success.value = '';
@@ -185,6 +177,7 @@ watch(() => state.password, () => {
             <!-- Submit Button -->
             <UButton
               type="submit"
+              color="primary"
               :loading="loading"
               :disabled="loading"
               class="w-full"

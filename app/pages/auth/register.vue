@@ -243,52 +243,52 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
               class="text-xs space-y-1 -mt-4 mb-2"
             >
               <div
-                :class="hasMinLength ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
+                :class="hasMinLength ? 'text-success-700 dark:text-success-400' : 'text-stone-500 dark:text-stone-400'"
                 class="flex items-center gap-1.5"
               >
                 <UIcon
                   :name="hasMinLength ? 'i-lucide-check-circle' : 'i-lucide-circle'"
-                  class="w-3.5 h-3.5"
+                  class="h-4 w-4"
                 />
                 <span>At least 8 characters</span>
               </div>
               <div
-                :class="hasUppercase ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
+                :class="hasUppercase ? 'text-success-700 dark:text-success-400' : 'text-stone-500 dark:text-stone-400'"
                 class="flex items-center gap-1.5"
               >
                 <UIcon
                   :name="hasUppercase ? 'i-lucide-check-circle' : 'i-lucide-circle'"
-                  class="w-3.5 h-3.5"
+                  class="h-4 w-4"
                 />
                 <span>One uppercase letter</span>
               </div>
               <div
-                :class="hasLowercase ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
+                :class="hasLowercase ? 'text-success-700 dark:text-success-400' : 'text-stone-500 dark:text-stone-400'"
                 class="flex items-center gap-1.5"
               >
                 <UIcon
                   :name="hasLowercase ? 'i-lucide-check-circle' : 'i-lucide-circle'"
-                  class="w-3.5 h-3.5"
+                  class="h-4 w-4"
                 />
                 <span>One lowercase letter</span>
               </div>
               <div
-                :class="hasNumber ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
+                :class="hasNumber ? 'text-success-700 dark:text-success-400' : 'text-stone-500 dark:text-stone-400'"
                 class="flex items-center gap-1.5"
               >
                 <UIcon
                   :name="hasNumber ? 'i-lucide-check-circle' : 'i-lucide-circle'"
-                  class="w-3.5 h-3.5"
+                  class="h-4 w-4"
                 />
                 <span>One number</span>
               </div>
               <div
-                :class="hasSpecialChar ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
+                :class="hasSpecialChar ? 'text-success-700 dark:text-success-400' : 'text-stone-500 dark:text-stone-400'"
                 class="flex items-center gap-1.5"
               >
                 <UIcon
                   :name="hasSpecialChar ? 'i-lucide-check-circle' : 'i-lucide-circle'"
-                  class="w-3.5 h-3.5"
+                  class="h-4 w-4"
                 />
                 <span>One special character (@$!%*?&)</span>
               </div>
@@ -313,10 +313,10 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
                 <span
                   class="text-xs font-semibold"
                   :class="{
-                    'text-red-600 dark:text-red-400': passwordStrength.color === 'error',
-                    'text-amber-600 dark:text-amber-400': passwordStrength.color === 'warning',
-                    'text-blue-600 dark:text-blue-400': passwordStrength.color === 'info',
-                    'text-green-600 dark:text-green-400': passwordStrength.color === 'success',
+                    'text-error-600 dark:text-error-400': passwordStrength.color === 'error',
+                    'text-warning-600 dark:text-warning-400': passwordStrength.color === 'warning',
+                    'text-info-600 dark:text-info-400': passwordStrength.color === 'info',
+                    'text-success-600 dark:text-success-400': passwordStrength.color === 'success',
                   }"
                 >
                   {{ passwordStrength.level }}
@@ -376,6 +376,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
 
             <UButton
               type="submit"
+              color="primary"
               :loading="loading"
               :disabled="loading || !state.acceptTerms"
               class="w-full"

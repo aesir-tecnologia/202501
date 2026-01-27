@@ -12,6 +12,14 @@ export const AUTH = {
 
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
+export const loginSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(AUTH.PASSWORD.MIN_LENGTH, `Password must be at least ${AUTH.PASSWORD.MIN_LENGTH} characters`),
+  remember: z.boolean().optional(),
+});
+
+export type LoginPayload = z.infer<typeof loginSchema>;
+
 export const registerSchema = z.object({
   fullName: z.string()
     .min(AUTH.FULL_NAME.MIN_LENGTH, `Full name must be at least ${AUTH.FULL_NAME.MIN_LENGTH} characters`)
