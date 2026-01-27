@@ -30,34 +30,85 @@ const hasSession = computed(() => props.activeStint !== null);
 const isRunning = computed(() => props.activeStint !== null && !isPaused.value);
 const isPausedState = computed(() => props.activeStint !== null && isPaused.value);
 
-const timerDisplay = computed(() => formatStintTime(secondsRemaining.value));
+// Snapshot refs - preserve last known values during hide animation
+const snapshotProjectName = ref<string | null>(null);
+const snapshotTimerDisplay = ref('00:00');
+const snapshotMeta = ref<{
+  started: string;
+  plannedDuration: string;
+  pausedMinutes: number;
+  ends: string;
+} | null>(null);
+const snapshotIsOvertime = ref(false);
+const snapshotIsPaused = ref(false);
 
-const sessionMeta = computed(() => {
-  const stint = props.activeStint;
-  if (!stint) return null;
+// Update snapshots only when we have active data
+watch(
+  () => props.project?.name,
+  (name) => {
+    if (name) snapshotProjectName.value = name;
+  },
+  { immediate: true },
+);
 
-  const startedAt = parseSafeDate(stint.started_at);
-  if (!startedAt) return null;
+watch(
+  secondsRemaining,
+  (seconds) => {
+    if (props.activeStint) {
+      snapshotTimerDisplay.value = formatStintTime(seconds);
+      snapshotIsOvertime.value = seconds < 0;
+    }
+  },
+  { immediate: true },
+);
 
-  const plannedMinutes = stint.planned_duration || 30;
-  const pausedSeconds = stint.paused_duration || 0;
-  const pausedMinutes = Math.round(pausedSeconds / 60);
+watch(
+  isPaused,
+  (paused) => {
+    if (props.activeStint) {
+      snapshotIsPaused.value = paused;
+    }
+  },
+  { immediate: true },
+);
 
-  const endTime = new Date(startedAt.getTime() + (plannedMinutes * 60 * 1000) + (pausedSeconds * 1000));
+// Compute and snapshot session meta
+watch(
+  () => props.activeStint,
+  (stint) => {
+    if (!stint) return;
 
-  const plannedHours = Math.floor(plannedMinutes / 60);
-  const plannedMins = plannedMinutes % 60;
-  const formattedPlannedDuration = plannedHours > 0
-    ? `${plannedHours}h ${plannedMins}m`
-    : `${plannedMinutes}m`;
+    const startedAt = parseSafeDate(stint.started_at);
+    if (!startedAt) return;
 
-  return {
-    started: startedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    plannedDuration: formattedPlannedDuration,
-    pausedMinutes,
-    ends: endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  };
-});
+    const plannedMinutes = stint.planned_duration || 30;
+    const pausedSeconds = stint.paused_duration || 0;
+    const pausedMinutes = Math.round(pausedSeconds / 60);
+
+    const endTime = new Date(startedAt.getTime() + (plannedMinutes * 60 * 1000) + (pausedSeconds * 1000));
+
+    const plannedHours = Math.floor(plannedMinutes / 60);
+    const plannedMins = plannedMinutes % 60;
+    const formattedPlannedDuration = plannedHours > 0
+      ? `${plannedHours}h ${plannedMins}m`
+      : `${plannedMinutes}m`;
+
+    snapshotMeta.value = {
+      started: startedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      plannedDuration: formattedPlannedDuration,
+      pausedMinutes,
+      ends: endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+  },
+  { immediate: true },
+);
+
+// Display values use snapshots (persist during fade)
+const displayProjectName = computed(() => snapshotProjectName.value);
+const displayTimerValue = computed(() => snapshotTimerDisplay.value);
+const displayMeta = computed(() => snapshotMeta.value);
+const displayIsOvertime = computed(() => snapshotIsOvertime.value);
+const displayIsPaused = computed(() => snapshotIsPaused.value);
 
 function handlePause(stint: StintRow) {
   emit('pause', stint);
@@ -78,39 +129,36 @@ function handleComplete(stint: StintRow) {
     :class="{ 'is-visible': hasSession }"
   >
     <!-- Ambient glow effect -->
-    <div
-      v-if="hasSession"
-      class="ambient-glow"
-    />
+    <div class="ambient-glow" />
 
     <!-- Active Session State -->
-    <template v-if="hasSession && project">
+    <div class="session-content">
       <div class="session-header">
         <h2 class="session-project font-serif">
-          {{ project.name }}
+          {{ displayProjectName }}
         </h2>
       </div>
 
       <!-- Session Metadata -->
       <div
-        v-if="sessionMeta"
+        v-if="displayMeta"
         class="session-meta"
       >
         <div class="meta-item">
-          <span class="meta-value">{{ sessionMeta.started }}</span>
+          <span class="meta-value">{{ displayMeta.started }}</span>
           <span class="meta-label">Started</span>
         </div>
         <div class="meta-item">
           <span class="meta-value">
-            {{ sessionMeta.plannedDuration }}<span
-              v-if="sessionMeta.pausedMinutes > 0"
+            {{ displayMeta.plannedDuration }}<span
+              v-if="displayMeta.pausedMinutes > 0"
               class="text-(--ui-text-muted)"
-            > +{{ sessionMeta.pausedMinutes }}</span>
+            > +{{ displayMeta.pausedMinutes }}</span>
           </span>
           <span class="meta-label">Duration</span>
         </div>
         <div class="meta-item">
-          <span class="meta-value">{{ sessionMeta.ends }}</span>
+          <span class="meta-value">{{ displayMeta.ends }}</span>
           <span class="meta-label">Ends</span>
         </div>
       </div>
@@ -119,12 +167,12 @@ function handleComplete(stint: StintRow) {
       <div class="session-timer">
         <div
           class="timer-display"
-          :class="{ 'is-paused': isPausedState, 'is-overtime': secondsRemaining < 0 }"
+          :class="{ 'is-paused': displayIsPaused, 'is-overtime': displayIsOvertime }"
         >
-          {{ timerDisplay }}
+          {{ displayTimerValue }}
         </div>
         <div class="timer-label">
-          {{ secondsRemaining < 0 ? 'Overtime' : 'Time Remaining' }}
+          {{ displayIsOvertime ? 'Overtime' : 'Time Remaining' }}
         </div>
       </div>
 
@@ -169,7 +217,7 @@ function handleComplete(stint: StintRow) {
           Stop
         </UButton>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 
@@ -183,7 +231,7 @@ function handleComplete(stint: StintRow) {
   position: relative;
   overflow: hidden;
   opacity: 0;
-  transition: opacity 500ms ease;
+  transition: opacity 300ms ease;
 }
 
 .session-card.is-visible {
