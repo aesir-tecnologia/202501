@@ -388,18 +388,25 @@ export async function startStint(
     return { data: null, error: new Error('Cannot start stint for archived project') };
   }
 
-  // Resolve planned duration: param → project custom → default 120
-  const resolvedDuration = plannedDurationMinutes
-    ?? project.custom_stint_duration
+  // Resolve planned duration in minutes: param → project custom (in seconds, convert to minutes) → default 120
+  // Note: project.custom_stint_duration is stored in seconds, convert to minutes for validation
+  const projectDurationMinutes = project.custom_stint_duration
+    ? Math.round(project.custom_stint_duration / 60)
+    : null;
+  const resolvedDurationMinutes = plannedDurationMinutes
+    ?? projectDurationMinutes
     ?? STINT.DURATION_MINUTES.DEFAULT;
 
-  // Validate duration bounds (5-480)
-  if (resolvedDuration < STINT.DURATION_MINUTES.MIN || resolvedDuration > STINT.DURATION_MINUTES.MAX) {
+  // Validate duration bounds in minutes (5-480)
+  if (resolvedDurationMinutes < STINT.DURATION_MINUTES.MIN || resolvedDurationMinutes > STINT.DURATION_MINUTES.MAX) {
     return {
       data: null,
       error: new Error(`Duration must be between ${STINT.DURATION_MINUTES.MIN} and ${STINT.DURATION_MINUTES.MAX} minutes`),
     };
   }
+
+  // Convert to seconds for database storage
+  const resolvedDurationSeconds = resolvedDurationMinutes * 60;
 
   // TOCTOU (Time-of-Check-Time-of-Use) Race Condition Handling:
   // 1. Validate stint start using RPC (check user version + active stint status)
@@ -438,13 +445,13 @@ export async function startStint(
     };
   }
 
-  // Insert new stint
+  // Insert new stint (planned_duration in seconds)
   const { data: newStint, error: insertError } = await client
     .from('stints')
     .insert({
       user_id: userId,
       project_id: projectId,
-      planned_duration: resolvedDuration,
+      planned_duration: resolvedDurationSeconds,
       notes: notes || null,
       status: 'active',
       started_at: new Date().toISOString(),

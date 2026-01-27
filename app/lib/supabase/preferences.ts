@@ -34,7 +34,10 @@ export async function getPreferences(
 
   return {
     data: {
-      defaultStintDuration: data.default_stint_duration,
+      // Convert from seconds (database) to minutes (user-facing)
+      defaultStintDuration: data.default_stint_duration !== null
+        ? Math.round(data.default_stint_duration / 60)
+        : null,
       celebrationAnimation: data.celebration_animation,
       desktopNotifications: data.desktop_notifications,
     },
@@ -54,7 +57,11 @@ export async function updatePreferences(
 
   const dbUpdates: Record<string, unknown> = {};
   if ('defaultStintDuration' in updates) {
-    dbUpdates.default_stint_duration = updates.defaultStintDuration;
+    // Convert from minutes (user-facing) to seconds (database storage)
+    const durationMinutes = updates.defaultStintDuration;
+    dbUpdates.default_stint_duration = durationMinutes != null
+      ? durationMinutes * 60
+      : null;
   }
   if ('celebrationAnimation' in updates) {
     dbUpdates.celebration_animation = updates.celebrationAnimation;
@@ -76,7 +83,10 @@ export async function updatePreferences(
 
   return {
     data: {
-      defaultStintDuration: data.default_stint_duration,
+      // Convert from seconds (database) to minutes (user-facing)
+      defaultStintDuration: data.default_stint_duration !== null
+        ? Math.round(data.default_stint_duration / 60)
+        : null,
       celebrationAnimation: data.celebration_animation,
       desktopNotifications: data.desktop_notifications,
     },

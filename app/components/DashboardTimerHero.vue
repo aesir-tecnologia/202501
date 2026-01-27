@@ -4,6 +4,7 @@ import type { ProjectRow } from '~/lib/supabase/projects';
 import { useStintTimer } from '~/composables/useStintTimer';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { formatStintTime } from '~/utils/stint-time';
+import { STINT } from '~/constants';
 
 interface DailyProgress {
   completed: number
@@ -39,11 +40,13 @@ const sessionMeta = computed(() => {
   const startedAt = parseSafeDate(stint.started_at);
   if (!startedAt) return null;
 
-  const plannedMinutes = stint.planned_duration || 30;
+  const plannedSeconds = stint.planned_duration || STINT.DURATION_SECONDS.DEFAULT;
   const pausedSeconds = stint.paused_duration || 0;
+
+  const plannedMinutes = Math.round(plannedSeconds / 60);
   const pausedMinutes = Math.round(pausedSeconds / 60);
 
-  const endTime = new Date(startedAt.getTime() + (plannedMinutes * 60 * 1000) + (pausedSeconds * 1000));
+  const endTime = new Date(startedAt.getTime() + (plannedSeconds * 1000) + (pausedSeconds * 1000));
 
   const totalMinutes = plannedMinutes + pausedMinutes;
   const durationHours = Math.floor(totalMinutes / 60);

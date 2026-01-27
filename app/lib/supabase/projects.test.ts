@@ -152,10 +152,11 @@ describe('projects.ts - Integration Tests', () => {
 
   describe('createProject', () => {
     it('should create project with valid payload', async () => {
+      // custom_stint_duration is in seconds (2700 = 45 minutes)
       const payload: CreateProjectPayload = {
         name: 'New Project',
         expected_daily_stints: 3,
-        custom_stint_duration: 45,
+        custom_stint_duration: 2700, // 45 minutes in seconds
       };
 
       const result = await createProject(authenticatedClient, payload);
@@ -164,7 +165,7 @@ describe('projects.ts - Integration Tests', () => {
       expect(result.data).not.toBeNull();
       expect(result.data!.name).toBe('New Project');
       expect(result.data!.expected_daily_stints).toBe(3);
-      expect(result.data!.custom_stint_duration).toBe(45);
+      expect(result.data!.custom_stint_duration).toBe(2700);
       expect(result.data!.user_id).toBe(testUserId);
     });
 

@@ -1,8 +1,8 @@
 # LifeStint - Database Schema & Data Models
 
 **Product Name:** LifeStint
-**Document Version:** 5.0
-**Date:** January 24, 2026
+**Document Version:** 5.1
+**Date:** January 26, 2026
 
 ---
 
@@ -46,7 +46,7 @@ CREATE TABLE user_profiles (
   timezone TEXT NOT NULL DEFAULT 'UTC',
   version INTEGER NOT NULL DEFAULT 1, -- Optimistic locking
   -- User preferences (stored here instead of separate table for simplicity)
-  default_stint_duration INTEGER CHECK (default_stint_duration IS NULL OR (default_stint_duration >= 5 AND default_stint_duration <= 480)),
+  default_stint_duration INTEGER CHECK (default_stint_duration IS NULL OR (default_stint_duration >= 300 AND default_stint_duration <= 28800)),
   celebration_animation BOOLEAN NOT NULL DEFAULT true,
   desktop_notifications BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now(),
@@ -101,7 +101,7 @@ CREATE TRIGGER on_auth_user_created
 - `email`: Synced from `auth.users.email` on profile creation
 - `timezone`: IANA timezone string (e.g., "America/New_York") for daily reset and analytics
 - `version`: Incremented on every update for optimistic locking (prevents race conditions)
-- `default_stint_duration`: Default stint duration in minutes (5-480). NULL means use system default (120 min)
+- `default_stint_duration`: Default stint duration in seconds (300-28800). NULL means use system default (7200 seconds = 120 min)
 - `celebration_animation`: Show confetti animation when daily goal is reached
 - `desktop_notifications`: Enable browser notifications for stint completion
 
@@ -127,7 +127,7 @@ CREATE TABLE projects (
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   expected_daily_stints INTEGER NOT NULL DEFAULT 2,
-  custom_stint_duration INTEGER, -- Minutes, NULL means use default (120)
+  custom_stint_duration INTEGER, -- Seconds, NULL means use default (7200 seconds = 120 min)
   color_tag TEXT,
   is_active BOOLEAN NOT NULL DEFAULT true,
   archived_at TIMESTAMPTZ, -- NULL if not archived
@@ -137,7 +137,7 @@ CREATE TABLE projects (
   CONSTRAINT valid_name CHECK (length(name) >= 2 AND length(name) <= 60),
   CONSTRAINT valid_daily_stints CHECK (expected_daily_stints >= 1 AND expected_daily_stints <= 12),
   CONSTRAINT valid_stint_duration CHECK (custom_stint_duration IS NULL OR
-    (custom_stint_duration >= 5 AND custom_stint_duration <= 480)),
+    (custom_stint_duration >= 300 AND custom_stint_duration <= 28800)),
   CONSTRAINT valid_color CHECK (color_tag IS NULL OR color_tag IN
     ('red', 'orange', 'amber', 'green', 'teal', 'blue', 'purple', 'pink'))
 );
@@ -169,7 +169,7 @@ CREATE TRIGGER auto_assign_project_sort_order_trigger BEFORE INSERT ON projects
 ```
 
 **Field Descriptions:**
-- `custom_stint_duration`: Overrides default 120 minutes if set
+- `custom_stint_duration`: Overrides default 7200 seconds (120 min) if set. Stored in seconds.
 - `color_tag`: Visual identifier in dashboard (8 preset colors)
 - `archived_at`: Soft delete timestamp (NULL if active)
 - `sort_order`: User-defined ordering (0 = first), future drag-to-reorder
@@ -177,7 +177,7 @@ CREATE TRIGGER auto_assign_project_sort_order_trigger BEFORE INSERT ON projects
 **Constraints:**
 - Project names must be unique per user (case-insensitive)
 - Expected daily stints: 1-12
-- Custom stint duration: 5-480 minutes if specified
+- Custom stint duration: 300-28800 seconds (5-480 minutes) if specified
 
 **Business Rules:**
 - Archiving a project with active stint is prevented by application logic
@@ -198,7 +198,7 @@ CREATE TABLE stints (
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE, -- Denormalized for query performance
   started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   ended_at TIMESTAMPTZ,
-  planned_duration INTEGER NOT NULL, -- Minutes (5-480)
+  planned_duration INTEGER NOT NULL, -- Seconds (300-28800)
   actual_duration INTEGER, -- Seconds, calculated on completion
   paused_duration INTEGER NOT NULL DEFAULT 0, -- Seconds
   paused_at TIMESTAMPTZ, -- Most recent pause time
@@ -207,7 +207,7 @@ CREATE TABLE stints (
   notes TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT valid_planned_duration CHECK (planned_duration >= 5 AND planned_duration <= 480),
+  CONSTRAINT valid_planned_duration CHECK (planned_duration >= 300 AND planned_duration <= 28800),
   CONSTRAINT valid_notes CHECK (notes IS NULL OR length(notes) <= 500),
   CONSTRAINT valid_ended CHECK (ended_at IS NULL OR ended_at >= started_at),
   CONSTRAINT completed_has_ended CHECK (status IN ('active', 'paused') OR ended_at IS NOT NULL)
@@ -252,7 +252,7 @@ ALTER TABLE stints REPLICA IDENTITY FULL;
 
 **Field Descriptions:**
 - `user_id`: Denormalized for faster queries (no join needed)
-- `planned_duration`: Stint length in **minutes** (5-480)
+- `planned_duration`: Stint length in **seconds** (300-28800). All duration fields now use seconds for consistency.
 - `actual_duration`: Total working time in **seconds**, calculated on completion
 - `paused_duration`: Cumulative pause time in **seconds**
 - `status`: Uses `stint_status` enum (active, paused, completed, interrupted)
@@ -260,7 +260,7 @@ ALTER TABLE stints REPLICA IDENTITY FULL;
 - `paused_at`: Timestamp when current pause started; NULL when active or completed
 
 **Constraints:**
-- Planned duration: 5-480 minutes
+- Planned duration: 300-28800 seconds (5-480 minutes)
 - Notes: Max 500 characters
 - Completed/interrupted stints must have `ended_at`
 
@@ -269,7 +269,7 @@ ALTER TABLE stints REPLICA IDENTITY FULL;
 - **Multiple paused stints allowed** per user (non-unique index `idx_stints_paused_per_user`)
 - Auto-completion triggered by pg_cron when working time reaches planned duration (active stints only)
 - Working time (seconds): `EXTRACT(EPOCH FROM (now() - started_at)) - paused_duration`
-- Comparison: `working_time_seconds >= planned_duration * 60`
+- Comparison: `working_time_seconds >= planned_duration` (both in seconds)
 - Paused stints do not auto-complete; working time is frozen while paused
 - Interrupted stints don't count toward daily progress but preserved in history
 
@@ -435,7 +435,7 @@ SELECT cron.schedule(
 ```
 
 **Purpose:**
-- Finds all active stints where `working_time >= planned_duration * 60`
+- Finds all active stints where `working_time >= planned_duration` (both in seconds)
 - Calls `complete_stint()` with `completion_type = 'auto'`
 - Returns count of completed stints and any errors
 
@@ -694,7 +694,7 @@ erDiagram
         text email UK "NOT NULL"
         text timezone "DEFAULT 'UTC'"
         int version "Optimistic locking"
-        int default_stint_duration "5-480 or NULL"
+        int default_stint_duration "300-28800 seconds or NULL"
         bool celebration_animation "DEFAULT true"
         bool desktop_notifications "DEFAULT false"
         timestamptz created_at
@@ -706,7 +706,7 @@ erDiagram
         uuid user_id FK "NOT NULL"
         text name "2-60 chars"
         int expected_daily_stints "1-12, DEFAULT 2"
-        int custom_stint_duration "5-480 or NULL"
+        int custom_stint_duration "300-28800 seconds or NULL"
         varchar color_tag "8 preset colors"
         bool is_active "DEFAULT true"
         timestamptz archived_at "NULL if active"
@@ -720,7 +720,7 @@ erDiagram
         uuid project_id FK "NOT NULL"
         uuid user_id FK "Denormalized"
         stint_status status "ENUM"
-        int planned_duration "Minutes, 5-480"
+        int planned_duration "Seconds, 300-28800"
         int actual_duration "Seconds"
         int paused_duration "Seconds, DEFAULT 0"
         timestamptz paused_at "NULL when active"

@@ -248,21 +248,21 @@ describe('stints.ts - Integration Tests', () => {
     it('should create stint with valid payload', async () => {
       const result = await createStint(authenticatedClient, {
         project_id: testProject.id,
-        planned_duration: 30,
+        planned_duration: 1800, // 30 minutes in seconds
         status: 'active',
         started_at: new Date().toISOString(),
       });
 
       expect(result.error).toBeNull();
       expect(result.data).not.toBeNull();
-      expect(result.data!.planned_duration).toBe(30);
+      expect(result.data!.planned_duration).toBe(1800);
       expect(result.data!.status).toBe('active');
     });
 
     it('should auto-generate id and timestamps', async () => {
       const result = await createStint(authenticatedClient, {
         project_id: testProject.id,
-        planned_duration: 25,
+        planned_duration: 1500, // 25 minutes in seconds
         status: 'active',
         started_at: new Date().toISOString(),
       });
@@ -276,7 +276,7 @@ describe('stints.ts - Integration Tests', () => {
     it('should return auth error when user is not authenticated', async () => {
       const result = await createStint(unauthenticatedClient, {
         project_id: testProject.id,
-        planned_duration: 25,
+        planned_duration: 1500, // 25 minutes in seconds
         status: 'active',
         started_at: new Date().toISOString(),
       });
@@ -647,24 +647,26 @@ describe('stints.ts - Integration Tests', () => {
 
   describe('startStint', () => {
     it('should start stint with explicit duration', async () => {
+      // User passes 45 minutes, stored as 2700 seconds
       const result = await startStint(authenticatedClient, testProject.id, 45);
 
       expect(result.error).toBeNull();
       expect(result.data).not.toBeNull();
-      expect(result.data!.planned_duration).toBe(45);
+      expect(result.data!.planned_duration).toBe(2700); // 45 min * 60 = 2700 sec
       expect(result.data!.status).toBe('active');
     });
 
     it('should use project custom_stint_duration when param not provided', async () => {
+      // Project duration is stored in seconds (3600 = 60 minutes)
       const projectWithCustomDuration = await createTestProject(serviceClient, testUserId, {
         name: 'Custom Duration Project',
-        custom_stint_duration: 60,
+        custom_stint_duration: 3600, // 60 minutes in seconds
       });
 
       const result = await startStint(authenticatedClient, projectWithCustomDuration.id);
 
       expect(result.error).toBeNull();
-      expect(result.data!.planned_duration).toBe(60);
+      expect(result.data!.planned_duration).toBe(3600); // 60 minutes in seconds
     });
 
     it('should use default 120 minutes when no project custom duration', async () => {
@@ -676,7 +678,7 @@ describe('stints.ts - Integration Tests', () => {
       const result = await startStint(authenticatedClient, projectWithoutCustomDuration.id);
 
       expect(result.error).toBeNull();
-      expect(result.data!.planned_duration).toBe(120);
+      expect(result.data!.planned_duration).toBe(7200); // 120 min * 60 = 7200 sec
     });
 
     it('should validate duration is at least 5 minutes', async () => {
@@ -744,7 +746,7 @@ describe('stints.ts - Integration Tests', () => {
   describe('syncStintCheck', () => {
     it('should return correct remaining time for active stint', async () => {
       const stint = await createActiveStint(serviceClient, testProject.id, testUserId, {
-        planned_duration: 30,
+        planned_duration: 1800, // 30 minutes in seconds
         started_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
       });
 
@@ -759,7 +761,7 @@ describe('stints.ts - Integration Tests', () => {
 
     it('should return correct remaining time for paused stint', async () => {
       const stint = await createPausedStint(serviceClient, testProject.id, testUserId, {
-        planned_duration: 30,
+        planned_duration: 1800, // 30 minutes in seconds
         started_at: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
         paused_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         paused_duration: 0,
@@ -847,7 +849,7 @@ describe('stints.ts - Integration Tests', () => {
 
     it('should calculate remaining time correctly after being paused and resumed', async () => {
       const stint = await createActiveStint(serviceClient, testProject.id, testUserId, {
-        planned_duration: 30,
+        planned_duration: 1800, // 30 minutes in seconds
         started_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
       });
 
@@ -863,7 +865,7 @@ describe('stints.ts - Integration Tests', () => {
 
     it('should not decrease remaining time while stint is paused', async () => {
       const stint = await createActiveStint(serviceClient, testProject.id, testUserId, {
-        planned_duration: 30,
+        planned_duration: 1800, // 30 minutes in seconds
         started_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
       });
 
@@ -885,7 +887,7 @@ describe('stints.ts - Integration Tests', () => {
     it('should exclude paused time from actual_duration when completing', async () => {
       const startTime = new Date(Date.now() - 60 * 1000);
       const stint = await createActiveStint(serviceClient, testProject.id, testUserId, {
-        planned_duration: 30,
+        planned_duration: 1800, // 30 minutes in seconds
         started_at: startTime.toISOString(),
       });
 
@@ -979,7 +981,7 @@ describe('stints.ts - Integration Tests', () => {
           project_id: otherProject.id,
           status: 'active',
           started_at: new Date().toISOString(),
-          planned_duration: 25,
+          planned_duration: 1500, // 25 minutes in seconds
         });
 
       expect(error).not.toBeNull();
@@ -998,7 +1000,7 @@ describe('stints.ts - Integration Tests', () => {
           status: 'paused',
           started_at: new Date().toISOString(),
           paused_at: new Date().toISOString(),
-          planned_duration: 25,
+          planned_duration: 1500, // 25 minutes in seconds
         })
         .select()
         .single();

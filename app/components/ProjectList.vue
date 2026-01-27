@@ -221,9 +221,13 @@ async function handleStartStint(project: ProjectRow): Promise<void> {
 
 async function doStartStint(project: ProjectRow): Promise<void> {
   try {
+    // custom_stint_duration is stored in seconds, convert to minutes for startStint
+    const durationMinutes = project.custom_stint_duration != null
+      ? Math.round(project.custom_stint_duration / 60)
+      : undefined;
     await startStint({
       projectId: project.id,
-      plannedDurationMinutes: project.custom_stint_duration ?? undefined,
+      plannedDurationMinutes: durationMinutes,
     });
 
     screenReaderAnnouncement.value = `Started working on ${project.name}`;

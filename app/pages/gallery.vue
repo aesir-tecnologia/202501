@@ -14,13 +14,14 @@ useSeoMeta({
   description: 'Visual showcase of all LifeStint Vue components',
 });
 
+// NOTE: custom_stint_duration and planned_duration are in SECONDS
 const mockProjects: ProjectRow[] = [
   {
     id: '1',
     user_id: 'demo-user',
     name: 'Client Alpha',
     expected_daily_stints: 3,
-    custom_stint_duration: 45,
+    custom_stint_duration: 2700, // 45 minutes
     is_active: true,
     sort_order: 0,
     color_tag: 'orange',
@@ -33,7 +34,7 @@ const mockProjects: ProjectRow[] = [
     user_id: 'demo-user',
     name: 'Project Beta',
     expected_daily_stints: 2,
-    custom_stint_duration: 30,
+    custom_stint_duration: 1800, // 30 minutes
     is_active: true,
     sort_order: 1,
     color_tag: 'green',
@@ -64,7 +65,7 @@ const mockActiveStint: StintRow = {
   started_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
   paused_at: null,
   ended_at: null,
-  planned_duration: 45,
+  planned_duration: 2700, // 45 minutes in seconds
   paused_duration: 0,
   actual_duration: null,
   completion_type: null,
@@ -81,7 +82,7 @@ const mockPausedStint: StintRow = {
   started_at: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
   paused_at: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
   ended_at: null,
-  planned_duration: 30,
+  planned_duration: 1800, // 30 minutes in seconds
   paused_duration: 120,
   actual_duration: null,
   completion_type: null,

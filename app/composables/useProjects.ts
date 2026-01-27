@@ -117,7 +117,10 @@ function toDbPayload(payload: ProjectCreatePayload | ProjectUpdatePayload): DbCr
     result.expected_daily_stints = payload.expectedDailyStints;
   }
   if ('customStintDuration' in payload && payload.customStintDuration !== undefined) {
-    result.custom_stint_duration = payload.customStintDuration;
+    // Convert from minutes (user input) to seconds (database storage)
+    result.custom_stint_duration = payload.customStintDuration === null
+      ? null
+      : payload.customStintDuration * 60;
   }
   if ('colorTag' in payload && payload.colorTag !== undefined) {
     result.color_tag = payload.colorTag;
@@ -211,7 +214,8 @@ export function useCreateProject() {
           user_id: '',
           is_active: payload.isActive ?? true,
           expected_daily_stints: payload.expectedDailyStints ?? 2,
-          custom_stint_duration: payload.customStintDuration ?? null,
+          // Convert from minutes (user input) to seconds (database storage)
+          custom_stint_duration: payload.customStintDuration != null ? payload.customStintDuration * 60 : null,
           color_tag: payload.colorTag ?? null,
           archived_at: null,
           sort_order: 0,

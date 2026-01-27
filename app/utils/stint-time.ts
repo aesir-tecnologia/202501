@@ -37,7 +37,8 @@ export function calculateStintTime(
 
   const startedAt = new Date(stint.started_at);
   const pausedDurationSeconds = stint.paused_duration || 0;
-  const plannedDurationSeconds = stint.planned_duration * 60;
+  // planned_duration is already in seconds (migrated from minutes)
+  const plannedDurationSeconds = stint.planned_duration;
 
   let elapsedSeconds: number;
 

@@ -149,8 +149,6 @@
 
 ### Time Unit Standardization
 
-> **Note:** Duration fields require standardization. See [Issue #28](https://github.com/aesir-tecnologia/202501/issues/28) for tracking.
-
 All duration fields in the database use **seconds** as the base unit:
 - `planned_duration`: Stored in seconds (e.g., 7200 for 2 hours)
 - `paused_duration`: Stored in seconds

@@ -10,6 +10,12 @@ export const PROJECT = {
     MAX: 12,
     DEFAULT: 2,
   },
+  // Duration in seconds (used for database storage)
+  CUSTOM_STINT_DURATION_SECONDS: {
+    MIN: 300, // 5 minutes
+    MAX: 28800, // 480 minutes (8 hours)
+  },
+  // Duration in minutes (used for user-facing display and input)
   CUSTOM_STINT_DURATION_MINUTES: {
     MIN: 5,
     MAX: 480,
@@ -22,7 +28,15 @@ export const PROJECT = {
 } as const;
 
 // Stint Constants
+// NOTE: All durations are stored in SECONDS in the database
 export const STINT = {
+  // Duration in seconds (used for database storage and calculations)
+  DURATION_SECONDS: {
+    MIN: 300, // 5 minutes
+    MAX: 28800, // 480 minutes (8 hours)
+    DEFAULT: 7200, // 120 minutes (2 hours)
+  },
+  // Duration in minutes (used for user-facing display and input)
   DURATION_MINUTES: {
     MIN: 5,
     MAX: 480,
@@ -40,7 +54,15 @@ export const STREAK = {
 } as const;
 
 // User Preferences Constants
+// NOTE: All durations are stored in SECONDS in the database
 export const PREFERENCES = {
+  // Duration in seconds (used for database storage)
+  STINT_DURATION_SECONDS: {
+    MIN: 300, // 5 minutes
+    MAX: 28800, // 480 minutes (8 hours)
+    DEFAULT: 7200, // 120 minutes (2 hours)
+  },
+  // Duration in minutes (used for user-facing display and input)
   STINT_DURATION: {
     MIN: 5,
     MAX: 480,

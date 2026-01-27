@@ -64,6 +64,7 @@ export async function createTestProject(
   return data;
 }
 
+// NOTE: planned_duration is in SECONDS
 export async function createActiveStint(
   client: TypedSupabaseClient,
   projectId: string,
@@ -75,7 +76,7 @@ export async function createActiveStint(
     .insert({
       project_id: projectId,
       user_id: userId,
-      planned_duration: 25,
+      planned_duration: 1500, // 25 minutes in seconds
       status: 'active',
       started_at: new Date().toISOString(),
       ...overrides,
@@ -97,7 +98,7 @@ export async function createPausedStint(
     .insert({
       project_id: projectId,
       user_id: userId,
-      planned_duration: 25,
+      planned_duration: 1500, // 25 minutes in seconds
       status: 'paused',
       started_at: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
       paused_at: new Date().toISOString(),
@@ -123,11 +124,11 @@ export async function createCompletedStint(
     .insert({
       project_id: projectId,
       user_id: userId,
-      planned_duration: 25,
+      planned_duration: 1500, // 25 minutes in seconds
       status: 'completed',
       started_at: startedAt.toISOString(),
       ended_at: endedAt.toISOString(),
-      actual_duration: 25 * 60,
+      actual_duration: 1500, // 25 minutes in seconds
       completion_type: 'manual',
       ...overrides,
     })
@@ -154,11 +155,11 @@ export async function createCompletedStintOnDate(
     .insert({
       project_id: projectId,
       user_id: userId,
-      planned_duration: 25,
+      planned_duration: 1500, // 25 minutes in seconds
       status: 'completed',
       started_at: startedAt.toISOString(),
       ended_at: endedAt.toISOString(),
-      actual_duration: 25 * 60,
+      actual_duration: 1500, // 25 minutes in seconds
       completion_type: 'manual',
       ...overrides,
     })

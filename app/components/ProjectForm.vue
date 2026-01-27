@@ -15,11 +15,14 @@ const emit = defineEmits<{
   cancel: []
 }>();
 
-// Form state
+// Form state (customStintDuration converted from seconds to minutes for form input)
 const formData = ref({
   name: props.project?.name ?? '',
   expectedDailyStints: props.project?.expected_daily_stints ?? PROJECT.DAILY_STINTS.DEFAULT,
-  customStintDuration: props.project?.custom_stint_duration ?? null,
+  // Database stores seconds, form uses minutes
+  customStintDuration: props.project?.custom_stint_duration != null
+    ? Math.round(props.project.custom_stint_duration / 60)
+    : null,
   colorTag: (props.project?.color_tag as ProjectColor | null) ?? null,
 });
 

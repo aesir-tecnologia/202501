@@ -35,7 +35,7 @@ type WorkerOutgoingMessage
 // Timer configuration constants
 const TIMER_DRIFT_THRESHOLD_SECONDS = 5;
 const TIMER_SYNC_INTERVAL_MS = 60000;
-const DEFAULT_PLANNED_DURATION_MINUTES = STINT.DURATION_MINUTES.DEFAULT;
+const DEFAULT_PLANNED_DURATION_SECONDS = STINT.DURATION_SECONDS.DEFAULT;
 const WORKER_RETRY_BASE_DELAY_MS = 1000;
 const NOTIFICATION_TIMEOUT_MS = 10000;
 const AUTO_COMPLETE_MAX_RETRIES = 3;
@@ -273,7 +273,8 @@ function startTimer(stint: StintRow): void {
     return;
   }
   const startedAt = startedAtDate.getTime();
-  const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000;
+  // planned_duration is in seconds, convert to milliseconds
+  const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_SECONDS) * 1000;
   const pausedDurationMs = (stint.paused_duration || 0) * 1000;
   const endTime = startedAt + plannedDurationMs + pausedDurationMs;
 
@@ -340,7 +341,8 @@ function resumeTimer(stint: StintRow): void {
     return;
   }
   const startedAt = startedAtDate.getTime();
-  const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_MINUTES) * 60 * 1000;
+  // planned_duration is in seconds, convert to milliseconds
+  const plannedDurationMs = (stint.planned_duration || DEFAULT_PLANNED_DURATION_SECONDS) * 1000;
   const pausedDurationMs = (stint.paused_duration || 0) * 1000;
   const endTime = startedAt + plannedDurationMs + pausedDurationMs;
 

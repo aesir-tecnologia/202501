@@ -7,13 +7,14 @@ import {
 } from './stint-time';
 import type { StintRow } from '~/lib/supabase/stints';
 
+// NOTE: planned_duration is in SECONDS (25 minutes = 1500 seconds)
 function createMockStint(overrides: Partial<StintRow> = {}): StintRow {
   return {
     id: 'stint-1',
     user_id: 'user-1',
     project_id: 'project-1',
     status: 'active',
-    planned_duration: 25,
+    planned_duration: 1500, // 25 minutes in seconds
     started_at: new Date('2025-01-01T10:00:00Z').toISOString(),
     paused_at: null,
     paused_duration: 0,
