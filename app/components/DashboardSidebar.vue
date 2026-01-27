@@ -36,18 +36,22 @@ function handleComplete(stint: StintRow) {
 
 <template>
   <aside class="dashboard-sidebar">
-    <!-- Timer Hero / Session Card -->
-    <DashboardTimerHero
-      :active-stint="activeStint"
-      :project="activeProject"
-      :daily-progress="dailyProgress"
-      @pause="handlePause"
-      @resume="handleResume"
-      @complete="handleComplete"
-    />
-
-    <!-- Streak Banner (self-contained, fetches own data) -->
-    <StreakBanner class="!mb-0" />
+    <!-- Timer Hero wrapper for grid animation -->
+    <div
+      class="hero-timer-row"
+      :class="{ 'is-visible': activeStint }"
+    >
+      <div class="hero-timer-content">
+        <DashboardTimerHero
+          :active-stint="activeStint"
+          :project="activeProject"
+          :daily-progress="dailyProgress"
+          @pause="handlePause"
+          @resume="handleResume"
+          @complete="handleComplete"
+        />
+      </div>
+    </div>
 
     <!-- Achievement Card (self-contained, fetches own data) -->
     <AchievementCard />
@@ -56,8 +60,8 @@ function handleComplete(stint: StintRow) {
 
 <style scoped>
 .dashboard-sidebar {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto auto;
   gap: 16px;
 }
 
@@ -67,5 +71,21 @@ function handleComplete(stint: StintRow) {
     position: sticky;
     top: 100px;
   }
+}
+
+/* Hero timer row animation */
+.hero-timer-row {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 500ms ease;
+}
+
+.hero-timer-row.is-visible {
+  grid-template-rows: 1fr;
+}
+
+.hero-timer-content {
+  overflow: hidden;
+  min-height: 0;
 }
 </style>

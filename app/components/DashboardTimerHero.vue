@@ -45,16 +45,16 @@ const sessionMeta = computed(() => {
 
   const endTime = new Date(startedAt.getTime() + (plannedMinutes * 60 * 1000) + (pausedSeconds * 1000));
 
-  const totalMinutes = plannedMinutes + pausedMinutes;
-  const durationHours = Math.floor(totalMinutes / 60);
-  const durationMins = totalMinutes % 60;
-  const formattedDuration = durationHours > 0
-    ? `${durationHours}h ${durationMins}m`
-    : `${totalMinutes}m`;
+  const plannedHours = Math.floor(plannedMinutes / 60);
+  const plannedMins = plannedMinutes % 60;
+  const formattedPlannedDuration = plannedHours > 0
+    ? `${plannedHours}h ${plannedMins}m`
+    : `${plannedMinutes}m`;
 
   return {
     started: startedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    duration: formattedDuration,
+    plannedDuration: formattedPlannedDuration,
+    pausedMinutes,
     ends: endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   };
 });
@@ -75,9 +75,9 @@ function handleComplete(stint: StintRow) {
 <template>
   <div
     class="session-card"
-    :class="{ 'has-session': hasSession }"
+    :class="{ 'is-visible': hasSession }"
   >
-    <!-- Ambient glow effect (only when session active) -->
+    <!-- Ambient glow effect -->
     <div
       v-if="hasSession"
       class="ambient-glow"
@@ -101,7 +101,12 @@ function handleComplete(stint: StintRow) {
           <span class="meta-label">Started</span>
         </div>
         <div class="meta-item">
-          <span class="meta-value">{{ sessionMeta.duration }}</span>
+          <span class="meta-value">
+            {{ sessionMeta.plannedDuration }}<span
+              v-if="sessionMeta.pausedMinutes > 0"
+              class="text-(--ui-text-muted)"
+            > +{{ sessionMeta.pausedMinutes }}</span>
+          </span>
           <span class="meta-label">Duration</span>
         </div>
         <div class="meta-item">
@@ -146,7 +151,7 @@ function handleComplete(stint: StintRow) {
           @click="handleResume(activeStint!)"
         >
           <Icon
-            name="i-lucide-play"
+            name="i-lucide-redo"
             class="w-4 h-4"
           />
           Resume
@@ -165,22 +170,6 @@ function handleComplete(stint: StintRow) {
         </UButton>
       </div>
     </template>
-
-    <!-- Empty State -->
-    <template v-else>
-      <div class="no-session">
-        <div class="no-session-icon">
-          <Icon
-            name="i-lucide-clock"
-            class="w-8 h-8"
-          />
-        </div>
-        <h3 class="font-serif">
-          No active session
-        </h3>
-        <p>Select a project to start a focused work stint</p>
-      </div>
-    </template>
   </div>
 </template>
 
@@ -193,18 +182,19 @@ function handleComplete(stint: StintRow) {
   box-shadow: var(--shadow-card);
   position: relative;
   overflow: hidden;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.session-card.is-visible {
+  opacity: 1;
+  transition: opacity 300ms ease;
 }
 
 @media (min-width: 768px) {
   .session-card {
     padding: 32px;
     border-radius: var(--radius-xl);
-  }
-}
-
-@media (max-width: 767.98px) {
-  .session-card:not(.has-session) {
-    display: none;
   }
 }
 
