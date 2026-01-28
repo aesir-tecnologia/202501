@@ -441,6 +441,9 @@ See `README.md` for detailed deployment instructions.
 - **Sentry** - Production error tracking via `@sentry/nuxt`
 - **Consola** - Logging abstraction with Sentry integration (UnJS/Nuxt team)
 
+**Sentry Consola Integration:**
+Use `Sentry.createConsolaReporter()` (reporter pattern), not `consolaIntegration` (doesn't exist). Configure in `sentry.*.config.ts` after `Sentry.init()`.
+
 ### Testing
 - **Vitest** - Unit and integration test runner
 - **Happy DOM** - Lightweight DOM implementation for tests
