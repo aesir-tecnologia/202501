@@ -101,10 +101,10 @@ async function handlePermanentDelete() {
         aria-hidden="true"
       />
       <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
-        No archived projects
+        Your archive is empty
       </h3>
       <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">
-        Your archive is empty. Projects you archive will appear here.
+        Projects you archive will appear here.
       </p>
       <UButton
         color="neutral"
