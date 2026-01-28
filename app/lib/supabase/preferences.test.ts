@@ -105,6 +105,7 @@ describe('preferences.ts - Integration Tests', () => {
       expect(result.data?.defaultStintDuration).toBe(90);
       expect(result.data?.celebrationAnimation).toBe(true);
       expect(result.data?.desktopNotifications).toBe(true);
+      expect(result.data?.stintDayAttribution).toBeDefined();
     });
 
     it('should require authentication', async () => {
@@ -148,6 +149,7 @@ describe('preferences.ts - Integration Tests', () => {
       expect(result.data?.defaultStintDuration).toBe(75);
       expect(result.data?.celebrationAnimation).toBe(false);
       expect(result.data?.desktopNotifications).toBe(true);
+      expect(result.data?.stintDayAttribution).toBeDefined();
     });
   });
 });
