@@ -112,7 +112,3 @@ If commit succeeded, show:
 Commit: fix(timer): correct drift calculation on pause
 Files: 2 changed, 15 insertions(+), 3 deletions(-)
 ```
-
----
-
-Now execute this workflow. Commit message hint: $ARGUMENTS
