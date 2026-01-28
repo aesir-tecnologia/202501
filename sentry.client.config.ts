@@ -3,6 +3,7 @@ import { consola } from 'consola';
 
 Sentry.init({
   dsn: 'https://5a5cbfb4beed2524e792c0fe58ce805b@o4504073906159616.ingest.us.sentry.io/4510676196392960',
+  environment: import.meta.env.MODE,
   enabled: import.meta.env.PROD,
   tracesSampleRate: 1.0,
 
