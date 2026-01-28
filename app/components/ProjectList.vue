@@ -12,6 +12,7 @@ import {
   useStartStint,
   useStintsQuery,
 } from '~/composables/useStints';
+import { getRandomPreWorkQuote } from '~/constants/motivational-quotes';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
@@ -24,11 +25,40 @@ import StintConflictDialog, { type ConflictResolutionAction } from './StintConfl
 const props = defineProps<{
   projects: ProjectRow[]
   isDraggable?: boolean
+  tab: 'active' | 'inactive'
+  totalProjectCount: number
+  hasInactiveProjects: boolean
+  hasCompletedStintsToday: boolean
 }>();
 
 const emit = defineEmits<{
   edit: [project: ProjectRow]
+  createProject: []
+  switchTab: [tab: 'active' | 'inactive' | 'archived']
 }>();
+
+type EmptyStateType = 'no-projects' | 'all-inactive' | 'no-inactive-projects' | null;
+
+const emptyStateType = computed<EmptyStateType>(() => {
+  if (props.projects.length > 0) return null;
+
+  if (props.tab === 'active') {
+    if (props.totalProjectCount === 0) return 'no-projects';
+    if (props.hasInactiveProjects) return 'all-inactive';
+  }
+
+  if (props.tab === 'inactive') return 'no-inactive-projects';
+
+  return null;
+});
+
+const motivationalQuote = ref(getRandomPreWorkQuote());
+
+const showNoStintsBanner = computed(() => {
+  return props.tab === 'active'
+    && props.projects.length > 0
+    && !props.hasCompletedStintsToday;
+});
 
 const isDraggable = computed(() => props.isDraggable ?? false);
 
@@ -440,26 +470,110 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
       {{ screenReaderAnnouncement }}
     </div>
 
-    <!-- Empty state -->
+    <!-- No Stints Today Banner (above project list, when projects exist) -->
     <div
-      v-if="projects.length === 0"
+      v-if="showNoStintsBanner"
+      class="mb-4 rounded-lg bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900 p-4"
+    >
+      <div class="flex items-start gap-3">
+        <Icon
+          name="i-lucide-sun"
+          class="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5"
+          aria-hidden="true"
+        />
+        <div>
+          <p class="text-sm font-medium text-orange-800 dark:text-orange-200">
+            Start your first stint of the day
+          </p>
+          <p class="mt-1 text-sm text-orange-700 dark:text-orange-300 italic">
+            "{{ motivationalQuote }}"
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State: No Projects -->
+    <div
+      v-if="emptyStateType === 'no-projects'"
       class="text-center py-12"
     >
       <Icon
-        name="i-lucide-folder-open"
-        class="h-12 w-12 mx-auto text-neutral-400 dark:text-neutral-600"
+        name="i-lucide-rocket"
+        class="h-12 w-12 mx-auto text-stone-400 dark:text-stone-600"
+        aria-hidden="true"
       />
-      <h3 class="mt-4 text-xl font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
-        No projects
+      <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
+        Start your first project
       </h3>
-      <p class="mt-2 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
-        No projects in this category
+      <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">
+        Create a project to begin tracking your focused work sessions.
       </p>
+      <UButton
+        color="primary"
+        class="mt-4"
+        icon="i-lucide-plus"
+        @click="emit('createProject')"
+      >
+        New Project
+      </UButton>
+    </div>
+
+    <!-- Empty State: All Projects Inactive -->
+    <div
+      v-else-if="emptyStateType === 'all-inactive'"
+      class="text-center py-12"
+    >
+      <Icon
+        name="i-lucide-pause-circle"
+        class="h-12 w-12 mx-auto text-stone-400 dark:text-stone-600"
+        aria-hidden="true"
+      />
+      <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
+        No active projects
+      </h3>
+      <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">
+        Activate a project to get started with your focus sessions.
+      </p>
+      <UButton
+        color="primary"
+        variant="outline"
+        class="mt-4"
+        icon="i-lucide-play"
+        @click="emit('switchTab', 'inactive')"
+      >
+        View Inactive Projects
+      </UButton>
+    </div>
+
+    <!-- Empty State: No Inactive Projects (positive message) -->
+    <div
+      v-else-if="emptyStateType === 'no-inactive-projects'"
+      class="text-center py-12"
+    >
+      <Icon
+        name="i-lucide-check-circle"
+        class="h-12 w-12 mx-auto text-green-500 dark:text-green-400"
+        aria-hidden="true"
+      />
+      <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
+        All projects are active
+      </h3>
+      <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">
+        You have no inactive projects. Great job keeping things moving!
+      </p>
+      <UButton
+        color="neutral"
+        variant="ghost"
+        class="mt-4"
+        @click="emit('switchTab', 'active')"
+      >
+        Back to Active Projects
+      </UButton>
     </div>
 
     <!-- Projects List -->
     <ul
-      v-else
+      v-else-if="projects.length > 0"
       ref="activeListRef"
       class="space-y-2"
     >

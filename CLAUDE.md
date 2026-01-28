@@ -69,6 +69,7 @@ npm run serve            # Preview generated static site locally (localhost:3000
 ```bash
 npm run lint             # Run ESLint
 npm run lint:fix         # Fix ESLint errors automatically
+npm run type-check       # Run TypeScript type checking
 ```
 
 ### Testing
@@ -76,6 +77,7 @@ npm run lint:fix         # Fix ESLint errors automatically
 npm test                 # Run tests in watch mode
 npm run test:ui          # Run tests with Vitest UI
 npm run test:run         # Run tests once (CI mode)
+npm test -- path/to/file.test.ts  # Run single test file
 ```
 
 ### Database
@@ -273,15 +275,7 @@ Use `useTypedSupabaseClient()` from `~/utils/supabase` instead of `useSupabaseCl
 
 ## Testing
 
-Tests are **co-located** with the files they test for better discoverability and maintainability.
-
-### Running Tests
-
-```bash
-npm test                 # Run in watch mode
-npm run test:ui          # Run with Vitest UI
-npm run test:run         # Run once in CI mode
-```
+Tests are **co-located** with the files they test for better discoverability and maintainability. See [Key Commands > Testing](#testing) for how to run tests.
 
 ### Test Organization
 
@@ -392,35 +386,38 @@ See `README.md` for detailed deployment instructions.
 ## Tech Stack
 
 ### Core Framework
-- **Vue 3.5.24** - Composition API with `<script setup>` syntax
-- **Nuxt 4.2.1** - SSG mode via `nitro: { preset: 'static' }`
-- **TypeScript 5.9.3** - Full type safety with strict mode
-- **Vue Router 4.5.1** - Client-side routing (auto-generated from pages)
+- **Vue 3** - Composition API with `<script setup>` syntax
+- **Nuxt 4** - SSG mode via `nitro: { preset: 'static' }`
+- **TypeScript** - Full type safety with strict mode
+- **Vue Router** - Client-side routing (auto-generated from pages)
 
 ### UI & Styling
-- **Nuxt UI 4.2.0** - Component library built on **Reka UI** primitives (NOT Radix Vue)
-- **Tailwind CSS 4.1.17** - Utility-first CSS (bundled with Nuxt UI)
-- **Lucide Icons 1.2.73** - Icon library (`@iconify-json/lucide`, bundled locally)
+- **Nuxt UI 4** - Component library built on **Reka UI** primitives (NOT Radix Vue)
+- **Tailwind CSS** - Utility-first CSS (bundled with Nuxt UI)
+- **Lucide Icons** - Icon library (`@iconify-json/lucide`, bundled locally)
 - **Color Mode** - System-aware dark/light mode via Nuxt UI
 
 ### State & Data Management
-- **TanStack Query 5.91.2** - Server state, caching, optimistic updates (Vue Query)
-- **VueUse 13.9.0** - Composition utilities (`@vueuse/core`, `@vueuse/integrations`)
-- **SortableJS 1.15.6** - Drag-and-drop via `useSortable` from VueUse
+- **TanStack Query** - Server state, caching, optimistic updates (Vue Query)
+- **VueUse** - Composition utilities (`@vueuse/core`, `@vueuse/integrations`)
+- **SortableJS** - Drag-and-drop via `useSortable` from VueUse
 
 ### Backend & Database
-- **Supabase JS 2.83.0** - PostgreSQL client with auth and RLS
+- **Supabase JS** - PostgreSQL client with auth and RLS
 - **Local PostgreSQL** - Supabase local development via Docker
 - **Row Level Security (RLS)** - User-scoped data access policies
 
+### Monitoring & Error Tracking
+- **Sentry** - Production error tracking via `@sentry/nuxt`
+
 ### Testing
-- **Vitest 3.2.4** - Unit and integration test runner
-- **Happy DOM 18.0.1** - Lightweight DOM implementation for tests
+- **Vitest** - Unit and integration test runner
+- **Happy DOM** - Lightweight DOM implementation for tests
 - **Local Supabase** - Tests run against local Supabase instance
-- **@nuxt/test-utils 3.19.2** - Nuxt-specific testing utilities
+- **@nuxt/test-utils** - Nuxt-specific testing utilities
 
 ### Code Quality
-- **@nuxt/eslint 1.9.0** - ESLint configuration with stylistic rules
+- **@nuxt/eslint** - ESLint configuration with stylistic rules
 - **TypeScript Strict Mode** - Type checking via `nuxt typecheck`
 
 ### Build & Deployment

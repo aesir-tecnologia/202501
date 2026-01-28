@@ -5,6 +5,10 @@ import { registerSchema, type RegisterPayload } from '~/schemas/auth';
 definePageMeta({
   layout: false,
   middleware: 'guest',
+  pageTransition: {
+    name: 'auth-transition',
+    mode: 'out-in',
+  },
 });
 
 useSeoMeta({
@@ -155,256 +159,259 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
 </script>
 
 <template>
-  <UApp>
-    <div class="min-h-screen flex items-center justify-center bg-[#fffbf5] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 dark:bg-stone-900">
-      <div class="max-w-md w-full space-y-8 text-stone-800 dark:text-stone-50">
-        <div class="text-center space-y-3">
-          <NuxtLink
-            to="/"
-            class="inline-flex items-center gap-2 text-stone-500 hover:text-orange-700 dark:text-stone-400 dark:hover:text-orange-500 transition-colors mb-4"
-          >
-            <UIcon
-              name="i-lucide-arrow-left"
-              class="size-4"
-            />
-            <span class="text-sm font-medium">Back to home</span>
-          </NuxtLink>
-          <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
-            Create your account
-          </h2>
-          <p class="text-sm text-stone-600 dark:text-stone-400">
-            Already have an account?
+  <div>
+    <UApp>
+      <div class="min-h-screen flex items-center justify-center bg-[#fffbf5] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 dark:bg-stone-900">
+        <div class="max-w-md w-full space-y-8 text-stone-800 dark:text-stone-50">
+          <div class="text-center space-y-4">
+            <!-- Logo -->
             <NuxtLink
-              to="/auth/login"
-              class="font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
+              to="/"
+              class="block"
             >
-              Sign in here
+              <span class="text-2xl font-serif">
+                <span class="text-stone-900 dark:text-white">Life</span><span class="italic text-orange-600 dark:text-orange-500">Stint</span>
+              </span>
             </NuxtLink>
-          </p>
-        </div>
 
-        <UCard class="p-8 bg-white shadow-warm border border-stone-200 rounded-2xl transition-colors duration-300 dark:border-stone-700 dark:bg-stone-800">
-          <UForm
-            :schema="registerSchema"
-            :state="state"
-            class="space-y-6"
-            @submit="handleRegister"
-          >
-            <UFormField
-              label="Full Name"
-              name="fullName"
-              required
-            >
-              <UInput
-                v-model="state.fullName"
-                placeholder="Enter your full name"
-                autocomplete="name"
-                size="lg"
-                :disabled="loading"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField
-              label="Email address"
-              name="email"
-              required
-            >
-              <UInput
-                v-model="state.email"
-                type="email"
-                placeholder="Enter your email"
-                autocomplete="email"
-                size="lg"
-                :disabled="loading"
-                class="w-full"
-              />
-            </UFormField>
-
-            <UFormField
-              label="Password"
-              name="password"
-              required
-            >
-              <UInput
-                v-model="state.password"
-                type="password"
-                placeholder="Create a password"
-                autocomplete="new-password"
-                size="lg"
-                :disabled="loading"
-                class="w-full"
-              />
-            </UFormField>
-
-            <!-- Password Requirements Checklist -->
-            <div
-              v-if="state.password"
-              class="text-xs space-y-1 -mt-4 mb-2"
-            >
-              <div
-                :class="hasMinLength ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
-                class="flex items-center gap-1.5"
+            <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
+              Create your account
+            </h2>
+            <p class="text-sm text-stone-600 dark:text-stone-400">
+              Already have an account?
+              <NuxtLink
+                to="/auth/login"
+                class="font-medium text-orange-700 hover:text-orange-800 dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
               >
-                <UIcon
-                  :name="hasMinLength ? 'i-lucide-check-circle' : 'i-lucide-circle'"
-                  class="w-3.5 h-3.5"
-                />
-                <span>At least 8 characters</span>
-              </div>
-              <div
-                :class="hasUppercase ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
-                class="flex items-center gap-1.5"
-              >
-                <UIcon
-                  :name="hasUppercase ? 'i-lucide-check-circle' : 'i-lucide-circle'"
-                  class="w-3.5 h-3.5"
-                />
-                <span>One uppercase letter</span>
-              </div>
-              <div
-                :class="hasLowercase ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
-                class="flex items-center gap-1.5"
-              >
-                <UIcon
-                  :name="hasLowercase ? 'i-lucide-check-circle' : 'i-lucide-circle'"
-                  class="w-3.5 h-3.5"
-                />
-                <span>One lowercase letter</span>
-              </div>
-              <div
-                :class="hasNumber ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
-                class="flex items-center gap-1.5"
-              >
-                <UIcon
-                  :name="hasNumber ? 'i-lucide-check-circle' : 'i-lucide-circle'"
-                  class="w-3.5 h-3.5"
-                />
-                <span>One number</span>
-              </div>
-              <div
-                :class="hasSpecialChar ? 'text-green-700 dark:text-green-400' : 'text-stone-500 dark:text-stone-400'"
-                class="flex items-center gap-1.5"
-              >
-                <UIcon
-                  :name="hasSpecialChar ? 'i-lucide-check-circle' : 'i-lucide-circle'"
-                  class="w-3.5 h-3.5"
-                />
-                <span>One special character (@$!%*?&)</span>
-              </div>
-            </div>
-            <div
-              v-else
-              class="text-xs text-stone-500 dark:text-stone-400 -mt-4 mb-2"
-            >
-              Password must be at least 8 characters with uppercase, lowercase, number, and special
-              character
-            </div>
+                Sign in here
+              </NuxtLink>
+            </p>
+          </div>
 
-            <!-- Password Strength Indicator -->
-            <div
-              v-if="state.password && passwordStrength.level !== 'none'"
-              class="-mt-2 mb-4"
+          <UCard class="p-8 bg-white shadow-warm border border-stone-200 rounded-2xl transition-colors duration-300 dark:border-stone-700 dark:bg-stone-800 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <UForm
+              :schema="registerSchema"
+              :state="state"
+              class="space-y-6"
+              @submit="handleRegister"
             >
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-xs font-medium text-stone-700 dark:text-stone-300">
-                  Password Strength:
-                </span>
-                <span
-                  class="text-xs font-semibold"
-                  :class="{
-                    'text-red-600 dark:text-red-400': passwordStrength.color === 'error',
-                    'text-amber-600 dark:text-amber-400': passwordStrength.color === 'warning',
-                    'text-blue-600 dark:text-blue-400': passwordStrength.color === 'info',
-                    'text-green-600 dark:text-green-400': passwordStrength.color === 'success',
-                  }"
-                >
-                  {{ passwordStrength.level }}
-                </span>
-              </div>
-              <UProgress
-                :model-value="passwordStrength.percentage"
-                :color="passwordStrength.color"
-                size="sm"
-              />
-            </div>
-
-            <UFormField
-              label="Confirm Password"
-              name="confirmPassword"
-              required
-            >
-              <UInput
-                v-model="state.confirmPassword"
-                type="password"
-                placeholder="Confirm your password"
-                autocomplete="new-password"
-                size="lg"
-                :disabled="loading"
-                class="w-full"
-              />
-            </UFormField>
-
-            <div class="space-y-3 text-stone-600 dark:text-stone-400">
-              <UCheckbox
-                v-model="state.acceptTerms"
-                :disabled="loading"
+              <UFormField
+                label="Full Name"
+                name="fullName"
                 required
               >
-                <template #label>
-                  <span class="text-sm">
-                    I agree to the
-                    <NuxtLink
-                      to="/legal/terms"
-                      class="text-orange-700 hover:text-orange-800 font-medium dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
-                      target="_blank"
-                    >
-                      Terms of Service
-                    </NuxtLink>
-                    and
-                    <NuxtLink
-                      to="/legal/privacy"
-                      class="text-orange-700 hover:text-orange-800 font-medium dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
-                      target="_blank"
-                    >
-                      Privacy Policy
-                    </NuxtLink>
+                <UInput
+                  v-model="state.fullName"
+                  placeholder="Enter your full name"
+                  autocomplete="name"
+                  size="lg"
+                  :disabled="loading"
+                  class="w-full"
+                />
+              </UFormField>
+
+              <UFormField
+                label="Email address"
+                name="email"
+                required
+              >
+                <UInput
+                  v-model="state.email"
+                  type="email"
+                  placeholder="Enter your email"
+                  autocomplete="email"
+                  size="lg"
+                  :disabled="loading"
+                  class="w-full"
+                />
+              </UFormField>
+
+              <UFormField
+                label="Password"
+                name="password"
+                required
+              >
+                <UInput
+                  v-model="state.password"
+                  type="password"
+                  placeholder="Create a password"
+                  autocomplete="new-password"
+                  size="lg"
+                  :disabled="loading"
+                  class="w-full"
+                />
+              </UFormField>
+
+              <!-- Password Requirements Checklist -->
+              <div
+                v-if="state.password"
+                class="text-xs space-y-1 -mt-4 mb-2"
+              >
+                <div
+                  :class="hasMinLength ? 'text-success-700 dark:text-success-400' : 'text-stone-500 dark:text-stone-400'"
+                  class="flex items-center gap-1.5"
+                >
+                  <UIcon
+                    :name="hasMinLength ? 'i-lucide-check-circle' : 'i-lucide-circle'"
+                    class="h-4 w-4"
+                  />
+                  <span>At least 8 characters</span>
+                </div>
+                <div
+                  :class="hasUppercase ? 'text-success-700 dark:text-success-400' : 'text-stone-500 dark:text-stone-400'"
+                  class="flex items-center gap-1.5"
+                >
+                  <UIcon
+                    :name="hasUppercase ? 'i-lucide-check-circle' : 'i-lucide-circle'"
+                    class="h-4 w-4"
+                  />
+                  <span>One uppercase letter</span>
+                </div>
+                <div
+                  :class="hasLowercase ? 'text-success-700 dark:text-success-400' : 'text-stone-500 dark:text-stone-400'"
+                  class="flex items-center gap-1.5"
+                >
+                  <UIcon
+                    :name="hasLowercase ? 'i-lucide-check-circle' : 'i-lucide-circle'"
+                    class="h-4 w-4"
+                  />
+                  <span>One lowercase letter</span>
+                </div>
+                <div
+                  :class="hasNumber ? 'text-success-700 dark:text-success-400' : 'text-stone-500 dark:text-stone-400'"
+                  class="flex items-center gap-1.5"
+                >
+                  <UIcon
+                    :name="hasNumber ? 'i-lucide-check-circle' : 'i-lucide-circle'"
+                    class="h-4 w-4"
+                  />
+                  <span>One number</span>
+                </div>
+                <div
+                  :class="hasSpecialChar ? 'text-success-700 dark:text-success-400' : 'text-stone-500 dark:text-stone-400'"
+                  class="flex items-center gap-1.5"
+                >
+                  <UIcon
+                    :name="hasSpecialChar ? 'i-lucide-check-circle' : 'i-lucide-circle'"
+                    class="h-4 w-4"
+                  />
+                  <span>One special character (@$!%*?&)</span>
+                </div>
+              </div>
+              <div
+                v-else
+                class="text-xs text-stone-500 dark:text-stone-400 -mt-4 mb-2"
+              >
+                Password must be at least 8 characters with uppercase, lowercase, number, and special
+                character
+              </div>
+
+              <!-- Password Strength Indicator -->
+              <div
+                v-if="state.password && passwordStrength.level !== 'none'"
+                class="-mt-2 mb-4"
+              >
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-xs font-medium text-stone-700 dark:text-stone-300">
+                    Password Strength:
                   </span>
-                </template>
-              </UCheckbox>
-            </div>
+                  <span
+                    class="text-xs font-semibold"
+                    :class="{
+                      'text-error-600 dark:text-error-400': passwordStrength.color === 'error',
+                      'text-warning-600 dark:text-warning-400': passwordStrength.color === 'warning',
+                      'text-info-600 dark:text-info-400': passwordStrength.color === 'info',
+                      'text-success-600 dark:text-success-400': passwordStrength.color === 'success',
+                    }"
+                  >
+                    {{ passwordStrength.level }}
+                  </span>
+                </div>
+                <UProgress
+                  :model-value="passwordStrength.percentage"
+                  :color="passwordStrength.color"
+                  size="sm"
+                />
+              </div>
 
-            <UButton
-              type="submit"
-              :loading="loading"
-              :disabled="loading || !state.acceptTerms"
-              class="w-full"
-              size="lg"
-            >
-              {{ loading ? 'Creating account...' : 'Create account' }}
-            </UButton>
-          </UForm>
+              <UFormField
+                label="Confirm Password"
+                name="confirmPassword"
+                required
+              >
+                <UInput
+                  v-model="state.confirmPassword"
+                  type="password"
+                  placeholder="Confirm your password"
+                  autocomplete="new-password"
+                  size="lg"
+                  :disabled="loading"
+                  class="w-full"
+                />
+              </UFormField>
 
-          <UAlert
-            v-if="error"
-            icon="i-lucide-triangle-alert"
-            color="error"
-            variant="soft"
-            :title="error"
-            class="mt-4"
-          />
+              <div class="space-y-3 text-stone-600 dark:text-stone-400">
+                <UCheckbox
+                  v-model="state.acceptTerms"
+                  :disabled="loading"
+                  required
+                >
+                  <template #label>
+                    <span class="text-sm">
+                      I agree to the
+                      <NuxtLink
+                        to="/legal/terms"
+                        class="text-orange-700 hover:text-orange-800 font-medium dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
+                        target="_blank"
+                      >
+                        Terms of Service
+                      </NuxtLink>
+                      and
+                      <NuxtLink
+                        to="/legal/privacy"
+                        class="text-orange-700 hover:text-orange-800 font-medium dark:text-orange-500 dark:hover:text-orange-400 transition-colors"
+                        target="_blank"
+                      >
+                        Privacy Policy
+                      </NuxtLink>
+                    </span>
+                  </template>
+                </UCheckbox>
+              </div>
 
-          <UAlert
-            v-if="success"
-            icon="i-lucide-circle-check"
-            color="success"
-            variant="soft"
-            :title="success"
-            :description="successDescription"
-            class="mt-4"
-          />
-        </UCard>
+              <UButton
+                type="submit"
+                color="primary"
+                :loading="loading"
+                :disabled="loading || !state.acceptTerms"
+                class="w-full"
+                size="lg"
+              >
+                {{ loading ? 'Creating account...' : 'Create account' }}
+              </UButton>
+            </UForm>
+
+            <UAlert
+              v-if="error"
+              icon="i-lucide-triangle-alert"
+              color="error"
+              variant="soft"
+              :title="error"
+              class="mt-4"
+            />
+
+            <UAlert
+              v-if="success"
+              icon="i-lucide-circle-check"
+              color="success"
+              variant="soft"
+              :title="success"
+              :description="successDescription"
+              class="mt-4"
+            />
+          </UCard>
+        </div>
       </div>
-    </div>
-  </UApp>
+    </UApp>
+  </div>
 </template>

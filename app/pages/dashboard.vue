@@ -35,6 +35,20 @@ const tabItems = [
 const activeProjects = computed(() => projects.value.filter(p => p.is_active));
 const inactiveProjects = computed(() => projects.value.filter(p => !p.is_active));
 
+const totalProjectCount = computed(() => projects.value.length);
+const hasInactiveProjects = computed(() => projects.value.some(p => !p.is_active));
+
+const hasCompletedStintsToday = computed(() => {
+  if (!allStints.value) return false;
+  const todayStart = startOfDay(new Date());
+  const tomorrow = addDays(todayStart, 1);
+  return allStints.value.some((stint) => {
+    if (stint.status !== 'completed' || !stint.ended_at) return false;
+    const endedAt = parseSafeDate(stint.ended_at);
+    return endedAt && endedAt >= todayStart && endedAt < tomorrow;
+  });
+});
+
 const isLoading = computed(() => {
   if (selectedTab.value === 'archived') {
     return isLoadingArchived.value;
@@ -224,7 +238,13 @@ async function handleConfirmComplete(notes: string) {
                 <ProjectList
                   :projects="activeProjects"
                   :is-draggable="true"
+                  tab="active"
+                  :total-project-count="totalProjectCount"
+                  :has-inactive-projects="hasInactiveProjects"
+                  :has-completed-stints-today="hasCompletedStintsToday"
                   @edit="openEditModal"
+                  @create-project="openCreateModal"
+                  @switch-tab="selectedTab = $event"
                 />
               </div>
             </template>
@@ -234,14 +254,23 @@ async function handleConfirmComplete(notes: string) {
                 <ProjectList
                   :projects="inactiveProjects"
                   :is-draggable="false"
+                  tab="inactive"
+                  :total-project-count="totalProjectCount"
+                  :has-inactive-projects="hasInactiveProjects"
+                  :has-completed-stints-today="hasCompletedStintsToday"
                   @edit="openEditModal"
+                  @create-project="openCreateModal"
+                  @switch-tab="selectedTab = $event"
                 />
               </div>
             </template>
 
             <template #archived>
               <div class="pt-4">
-                <ArchivedProjectsList :projects="archivedProjects" />
+                <ArchivedProjectsList
+                  :projects="archivedProjects"
+                  @switch-tab="selectedTab = $event"
+                />
               </div>
             </template>
           </UTabs>

@@ -6,6 +6,10 @@ defineProps<{
   projects: ProjectRow[]
 }>();
 
+const emit = defineEmits<{
+  switchTab: [tab: 'active' | 'inactive' | 'archived']
+}>();
+
 const toast = useToast();
 const { mutateAsync: permanentlyDeleteProject, isPending: isDeleting } = usePermanentlyDeleteProject();
 const { mutateAsync: unarchiveProject, isPending: isUnarchiving } = useUnarchiveProject();
@@ -86,20 +90,30 @@ async function handlePermanentDelete() {
 
 <template>
   <div>
+    <!-- Empty State: No Archived Projects (positive message) -->
     <div
       v-if="projects.length === 0"
       class="text-center py-12"
     >
       <Icon
-        name="i-lucide-archive"
-        class="h-12 w-12 mx-auto text-neutral-400 dark:text-neutral-600"
+        name="i-lucide-sparkles"
+        class="h-12 w-12 mx-auto text-amber-500 dark:text-amber-400"
+        aria-hidden="true"
       />
-      <h3 class="mt-4 text-lg font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
-        No archived projects
+      <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
+        Your archive is empty
       </h3>
-      <p class="mt-2 text-sm leading-normal text-neutral-500 dark:text-neutral-400">
-        Projects you archive will appear here
+      <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">
+        Projects you archive will appear here.
       </p>
+      <UButton
+        color="neutral"
+        variant="ghost"
+        class="mt-4"
+        @click="emit('switchTab', 'active')"
+      >
+        Back to Active Projects
+      </UButton>
     </div>
 
     <ul
@@ -177,6 +191,7 @@ async function handlePermanentDelete() {
               <Icon
                 name="i-lucide-alert-triangle"
                 class="h-5 w-5 text-red-400"
+                aria-hidden="true"
               />
             </div>
             <div class="ml-3">

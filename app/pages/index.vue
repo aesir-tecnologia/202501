@@ -12,6 +12,10 @@ const ANIMATION_CONFIG = {
 
 definePageMeta({
   layout: false,
+  pageTransition: {
+    name: 'auth-transition',
+    mode: 'out-in',
+  },
 });
 
 useSeoMeta({
@@ -114,7 +118,7 @@ onUnmounted(() => {
               <template v-else>
                 <NuxtLink
                   to="/auth/login"
-                  class="hidden sm:inline-block px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-sm"
+                  class="inline-block px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-sm"
                 >Sign in</NuxtLink>
                 <NuxtLink
                   to="/auth/register"
@@ -125,7 +129,7 @@ onUnmounted(() => {
             <template #fallback>
               <NuxtLink
                 to="/auth/login"
-                class="hidden sm:inline-block px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-sm"
+                class="inline-block px-3 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-sm"
               >Sign in</NuxtLink>
               <NuxtLink
                 to="/auth/register"
