@@ -207,7 +207,7 @@ All mutations implement optimistic updates with automatic cache rollback on erro
 
 ### Logging
 
-Use the `logger` utility instead of `console.*` calls. Logs are routed to console in development and Sentry in production via `consolaIntegration`.
+Use the `logger` utility instead of `console.*` calls. Logs are routed to console in development and Sentry in production via `createConsolaReporter()`.
 
 **Basic Usage:**
 ```ts

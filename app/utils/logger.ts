@@ -2,7 +2,7 @@ import { consola, type ConsolaInstance } from 'consola';
 
 /**
  * Application-wide logger instance with 'lifestint' tag.
- * Routes to console in development, Sentry in production via consolaIntegration.
+ * Routes to console in development, Sentry in production via createConsolaReporter().
  *
  * Usage:
  *   logger.info('Operation started', { projectId })
