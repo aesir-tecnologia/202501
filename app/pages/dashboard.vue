@@ -218,7 +218,18 @@ async function handleConfirmComplete(payload: { notes: string, attributedDate?: 
       const newPref = payload.attributedDate === midnightSpanInfo.value.startDate
         ? 'start_date' as const
         : 'end_date' as const;
-      await updatePreferences({ stintDayAttribution: newPref });
+      try {
+        await updatePreferences({ stintDayAttribution: newPref });
+      }
+      catch (prefError) {
+        toast.add({
+          title: 'Preference not saved',
+          description: prefError instanceof Error
+            ? prefError.message
+            : 'The stint was completed, but we could not save your preference.',
+          color: 'warning',
+        });
+      }
     }
   }
   catch (error) {

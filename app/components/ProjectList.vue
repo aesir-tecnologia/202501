@@ -2,6 +2,7 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import { useSortable } from '@vueuse/integrations/useSortable';
 import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
+import { usePreferencesQuery, useUpdatePreferences } from '~/composables/usePreferences';
 import { createLogger } from '~/utils/logger';
 import {
   stintKeys,
@@ -20,6 +21,7 @@ import type { DailyProgress } from '~/types/progress';
 import { startOfDay, addDays } from 'date-fns';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { calculateRemainingSeconds } from '~/utils/stint-time';
+import { detectMidnightSpan, formatAttributionDates } from '~/utils/midnight-detection';
 import ProjectListCard from './ProjectListCard.vue';
 import StintConflictDialog, { type ConflictResolutionAction } from './StintConflictDialog.vue';
 
@@ -83,6 +85,8 @@ const { mutateAsync: startStint, isPending: isStarting } = useStartStint();
 const { mutateAsync: pauseStint, isPending: isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint();
 const { mutateAsync: completeStint, isPending: isCompleting } = useCompleteStint();
+const { data: preferencesData } = usePreferencesQuery();
+const { mutateAsync: updatePreferences } = useUpdatePreferences();
 
 const showCompletionModal = ref(false);
 const stintToComplete = ref<StintRow | null>(null);
@@ -145,6 +149,29 @@ function computeAllDailyProgress(
 
 const dailyProgressMap = computed(() => {
   return computeAllDailyProgress(props.projects, allStints.value);
+});
+
+const midnightSpanInfo = computed(() => {
+  if (!stintToComplete.value) return null;
+  return detectMidnightSpan(stintToComplete.value);
+});
+
+const midnightSpanLabels = computed(() => {
+  if (!midnightSpanInfo.value) return null;
+  return formatAttributionDates(midnightSpanInfo.value);
+});
+
+const shouldShowDayAttribution = computed(() => {
+  if (!midnightSpanInfo.value?.spansMidnight) return false;
+  return preferencesData.value?.stintDayAttribution === 'ask';
+});
+
+const presetAttributedDate = computed(() => {
+  if (!midnightSpanInfo.value?.spansMidnight) return undefined;
+  const preference = preferencesData.value?.stintDayAttribution;
+  if (preference === 'start_date') return midnightSpanInfo.value.startDate;
+  if (preference === 'end_date') return midnightSpanInfo.value.endDate;
+  return undefined;
 });
 
 // Update local projects when props change (but not during drag)
@@ -333,16 +360,37 @@ function handleCompletionCancel(): void {
   stintToComplete.value = null;
 }
 
-async function handleCompletionConfirm(payload: { notes: string, attributedDate?: string }): Promise<void> {
+async function handleCompletionConfirm(payload: { notes: string, attributedDate?: string, rememberChoice?: boolean }): Promise<void> {
   if (!stintToComplete.value) return;
 
   try {
+    const finalAttributedDate = payload.attributedDate || presetAttributedDate.value;
+
     await completeStint({
       stintId: stintToComplete.value.id,
       completionType: 'manual',
       notes: payload.notes || undefined,
-      attributedDate: payload.attributedDate,
+      attributedDate: finalAttributedDate,
     });
+
+    if (payload.rememberChoice && payload.attributedDate && midnightSpanInfo.value) {
+      const newPref = payload.attributedDate === midnightSpanInfo.value.startDate
+        ? 'start_date' as const
+        : 'end_date' as const;
+      try {
+        await updatePreferences({ stintDayAttribution: newPref });
+      }
+      catch (prefError) {
+        toast.add({
+          title: 'Preference not saved',
+          description: prefError instanceof Error
+            ? prefError.message
+            : 'The stint was completed, but we could not save your preference.',
+          color: 'warning',
+        });
+      }
+    }
+
     screenReaderAnnouncement.value = 'Stint completed';
   }
   catch (error) {
@@ -613,6 +661,11 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
     <StintCompletionModal
       v-model:open="showCompletionModal"
       :stint-id="stintToComplete?.id ?? ''"
+      :spans-midnight="shouldShowDayAttribution"
+      :start-date="midnightSpanInfo?.startDate"
+      :end-date="midnightSpanInfo?.endDate"
+      :start-date-label="midnightSpanLabels?.startLabel"
+      :end-date-label="midnightSpanLabels?.endLabel"
       @cancel="handleCompletionCancel"
       @confirm="handleCompletionConfirm"
     />

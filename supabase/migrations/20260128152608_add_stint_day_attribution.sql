@@ -94,6 +94,9 @@ DECLARE
   v_current_user_id UUID;
   v_stint public.stints%ROWTYPE;
   v_actual_duration INTEGER;
+  v_user_timezone TEXT;
+  v_valid_start_date DATE;
+  v_valid_end_date DATE;
 BEGIN
   -- SECURITY: Get and verify authenticated user
   v_current_user_id := auth.uid();
@@ -125,6 +128,21 @@ BEGIN
   -- Only active or paused stints can be completed
   IF v_stint.status NOT IN ('active', 'paused') THEN
     RAISE EXCEPTION 'This stint is not active or paused and cannot be completed';
+  END IF;
+
+  -- Validate attributed_date if provided (defense-in-depth)
+  IF p_attributed_date IS NOT NULL THEN
+    SELECT COALESCE(timezone, 'UTC') INTO v_user_timezone
+    FROM public.user_profiles
+    WHERE id = v_current_user_id;
+
+    v_valid_start_date := DATE(v_stint.started_at AT TIME ZONE v_user_timezone);
+    v_valid_end_date := DATE(NOW() AT TIME ZONE v_user_timezone);
+
+    IF p_attributed_date NOT IN (v_valid_start_date, v_valid_end_date) THEN
+      RAISE EXCEPTION 'attributed_date must be either the start date (%) or end date (%) of the stint',
+        v_valid_start_date, v_valid_end_date;
+    END IF;
   END IF;
 
   -- Calculate actual duration
