@@ -128,6 +128,7 @@ export type Database = {
       stints: {
         Row: {
           actual_duration: number | null
+          attributed_date: string | null
           completion_type: Database["public"]["Enums"]["completion_type"] | null
           created_at: string | null
           ended_at: string | null
@@ -144,6 +145,7 @@ export type Database = {
         }
         Insert: {
           actual_duration?: number | null
+          attributed_date?: string | null
           completion_type?:
             | Database["public"]["Enums"]["completion_type"]
             | null
@@ -162,6 +164,7 @@ export type Database = {
         }
         Update: {
           actual_duration?: number | null
+          attributed_date?: string | null
           completion_type?:
             | Database["public"]["Enums"]["completion_type"]
             | null
@@ -203,6 +206,7 @@ export type Database = {
           desktop_notifications: boolean
           email: string
           id: string
+          stint_day_attribution: Database["public"]["Enums"]["stint_day_attribution"]
           timezone: string
           updated_at: string | null
           version: number
@@ -214,6 +218,7 @@ export type Database = {
           desktop_notifications?: boolean
           email: string
           id: string
+          stint_day_attribution?: Database["public"]["Enums"]["stint_day_attribution"]
           timezone?: string
           updated_at?: string | null
           version?: number
@@ -225,6 +230,7 @@ export type Database = {
           desktop_notifications?: boolean
           email?: string
           id?: string
+          stint_day_attribution?: Database["public"]["Enums"]["stint_day_attribution"]
           timezone?: string
           updated_at?: string | null
           version?: number
@@ -300,12 +306,14 @@ export type Database = {
       }
       complete_stint: {
         Args: {
+          p_attributed_date?: string
           p_completion_type: Database["public"]["Enums"]["completion_type"]
           p_notes?: string
           p_stint_id: string
         }
         Returns: {
           actual_duration: number | null
+          attributed_date: string | null
           completion_type: Database["public"]["Enums"]["completion_type"] | null
           created_at: string | null
           ended_at: string | null
@@ -331,6 +339,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: {
           actual_duration: number | null
+          attributed_date: string | null
           completion_type: Database["public"]["Enums"]["completion_type"] | null
           created_at: string | null
           ended_at: string | null
@@ -369,6 +378,7 @@ export type Database = {
         Args: { p_stint_id: string }
         Returns: {
           actual_duration: number | null
+          attributed_date: string | null
           completion_type: Database["public"]["Enums"]["completion_type"] | null
           created_at: string | null
           ended_at: string | null
@@ -403,6 +413,7 @@ export type Database = {
         Args: { p_stint_id: string }
         Returns: {
           actual_duration: number | null
+          attributed_date: string | null
           completion_type: Database["public"]["Enums"]["completion_type"] | null
           created_at: string | null
           ended_at: string | null
@@ -446,6 +457,7 @@ export type Database = {
     }
     Enums: {
       completion_type: "manual" | "auto" | "interrupted"
+      stint_day_attribution: "start_date" | "end_date" | "ask"
       stint_status: "active" | "paused" | "completed" | "interrupted"
     }
     CompositeTypes: {
@@ -578,6 +590,7 @@ export const Constants = {
   public: {
     Enums: {
       completion_type: ["manual", "auto", "interrupted"],
+      stint_day_attribution: ["start_date", "end_date", "ask"],
       stint_status: ["active", "paused", "completed", "interrupted"],
     },
   },

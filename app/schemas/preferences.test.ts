@@ -150,6 +150,7 @@ describe('preferences schema', () => {
         defaultStintDuration: null,
         celebrationAnimation: true,
         desktopNotifications: false,
+        stintDayAttribution: 'ask',
       });
     });
 
@@ -157,6 +158,7 @@ describe('preferences schema', () => {
       expect(DEFAULT_PREFERENCES.defaultStintDuration).toBeNull();
       expect(DEFAULT_PREFERENCES.celebrationAnimation).toBe(true);
       expect(DEFAULT_PREFERENCES.desktopNotifications).toBe(false);
+      expect(DEFAULT_PREFERENCES.stintDayAttribution).toBe('ask');
     });
   });
 

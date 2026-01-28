@@ -333,14 +333,15 @@ function handleCompletionCancel(): void {
   stintToComplete.value = null;
 }
 
-async function handleCompletionConfirm(notes: string): Promise<void> {
+async function handleCompletionConfirm(payload: { notes: string, attributedDate?: string }): Promise<void> {
   if (!stintToComplete.value) return;
 
   try {
     await completeStint({
       stintId: stintToComplete.value.id,
       completionType: 'manual',
-      notes: notes || undefined,
+      notes: payload.notes || undefined,
+      attributedDate: payload.attributedDate,
     });
     screenReaderAnnouncement.value = 'Stint completed';
   }

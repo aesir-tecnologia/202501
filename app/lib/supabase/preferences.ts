@@ -1,10 +1,12 @@
 import type { TypedSupabaseClient } from '~/utils/supabase';
+import type { StintDayAttribution } from '~/schemas/preferences';
 import { requireUserId, type Result } from './auth';
 
 export interface PreferencesData {
   defaultStintDuration: number | null
   celebrationAnimation: boolean
   desktopNotifications: boolean
+  stintDayAttribution: StintDayAttribution
 }
 
 export type { Result };
@@ -20,7 +22,7 @@ export async function getPreferences(
 
   const { data, error } = await client
     .from('user_profiles')
-    .select('default_stint_duration, celebration_animation, desktop_notifications')
+    .select('default_stint_duration, celebration_animation, desktop_notifications, stint_day_attribution')
     .eq('id', userId)
     .single();
 
@@ -37,6 +39,7 @@ export async function getPreferences(
       defaultStintDuration: data.default_stint_duration,
       celebrationAnimation: data.celebration_animation,
       desktopNotifications: data.desktop_notifications,
+      stintDayAttribution: data.stint_day_attribution as StintDayAttribution,
     },
     error: null,
   };
@@ -62,12 +65,15 @@ export async function updatePreferences(
   if ('desktopNotifications' in updates) {
     dbUpdates.desktop_notifications = updates.desktopNotifications;
   }
+  if ('stintDayAttribution' in updates) {
+    dbUpdates.stint_day_attribution = updates.stintDayAttribution;
+  }
 
   const { data, error } = await client
     .from('user_profiles')
     .update(dbUpdates)
     .eq('id', userId)
-    .select('default_stint_duration, celebration_animation, desktop_notifications')
+    .select('default_stint_duration, celebration_animation, desktop_notifications, stint_day_attribution')
     .single();
 
   if (error) {
@@ -79,6 +85,7 @@ export async function updatePreferences(
       defaultStintDuration: data.default_stint_duration,
       celebrationAnimation: data.celebration_animation,
       desktopNotifications: data.desktop_notifications,
+      stintDayAttribution: data.stint_day_attribution as StintDayAttribution,
     },
     error: null,
   };

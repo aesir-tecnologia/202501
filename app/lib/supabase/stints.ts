@@ -304,6 +304,7 @@ export async function completeStint(
   stintId: string,
   completionType: 'manual' | 'auto' | 'interrupted',
   notes?: string | null,
+  attributedDate?: string | null,
 ): Promise<Result<StintRow>> {
   const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
@@ -319,6 +320,7 @@ export async function completeStint(
       p_stint_id: stintId,
       p_completion_type: completionType,
       p_notes: notes ?? undefined,
+      p_attributed_date: attributedDate ?? undefined,
     })
     .single<StintRow>();
 

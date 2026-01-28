@@ -40,6 +40,7 @@ describe('preferences.ts - Integration Tests', () => {
         defaultStintDuration: null,
         celebrationAnimation: true,
         desktopNotifications: false,
+        stintDayAttribution: 'ask',
       });
     });
 
@@ -101,11 +102,9 @@ describe('preferences.ts - Integration Tests', () => {
       });
 
       expect(result.error).toBeNull();
-      expect(result.data).toEqual({
-        defaultStintDuration: 90,
-        celebrationAnimation: true,
-        desktopNotifications: true,
-      });
+      expect(result.data?.defaultStintDuration).toBe(90);
+      expect(result.data?.celebrationAnimation).toBe(true);
+      expect(result.data?.desktopNotifications).toBe(true);
     });
 
     it('should require authentication', async () => {
@@ -146,11 +145,9 @@ describe('preferences.ts - Integration Tests', () => {
       const result = await getPreferences(authenticatedClient);
 
       expect(result.error).toBeNull();
-      expect(result.data).toEqual({
-        defaultStintDuration: 75,
-        celebrationAnimation: false,
-        desktopNotifications: true,
-      });
+      expect(result.data?.defaultStintDuration).toBe(75);
+      expect(result.data?.celebrationAnimation).toBe(false);
+      expect(result.data?.desktopNotifications).toBe(true);
     });
   });
 });

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useProjectsQuery, useArchivedProjectsQuery, useToggleProjectActive } from '~/composables/useProjects';
 import { useActiveStintQuery, usePauseStint, useResumeStint, useStintsQuery, useCompleteStint } from '~/composables/useStints';
+import { usePreferencesQuery, useUpdatePreferences } from '~/composables/usePreferences';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import { startOfDay, addDays } from 'date-fns';
 import { parseSafeDate } from '~/utils/date-helpers';
+import { detectMidnightSpan, formatAttributionDates } from '~/utils/midnight-detection';
 
 definePageMeta({
   title: 'Dashboard',
@@ -71,6 +73,8 @@ const { mutateAsync: pauseStint, isPending: _isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: _isResuming } = useResumeStint();
 const { mutateAsync: completeStint, isPending: _isCompleting } = useCompleteStint();
 const { data: allStints } = useStintsQuery();
+const { data: preferencesData } = usePreferencesQuery();
+const { mutateAsync: updatePreferences } = useUpdatePreferences();
 
 const activeProject = computed(() => {
   const stint = activeStint.value;
@@ -87,19 +91,51 @@ const dailyProgress = computed(() => {
 
   const todayStart = startOfDay(new Date());
   const tomorrow = addDays(todayStart, 1);
+  const todayStr = todayStart.toISOString().split('T')[0];
 
   if (allStints.value) {
     for (const stint of allStints.value) {
       if (stint.project_id !== project.id) continue;
       if (stint.status !== 'completed' || !stint.ended_at) continue;
-      const endedAt = parseSafeDate(stint.ended_at);
-      if (endedAt && endedAt >= todayStart && endedAt < tomorrow) {
-        completed++;
+
+      if (stint.attributed_date) {
+        if (stint.attributed_date === todayStr) {
+          completed++;
+        }
+      }
+      else {
+        const endedAt = parseSafeDate(stint.ended_at);
+        if (endedAt && endedAt >= todayStart && endedAt < tomorrow) {
+          completed++;
+        }
       }
     }
   }
 
   return { completed, expected };
+});
+
+const midnightSpanInfo = computed(() => {
+  if (!stintToComplete.value) return null;
+  return detectMidnightSpan(stintToComplete.value);
+});
+
+const midnightSpanLabels = computed(() => {
+  if (!midnightSpanInfo.value) return null;
+  return formatAttributionDates(midnightSpanInfo.value);
+});
+
+const shouldShowDayAttribution = computed(() => {
+  if (!midnightSpanInfo.value?.spansMidnight) return false;
+  return preferencesData.value?.stintDayAttribution === 'ask';
+});
+
+const presetAttributedDate = computed(() => {
+  if (!midnightSpanInfo.value?.spansMidnight) return undefined;
+  const preference = preferencesData.value?.stintDayAttribution;
+  if (preference === 'start_date') return midnightSpanInfo.value.startDate;
+  if (preference === 'end_date') return midnightSpanInfo.value.endDate;
+  return undefined;
 });
 
 function openCreateModal() {
@@ -166,14 +202,24 @@ function handleCompleteStint(stint: StintRow) {
   showCompletionModal.value = true;
 }
 
-async function handleConfirmComplete(notes: string) {
+async function handleConfirmComplete(payload: { notes: string, attributedDate?: string, rememberChoice?: boolean }) {
   if (!stintToComplete.value) return;
   try {
+    const finalAttributedDate = payload.attributedDate || presetAttributedDate.value;
+
     await completeStint({
       stintId: stintToComplete.value.id,
       completionType: 'manual',
-      notes: notes || undefined,
+      notes: payload.notes || undefined,
+      attributedDate: finalAttributedDate,
     });
+
+    if (payload.rememberChoice && payload.attributedDate && midnightSpanInfo.value) {
+      const newPref = payload.attributedDate === midnightSpanInfo.value.startDate
+        ? 'start_date' as const
+        : 'end_date' as const;
+      await updatePreferences({ stintDayAttribution: newPref });
+    }
   }
   catch (error) {
     toast.add({
@@ -314,6 +360,11 @@ async function handleConfirmComplete(notes: string) {
       v-if="stintToComplete"
       v-model:open="showCompletionModal"
       :stint-id="stintToComplete.id"
+      :spans-midnight="shouldShowDayAttribution"
+      :start-date="midnightSpanInfo?.startDate"
+      :end-date="midnightSpanInfo?.endDate"
+      :start-date-label="midnightSpanLabels?.startLabel"
+      :end-date-label="midnightSpanLabels?.endLabel"
       @confirm="handleConfirmComplete"
     />
   </div>
