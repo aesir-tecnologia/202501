@@ -98,6 +98,7 @@ async function handlePermanentDelete() {
       <Icon
         name="i-lucide-sparkles"
         class="h-12 w-12 mx-auto text-amber-500 dark:text-amber-400"
+        aria-hidden="true"
       />
       <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
         No archived projects
@@ -190,6 +191,7 @@ async function handlePermanentDelete() {
               <Icon
                 name="i-lucide-alert-triangle"
                 class="h-5 w-5 text-red-400"
+                aria-hidden="true"
               />
             </div>
             <div class="ml-3">

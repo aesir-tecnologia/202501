@@ -479,6 +479,7 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
         <Icon
           name="i-lucide-sun"
           class="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5"
+          aria-hidden="true"
         />
         <div>
           <p class="text-sm font-medium text-orange-800 dark:text-orange-200">
@@ -499,6 +500,7 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
       <Icon
         name="i-lucide-rocket"
         class="h-12 w-12 mx-auto text-stone-400 dark:text-stone-600"
+        aria-hidden="true"
       />
       <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
         Start your first project
@@ -524,6 +526,7 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
       <Icon
         name="i-lucide-pause-circle"
         class="h-12 w-12 mx-auto text-stone-400 dark:text-stone-600"
+        aria-hidden="true"
       />
       <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
         No active projects
@@ -550,6 +553,7 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
       <Icon
         name="i-lucide-check-circle"
         class="h-12 w-12 mx-auto text-green-500 dark:text-green-400"
+        aria-hidden="true"
       />
       <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
         All projects are active
