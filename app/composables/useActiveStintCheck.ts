@@ -1,5 +1,6 @@
 import type { Ref } from 'vue';
 import { hasActiveStint } from '~/lib/supabase/projects';
+import { logger } from '~/utils/logger';
 
 interface ActiveStintCheckResult {
   hasActive: Ref<boolean>
@@ -25,7 +26,7 @@ export function useActiveStintCheck(
     const { data, error } = await hasActiveStint(client, projectId.value);
 
     if (error) {
-      console.error('Failed to check active stint:', error);
+      logger.error('Failed to check active stint:', error);
       hasActive.value = true;
       toast.add({
         title: 'Unable to verify project status',

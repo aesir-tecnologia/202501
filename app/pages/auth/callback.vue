@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { logger } from '~/utils/logger';
+
 definePageMeta({
   layout: false,
 });
@@ -75,7 +77,7 @@ async function handleAuthCallback() {
     }
   }
   catch (err: unknown) {
-    console.error('Auth callback error:', err);
+    logger.error('Auth callback error:', err);
 
     // Handle specific error types
     const errorMessage = err instanceof Error ? err.message : String(err);

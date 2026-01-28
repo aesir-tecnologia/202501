@@ -1,5 +1,8 @@
 import type { DailySummaryResult, ProjectBreakdownItem as DbProjectBreakdown } from '~/lib/supabase/daily-summaries';
 import type { DailySummary, ProjectBreakdownItem, DailySummaryFilters } from '~/schemas/daily-summaries';
+import { createLogger } from '~/utils/logger';
+
+const log = createLogger('daily-summaries');
 
 export function isValidDbProjectBreakdownItem(item: unknown): item is DbProjectBreakdown {
   return (
@@ -21,7 +24,7 @@ export function transformProjectBreakdown(
 ): ProjectBreakdownItem[] {
   if (!breakdown || !Array.isArray(breakdown)) {
     if (breakdown !== null && breakdown !== undefined) {
-      console.warn('[daily-summaries] project_breakdown is not an array:', typeof breakdown);
+      log.warn('project_breakdown is not an array:', typeof breakdown);
     }
     return [];
   }
@@ -44,7 +47,7 @@ export function transformProjectBreakdown(
   }
 
   if (invalidItems.length > 0) {
-    console.error('[daily-summaries] Filtered invalid project breakdown items:', invalidItems);
+    log.error('Filtered invalid project breakdown items:', invalidItems);
   }
 
   return validItems;

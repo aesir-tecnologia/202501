@@ -2,6 +2,7 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import { useSortable } from '@vueuse/integrations/useSortable';
 import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
+import { createLogger } from '~/utils/logger';
 import {
   stintKeys,
   useActiveStintQuery,
@@ -21,6 +22,8 @@ import { parseSafeDate } from '~/utils/date-helpers';
 import { calculateRemainingSeconds } from '~/utils/stint-time';
 import ProjectListCard from './ProjectListCard.vue';
 import StintConflictDialog, { type ConflictResolutionAction } from './StintConflictDialog.vue';
+
+const log = createLogger('ProjectList');
 
 const props = defineProps<{
   projects: ProjectRow[]
@@ -358,7 +361,7 @@ async function handleCompletionConfirm(notes: string): Promise<void> {
 
 async function handleConflictResolution(action: ConflictResolutionAction): Promise<void> {
   if (!conflictStint.value) {
-    console.error('[ProjectList] handleConflictResolution called without conflictStint', { action });
+    log.error('handleConflictResolution called without conflictStint', { action });
     toast.add({
       title: 'Unexpected Error',
       description: 'Conflict state was lost. Please try again.',
@@ -369,7 +372,7 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
   }
 
   if (!pendingProject.value) {
-    console.error('[ProjectList] handleConflictResolution called without pendingProject', { action });
+    log.error('handleConflictResolution called without pendingProject', { action });
     toast.add({
       title: 'Unexpected Error',
       description: 'Target project was lost. Please try again.',
@@ -446,7 +449,7 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
         break;
 
       default: {
-        console.error('[ProjectList] Unhandled conflict resolution action:', action);
+        log.error('Unhandled conflict resolution action:', action);
       }
     }
   }

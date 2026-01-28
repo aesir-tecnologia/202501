@@ -1,4 +1,5 @@
 import { VueQueryPlugin, QueryClient } from '@tanstack/vue-query';
+import { logger } from '~/utils/logger';
 
 export default defineNuxtPlugin((nuxtApp) => {
   const queryClient = new QueryClient({
@@ -11,7 +12,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       },
       mutations: {
         onError: (error) => {
-          console.error('Mutation error:', error);
+          logger.error('Mutation error:', error);
           // Component-level error handling is preferred for custom messages
         },
       },
