@@ -267,7 +267,10 @@ async function handleConfirmComplete(notes: string) {
 
             <template #archived>
               <div class="pt-4">
-                <ArchivedProjectsList :projects="archivedProjects" />
+                <ArchivedProjectsList
+                  :projects="archivedProjects"
+                  @switch-tab="selectedTab = $event"
+                />
               </div>
             </template>
           </UTabs>
