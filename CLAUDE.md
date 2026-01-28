@@ -205,6 +205,36 @@ All mutations implement optimistic updates with automatic cache rollback on erro
 - `onError`: Restores snapshot if mutation fails
 - `onSuccess`: Invalidates affected queries for refetch
 
+### Logging
+
+Use the `logger` utility instead of `console.*` calls. Logs are routed to console in development and Sentry in production via `createConsolaReporter()`.
+
+**Basic Usage:**
+```ts
+import { logger } from '~/utils/logger'
+
+logger.info('Operation started', { projectId })
+logger.warn('Unusual condition', { details })
+logger.error('Operation failed', error)
+logger.debug('Verbose tracing')  // Suppressed in production
+```
+
+**Module-Specific Logger:**
+```ts
+import { createLogger } from '~/utils/logger'
+
+const log = createLogger('timer')
+log.error('Timer failed', { reason })  // Tagged: [lifestint] [timer]
+```
+
+**Log Levels:**
+| Level | Usage | Production |
+|-------|-------|------------|
+| `debug` | Verbose tracing, development only | Hidden |
+| `info` | Operational messages, sync status | Visible |
+| `warn` | Unexpected but handled conditions | Visible + Sentry |
+| `error` | Failures requiring attention | Visible + Sentry |
+
 ### State Management
 
 **Architecture:** Pure TanStack Query - no Pinia/Vuex stores. All server state managed through TanStack Query cache.
@@ -409,6 +439,10 @@ See `README.md` for detailed deployment instructions.
 
 ### Monitoring & Error Tracking
 - **Sentry** - Production error tracking via `@sentry/nuxt`
+- **Consola** - Logging abstraction with Sentry integration (UnJS/Nuxt team)
+
+**Sentry Consola Integration:**
+Use `Sentry.createConsolaReporter()` (reporter pattern), not `consolaIntegration` (doesn't exist). Configure in `sentry.*.config.ts` after `Sentry.init()`.
 
 ### Testing
 - **Vitest** - Unit and integration test runner

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import type { UseQueryReturnType, UseMutationReturnType } from '@tanstack/vue-query';
 import { useTypedSupabaseClient } from '~/utils/supabase';
+import { createLogger } from '~/utils/logger';
 import {
   listStints,
   getStintById,
@@ -32,6 +33,8 @@ import {
 import { streakKeys, getBrowserTimezone } from '~/composables/useStreaks';
 import { updateStreakAfterCompletion } from '~/lib/supabase/streaks';
 import { useCelebration } from '~/composables/useCelebration';
+
+const log = createLogger('stints');
 
 // ============================================================================
 // Query Key Factory
@@ -523,7 +526,7 @@ export function useCompleteStint() {
       // as calculate_streak_with_tz RPC still works without it
       const timezone = getBrowserTimezone();
       updateStreakAfterCompletion(client, timezone).catch((err) => {
-        console.error('[Streak] Failed to update streak cache. Streak display may be stale.', {
+        log.error('Failed to update streak cache. Streak display may be stale.', {
           error: err instanceof Error ? err.message : String(err),
           timezone,
           stintId: payload.stintId,

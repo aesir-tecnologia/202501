@@ -2,6 +2,9 @@ import type { Database, Json } from '~/types/database.types';
 import type { TypedSupabaseClient } from '~/utils/supabase';
 import { isValidDbProjectBreakdownItem } from '~/utils/daily-summaries';
 import { requireUserId, type Result } from './auth';
+import { createLogger } from '~/utils/logger';
+
+const log = createLogger('daily-summaries');
 
 export type DailySummaryRow = Database['public']['Tables']['daily_summaries']['Row'];
 
@@ -50,7 +53,7 @@ function parseProjectBreakdown(
 ): ProjectBreakdownItem[] {
   if (!breakdown || !Array.isArray(breakdown)) {
     if (breakdown !== null && breakdown !== undefined) {
-      console.warn('[daily-summaries] project_breakdown is not an array:', {
+      log.warn('project_breakdown is not an array:', {
         type: typeof breakdown,
         context,
       });
@@ -71,7 +74,7 @@ function parseProjectBreakdown(
   }
 
   if (invalidItems.length > 0) {
-    console.error('[daily-summaries] Filtered invalid project breakdown items:', {
+    log.error('Filtered invalid project breakdown items:', {
       invalidCount: invalidItems.length,
       validCount: validItems.length,
       context,

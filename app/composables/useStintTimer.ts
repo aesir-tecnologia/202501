@@ -16,6 +16,9 @@ import { streakKeys } from '~/composables/useStreaks';
 import { STINT } from '~/constants';
 import { isAuthError, withAuthRetry } from '~/utils/auth-recovery';
 import { useCelebration } from '~/composables/useCelebration';
+import { createLogger } from '~/utils/logger';
+
+const log = createLogger('timer');
 
 type StintRow = Database['public']['Tables']['stints']['Row'];
 
@@ -147,14 +150,14 @@ function createWorker(): void {
     workerCreationAttempts = 0;
   }
   catch (error) {
-    console.error('Failed to create timer worker:', error);
+    log.error('Failed to create timer worker:', error);
 
     workerCreationAttempts++;
 
     if (workerCreationAttempts < maxWorkerCreationAttempts) {
       // Retry after delay with exponential backoff
       const delayMs = WORKER_RETRY_BASE_DELAY_MS * workerCreationAttempts;
-      console.log(`Retrying worker creation in ${delayMs}ms (attempt ${workerCreationAttempts + 1}/${maxWorkerCreationAttempts})`);
+      log.info(`Retrying worker creation in ${delayMs}ms (attempt ${workerCreationAttempts + 1}/${maxWorkerCreationAttempts})`);
 
       setTimeout(() => {
         createWorker();
@@ -162,7 +165,7 @@ function createWorker(): void {
     }
     else {
       // Max attempts reached - show error to user
-      console.error('Max worker creation attempts reached');
+      log.error('Max worker creation attempts reached');
       globalTimerState.toast?.add({
         title: 'Timer Error',
         description: 'Failed to initialize timer. Please refresh the page.',
@@ -192,7 +195,7 @@ function handleWorkerMessage(event: MessageEvent<WorkerIncomingMessage>): void {
       break;
 
     case 'error':
-      console.error('Timer worker error:', message.message);
+      log.error('Timer worker error:', message.message);
       break;
   }
 }
@@ -201,7 +204,7 @@ function handleWorkerMessage(event: MessageEvent<WorkerIncomingMessage>): void {
  * Handle worker errors
  */
 function handleWorkerError(error: ErrorEvent): void {
-  console.error('Timer worker error:', error.message);
+  log.error('Timer worker error:', error.message);
   globalTimerState.toast?.add({
     title: 'Timer Error',
     description: 'Timer encountered an error. Please refresh if the timer stops working.',
@@ -250,7 +253,7 @@ function handleStintChange(newStint: StintRow | null | undefined, _oldStint: Sti
  */
 function startTimer(stint: StintRow): void {
   if (!globalTimerState.worker) {
-    console.error('Cannot start timer: worker not initialized');
+    log.error('Cannot start timer: worker not initialized');
     globalTimerState.toast?.add({
       title: 'Timer Error',
       description: 'Timer not initialized. Please refresh the page.',
@@ -263,7 +266,7 @@ function startTimer(stint: StintRow): void {
   // Calculate end time
   const startedAtDate = parseSafeDate(stint.started_at);
   if (!startedAtDate) {
-    console.error('Cannot start timer: invalid started_at date', stint.started_at);
+    log.error('Cannot start timer: invalid started_at date', stint.started_at);
     globalTimerState.toast?.add({
       title: 'Timer Error',
       description: 'Invalid stint start time. Please try again.',
@@ -314,7 +317,7 @@ function pauseTimer(): void {
  */
 function resumeTimer(stint: StintRow): void {
   if (!globalTimerState.worker) {
-    console.error('Cannot resume timer: worker not initialized');
+    log.error('Cannot resume timer: worker not initialized');
     globalTimerState.toast?.add({
       title: 'Timer Error',
       description: 'Timer not initialized. Please refresh the page.',
@@ -330,7 +333,7 @@ function resumeTimer(stint: StintRow): void {
   // the full planned duration of active work time even after pause/resume cycles.
   const startedAtDate = parseSafeDate(stint.started_at);
   if (!startedAtDate) {
-    console.error('Cannot resume timer: invalid started_at date', stint.started_at);
+    log.error('Cannot resume timer: invalid started_at date', stint.started_at);
     globalTimerState.toast?.add({
       title: 'Timer Error',
       description: 'Invalid stint start time. Please try again.',
@@ -440,7 +443,7 @@ async function syncWithServer(stintId: string): Promise<void> {
     // (by Supabase cron, manual action in another tab, etc.). Invalidate cache to
     // trigger the watcher which will call stopTimer() and clean up gracefully.
     if (data.status === 'completed' || data.status === 'interrupted') {
-      console.log('Sync detected stint completed externally, refreshing cache...');
+      log.info('Sync detected stint completed externally, refreshing cache...');
       stopServerSync();
       try {
         if (globalTimerState.queryClient) {
@@ -450,7 +453,7 @@ async function syncWithServer(stintId: string): Promise<void> {
         }
       }
       catch (cacheError) {
-        console.error('Failed to invalidate cache after detecting completed stint:', cacheError);
+        log.error('Failed to invalidate cache after detecting completed stint:', cacheError);
         globalTimerState.toast?.add({
           title: 'Sync Issue',
           description: 'Your stint was completed but the display may be outdated. Please refresh the page.',
@@ -467,7 +470,7 @@ async function syncWithServer(stintId: string): Promise<void> {
 
     // Correct if drift > threshold
     if (drift > TIMER_DRIFT_THRESHOLD_SECONDS) {
-      console.log(`Timer drift detected: ${drift}s, correcting...`);
+      log.info(`Timer drift detected: ${drift}s, correcting...`);
 
       const message: WorkerOutgoingMessage = {
         type: 'sync',
@@ -488,7 +491,7 @@ async function syncWithServer(stintId: string): Promise<void> {
 function handleSyncFailure(error: unknown, isAuth: boolean = false): void {
   globalTimerState.consecutiveSyncFailures++;
 
-  console.error('Sync with server failed:', error, {
+  log.error('Sync with server failed:', error, {
     failureCount: globalTimerState.consecutiveSyncFailures,
     isAuthError: isAuth,
   });
@@ -533,7 +536,7 @@ async function handleTimerComplete(): Promise<void> {
   // If another actor (Supabase cron, manual action, etc.) already completed this
   // stint, just refresh the cache and let the watcher handle cleanup.
   if (activeStint.status !== 'active' && activeStint.status !== 'paused') {
-    console.log('Stint already completed/interrupted, skipping auto-complete');
+    log.info('Stint already completed/interrupted, skipping auto-complete');
     try {
       if (globalTimerState.queryClient) {
         await globalTimerState.queryClient.invalidateQueries({
@@ -542,7 +545,7 @@ async function handleTimerComplete(): Promise<void> {
       }
     }
     catch (cacheError) {
-      console.error('Failed to invalidate cache after skipping auto-complete:', cacheError);
+      log.error('Failed to invalidate cache after skipping auto-complete:', cacheError);
       globalTimerState.toast?.add({
         title: 'Sync Issue',
         description: 'Your stint was completed but the display may be outdated. Please refresh the page.',
@@ -605,7 +608,7 @@ async function handleTimerComplete(): Promise<void> {
     }
 
     // Log retry attempt
-    console.error(`Auto-complete attempt ${attempt}/${AUTO_COMPLETE_MAX_RETRIES} failed:`, error);
+    log.error(`Auto-complete attempt ${attempt}/${AUTO_COMPLETE_MAX_RETRIES} failed:`, error);
 
     // Wait before retrying (except on last attempt)
     if (attempt < AUTO_COMPLETE_MAX_RETRIES) {
@@ -616,7 +619,7 @@ async function handleTimerComplete(): Promise<void> {
   // All retries failed - reset timer state to reflect actual database state
   globalTimerState.timerCompleted.value = false;
 
-  console.error('Auto-complete failed after all retries:', lastError);
+  log.error('Auto-complete failed after all retries:', lastError);
 
   // Auth errors: redirect to login with clear message
   if (authErrorEncountered) {
@@ -664,7 +667,7 @@ function requestNotificationPermission(): void {
         globalTimerState.notificationPermission.value = permission;
       })
       .catch((error) => {
-        console.warn('Failed to request notification permission:', error);
+        log.warn('Failed to request notification permission:', error);
         globalTimerState.notificationPermission.value = 'denied';
       });
   }
@@ -697,7 +700,7 @@ function showNotification(projectName: string): void {
     }, NOTIFICATION_TIMEOUT_MS);
   }
   catch (error) {
-    console.error('Failed to show notification:', error);
+    log.error('Failed to show notification:', error);
   }
 }
 
