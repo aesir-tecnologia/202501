@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { SpeedInsights } from '@vercel/speed-insights/vue';
+
 const appConfig = useAppConfig();
 const route = useRoute();
 const supabase = useSupabaseClient();
@@ -232,5 +234,6 @@ const formattedTime = computed(() => {
     <UMain>
       <slot />
     </UMain>
+    <SpeedInsights />
   </div>
 </template>
