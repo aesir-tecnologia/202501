@@ -7,7 +7,10 @@ import { parseSafeDate } from '~/utils/date-helpers';
 
 function getEffectiveDate(stint: StintRow): Date | null {
   if (stint.attributed_date) {
-    return new Date(stint.attributed_date + 'T00:00:00');
+    const date = new Date(stint.attributed_date + 'T00:00:00');
+    if (!Number.isNaN(date.getTime())) {
+      return date;
+    }
   }
   return stint.ended_at ? parseSafeDate(stint.ended_at) : null;
 }

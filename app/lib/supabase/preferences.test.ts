@@ -118,6 +118,35 @@ describe('preferences.ts - Integration Tests', () => {
       expect(result.error?.message).toContain('authenticated');
     });
 
+    it('should update stintDayAttribution to start_date', async () => {
+      const result = await updatePreferences(authenticatedClient, {
+        stintDayAttribution: 'start_date',
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data?.stintDayAttribution).toBe('start_date');
+    });
+
+    it('should update stintDayAttribution to end_date', async () => {
+      const result = await updatePreferences(authenticatedClient, {
+        stintDayAttribution: 'end_date',
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data?.stintDayAttribution).toBe('end_date');
+    });
+
+    it('should update stintDayAttribution to ask', async () => {
+      await updatePreferences(authenticatedClient, { stintDayAttribution: 'start_date' });
+
+      const result = await updatePreferences(authenticatedClient, {
+        stintDayAttribution: 'ask',
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data?.stintDayAttribution).toBe('ask');
+    });
+
     it('should enforce minimum duration constraint', async () => {
       const result = await updatePreferences(authenticatedClient, {
         defaultStintDuration: 3,

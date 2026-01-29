@@ -377,6 +377,7 @@ async function handleConfirmComplete(payload: { notes: string, attributedDate?: 
       :start-date-label="midnightSpanLabels?.startLabel"
       :end-date-label="midnightSpanLabels?.endLabel"
       @confirm="handleConfirmComplete"
+      @cancel="stintToComplete = null"
     />
   </div>
 </template>

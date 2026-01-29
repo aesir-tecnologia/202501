@@ -49,6 +49,11 @@ function handleCancel() {
 }
 
 function handleConfirm() {
+  if (props.spansMidnight && selectedDate.value) {
+    if (selectedDate.value !== props.startDate && selectedDate.value !== props.endDate) {
+      return;
+    }
+  }
   emit('confirm', {
     notes: notes.value.trim(),
     attributedDate: props.spansMidnight ? selectedDate.value : undefined,

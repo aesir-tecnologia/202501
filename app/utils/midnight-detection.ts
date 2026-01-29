@@ -7,7 +7,12 @@ export interface MidnightSpanInfo {
 }
 
 function getDateInTimezone(date: Date, timezone: string): string {
-  return date.toLocaleDateString('en-CA', { timeZone: timezone });
+  try {
+    return date.toLocaleDateString('en-CA', { timeZone: timezone });
+  }
+  catch {
+    return date.toLocaleDateString('en-CA', { timeZone: 'UTC' });
+  }
 }
 
 export function detectMidnightSpan(
