@@ -4,7 +4,7 @@ import { useActiveStintQuery, usePauseStint, useResumeStint, useStintsQuery, use
 import { usePreferencesQuery, useUpdatePreferences } from '~/composables/usePreferences';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
-import { startOfDay, addDays } from 'date-fns';
+import { startOfDay, addDays, format } from 'date-fns';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { detectMidnightSpan, formatAttributionDates } from '~/utils/midnight-detection';
 
@@ -91,7 +91,7 @@ const dailyProgress = computed(() => {
 
   const todayStart = startOfDay(new Date());
   const tomorrow = addDays(todayStart, 1);
-  const todayStr = todayStart.toISOString().split('T')[0];
+  const todayStr = format(todayStart, 'yyyy-MM-dd');
 
   if (allStints.value) {
     for (const stint of allStints.value) {

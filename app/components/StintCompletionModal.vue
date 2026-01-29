@@ -75,15 +75,13 @@ watch(isOpen, (open) => {
   <UModal
     v-model:open="isOpen"
     title="Complete Stint"
-    :description="spansMidnight
-      ? 'This stint started on one day and ended on another. Choose which day it should count toward.'
-      : 'Add optional notes about what you accomplished during this stint.'"
+    description="Add optional notes about what you accomplished during this stint."
     :ui="{ footer: 'justify-end' }"
   >
     <template #body>
       <div class="space-y-4">
         <div
-          v-if="spansMidnight && startDateLabel && endDateLabel"
+          v-if="spansMidnight"
           class="space-y-3"
         >
           <p class="text-sm text-neutral-600 dark:text-neutral-400">
