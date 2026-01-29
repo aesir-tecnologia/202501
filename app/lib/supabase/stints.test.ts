@@ -647,7 +647,7 @@ describe('stints.ts - Integration Tests', () => {
     it('should accept and store attributed_date when completing a stint', async () => {
       const stint = await createActiveStint(serviceClient, testProject.id, testUserId);
       // Use the actual start date of the stint (in YYYY-MM-DD format)
-      const attributedDate = stint.started_at.split('T')[0];
+      const attributedDate = stint.started_at!.split('T')[0];
 
       const result = await completeStint(
         authenticatedClient,
