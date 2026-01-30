@@ -257,7 +257,7 @@ function handleCompleteStint() {
           />
           <UIcon
             v-else
-            :name="isPaused || hasPausedStint ? 'i-lucide-play' : 'i-lucide-pause'"
+            :name="isPaused || hasPausedStint ? 'i-lucide-step-forward' : 'i-lucide-pause'"
             class="w-4 h-4"
           />
         </button>
@@ -559,22 +559,41 @@ function handleCompleteStint() {
   cursor: not-allowed;
 }
 
-.action-btn.pause,
-.action-btn.resume {
+.action-btn.pause {
   color: #b45309;
   border-color: rgba(217, 119, 6, 0.25);
   background: rgba(217, 119, 6, 0.05);
 }
 
-.action-btn.pause:hover:not(:disabled),
-.action-btn.resume:hover:not(:disabled) {
+.action-btn.pause:hover:not(:disabled) {
   background: rgba(217, 119, 6, 0.15);
   border-color: rgba(217, 119, 6, 0.4);
 }
 
-:root.dark .action-btn.pause,
-:root.dark .action-btn.resume {
+:root.dark .action-btn.pause {
   color: #fbbf24;
+}
+
+.action-btn.resume {
+  color: #16a34a;
+  border-color: rgba(22, 163, 74, 0.25);
+  background: rgba(22, 163, 74, 0.05);
+}
+
+.action-btn.resume:hover:not(:disabled) {
+  background: rgba(22, 163, 74, 0.15);
+  border-color: rgba(22, 163, 74, 0.4);
+}
+
+:root.dark .action-btn.resume {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.25);
+  background: rgba(74, 222, 128, 0.1);
+}
+
+:root.dark .action-btn.resume:hover:not(:disabled) {
+  background: rgba(74, 222, 128, 0.2);
+  border-color: rgba(74, 222, 128, 0.4);
 }
 
 .action-btn.stop {

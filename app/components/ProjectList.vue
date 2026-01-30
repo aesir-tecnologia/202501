@@ -13,7 +13,6 @@ import {
   useStartStint,
   useStintsQuery,
 } from '~/composables/useStints';
-import { getRandomPreWorkQuote } from '~/constants/motivational-quotes';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
@@ -53,14 +52,6 @@ const emptyStateType = computed<EmptyStateType>(() => {
   if (props.tab === 'inactive') return 'no-inactive-projects';
 
   return null;
-});
-
-const motivationalQuote = ref(getRandomPreWorkQuote());
-
-const showNoStintsBanner = computed(() => {
-  return props.tab === 'active'
-    && props.projects.length > 0
-    && !props.hasCompletedStintsToday;
 });
 
 const isDraggable = computed(() => props.isDraggable ?? false);
@@ -471,28 +462,6 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
       class="sr-only"
     >
       {{ screenReaderAnnouncement }}
-    </div>
-
-    <!-- No Stints Today Banner (above project list, when projects exist) -->
-    <div
-      v-if="showNoStintsBanner"
-      class="mb-4 rounded-lg bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900 p-4"
-    >
-      <div class="flex items-start gap-3">
-        <Icon
-          name="i-lucide-sun"
-          class="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5"
-          aria-hidden="true"
-        />
-        <div>
-          <p class="text-sm font-medium text-orange-800 dark:text-orange-200">
-            Start your first stint of the day
-          </p>
-          <p class="mt-1 text-sm text-orange-700 dark:text-orange-300 italic">
-            "{{ motivationalQuote }}"
-          </p>
-        </div>
-      </div>
     </div>
 
     <!-- Empty State: No Projects -->
