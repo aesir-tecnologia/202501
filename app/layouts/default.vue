@@ -4,7 +4,6 @@ import { SpeedInsights } from '@vercel/speed-insights/vue';
 
 const appConfig = useAppConfig();
 const route = useRoute();
-const isOnTodayPage = computed(() => route.path === '/dashboard');
 const supabase = useSupabaseClient();
 const toast = useToast();
 const colorMode = useColorMode();
@@ -26,36 +25,6 @@ const navigationItems = computed(() => [
   { label: 'Today', to: '/dashboard', icon: 'i-lucide-calendar' },
   { label: 'Analytics', to: '/analytics', icon: 'i-lucide-bar-chart-2' },
   { label: 'Settings', to: '/settings', icon: 'i-lucide-settings' },
-]);
-
-const actionItems = computed(() => [
-  {
-    label: isDark.value ? 'Light' : 'Dark',
-    icon: isDark.value ? 'i-lucide-sun' : 'i-lucide-moon',
-    onSelect: () => { isDark.value = !isDark.value; },
-  },
-  {
-    label: 'Log out',
-    icon: 'i-lucide-log-out',
-    onSelect: signOut,
-  },
-]);
-
-const mobileActionItems = computed(() => [
-  {
-    ...actionItems.value[0],
-    onSelect: () => {
-      isDark.value = !isDark.value;
-      isMobileMenuOpen.value = false;
-    },
-  },
-  {
-    ...actionItems.value[1],
-    onSelect: async () => {
-      await signOut();
-      isMobileMenuOpen.value = false;
-    },
-  },
 ]);
 
 const signOut = async () => {
@@ -91,7 +60,7 @@ const formattedTime = computed(() => formatStintTime(secondsRemaining.value));
 <template>
   <div class="min-h-screen bg-[#fffbf5] dark:bg-stone-900">
     <!-- Header wrapper for mobile nav positioning -->
-    <div class="relative sticky top-0 z-50 border-b border-stone-200 dark:border-stone-700/50 bg-[#fffbf5]/80 dark:bg-stone-900/80 backdrop-blur-md supports-[backdrop-filter]:bg-[#fffbf5]/60 dark:supports-[backdrop-filter]:bg-stone-900/60">
+    <div class="relative sticky top-0 z-50 bg-[#fffbf5]/80 dark:bg-stone-900/80 backdrop-blur-md supports-[backdrop-filter]:bg-[#fffbf5]/60 dark:supports-[backdrop-filter]:bg-stone-900/60">
       <header class="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8 max-w-(--ui-container) mx-auto w-full">
         <!-- Header Left: Hamburger + Logo -->
         <div class="flex items-center gap-3">
@@ -121,48 +90,75 @@ const formattedTime = computed(() => formatStintTime(secondsRemaining.value));
           </div>
         </div>
 
-        <!-- Desktop Navigation -->
-        <UNavigationMenu
-          :items="navigationItems"
-          variant="pill"
-          class="hidden md:flex"
-          :ui="{
-            root: 'bg-[#fef7ed] dark:bg-[#1f1b18] p-1 rounded-full gap-1',
-            link: 'px-5 py-2.5 text-sm font-medium rounded-full text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all duration-200 data-[state=active]:bg-orange-700 dark:data-[state=active]:bg-orange-600 data-[state=active]:text-white',
-          }"
-        />
-
+        <!-- Right side: Timer + Navigation (desktop) + Action icons -->
         <div class="flex items-center gap-3">
           <!-- Global Timer (client-only to prevent hydration mismatch) -->
           <ClientOnly>
-            <div
-              v-show="activeStint && activeStint.status !== 'completed'"
-              class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
-              :class="[
-                isOnTodayPage ? 'invisible' : '',
-                isPaused
-                  ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
-                  : 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-400 shadow-[0_0_10px_rgba(22,163,74,0.2)]',
-              ]"
+            <Transition
+              enter-active-class="transition duration-200 ease-out"
+              enter-from-class="opacity-0 scale-95"
+              enter-to-class="opacity-100 scale-100"
+              leave-active-class="transition duration-150 ease-in"
+              leave-from-class="opacity-100 scale-100"
+              leave-to-class="opacity-0 scale-95"
             >
-              <UIcon
-                :name="isPaused ? 'i-lucide-pause' : 'i-lucide-clock'"
-                :class="['w-4 h-4', !isPaused && 'animate-pulse']"
-              />
-              <span class="font-mono font-bold tabular-nums text-sm">{{ formattedTime }}</span>
-            </div>
+              <div
+                v-if="activeStint && activeStint.status !== 'completed'"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
+                :class="isPaused
+                  ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
+                  : 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-400 shadow-[0_0_10px_rgba(22,163,74,0.2)]'"
+              >
+                <div
+                  v-if="!isPaused"
+                  class="relative flex h-2 w-2 mr-0.5"
+                >
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                </div>
+                <UIcon
+                  :name="isPaused ? 'i-lucide-pause' : 'i-lucide-clock'"
+                  class="w-4 h-4"
+                />
+                <span class="font-mono font-bold tabular-nums text-sm">{{ formattedTime }}</span>
+              </div>
+            </Transition>
           </ClientOnly>
 
-          <!-- Desktop Action Items (Dark mode toggle + Logout) -->
+          <!-- Desktop Navigation -->
           <UNavigationMenu
-            :items="actionItems"
+            :items="navigationItems"
             variant="pill"
             class="hidden md:flex"
             :ui="{
               root: 'bg-[#fef7ed] dark:bg-[#1f1b18] p-1 rounded-full gap-1',
-              link: 'px-5 py-2.5 text-sm font-medium rounded-full text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all duration-200',
+              link: 'px-5 py-2.5 text-sm font-medium rounded-full text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all duration-200 data-[state=active]:bg-orange-700 dark:data-[state=active]:bg-orange-600 data-[state=active]:text-white',
             }"
           />
+
+          <!-- Action Icons (Theme + Logout) -->
+          <div class="flex items-center gap-1 bg-[#fef7ed] dark:bg-[#1f1b18] p-1 rounded-full">
+            <button
+              class="w-10 h-10 flex items-center justify-center rounded-full text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors"
+              :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+              @click="isDark = !isDark"
+            >
+              <UIcon
+                :name="isDark ? 'i-lucide-sun' : 'i-lucide-moon'"
+                class="w-5 h-5"
+              />
+            </button>
+            <button
+              class="w-10 h-10 flex items-center justify-center rounded-full text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-colors"
+              aria-label="Log out"
+              @click="signOut"
+            >
+              <UIcon
+                name="i-lucide-log-out"
+                class="w-5 h-5"
+              />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -189,22 +185,6 @@ const formattedTime = computed(() => formatStintTime(secondsRemaining.value));
             :ui="{
               root: 'w-full',
               link: 'px-4 py-3.5 rounded-xl text-[15px] font-medium transition-colors text-stone-600 dark:text-stone-300 hover:bg-[#fef7ed] dark:hover:bg-[#1f1b18] hover:text-stone-900 dark:hover:text-white data-[state=active]:bg-[#fef7ed] dark:data-[state=active]:bg-[#1f1b18] data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-500',
-              linkLeadingIcon: 'w-5 h-5',
-            }"
-          />
-
-          <!-- Separator -->
-          <div class="my-2 border-t border-stone-200 dark:border-stone-700" />
-
-          <!-- Action Items -->
-          <UNavigationMenu
-            :items="mobileActionItems"
-            orientation="vertical"
-            variant="pill"
-            :highlight="false"
-            :ui="{
-              root: 'w-full',
-              link: 'px-4 py-3.5 rounded-xl text-[15px] font-medium transition-colors text-stone-600 dark:text-stone-300 hover:bg-[#fef7ed] dark:hover:bg-[#1f1b18] hover:text-stone-900 dark:hover:text-white',
               linkLeadingIcon: 'w-5 h-5',
             }"
           />
