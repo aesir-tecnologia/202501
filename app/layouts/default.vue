@@ -118,7 +118,7 @@ const formattedTime = computed(() => {
   <div class="min-h-screen bg-[#fffbf5] dark:bg-stone-900">
     <!-- Header wrapper for mobile nav positioning -->
     <div class="relative sticky top-0 z-50 border-b border-stone-200 dark:border-stone-700/50 bg-[#fffbf5]/80 dark:bg-stone-900/80 backdrop-blur-md supports-[backdrop-filter]:bg-[#fffbf5]/60 dark:supports-[backdrop-filter]:bg-stone-900/60">
-      <header class="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 lg:px-10 lg:max-w-[1400px] lg:mx-auto lg:w-full">
+      <header class="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8 max-w-(--ui-container) mx-auto w-full">
         <!-- Header Left: Hamburger + Logo -->
         <div class="flex items-center gap-3">
           <!-- Mobile Hamburger Button -->
