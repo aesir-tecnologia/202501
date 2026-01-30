@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { formatStintTime } from '~/utils/stint-time';
 import { SpeedInsights } from '@vercel/speed-insights/vue';
 
 const appConfig = useAppConfig();
 const route = useRoute();
+const isOnTodayPage = computed(() => route.path === '/dashboard');
 const supabase = useSupabaseClient();
 const toast = useToast();
 const colorMode = useColorMode();
@@ -107,11 +109,7 @@ const { data: activeStint } = import.meta.client
   ? useActiveStintQuery()
   : { data: ref(null) };
 
-const formattedTime = computed(() => {
-  const mins = Math.floor(secondsRemaining.value / 60);
-  const secs = secondsRemaining.value % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-});
+const formattedTime = computed(() => formatStintTime(secondsRemaining.value));
 </script>
 
 <template>
@@ -162,22 +160,18 @@ const formattedTime = computed(() => {
           <!-- Global Timer (client-only to prevent hydration mismatch) -->
           <ClientOnly>
             <div
-              v-if="activeStint && activeStint.status !== 'completed'"
+              v-show="activeStint && activeStint.status !== 'completed'"
               class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
-              :class="isPaused
-                ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
-                : 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-400 shadow-[0_0_10px_rgba(22,163,74,0.2)]'"
+              :class="[
+                isOnTodayPage ? 'invisible' : '',
+                isPaused
+                  ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
+                  : 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-400 shadow-[0_0_10px_rgba(22,163,74,0.2)]',
+              ]"
             >
-              <div
-                v-if="!isPaused"
-                class="relative flex h-2 w-2 mr-0.5"
-              >
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-              </div>
               <UIcon
                 :name="isPaused ? 'i-lucide-pause' : 'i-lucide-clock'"
-                class="w-4 h-4"
+                :class="['w-4 h-4', !isPaused && 'animate-pulse']"
               />
               <span class="font-mono font-bold tabular-nums text-sm">{{ formattedTime }}</span>
             </div>
