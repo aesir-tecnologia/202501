@@ -432,6 +432,7 @@ export function useCompleteStint() {
         payload.stintId,
         payload.completionType,
         payload.notes,
+        payload.attributedDate,
       );
 
       if (error || !data) {
@@ -465,6 +466,7 @@ export function useCompleteStint() {
                   completion_type: payload.completionType,
                   ended_at: new Date().toISOString(),
                   notes: payload.notes !== undefined ? payload.notes : s.notes,
+                  attributed_date: payload.attributedDate ?? s.attributed_date,
                   updated_at: new Date().toISOString(),
                 }
               : s,
@@ -480,6 +482,7 @@ export function useCompleteStint() {
           completion_type: payload.completionType,
           ended_at: new Date().toISOString(),
           notes: payload.notes !== undefined ? payload.notes : previousStint.notes,
+          attributed_date: payload.attributedDate ?? previousStint.attributed_date,
           updated_at: new Date().toISOString(),
         });
       }
@@ -849,6 +852,7 @@ export function useStartStint() {
           paused_at: null,
           paused_duration: 0,
           notes: payload.notes || null,
+          attributed_date: null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };

@@ -141,11 +141,16 @@
 
 ### Midnight Boundary Behavior
 
-- Stints that span midnight are attributed to their **start date**
-- Example: Stint started at 11:30 PM, ends 12:30 AM → counts toward the start date
-- Daily progress ("X of Y stints today") uses `DATE(started_at)` in user's timezone
-- Streak calculation uses start date: a stint started before midnight counts for that day
-- This ensures predictable behavior for users working late-night sessions
+- Stints that span midnight can be attributed to either their **start date** or **end date**, based on user preference
+- User preference options (`stint_day_attribution`):
+  - `ask`: Prompt user to choose when completing a midnight-spanning stint (default)
+  - `start_date`: Always attribute to the day the stint started
+  - `end_date`: Always attribute to the day the stint ended
+- Example: Stint started at 11:30 PM, ends 12:30 AM → user chooses or preference decides which day it counts toward
+- The completion modal shows a date selector when preference is `ask` and the stint spans midnight
+- Users can check "Remember my choice" to automatically save their preference for future stints
+- Daily progress ("X of Y stints today") uses the `attributed_date` field when set, falling back to end date
+- This ensures flexibility for users with different late-night work patterns
 
 ### Time Unit Standardization
 
