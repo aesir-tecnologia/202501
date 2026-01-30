@@ -18,6 +18,7 @@
     "supabase:types": "supabase gen types typescript --local > app/types/database.types.ts"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.4.1",
     "@iconify-json/lucide": "^1.2.68",
     "@nuxt/eslint": "^1.9.0",
     "@nuxt/ui": "^4.0.0",
