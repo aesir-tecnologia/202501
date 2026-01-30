@@ -1,8 +1,19 @@
 <script setup lang="ts">
 import type { ProjectRow } from '~/lib/supabase/projects';
+import type { StintRow } from '~/lib/supabase/stints';
 import { useStintsQuery } from '~/composables/useStints';
 import { useProjectsQuery } from '~/composables/useProjects';
 import { parseSafeDate } from '~/utils/date-helpers';
+
+function getEffectiveDate(stint: StintRow): Date | null {
+  if (stint.attributed_date) {
+    const date = new Date(stint.attributed_date + 'T00:00:00');
+    if (!Number.isNaN(date.getTime())) {
+      return date;
+    }
+  }
+  return stint.ended_at ? parseSafeDate(stint.ended_at) : null;
+}
 
 definePageMeta({
   title: 'Analytics',
@@ -38,8 +49,7 @@ const currentStreak = computed(() => {
   // Check backwards from today
   while (true) {
     const hasStintOnDate = completedStints.value.some((stint) => {
-      if (!stint.ended_at) return false;
-      const stintDate = parseSafeDate(stint.ended_at);
+      const stintDate = getEffectiveDate(stint);
       if (!stintDate) return false;
       stintDate.setHours(0, 0, 0, 0);
       return stintDate.getTime() === checkDate.getTime();
@@ -59,12 +69,10 @@ const longestStreak = computed(() => {
 
   const dates = new Set<string>();
   completedStints.value.forEach((stint) => {
-    if (stint.ended_at) {
-      const date = parseSafeDate(stint.ended_at);
-      if (date) {
-        date.setHours(0, 0, 0, 0);
-        dates.add(date.toISOString());
-      }
+    const date = getEffectiveDate(stint);
+    if (date) {
+      date.setHours(0, 0, 0, 0);
+      dates.add(date.toISOString());
     }
   });
 
@@ -76,7 +84,7 @@ const longestStreak = computed(() => {
   if (sortedDates.length === 0) return 0;
 
   let maxStreak = 1;
-  let currentStreak = 1;
+  let currentStreakCount = 1;
 
   for (let i = 1; i < sortedDates.length; i++) {
     const currentDate = sortedDates[i];
@@ -88,11 +96,11 @@ const longestStreak = computed(() => {
     );
 
     if (diffDays === 1) {
-      currentStreak++;
-      maxStreak = Math.max(maxStreak, currentStreak);
+      currentStreakCount++;
+      maxStreak = Math.max(maxStreak, currentStreakCount);
     }
     else {
-      currentStreak = 1;
+      currentStreakCount = 1;
     }
   }
 
@@ -105,8 +113,7 @@ const todayStints = computed(() => {
   today.setHours(0, 0, 0, 0);
 
   return completedStints.value.filter((stint) => {
-    if (!stint.ended_at) return false;
-    const stintDate = parseSafeDate(stint.ended_at);
+    const stintDate = getEffectiveDate(stint);
     if (!stintDate) return false;
     stintDate.setHours(0, 0, 0, 0);
     return stintDate.getTime() === today.getTime();
@@ -169,8 +176,7 @@ const weekStints = computed(() => {
   weekStart.setHours(0, 0, 0, 0);
 
   return completedStints.value.filter((stint) => {
-    if (!stint.ended_at) return false;
-    const stintDate = parseSafeDate(stint.ended_at);
+    const stintDate = getEffectiveDate(stint);
     if (!stintDate) return false;
     return stintDate >= weekStart;
   });
@@ -196,8 +202,7 @@ const weekDataByDay = computed(() => {
     date.setDate(weekStart.getDate() + index);
 
     const dayStints = weekStints.value.filter((stint) => {
-      if (!stint.ended_at) return false;
-      const stintDate = parseSafeDate(stint.ended_at);
+      const stintDate = getEffectiveDate(stint);
       if (!stintDate) return false;
       stintDate.setHours(0, 0, 0, 0);
       return stintDate.getTime() === date.getTime();
@@ -231,11 +236,9 @@ const longestStreakThisWeek = computed(() => {
 
   const uniqueDates = new Set<string>();
   weekStints.value.forEach((stint) => {
-    if (stint.ended_at) {
-      const date = parseSafeDate(stint.ended_at);
-      if (date) {
-        uniqueDates.add(date.toISOString().split('T')[0]!);
-      }
+    const date = getEffectiveDate(stint);
+    if (date) {
+      uniqueDates.add(date.toISOString().split('T')[0]!);
     }
   });
 

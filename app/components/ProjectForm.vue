@@ -108,14 +108,19 @@ defineExpose({
       :error="errors.expectedDailyStints"
       help="How many stints do you aim to complete per day?"
     >
-      <UInputNumber
-        v-model="formData.expectedDailyStints"
-        :min="PROJECT.DAILY_STINTS.MIN"
-        :max="PROJECT.DAILY_STINTS.MAX"
-        :step="1"
-        class="w-full"
-        @blur="validateForm"
-      />
+      <div class="flex items-center gap-4">
+        <USlider
+          v-model="formData.expectedDailyStints"
+          :min="PROJECT.DAILY_STINTS.MIN"
+          :max="PROJECT.DAILY_STINTS.MAX"
+          :step="1"
+          class="flex-1"
+          @update:model-value="validateForm"
+        />
+        <span class="text-2xl font-bold tabular-nums min-w-[3ch] text-right text-primary">
+          {{ formData.expectedDailyStints }}
+        </span>
+      </div>
     </UFormField>
 
     <UFormField

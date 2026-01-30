@@ -3,6 +3,7 @@ import { useAuthUser } from '~/composables/useAuthUser';
 import { usePreferencesQuery, useUpdatePreferences } from '~/composables/usePreferences';
 import { useSupabaseClient } from '#imports';
 import { PREFERENCES } from '~/constants';
+import type { StintDayAttribution } from '~/schemas/preferences';
 
 definePageMeta({
   title: 'Settings',
@@ -33,6 +34,13 @@ const updatePreferencesMutation = useUpdatePreferences();
 const localDefaultStintDuration = ref<number>(PREFERENCES.STINT_DURATION.DEFAULT);
 const localCelebrationAnimation = ref(true);
 const localDesktopNotifications = ref(false);
+const localStintDayAttribution = ref<StintDayAttribution>('ask');
+
+const stintDayAttributionOptions = [
+  { label: 'Always count toward start date', value: 'start_date' },
+  { label: 'Always count toward end date', value: 'end_date' },
+  { label: 'Ask me each time', value: 'ask' },
+];
 
 // Sync local state when preferences load
 watch(preferencesData, (data) => {
@@ -40,6 +48,7 @@ watch(preferencesData, (data) => {
     localDefaultStintDuration.value = data.defaultStintDuration ?? PREFERENCES.STINT_DURATION.DEFAULT;
     localCelebrationAnimation.value = data.celebrationAnimation;
     localDesktopNotifications.value = data.desktopNotifications;
+    localStintDayAttribution.value = data.stintDayAttribution;
   }
 }, { immediate: true });
 
@@ -183,6 +192,7 @@ async function savePreferences() {
       defaultStintDuration: localDefaultStintDuration.value,
       celebrationAnimation: localCelebrationAnimation.value,
       desktopNotifications: localDesktopNotifications.value,
+      stintDayAttribution: localStintDayAttribution.value,
     });
 
     toast.add({
@@ -527,6 +537,18 @@ const timezones = computed(() => {
                   Enable
                 </UButton>
               </div>
+            </UFormField>
+
+            <UFormField
+              label="Midnight-Spanning Stints"
+              name="stintDayAttribution"
+              hint="Choose how stints that cross midnight are counted in daily stats"
+            >
+              <USelect
+                v-model="localStintDayAttribution"
+                :items="stintDayAttributionOptions"
+                :disabled="isLoadingPreferences"
+              />
             </UFormField>
           </div>
 

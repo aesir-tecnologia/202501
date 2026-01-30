@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatStintTime } from '~/utils/stint-time';
+import { SpeedInsights } from '@vercel/speed-insights/vue';
 
 const appConfig = useAppConfig();
 const route = useRoute();
@@ -227,5 +228,6 @@ const formattedTime = computed(() => formatStintTime(secondsRemaining.value));
     <UMain>
       <slot />
     </UMain>
+    <SpeedInsights />
   </div>
 </template>

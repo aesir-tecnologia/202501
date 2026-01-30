@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { PREFERENCES } from '~/constants';
 
+export const stintDayAttributionValues = ['start_date', 'end_date', 'ask'] as const;
+export type StintDayAttribution = typeof stintDayAttributionValues[number];
+
 export const preferencesUpdateSchema = z.object({
   defaultStintDuration: z
     .number({ invalid_type_error: 'Default duration must be a number' })
@@ -11,6 +14,9 @@ export const preferencesUpdateSchema = z.object({
     .optional(),
   celebrationAnimation: z.boolean().optional(),
   desktopNotifications: z.boolean().optional(),
+  stintDayAttribution: z.enum(stintDayAttributionValues, {
+    errorMap: () => ({ message: 'Invalid stint day attribution value' }),
+  }).optional(),
 });
 
 export type PreferencesUpdatePayload = z.infer<typeof preferencesUpdateSchema>;
@@ -19,4 +25,5 @@ export const DEFAULT_PREFERENCES = {
   defaultStintDuration: null,
   celebrationAnimation: true,
   desktopNotifications: false,
+  stintDayAttribution: 'ask' as StintDayAttribution,
 } as const;
