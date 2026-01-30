@@ -14,69 +14,45 @@ const isDark = computed({
   },
 });
 
-const user = useSupabaseUser();
-
-const userInitials = computed(() => {
-  const email = user.value?.email || '';
-  const name = user.value?.user_metadata?.full_name || email;
-  if (!name) return 'U';
-  return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
-});
-
-const userDisplayName = computed(() => {
-  return user.value?.user_metadata?.full_name || user.value?.email || 'User';
-});
-
 const isMobileMenuOpen = ref(false);
 
 watch(() => route.path, () => {
   isMobileMenuOpen.value = false;
 });
 
-const userMenuItems = computed(() => [
-  [
-    {
-      label: userDisplayName.value,
-      slot: 'account' as const,
-      disabled: true,
-    },
-  ],
-  [
-    {
-      label: 'Settings',
-      icon: 'i-lucide-settings',
-      to: '/settings',
-    },
-  ],
-  [
-    {
-      label: isDark.value ? 'Light mode' : 'Dark mode',
-      icon: isDark.value ? 'i-lucide-sun' : 'i-lucide-moon',
-      onSelect() {
-        isDark.value = !isDark.value;
-      },
-    },
-  ],
-  [
-    {
-      label: 'Log out',
-      icon: 'i-lucide-log-out',
-      color: 'error' as const,
-      onSelect: signOut,
-    },
-  ],
+const navigationItems = computed(() => [
+  { label: 'Today', to: '/dashboard', icon: 'i-lucide-calendar' },
+  { label: 'Analytics', to: '/analytics', icon: 'i-lucide-bar-chart-2' },
+  { label: 'Settings', to: '/settings', icon: 'i-lucide-settings' },
 ]);
 
-const items = computed(() => [
+const actionItems = computed(() => [
   {
-    label: 'Today',
-    to: '/dashboard',
-    icon: 'i-lucide-calendar',
+    label: isDark.value ? 'Light' : 'Dark',
+    icon: isDark.value ? 'i-lucide-sun' : 'i-lucide-moon',
+    onSelect: () => { isDark.value = !isDark.value; },
   },
   {
-    label: 'Analytics',
-    to: '/analytics',
-    icon: 'i-lucide-bar-chart-2',
+    label: 'Log out',
+    icon: 'i-lucide-log-out',
+    onSelect: signOut,
+  },
+]);
+
+const mobileActionItems = computed(() => [
+  {
+    ...actionItems.value[0],
+    onSelect: () => {
+      isDark.value = !isDark.value;
+      isMobileMenuOpen.value = false;
+    },
+  },
+  {
+    ...actionItems.value[1],
+    onSelect: async () => {
+      await signOut();
+      isMobileMenuOpen.value = false;
+    },
   },
 ]);
 
@@ -149,7 +125,7 @@ const formattedTime = computed(() => {
 
         <!-- Desktop Navigation -->
         <UNavigationMenu
-          :items="items"
+          :items="navigationItems"
           variant="pill"
           class="hidden md:flex"
           :ui="{
@@ -183,22 +159,16 @@ const formattedTime = computed(() => {
             </div>
           </ClientOnly>
 
-          <!-- User Dropdown Menu -->
-          <UDropdownMenu
-            :items="userMenuItems"
-            :content="{ align: 'end' }"
-            :ui="{ content: 'w-56' }"
-          >
-            <button
-              class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full
-                     bg-gradient-to-br from-orange-700 to-amber-600 dark:from-orange-600 dark:to-amber-400
-                     text-white font-semibold text-sm flex items-center justify-center
-                     hover:scale-105 transition-transform"
-              aria-label="User menu"
-            >
-              {{ userInitials }}
-            </button>
-          </UDropdownMenu>
+          <!-- Desktop Action Items (Dark mode toggle + Logout) -->
+          <UNavigationMenu
+            :items="actionItems"
+            variant="pill"
+            class="hidden md:flex"
+            :ui="{
+              root: 'bg-[#fef7ed] dark:bg-[#1f1b18] p-1 rounded-full gap-1',
+              link: 'px-5 py-2.5 text-sm font-medium rounded-full text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition-all duration-200',
+            }"
+          />
         </div>
       </header>
 
@@ -216,14 +186,31 @@ const formattedTime = computed(() => {
           class="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-stone-900
                  border-b border-stone-200 dark:border-stone-700 shadow-lg p-2"
         >
+          <!-- Navigation Items -->
           <UNavigationMenu
-            :items="items"
+            :items="navigationItems"
             orientation="vertical"
             variant="pill"
             :highlight="false"
             :ui="{
               root: 'w-full',
               link: 'px-4 py-3.5 rounded-xl text-[15px] font-medium transition-colors text-stone-600 dark:text-stone-300 hover:bg-[#fef7ed] dark:hover:bg-[#1f1b18] hover:text-stone-900 dark:hover:text-white data-[state=active]:bg-[#fef7ed] dark:data-[state=active]:bg-[#1f1b18] data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-500',
+              linkLeadingIcon: 'w-5 h-5',
+            }"
+          />
+
+          <!-- Separator -->
+          <div class="my-2 border-t border-stone-200 dark:border-stone-700" />
+
+          <!-- Action Items -->
+          <UNavigationMenu
+            :items="mobileActionItems"
+            orientation="vertical"
+            variant="pill"
+            :highlight="false"
+            :ui="{
+              root: 'w-full',
+              link: 'px-4 py-3.5 rounded-xl text-[15px] font-medium transition-colors text-stone-600 dark:text-stone-300 hover:bg-[#fef7ed] dark:hover:bg-[#1f1b18] hover:text-stone-900 dark:hover:text-white',
               linkLeadingIcon: 'w-5 h-5',
             }"
           />
