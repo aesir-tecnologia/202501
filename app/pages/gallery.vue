@@ -69,6 +69,7 @@ const mockActiveStint: StintRow = {
   actual_duration: null,
   completion_type: null,
   notes: null,
+  attributed_date: null,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
 };
@@ -86,6 +87,7 @@ const mockPausedStint: StintRow = {
   actual_duration: null,
   completion_type: null,
   notes: null,
+  attributed_date: null,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
 };

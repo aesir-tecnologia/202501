@@ -643,6 +643,33 @@ describe('stints.ts - Integration Tests', () => {
       expect(result.error).not.toBeNull();
       expect(result.error?.message).toContain('authenticated');
     });
+
+    it('should accept and store attributed_date when completing a stint', async () => {
+      const stint = await createActiveStint(serviceClient, testProject.id, testUserId);
+      // Use the actual start date of the stint (in YYYY-MM-DD format)
+      const attributedDate = stint.started_at!.split('T')[0];
+
+      const result = await completeStint(
+        authenticatedClient,
+        stint.id,
+        'manual',
+        null,
+        attributedDate,
+      );
+
+      expect(result.error).toBeNull();
+      expect(result.data?.status).toBe('completed');
+      expect(result.data?.attributed_date).toBe(attributedDate);
+    });
+
+    it('should allow null attributed_date for default behavior', async () => {
+      const stint = await createActiveStint(serviceClient, testProject.id, testUserId);
+
+      const result = await completeStint(authenticatedClient, stint.id, 'manual');
+
+      expect(result.error).toBeNull();
+      expect(result.data?.attributed_date).toBeNull();
+    });
   });
 
   describe('startStint', () => {

@@ -44,6 +44,10 @@ export const stintCompletionSchema = z.object({
     errorMap: () => ({ message: 'Completion type must be manual, auto, or interrupted' }),
   }),
   notes: stintUpdateSchema.shape.notes,
+  attributedDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Attributed date must be in YYYY-MM-DD format')
+    .optional(),
 });
 
 export const stintInterruptSchema = z.object({
