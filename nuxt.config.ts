@@ -71,7 +71,6 @@ export default defineNuxtConfig({
         '/auth/verify-email',
         '/legal/privacy',
         '/legal/terms',
-        '/design-showcase',
       ],
       ignore: ['/dashboard', '/analytics', '/reports', '/settings', '/auth/callback', '/api/**'],
     },
