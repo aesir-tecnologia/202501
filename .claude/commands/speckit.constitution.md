@@ -1,5 +1,9 @@
 ---
-description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync
+description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
+handoffs: 
+  - label: Build Specification
+    agent: speckit.specify
+    prompt: Implement the feature specification based on the updated constitution. I want to build...
 ---
 
 ## User Input
@@ -36,56 +40,12 @@ Follow this execution flow:
    - Ensure each Principle section: succinct name line, paragraph (or bullet list) capturing non‑negotiable rules, explicit rationale if not obvious.
    - Ensure Governance section lists amendment procedure, versioning policy, and compliance review expectations.
 
-4. Consistency propagation via subagent delegation:
-
-   **RECOMMENDED APPROACH:** Use the Task tool with `subagent_type: "general-purpose"` to analyze all files in parallel. This saves ~30k tokens and executes 3-5x faster than reading files directly.
-
-   Invoke the Task tool with this prompt structure:
-
-   ```
-   Analyze cross-file consistency between the updated constitution principles
-   and existing project artifacts.
-
-   CONSTITUTION PRINCIPLES TO CHECK:
-   [Insert the finalized principles from step 3 draft here]
-
-   FILES TO ANALYZE (read all in parallel):
-   - .specify/templates/plan-template.md
-   - .specify/templates/spec-template.md
-   - .specify/templates/tasks-template.md
-   - All files matching .specify/templates/commands/*.md
-   - README.md
-   - docs/quickstart.md (if exists)
-   - Any other agent-specific guidance files found
-
-   ANALYSIS TASKS:
-   1. Identify outdated references to old principle names/requirements
-   2. Find missing sections that new principles require
-   3. Detect contradictions with updated governance rules
-   4. Flag agent-specific names (e.g., "CLAUDE only") where generic guidance needed
-   5. Note any "Constitution Check" sections that need alignment
-
-   RETURN FORMAT:
-   Provide a structured report with this format for each file:
-   {
-     "file_path": {
-       "status": "✅ aligned" | "⚠ needs update",
-       "issues": ["specific issue description", ...],
-       "suggested_changes": ["specific change needed", ...]
-     }
-   }
-   ```
-
-   - Wait for the subagent to return the structured consistency report.
-   - Parse the report and update all files flagged with "⚠ needs update" status.
-   - Apply suggested changes or make appropriate updates based on identified issues.
-
-   **FALLBACK APPROACH:** If Task tool unavailable, read files directly:
+4. Consistency propagation checklist (convert prior checklist into active validations):
    - Read `.specify/templates/plan-template.md` and ensure any "Constitution Check" or rules align with updated principles.
    - Read `.specify/templates/spec-template.md` for scope/requirements alignment—update if constitution adds/removes mandatory sections or constraints.
-   - Read `.specify/templates/tasks-template.md` and ensure task categorization reflects new or removed principle-driven task types.
-   - Read each command file in `.specify/templates/commands/*.md` to verify no outdated references remain.
-   - Read any runtime guidance docs and update references to principles changed.
+   - Read `.specify/templates/tasks-template.md` and ensure task categorization reflects new or removed principle-driven task types (e.g., observability, versioning, testing discipline).
+   - Read each command file in `.specify/templates/commands/*.md` (including this one) to verify no outdated references (agent-specific names like CLAUDE only) remain when generic guidance is required.
+   - Read any runtime guidance docs (e.g., `README.md`, `docs/quickstart.md`, or agent-specific guidance files if present). Update references to principles changed.
 
 5. Produce a Sync Impact Report (prepend as an HTML comment at top of the constitution file after update):
    - Version change: old → new
@@ -100,7 +60,6 @@ Follow this execution flow:
    - Version line matches report.
    - Dates ISO format YYYY-MM-DD.
    - Principles are declarative, testable, and free of vague language ("should" → replace with MUST/SHOULD rationale where appropriate).
-   - Subagent consistency report was generated and all "⚠ needs update" flagged files have been addressed.
 
 7. Write the completed constitution back to `.specify/memory/constitution.md` (overwrite).
 
@@ -108,33 +67,6 @@ Follow this execution flow:
    - New version and bump rationale.
    - Any files flagged for manual follow-up.
    - Suggested commit message (e.g., `docs: amend constitution to vX.Y.Z (principle additions + governance update)`).
-
-## Subagent Usage
-
-When executing step 4 (consistency propagation), you **MUST** use the Task tool with the general-purpose subagent unless it is unavailable:
-
-- **subagent_type**: `"general-purpose"`
-- **description**: `"Check constitution consistency"`
-- **prompt**: Must include:
-  1. The finalized constitution principles from step 3
-  2. Complete list of files to analyze
-  3. Specific analysis tasks (outdated references, missing sections, contradictions, etc.)
-  4. Clear structured return format specification
-
-**Benefits:**
-- Reads 10+ files in parallel, reducing execution time by 3-5x
-- Saves ~30k tokens in main conversation context
-- Provides structured, comprehensive consistency analysis
-
-**Execution Flow:**
-1. Main conversation completes steps 1-3 (load, collect values, draft constitution)
-2. Main conversation invokes Task tool with general-purpose subagent
-3. Subagent reads all template/doc files in parallel and analyzes
-4. Subagent returns structured consistency report
-5. Main conversation processes report and updates flagged files
-6. Main conversation continues with steps 5-8 (sync report, validation, write, summary)
-
-**Important:** Do NOT attempt to read all template/docs files directly in the main conversation during step 4. Always delegate file analysis to the general-purpose subagent unless the Task tool is unavailable, in which case use the fallback approach.
 
 Formatting & Style Requirements:
 
