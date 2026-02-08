@@ -75,15 +75,17 @@ async function processExpiredDeletions(supabase: SupabaseClient): Promise<{
     let anonymizedRef = 'unknown';
     try {
       anonymizedRef = await generateAnonymizedRef(supabase, user.id);
-      await logDeletionEvent(supabase, user.id, 'complete', {
+      const metadata = {
         scheduled_deletion_at: new Date(
           new Date(user.deletion_requested_at).getTime() + 30 * 24 * 60 * 60 * 1000,
         ).toISOString(),
         processed_at: new Date().toISOString(),
-      });
+      };
 
       const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
       if (deleteError) throw deleteError;
+
+      await logDeletionEvent(supabase, user.id, 'complete', metadata);
 
       processedCount++;
     }

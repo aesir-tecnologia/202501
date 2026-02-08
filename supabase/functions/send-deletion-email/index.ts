@@ -1,8 +1,15 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error(
+    'Missing required environment variables: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be configured',
+  );
+}
+
 const FROM_EMAIL = Deno.env.get('DELETION_EMAIL_FROM') ?? 'LifeStint <no-reply@lifestint.com>';
 const APP_NAME = 'LifeStint';
 
@@ -142,15 +149,24 @@ Deno.serve(async (req) => {
     const email = await getUserEmail(payload.userId);
 
     const supabase = createServiceClient();
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
       .select('deletion_requested_at')
       .eq('id', payload.userId)
       .single();
 
-    const requestedAt = profile?.deletion_requested_at
-      ? new Date(profile.deletion_requested_at)
-      : new Date();
+    if (profileError) {
+      throw new Error(`Failed to fetch user profile: ${profileError.message}`);
+    }
+
+    if (!profile?.deletion_requested_at) {
+      return new Response(
+        JSON.stringify({ message: 'Deletion request not found for the specified user' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } },
+      );
+    }
+
+    const requestedAt = new Date(profile.deletion_requested_at);
     const scheduledDeletionDate = new Date(requestedAt.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     let emailContent: { subject: string, html: string };

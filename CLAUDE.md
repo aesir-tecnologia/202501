@@ -291,7 +291,7 @@ Use `useTypedSupabaseClient()` from `~/utils/supabase` instead of `useSupabaseCl
 
 Supabase Edge Functions in `supabase/functions/`:
 - `process-account-deletions` - Cron-triggered cleanup of accounts past grace period
-- `send-deletion-email` - Sends account deletion confirmation/cancellation emails
+- `send-deletion-email` - Sends account deletion confirmation and reminder emails
 
 **Logging in Edge Functions:**
 - Use `console.error()` / `console.log()` (NOT the `logger` utility from main app)
