@@ -59,6 +59,10 @@ AS $$
 DECLARE
   v_log_id UUID;
 BEGIN
+  IF auth.uid() IS NOT NULL AND auth.uid() != p_user_id THEN
+    RAISE EXCEPTION 'Unauthorized: cannot log events for other users';
+  END IF;
+
   INSERT INTO public.deletion_audit_log (
     event_type,
     anonymized_user_ref,
