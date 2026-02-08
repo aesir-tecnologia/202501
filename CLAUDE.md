@@ -293,6 +293,11 @@ Supabase Edge Functions in `supabase/functions/`:
 - `process-account-deletions` - Cron-triggered cleanup of accounts past grace period
 - `send-deletion-email` - Sends account deletion confirmation and reminder emails
 
+**Account Deletion Gotchas:**
+- `deletion_audit_log` has NO `user_id` column — only `anonymized_user_ref` (SHA-256 hash). Query/cleanup by ref, not user ID.
+- `hasActiveStint()` intentionally blocks on both active AND paused stints (`ended_at IS NULL`). Users must fully end stints before requesting deletion.
+- Log audit events (especially `'complete'`) AFTER the destructive operation succeeds, not before.
+
 **Logging in Edge Functions:**
 - Use `console.error()` / `console.log()` (NOT the `logger` utility from main app)
 - Logs appear in: Supabase Dashboard → Edge Functions → Logs, or `supabase functions logs <name>`
