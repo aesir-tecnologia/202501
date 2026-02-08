@@ -1,0 +1,869 @@
+{
+  "requirements": [
+    {
+      "slug": "user-can-request-account-deletion",
+      "type": "functional",
+      "text": "System MUST allow authenticated users to request account deletion from the Settings page",
+      "location": "spec.md:§Functional Requirements:FR-001",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "require-email-and-password-reauth",
+      "type": "functional",
+      "text": "System MUST require re-entry of email AND password before accepting a deletion request",
+      "location": "spec.md:§Functional Requirements:FR-002",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "send-confirmation-email-on-deletion",
+      "type": "functional",
+      "text": "System MUST send confirmation email on deletion request; delivery failures handled by Resend retries",
+      "location": "spec.md:§Functional Requirements:FR-003",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "include-user-id-in-confirmation-email",
+      "type": "functional",
+      "text": "Deletion confirmation email MUST include user_id for audit trail lookups via support",
+      "location": "spec.md:§Functional Requirements:FR-003a",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "enforce-30-day-grace-period",
+      "type": "functional",
+      "text": "System MUST implement a 30-day grace period before permanent deletion",
+      "location": "spec.md:§Functional Requirements:FR-004",
+      "measurable": true,
+      "relatedStories": ["US1", "US2", "US3"]
+    },
+    {
+      "slug": "allow-cancel-pending-deletion",
+      "type": "functional",
+      "text": "System MUST allow users to cancel a pending deletion request during the grace period",
+      "location": "spec.md:§Functional Requirements:FR-005",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "display-deletion-status-and-countdown",
+      "type": "functional",
+      "text": "System MUST display deletion status and remaining grace period to users with pending deletions",
+      "location": "spec.md:§Functional Requirements:FR-006",
+      "measurable": true,
+      "relatedStories": ["US1", "US2"]
+    },
+    {
+      "slug": "auto-permanent-deletion-after-grace",
+      "type": "functional",
+      "text": "System MUST automatically perform permanent deletion after the grace period expires",
+      "location": "spec.md:§Functional Requirements:FR-007",
+      "measurable": true,
+      "relatedStories": ["US3"]
+    },
+    {
+      "slug": "hard-delete-all-user-data",
+      "type": "functional",
+      "text": "Permanent deletion MUST hard-delete all user data including profile, projects, stints, streaks, daily summaries",
+      "location": "spec.md:§Functional Requirements:FR-008",
+      "measurable": true,
+      "relatedStories": ["US3"]
+    },
+    {
+      "slug": "remove-auth-account-on-deletion",
+      "type": "functional",
+      "text": "Permanent deletion MUST remove the user's authentication account from auth system",
+      "location": "spec.md:§Functional Requirements:FR-009",
+      "measurable": true,
+      "relatedStories": ["US3"]
+    },
+    {
+      "slug": "log-deletion-events-for-audit",
+      "type": "functional",
+      "text": "System MUST record all deletion events in deletion_audit_log with anonymized refs; retained indefinitely",
+      "location": "spec.md:§Functional Requirements:FR-010",
+      "measurable": true,
+      "relatedStories": ["US1", "US2", "US3"]
+    },
+    {
+      "slug": "block-deletion-with-active-stint",
+      "type": "functional",
+      "text": "System MUST block deletion requests if user has an active running stint and prompt to end it",
+      "location": "spec.md:§Functional Requirements:FR-011",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "allow-full-access-during-grace-period",
+      "type": "functional",
+      "text": "System MUST allow full application access during the 30-day grace period with no restrictions",
+      "location": "spec.md:§Functional Requirements:FR-012",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "send-7-day-reminder-email",
+      "type": "functional",
+      "text": "System MUST send reminder email 7 days before deletion; delivery failures MUST NOT block deletion",
+      "location": "spec.md:§Functional Requirements:FR-014",
+      "measurable": true,
+      "relatedStories": ["US3"]
+    },
+    {
+      "slug": "deletion-request-under-60-seconds",
+      "type": "non-functional",
+      "text": "Users can complete the deletion request process in under 60 seconds",
+      "location": "spec.md:§Success Criteria:SC-001",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "email-dispatched-within-5-minutes",
+      "type": "non-functional",
+      "text": "Deletion confirmation email dispatched within 5 minutes; failures retried without blocking",
+      "location": "spec.md:§Success Criteria:SC-002",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "single-action-cancel-deletion",
+      "type": "non-functional",
+      "text": "Users can cancel a pending deletion with a single action from the Settings page",
+      "location": "spec.md:§Success Criteria:SC-003",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "data-removed-within-24h-after-grace",
+      "type": "non-functional",
+      "text": "All user data permanently removed within 24 hours after the 30-day grace period expires",
+      "location": "spec.md:§Success Criteria:SC-004",
+      "measurable": true,
+      "relatedStories": ["US3"]
+    },
+    {
+      "slug": "zero-pii-remnants-after-deletion",
+      "type": "non-functional",
+      "text": "Zero user-identifiable data remnants after permanent deletion; verified via audit trail compliance",
+      "location": "spec.md:§Success Criteria:SC-005",
+      "measurable": true,
+      "relatedStories": ["US3"]
+    },
+    {
+      "slug": "support-100-deletions-per-day",
+      "type": "non-functional",
+      "text": "System supports processing at least 100 deletion requests per day without degradation",
+      "location": "spec.md:§Success Criteria:SC-006",
+      "measurable": true,
+      "relatedStories": ["US3"]
+    }
+  ],
+  "userStories": [
+    {
+      "id": "US1",
+      "title": "Request Account Deletion",
+      "priority": "P1",
+      "scenarioCount": 4,
+      "hasAcceptanceCriteria": true,
+      "mappedRequirements": [
+        "user-can-request-account-deletion",
+        "require-email-and-password-reauth",
+        "send-confirmation-email-on-deletion",
+        "include-user-id-in-confirmation-email",
+        "enforce-30-day-grace-period",
+        "display-deletion-status-and-countdown",
+        "log-deletion-events-for-audit",
+        "block-deletion-with-active-stint",
+        "deletion-request-under-60-seconds",
+        "email-dispatched-within-5-minutes"
+      ]
+    },
+    {
+      "id": "US2",
+      "title": "Cancel Account Deletion",
+      "priority": "P2",
+      "scenarioCount": 3,
+      "hasAcceptanceCriteria": true,
+      "mappedRequirements": [
+        "allow-cancel-pending-deletion",
+        "display-deletion-status-and-countdown",
+        "allow-full-access-during-grace-period",
+        "log-deletion-events-for-audit",
+        "single-action-cancel-deletion"
+      ]
+    },
+    {
+      "id": "US3",
+      "title": "Automatic Permanent Deletion",
+      "priority": "P3",
+      "scenarioCount": 6,
+      "hasAcceptanceCriteria": true,
+      "mappedRequirements": [
+        "enforce-30-day-grace-period",
+        "auto-permanent-deletion-after-grace",
+        "hard-delete-all-user-data",
+        "remove-auth-account-on-deletion",
+        "log-deletion-events-for-audit",
+        "send-7-day-reminder-email",
+        "data-removed-within-24h-after-grace",
+        "zero-pii-remnants-after-deletion",
+        "support-100-deletions-per-day"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T000",
+      "phase": "Setup",
+      "storyLabel": null,
+      "description": "Configure Resend email infrastructure and set RESEND_API_KEY as Edge Function secret",
+      "files": [],
+      "isParallel": false,
+      "inferredRequirements": ["send-confirmation-email-on-deletion", "send-7-day-reminder-email"]
+    },
+    {
+      "id": "T001",
+      "phase": "Setup",
+      "storyLabel": null,
+      "description": "Create migration for deletion_requested_at column on user_profiles",
+      "files": ["supabase/migrations/[timestamp]_add_deletion_requested_at.sql"],
+      "isParallel": false,
+      "inferredRequirements": ["enforce-30-day-grace-period"]
+    },
+    {
+      "id": "T002",
+      "phase": "Setup",
+      "storyLabel": null,
+      "description": "Create migration for deletion_audit_log table and helper functions",
+      "files": ["supabase/migrations/[timestamp]_create_deletion_audit_log.sql"],
+      "isParallel": false,
+      "inferredRequirements": ["log-deletion-events-for-audit"]
+    },
+    {
+      "id": "T003",
+      "phase": "Setup",
+      "storyLabel": null,
+      "description": "Apply migrations and regenerate TypeScript types",
+      "files": ["app/types/database.types.ts"],
+      "isParallel": false,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T004",
+      "phase": "Core",
+      "storyLabel": null,
+      "description": "Create requestDeletionSchema with email and password validation",
+      "files": ["app/schemas/account-deletion.ts"],
+      "isParallel": true,
+      "inferredRequirements": ["require-email-and-password-reauth"]
+    },
+    {
+      "id": "T005",
+      "phase": "Core",
+      "storyLabel": null,
+      "description": "Create deletionStatusSchema with isPending, requestedAt, expiresAt, daysRemaining",
+      "files": ["app/schemas/account-deletion.ts"],
+      "isParallel": true,
+      "inferredRequirements": ["display-deletion-status-and-countdown"]
+    },
+    {
+      "id": "T006",
+      "phase": "Tests",
+      "storyLabel": null,
+      "description": "Create co-located schema tests for validation rules",
+      "files": ["app/schemas/account-deletion.test.ts"],
+      "isParallel": true,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T007",
+      "phase": "Core",
+      "storyLabel": null,
+      "description": "Create accountDeletionKeys query key factory",
+      "files": ["app/composables/useAccountDeletion.ts"],
+      "isParallel": false,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T008",
+      "phase": "Core",
+      "storyLabel": "US1",
+      "description": "Implement hasActiveStint() function in database layer",
+      "files": ["app/lib/supabase/account-deletion.ts"],
+      "isParallel": false,
+      "inferredRequirements": ["block-deletion-with-active-stint"]
+    },
+    {
+      "id": "T009",
+      "phase": "Core",
+      "storyLabel": "US1",
+      "description": "Implement getDeletionStatus() function in database layer",
+      "files": ["app/lib/supabase/account-deletion.ts"],
+      "isParallel": false,
+      "inferredRequirements": ["display-deletion-status-and-countdown", "enforce-30-day-grace-period"]
+    },
+    {
+      "id": "T010",
+      "phase": "Core",
+      "storyLabel": "US1",
+      "description": "Implement requestAccountDeletion() function in database layer",
+      "files": ["app/lib/supabase/account-deletion.ts"],
+      "isParallel": false,
+      "inferredRequirements": ["user-can-request-account-deletion", "log-deletion-events-for-audit"]
+    },
+    {
+      "id": "T011",
+      "phase": "Tests",
+      "storyLabel": "US1",
+      "description": "Create co-located database layer tests for account deletion functions",
+      "files": ["app/lib/supabase/account-deletion.test.ts"],
+      "isParallel": true,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T012",
+      "phase": "Core",
+      "storyLabel": "US1",
+      "description": "Implement useDeletionStatusQuery() hook in composable layer",
+      "files": ["app/composables/useAccountDeletion.ts"],
+      "isParallel": false,
+      "inferredRequirements": ["display-deletion-status-and-countdown"]
+    },
+    {
+      "id": "T013",
+      "phase": "Core",
+      "storyLabel": "US1",
+      "description": "Implement useRequestDeletion() mutation with server-first password verification",
+      "files": ["app/composables/useAccountDeletion.ts"],
+      "isParallel": false,
+      "inferredRequirements": ["user-can-request-account-deletion", "require-email-and-password-reauth"]
+    },
+    {
+      "id": "T014",
+      "phase": "Tests",
+      "storyLabel": "US1",
+      "description": "Create co-located composable tests for deletion query and mutation",
+      "files": ["app/composables/useAccountDeletion.test.ts"],
+      "isParallel": true,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T015",
+      "phase": "Core",
+      "storyLabel": "US1",
+      "description": "Create send-deletion-email Edge Function for confirmation and reminder types",
+      "files": ["supabase/functions/send-deletion-email/index.ts"],
+      "isParallel": true,
+      "inferredRequirements": ["send-confirmation-email-on-deletion", "include-user-id-in-confirmation-email", "send-7-day-reminder-email"]
+    },
+    {
+      "id": "T016",
+      "phase": "Tests",
+      "storyLabel": "US1",
+      "description": "Create co-located test for send-deletion-email Edge Function",
+      "files": ["supabase/functions/send-deletion-email/index.test.ts"],
+      "isParallel": true,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T017",
+      "phase": "Integration",
+      "storyLabel": "US1",
+      "description": "Update Settings page with Delete Account danger section and trigger button",
+      "files": ["app/pages/settings.vue"],
+      "isParallel": false,
+      "inferredRequirements": ["user-can-request-account-deletion"]
+    },
+    {
+      "id": "T018",
+      "phase": "Integration",
+      "storyLabel": "US1",
+      "description": "Implement deletion confirmation modal with email and password fields",
+      "files": ["app/pages/settings.vue"],
+      "isParallel": false,
+      "inferredRequirements": ["require-email-and-password-reauth", "deletion-request-under-60-seconds"]
+    },
+    {
+      "id": "T019",
+      "phase": "Integration",
+      "storyLabel": "US1",
+      "description": "Display deletion status banner with days remaining when pending",
+      "files": ["app/pages/settings.vue"],
+      "isParallel": true,
+      "inferredRequirements": ["display-deletion-status-and-countdown"]
+    },
+    {
+      "id": "T020",
+      "phase": "Core",
+      "storyLabel": "US2",
+      "description": "Implement cancelAccountDeletion() function in database layer",
+      "files": ["app/lib/supabase/account-deletion.ts"],
+      "isParallel": false,
+      "inferredRequirements": ["allow-cancel-pending-deletion", "log-deletion-events-for-audit"]
+    },
+    {
+      "id": "T021",
+      "phase": "Tests",
+      "storyLabel": "US2",
+      "description": "Add cancellation tests to database layer test file",
+      "files": ["app/lib/supabase/account-deletion.test.ts"],
+      "isParallel": true,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T022",
+      "phase": "Core",
+      "storyLabel": "US2",
+      "description": "Implement useCancelDeletion() mutation with optimistic update and rollback",
+      "files": ["app/composables/useAccountDeletion.ts"],
+      "isParallel": false,
+      "inferredRequirements": ["allow-cancel-pending-deletion", "single-action-cancel-deletion"]
+    },
+    {
+      "id": "T023",
+      "phase": "Tests",
+      "storyLabel": "US2",
+      "description": "Add cancellation tests to composable test file",
+      "files": ["app/composables/useAccountDeletion.test.ts"],
+      "isParallel": true,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T024",
+      "phase": "Integration",
+      "storyLabel": "US2",
+      "description": "Add Cancel Deletion button to status banner with FR-012 grace period validation",
+      "files": ["app/pages/settings.vue"],
+      "isParallel": false,
+      "inferredRequirements": ["allow-cancel-pending-deletion", "allow-full-access-during-grace-period", "single-action-cancel-deletion"]
+    },
+    {
+      "id": "T025",
+      "phase": "Core",
+      "storyLabel": "US3",
+      "description": "Create process-account-deletions Edge Function scaffold with service role auth",
+      "files": ["supabase/functions/process-account-deletions/index.ts"],
+      "isParallel": false,
+      "inferredRequirements": ["auto-permanent-deletion-after-grace"]
+    },
+    {
+      "id": "T026",
+      "phase": "Core",
+      "storyLabel": "US3",
+      "description": "Implement Phase 1 deletion: query expired accounts, audit log, auth admin deleteUser",
+      "files": ["supabase/functions/process-account-deletions/index.ts"],
+      "isParallel": false,
+      "inferredRequirements": ["auto-permanent-deletion-after-grace", "hard-delete-all-user-data", "remove-auth-account-on-deletion", "log-deletion-events-for-audit"]
+    },
+    {
+      "id": "T027",
+      "phase": "Core",
+      "storyLabel": "US3",
+      "description": "Implement Phase 2 reminders: query day-23 users and send reminder emails",
+      "files": ["supabase/functions/process-account-deletions/index.ts"],
+      "isParallel": false,
+      "inferredRequirements": ["send-7-day-reminder-email"]
+    },
+    {
+      "id": "T028",
+      "phase": "Tests",
+      "storyLabel": "US3",
+      "description": "Add idempotency test for process-account-deletions Edge Function",
+      "files": ["supabase/functions/process-account-deletions/index.test.ts"],
+      "isParallel": true,
+      "inferredRequirements": ["auto-permanent-deletion-after-grace"]
+    },
+    {
+      "id": "T029",
+      "phase": "Tests",
+      "storyLabel": "US3",
+      "description": "Add PII verification, re-registration, and full lifecycle integration tests",
+      "files": ["supabase/functions/process-account-deletions/index.test.ts"],
+      "isParallel": true,
+      "inferredRequirements": ["zero-pii-remnants-after-deletion", "hard-delete-all-user-data"]
+    },
+    {
+      "id": "T030",
+      "phase": "Integration",
+      "storyLabel": "US3",
+      "description": "Create pg_cron migration for daily scheduled deletion cleanup job",
+      "files": ["supabase/migrations/[timestamp]_schedule_deletion_cleanup_cron.sql"],
+      "isParallel": false,
+      "inferredRequirements": ["auto-permanent-deletion-after-grace", "data-removed-within-24h-after-grace"]
+    },
+    {
+      "id": "T031",
+      "phase": "Integration",
+      "storyLabel": "US3",
+      "description": "Configure pg_net HTTP POST payload and auth headers in cron migration",
+      "files": ["supabase/migrations/[timestamp]_schedule_deletion_cleanup_cron.sql"],
+      "isParallel": false,
+      "inferredRequirements": ["auto-permanent-deletion-after-grace"]
+    },
+    {
+      "id": "T032",
+      "phase": "Polish",
+      "storyLabel": null,
+      "description": "Verify PR description includes Closes #43 to link tracking issue",
+      "files": [],
+      "isParallel": false,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T033",
+      "phase": "Polish",
+      "storyLabel": null,
+      "description": "Update quickstart.md File Checklist with Edge Function test files",
+      "files": ["specs/007-account-deletion-backend/quickstart.md"],
+      "isParallel": false,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T034",
+      "phase": "Polish",
+      "storyLabel": null,
+      "description": "Run full test suite via npm run test:run and verify all tests pass",
+      "files": [],
+      "isParallel": false,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T035",
+      "phase": "Polish",
+      "storyLabel": null,
+      "description": "Run type check via npm run type-check and verify no errors",
+      "files": [],
+      "isParallel": false,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T036",
+      "phase": "Polish",
+      "storyLabel": null,
+      "description": "Run lint via npm run lint and verify no errors",
+      "files": [],
+      "isParallel": false,
+      "inferredRequirements": []
+    }
+  ],
+  "architecture": {
+    "stack": [
+      "TypeScript 5.x",
+      "Nuxt 4 (SSG mode)",
+      "Vue 3 (Composition API)",
+      "Supabase (PostgreSQL + Auth + Edge Functions)",
+      "TanStack Query (Vue Query)",
+      "Zod",
+      "Resend (email delivery)",
+      "Nuxt UI 4 (Reka UI)",
+      "Tailwind CSS v4",
+      "Vitest + Happy DOM",
+      "pg_cron + pg_net",
+      "Deno (Edge Functions runtime)",
+      "Vercel (static hosting)"
+    ],
+    "patterns": [
+      "Three-Layer Data Access (Database -> Schema -> Composable)",
+      "Query Key Factory Pattern (simplified: all + status for singleton)",
+      "Optimistic Updates with Automatic Rollback",
+      "Server-First Mutation (deviation for password verification)",
+      "Direct Auth Call in Composable (deviation for signInWithPassword)",
+      "Result<T> Error Propagation",
+      "Co-located Tests",
+      "SSG + Client-Side Auth Middleware",
+      "camelCase API / snake_case Database with toDbPayload()",
+      "SECURITY DEFINER Functions for privileged operations",
+      "Two-Phase Edge Function (Deletion + Reminders)",
+      "Idempotent Cleanup Jobs",
+      "CASCADE DELETE for related data removal"
+    ],
+    "entities": [
+      "User Profile (extended with deletion_requested_at)",
+      "Deletion Audit Log (new table with anonymized refs)",
+      "Project (CASCADE deleted)",
+      "Stint (CASCADE deleted)",
+      "Preferences (embedded in user_profiles, CASCADE deleted)",
+      "User Streaks (CASCADE deleted)",
+      "Daily Summaries (CASCADE deleted)",
+      "Authentication Account (Supabase Auth, admin-deleted)"
+    ],
+    "constraints": [
+      "SSG with client-side auth - no server-side rendering for protected routes",
+      "SERVICE_ROLE key must never be exposed client-side",
+      "Email delivery is non-blocking - failures do not block deletion flow",
+      "Reminder email failures MUST NOT block or delay scheduled deletions",
+      "Hard delete (not soft delete) for GDPR compliance",
+      "30-day grace period is fixed, not configurable per user",
+      "One active deletion request per account (natural rate limit, no rate limiting needed)",
+      "CASCADE foreign key constraints handle related data removal",
+      "Audit logs retained indefinitely with anonymized user references",
+      "Active stint blocks deletion request until manually ended"
+    ]
+  },
+  "constitutionRules": [
+    {
+      "principle": "Three-Layer Data Access Architecture",
+      "normative": "MUST",
+      "summary": "All data access follows Database -> Schema -> Composable pattern with typed helpers and RLS",
+      "checkpoints": [
+        "Export typed helpers (Row, Insert, Update)",
+        "Require TypedSupabaseClient parameter",
+        "Enforce user authentication and RLS",
+        "Return Result<T> with user-friendly error messages",
+        "Use camelCase for API surface in schemas",
+        "Export schema limits as constants (*_SCHEMA_LIMITS)",
+        "Separate create/update schemas with appropriate defaults",
+        "Mutation hooks with optimistic updates",
+        "Transform camelCase to snake_case via toDbPayload()"
+      ]
+    },
+    {
+      "principle": "Test-Driven Development",
+      "normative": "MUST",
+      "summary": "Testing mandatory for critical features with minimal mocking philosophy and co-located test files",
+      "checkpoints": [
+        "Unit tests for pure logic (lib/, composables/)",
+        "Component tests using @nuxt/test-utils",
+        "Tests written alongside implementation",
+        "Run npm test during development",
+        "Verify with npm run test:run before committing",
+        "Mock ONLY what is completely out of scope",
+        "Database mocking allowed to avoid rate limits",
+        "Mock implementations must match real interfaces"
+      ]
+    },
+    {
+      "principle": "Static Site Generation + Client-Side Auth",
+      "normative": "MUST",
+      "summary": "Public routes pre-rendered at build time; protected routes use ssr:false with client-side auth",
+      "checkpoints": [
+        "Public routes pre-rendered at build time",
+        "Protected routes use ssr: false",
+        "Client-side auth middleware only (skips on server)",
+        "Only anon keys in build-time credentials",
+        "Never commit service role keys"
+      ]
+    },
+    {
+      "principle": "Type Safety and Code Generation",
+      "normative": "MUST",
+      "summary": "Type safety enforced at all levels via generated types, TypedSupabaseClient, and Zod schemas",
+      "checkpoints": [
+        "Generated types from Supabase schema (database.types.ts)",
+        "TypedSupabaseClient for all database operations",
+        "Zod schemas for runtime validation with TS inference",
+        "Each layer exports its own types",
+        "Run supabase:types after schema changes"
+      ]
+    },
+    {
+      "principle": "User-Friendly Error Handling",
+      "normative": "MUST",
+      "summary": "Three-layer error propagation: PostgreSQL errors -> Zod validation -> toast notifications",
+      "checkpoints": [
+        "Database layer translates PostgreSQL errors to user-friendly messages",
+        "Composable layer validates with Zod and throws for TanStack Query",
+        "Component layer uses try-catch with toast.add() notifications",
+        "Success, error, warning, and info toast states"
+      ]
+    },
+    {
+      "principle": "Optimistic Updates with Automatic Rollback",
+      "normative": "MUST",
+      "summary": "All mutations implement optimistic updates with onMutate snapshot and onError rollback",
+      "checkpoints": [
+        "onMutate: Snapshot current cache state and apply optimistic update",
+        "onError: Restore snapshot if mutation fails",
+        "onSuccess: Invalidate affected queries for refetch",
+        "Never leave cache in inconsistent state"
+      ]
+    },
+    {
+      "principle": "Query Key Factory Pattern",
+      "normative": "MUST",
+      "summary": "Cache organization uses centralized key factories with broad/targeted invalidation strategies",
+      "checkpoints": [
+        "Centralized key factory per entity",
+        "all, lists(), list(filters), detail(id) structure",
+        "Broad invalidation after create/delete",
+        "Targeted invalidation after updates",
+        "Full key matching for getQueryData()"
+      ]
+    },
+    {
+      "principle": "State Management via TanStack Query Only",
+      "normative": "MUST",
+      "summary": "No Pinia/Vuex stores for server state; all managed through TanStack Query cache",
+      "checkpoints": [
+        "No Pinia or Vuex for server state",
+        "Singleton pattern for global state (e.g., timer Web Worker)",
+        "Local component state with ref/reactive as needed"
+      ]
+    },
+    {
+      "principle": "Design System Compliance",
+      "normative": "MUST",
+      "summary": "ALL styling follows docs/DESIGN_SYSTEM.md using Nuxt UI 4 on Reka UI primitives with dark mode",
+      "checkpoints": [
+        "Use documented color tokens (brand, ink, mint, amberx)",
+        "Follow typography scale and font families",
+        "Use Nuxt UI components with documented patterns",
+        "Apply spacing, layout, and animation guidelines",
+        "Always provide dark mode variants",
+        "No custom styling deviating from design system without justification"
+      ]
+    },
+    {
+      "principle": "Database Operations with RLS",
+      "normative": "MUST",
+      "summary": "RLS enforced on all tables; migrations in supabase/migrations/ with type regeneration",
+      "checkpoints": [
+        "RLS enabled on all tables",
+        "Migrations in supabase/migrations/",
+        "Type generation after schema changes",
+        "PostgreSQL functions for complex operations"
+      ]
+    },
+    {
+      "principle": "Code Quality Standards",
+      "normative": "SHOULD",
+      "summary": "ESLint via @nuxt/eslint with camelCase API / snake_case DB naming; no comments unless complex",
+      "checkpoints": [
+        "ESLint configured via @nuxt/eslint",
+        "Auto-fix before committing",
+        "camelCase for API, snake_case for database",
+        "No comments unless logic is too complex"
+      ]
+    },
+    {
+      "principle": "Never Auto-Commit",
+      "normative": "MUST",
+      "summary": "Only commit when explicitly requested by user; clear messages describing what and why",
+      "checkpoints": [
+        "Only commit when explicitly requested",
+        "Clear commit messages (what and why)",
+        "Atomic commits as logical units",
+        "Run tests and linting before pushing"
+      ]
+    },
+    {
+      "principle": "Public Keys Only in Environment",
+      "normative": "MUST",
+      "summary": "Never commit service role keys; only public anon keys in .env for static build embedding",
+      "checkpoints": [
+        "SUPABASE_URL and SUPABASE_ANON_KEY in .env",
+        "Never commit service role keys",
+        "Set environment variables in Vercel dashboard for production"
+      ]
+    },
+    {
+      "principle": "Compliance Review on All PRs",
+      "normative": "MUST",
+      "summary": "All PRs must verify compliance with constitution; deviations require justification",
+      "checkpoints": [
+        "All PRs verify compliance with principles",
+        "Architecture decisions justified if deviating",
+        "Complexity justified with simpler alternatives documented",
+        "Constitution supersedes all other practices"
+      ]
+    }
+  ],
+  "terminology": [
+    {
+      "term": "stint",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md", "constitution.md"],
+      "variants": ["stint", "active stint", "running stint", "work session"]
+    },
+    {
+      "term": "grace period",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["grace period", "30-day grace period", "30-day window"]
+    },
+    {
+      "term": "hard delete",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["hard delete", "hard-delete", "permanent deletion", "permanently deleted", "permanently removed"]
+    },
+    {
+      "term": "deletion request",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["deletion request", "account deletion", "request deletion", "pending deletion", "deletion scheduled"]
+    },
+    {
+      "term": "audit log",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["audit log", "deletion audit log", "deletion_audit_log", "audit trail", "audit entries"]
+    },
+    {
+      "term": "re-authentication",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["re-authentication", "re-authentication confirmation", "password verification", "re-entry of email and password", "signInWithPassword"]
+    },
+    {
+      "term": "Edge Function",
+      "usageLocations": ["plan.md", "tasks.md"],
+      "variants": ["Edge Function", "Supabase Edge Function", "Deno Edge Function"]
+    },
+    {
+      "term": "composable",
+      "usageLocations": ["plan.md", "tasks.md", "constitution.md"],
+      "variants": ["composable", "composable layer", "TanStack Query hooks", "query hooks", "mutation hooks"]
+    },
+    {
+      "term": "optimistic update",
+      "usageLocations": ["plan.md", "tasks.md", "constitution.md"],
+      "variants": ["optimistic update", "optimistic updates", "server-first optimistic", "immediate optimistic"]
+    },
+    {
+      "term": "anonymized reference",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["anonymized reference", "anonymized user reference", "anonymized ref", "user_deleted_<hash>"]
+    },
+    {
+      "term": "reminder email",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["reminder email", "7-day reminder", "deletion_reminder", "reminder notification"]
+    },
+    {
+      "term": "three-layer pattern",
+      "usageLocations": ["plan.md", "tasks.md", "constitution.md"],
+      "variants": ["three-layer data access", "three-layer pattern", "Database -> Schema -> Composable"]
+    },
+    {
+      "term": "Result<T>",
+      "usageLocations": ["plan.md", "constitution.md"],
+      "variants": ["Result<T>", "{ data, error }", "Result type"]
+    },
+    {
+      "term": "user profile",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["user profile", "user_profiles", "profile"]
+    },
+    {
+      "term": "CASCADE DELETE",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["CASCADE DELETE", "CASCADE", "cascade FK", "cascade foreign key constraints"]
+    },
+    {
+      "term": "pg_cron",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["pg_cron", "cron job", "scheduled cleanup job", "daily cron job"]
+    },
+    {
+      "term": "Resend",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["Resend", "Resend API", "email provider", "RESEND_API_KEY"]
+    }
+  ],
+  "metrics": {
+    "totalRequirements": 20,
+    "totalStories": 3,
+    "totalTasks": 37,
+    "totalPhases": 7,
+    "totalEdgeCases": 6,
+    "totalPrinciples": 14
+  }
+}
