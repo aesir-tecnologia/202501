@@ -38,7 +38,8 @@ function createMockState(): MockState {
 
 // ── Simulated handler logic for testing ─────────────────────────────
 // Since Deno Edge Functions register via Deno.serve() at module load,
-// we replicate the core logic here to test behavior in isolation.
+// we replicate the control flow here with stubbed externals (auth.admin,
+// audit logging, email sending) to test phase isolation and error handling.
 
 async function simulateProcessDeletions(
   expiredUsers: Array<{ id: string, deletion_requested_at: string }>,
@@ -210,12 +211,11 @@ Deno.test('PII: after deletion, user data is fully removed via CASCADE', async (
   await simulateProcessDeletions([USER_EXPIRED], [], state);
 
   assert(state.deletedUserIds.includes(USER_EXPIRED.id));
-  // In production, auth.admin.deleteUser() cascades to:
-  //   auth.users -> user_profiles -> projects -> stints
-  //   auth.users -> user_profiles -> user_streaks
-  //   auth.users -> user_profiles -> daily_summaries
+  // In production, auth.admin.deleteUser() cascades via:
+  //   auth.users → user_profiles (ON DELETE CASCADE)
+  //   user_profiles → projects, stints, user_streaks, daily_summaries (all ON DELETE CASCADE)
+  //   projects → stints (ON DELETE CASCADE, redundant with direct user_profiles → stints)
   // The user would not appear in any subsequent query.
-  // This test verifies the deletion was triggered.
 });
 
 Deno.test('PII: audit log uses anonymized reference, not real user ID', async () => {

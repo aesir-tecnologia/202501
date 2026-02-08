@@ -82,23 +82,10 @@ async function callHandler(body: unknown, authHeader?: string): Promise<Response
 
   const _originalDynamicImport = globalThis.fetch;
 
-  // Since we can't easily mock createClient inside the module,
-  // we test the HTTP handler behavior by mocking fetch and env,
-  // then importing the module fresh each time.
-  // For unit tests, we test the handler's HTTP interface directly.
-
-  const _req = new Request(`${SUPABASE_URL}/functions/v1/send-deletion-email`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(authHeader !== undefined ? { Authorization: authHeader } : {}),
-    },
-    body: JSON.stringify(body),
-  });
-
-  // Since we can't easily re-import the module with mocks in Deno,
-  // we'll test the handler logic by reconstructing the request/response flow.
-  // This tests the contract: input validation, auth check, email type routing.
+  // Deno Edge Functions register via Deno.serve() at module load, so we
+  // can't import the handler directly. Instead, we replicate the handler's
+  // validation and routing logic to test the expected contract (auth, payload
+  // validation, email type routing, Resend API integration).
 
   // Validate auth
   if (!authHeader?.startsWith('Bearer ') || authHeader.split(' ')[1] !== SERVICE_ROLE_KEY) {

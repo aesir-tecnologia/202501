@@ -106,6 +106,7 @@ Deno.serve(async (req) => {
   }
 
   if (!RESEND_API_KEY) {
+    console.error('send-deletion-email: RESEND_API_KEY not configured');
     return new Response(JSON.stringify({ message: 'RESEND_API_KEY not configured' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
