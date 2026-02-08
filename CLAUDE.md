@@ -335,6 +335,49 @@ app/
 │   └── preferences.ts
 ```
 
+### Testing Philosophy
+
+**"Test the unique logic, not the framework wiring."**
+
+This codebase follows a **three-layer testing architecture** where each layer is tested at the appropriate level of abstraction:
+
+#### Layer 1: Schema Tests (`app/schemas/*.test.ts`)
+- **What:** Zod schema validation rules, transformations, boundary conditions
+- **How:** Unit tests using `schema.safeParse()`
+- **Examples:** Valid/invalid payloads, min/max lengths, null handling, error messages
+
+#### Layer 2: Database Tests (`app/lib/supabase/*.test.ts`)
+- **What:** Business logic, CRUD operations, auth/RLS enforcement, data transformations
+- **How:** Integration tests against local Supabase database
+- **Pattern:** Test with three client types (authenticated, unauthenticated, service)
+- **Examples:** Query correctness, business rules (active stint blocks deletion), error handling
+
+#### Layer 3: Composable Tests (`app/composables/*.test.ts`)
+- **What:** Query key factory structure and consistency
+- **How:** Unit tests verifying cache key hierarchy
+- **Scope:** TanStack Query hooks (`useQuery`, `useMutation`) are **NOT tested directly**
+- **Rationale:**
+  - Composables are thin glue code that call database layer functions
+  - Business logic is already tested in Layers 1 and 2
+  - Framework behavior is tested by TanStack Query's own test suite
+  - Avoids complex mocking of framework internals
+  - Keeps tests focused, maintainable, and fast
+
+**Examples of Established Pattern:**
+- `useProjects.test.ts` - Only tests `projectKeys` factory
+- `useStints.test.ts` - Only tests `stintKeys` factory
+- `usePreferences.test.ts` - Only tests `preferencesKeys` factory
+- `useAccountDeletion.test.ts` - Only tests `accountDeletionKeys` factory
+
+**What This Means:**
+- ✅ Query key factories → Test structure and consistency
+- ✅ Business logic → Test in database layer with real Supabase
+- ✅ Validation → Test in schema layer with Zod
+- ❌ TanStack Query hooks → Do not mock/test at composable level
+- ❌ Cache operations → Verified through E2E tests, not unit tests
+
+This architecture ensures complete coverage while avoiding brittle tests that break when framework APIs change.
+
 ## Environment Variables
 
 Required in `.env` for local development:

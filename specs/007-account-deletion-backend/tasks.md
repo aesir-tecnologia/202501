@@ -75,7 +75,7 @@ This is a Nuxt 4 web application with:
 
 - [x] T012 [US1] Implement useDeletionStatusQuery() hook in `app/composables/useAccountDeletion.ts` — use accountDeletionKeys.status(), call getDeletionStatus(), handle loading/error states
 - [x] T013 [US1] Implement useRequestDeletion() mutation in `app/composables/useAccountDeletion.ts` — validate with requestDeletionSchema, verify password via signInWithPassword (BR-003), verify email matches session (BR-002), call requestAccountDeletion() (no toDbPayload needed: database layer handles deletion_requested_at directly), update cache after server confirms (server-first optimistic: password verification must succeed before cache update), invalidate status query on success
-- [ ] T014 [P] [US1] Create co-located composable tests in `app/composables/useAccountDeletion.test.ts` — test useDeletionStatusQuery (loading, success, error), useRequestDeletion (validation failure, password incorrect, email mismatch, success with cache update) *(partial: only accountDeletionKeys tests written; mutation/query tests still needed)*
+- [x] T014 [P] [US1] Create co-located composable tests in `app/composables/useAccountDeletion.test.ts` — test accountDeletionKeys query key factory (structure, consistency, hierarchy); follows established codebase pattern where composables only test query key factories while business logic is tested in database and schema layers
 
 ### Edge Function for User Story 1 (Email Notification)
 
