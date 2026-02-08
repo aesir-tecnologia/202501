@@ -75,6 +75,30 @@ export type Database = {
           },
         ]
       }
+      deletion_audit_log: {
+        Row: {
+          anonymized_user_ref: string
+          event_timestamp: string
+          event_type: string
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          anonymized_user_ref: string
+          event_timestamp?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          anonymized_user_ref?: string
+          event_timestamp?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           archived_at: string | null
@@ -203,6 +227,7 @@ export type Database = {
           celebration_animation: boolean
           created_at: string | null
           default_stint_duration: number | null
+          deletion_requested_at: string | null
           desktop_notifications: boolean
           email: string
           id: string
@@ -215,6 +240,7 @@ export type Database = {
           celebration_animation?: boolean
           created_at?: string | null
           default_stint_duration?: number | null
+          deletion_requested_at?: string | null
           desktop_notifications?: boolean
           email: string
           id: string
@@ -227,6 +253,7 @@ export type Database = {
           celebration_animation?: boolean
           created_at?: string | null
           default_stint_duration?: number | null
+          deletion_requested_at?: string | null
           desktop_notifications?: boolean
           email?: string
           id?: string
@@ -335,6 +362,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      generate_anonymized_user_ref: {
+        Args: { user_id: string }
+        Returns: string
+      }
       get_active_stint: {
         Args: { p_user_id: string }
         Returns: {
@@ -374,6 +405,10 @@ export type Database = {
         }[]
       }
       increment_user_version: { Args: { p_user_id: string }; Returns: number }
+      log_deletion_event: {
+        Args: { p_event_type: string; p_metadata?: Json; p_user_id: string }
+        Returns: string
+      }
       pause_stint: {
         Args: { p_stint_id: string }
         Returns: {

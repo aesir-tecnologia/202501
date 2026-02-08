@@ -35,9 +35,9 @@ This is a Nuxt 4 web application with:
 
 **Purpose**: Database migrations and type generation - MUST complete before any TypeScript implementation
 
-- [ ] T001 Create migration for deletion_requested_at column in `supabase/migrations/[timestamp]_add_deletion_requested_at.sql` — add nullable `deletion_requested_at TIMESTAMPTZ` to `user_profiles` with partial index per data-model.md Migration 1
-- [ ] T002 Create migration for deletion_audit_log table and helper functions in `supabase/migrations/[timestamp]_create_deletion_audit_log.sql` — create table, indexes, `generate_anonymized_user_ref()`, `log_deletion_event()` SECURITY DEFINER function per data-model.md Migrations 2-3
-- [ ] T003 Apply migrations and regenerate TypeScript types — run `supabase db reset && npm run supabase:types`, verify `deletion_requested_at` and `deletion_audit_log` appear in `app/types/database.types.ts`
+- [x] T001 Create migration for deletion_requested_at column in `supabase/migrations/[timestamp]_add_deletion_requested_at.sql` — add nullable `deletion_requested_at TIMESTAMPTZ` to `user_profiles` with partial index per data-model.md Migration 1
+- [x] T002 Create migration for deletion_audit_log table and helper functions in `supabase/migrations/[timestamp]_create_deletion_audit_log.sql` — create table, indexes, `generate_anonymized_user_ref()`, `log_deletion_event()` SECURITY DEFINER function per data-model.md Migrations 2-3
+- [x] T003 Apply migrations and regenerate TypeScript types — run `supabase db reset && npm run supabase:types`, verify `deletion_requested_at` and `deletion_audit_log` appear in `app/types/database.types.ts`
 
 ---
 
@@ -47,10 +47,10 @@ This is a Nuxt 4 web application with:
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Create requestDeletionSchema in `app/schemas/account-deletion.ts` — email (required, valid format) + password (required, min 1) per data-model.md Validation Rules; export `RequestDeletionPayload` type and `ACCOUNT_DELETION_SCHEMA_LIMITS` constant (PASSWORD_MIN_LENGTH: 1, EMAIL_MAX_LENGTH: 255)
-- [ ] T005 [P] Create deletionStatusSchema in `app/schemas/account-deletion.ts` — isPending (boolean), requestedAt (string|null), expiresAt (string|null), daysRemaining (number|null) per data-model.md; export `DeletionStatus` type
-- [ ] T006 [P] Create co-located schema tests in `app/schemas/account-deletion.test.ts` — test valid/invalid email, empty password, null fields in status schema
-- [ ] T007 Create accountDeletionKeys query key factory in `app/composables/useAccountDeletion.ts` — follow Query Key Factory pattern from constitution (all, status)
+- [x] T004 [P] Create requestDeletionSchema in `app/schemas/account-deletion.ts` — email (required, valid format) + password (required, min 1) per data-model.md Validation Rules; export `RequestDeletionPayload` type and `ACCOUNT_DELETION_SCHEMA_LIMITS` constant (PASSWORD_MIN_LENGTH: 1, EMAIL_MAX_LENGTH: 255)
+- [x] T005 [P] Create deletionStatusSchema in `app/schemas/account-deletion.ts` — isPending (boolean), requestedAt (string|null), expiresAt (string|null), daysRemaining (number|null) per data-model.md; export `DeletionStatus` type
+- [x] T006 [P] Create co-located schema tests in `app/schemas/account-deletion.test.ts` — test valid/invalid email, empty password, null fields in status schema
+- [x] T007 Create accountDeletionKeys query key factory in `app/composables/useAccountDeletion.ts` — follow Query Key Factory pattern from constitution (all, status)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -66,27 +66,27 @@ This is a Nuxt 4 web application with:
 
 ### Database Layer for User Story 1
 
-- [ ] T008 [US1] Implement hasActiveStint() function in `app/lib/supabase/account-deletion.ts` — query stints where started_at IS NOT NULL AND completed_at IS NULL AND paused_at IS NULL per BR-001; return Result<boolean>
-- [ ] T009 [US1] Implement getDeletionStatus() function in `app/lib/supabase/account-deletion.ts` — read deletion_requested_at from user_profiles, calculate expiresAt (+30 days) and daysRemaining; return Result<DeletionStatus>
-- [ ] T010 [US1] Implement requestAccountDeletion() function in `app/lib/supabase/account-deletion.ts` — enforce preconditions (BR-001 active stint, BR-004 already pending), set deletion_requested_at = NOW(), call log_deletion_event('request'); return Result<DeletionStatus>
-- [ ] T011 [P] [US1] Create co-located database layer tests in `app/lib/supabase/account-deletion.test.ts` — test hasActiveStint, getDeletionStatus (no pending, pending with days calc), requestAccountDeletion (success, active stint block, already pending block)
+- [x] T008 [US1] Implement hasActiveStint() function in `app/lib/supabase/account-deletion.ts` — query stints where started_at IS NOT NULL AND completed_at IS NULL AND paused_at IS NULL per BR-001; return Result<boolean>
+- [x] T009 [US1] Implement getDeletionStatus() function in `app/lib/supabase/account-deletion.ts` — read deletion_requested_at from user_profiles, calculate expiresAt (+30 days) and daysRemaining; return Result<DeletionStatus>
+- [x] T010 [US1] Implement requestAccountDeletion() function in `app/lib/supabase/account-deletion.ts` — enforce preconditions (BR-001 active stint, BR-004 already pending), set deletion_requested_at = NOW(), call log_deletion_event('request'); return Result<DeletionStatus>
+- [x] T011 [P] [US1] Create co-located database layer tests in `app/lib/supabase/account-deletion.test.ts` — test hasActiveStint, getDeletionStatus (no pending, pending with days calc), requestAccountDeletion (success, active stint block, already pending block)
 
 ### Composable Layer for User Story 1
 
-- [ ] T012 [US1] Implement useDeletionStatusQuery() hook in `app/composables/useAccountDeletion.ts` — use accountDeletionKeys.status(), call getDeletionStatus(), handle loading/error states
-- [ ] T013 [US1] Implement useRequestDeletion() mutation in `app/composables/useAccountDeletion.ts` — validate with requestDeletionSchema, verify password via signInWithPassword (BR-003), verify email matches session (BR-002), call requestAccountDeletion() (no toDbPayload needed: database layer handles deletion_requested_at directly), update cache after server confirms (server-first optimistic: password verification must succeed before cache update), invalidate status query on success
-- [ ] T014 [P] [US1] Create co-located composable tests in `app/composables/useAccountDeletion.test.ts` — test useDeletionStatusQuery (loading, success, error), useRequestDeletion (validation failure, password incorrect, email mismatch, success with cache update)
+- [x] T012 [US1] Implement useDeletionStatusQuery() hook in `app/composables/useAccountDeletion.ts` — use accountDeletionKeys.status(), call getDeletionStatus(), handle loading/error states
+- [x] T013 [US1] Implement useRequestDeletion() mutation in `app/composables/useAccountDeletion.ts` — validate with requestDeletionSchema, verify password via signInWithPassword (BR-003), verify email matches session (BR-002), call requestAccountDeletion() (no toDbPayload needed: database layer handles deletion_requested_at directly), update cache after server confirms (server-first optimistic: password verification must succeed before cache update), invalidate status query on success
+- [ ] T014 [P] [US1] Create co-located composable tests in `app/composables/useAccountDeletion.test.ts` — test useDeletionStatusQuery (loading, success, error), useRequestDeletion (validation failure, password incorrect, email mismatch, success with cache update) *(partial: only accountDeletionKeys tests written; mutation/query tests still needed)*
 
 ### Edge Function for User Story 1 (Email Notification)
 
-- [ ] T015 [P] [US1] Create send-deletion-email Edge Function in `supabase/functions/send-deletion-email/index.ts` — accept `type` (deletion_confirmation | deletion_reminder) and `userId`; fetch user email from DB; send via Resend API. For deletion_confirmation: include user_id, request timestamp, scheduled deletion date, cancel instructions (FR-003, FR-003a). For deletion_reminder: warn permanent deletion in 7 days, include cancel instructions (FR-014). Both types use service role auth.
-- [ ] T016 [P] [US1] Create co-located test for send-deletion-email Edge Function in `supabase/functions/send-deletion-email/index.test.ts` — test payload validation (missing type/userId), email type handling (confirmation vs reminder), Resend API error responses; use Deno.test with mocked Resend client
+- [x] T015 [P] [US1] Create send-deletion-email Edge Function in `supabase/functions/send-deletion-email/index.ts` — accept `type` (deletion_confirmation | deletion_reminder) and `userId`; fetch user email from DB; send via Resend API. For deletion_confirmation: include user_id, request timestamp, scheduled deletion date, cancel instructions (FR-003, FR-003a). For deletion_reminder: warn permanent deletion in 7 days, include cancel instructions (FR-014). Both types use service role auth.
+- [x] T016 [P] [US1] Create co-located test for send-deletion-email Edge Function in `supabase/functions/send-deletion-email/index.test.ts` — test payload validation (missing type/userId), email type handling (confirmation vs reminder), Resend API error responses; use Deno.test with mocked Resend client
 
 ### UI Layer for User Story 1
 
-- [ ] T017 [US1] Update Settings page to include "Delete Account" danger section with trigger button in `app/pages/settings.vue` — follow existing Settings layout pattern; button opens confirmation modal (FR-001); verify dark mode rendering and use docs/DESIGN_SYSTEM.md danger section color tokens
-- [ ] T018 [US1] Implement deletion confirmation modal with email and password fields in `app/pages/settings.vue` — UModal with email input, password input, confirm/cancel buttons; call useRequestDeletion on confirm; show toast success/error; close modal on success (FR-002); consult Nuxt UI 4 docs via Context7 for UModal and form input APIs
-- [ ] T019 [P] [US1] Display deletion status banner with days remaining when deletion is pending in `app/pages/settings.vue` — show prominent warning banner when useDeletionStatusQuery returns isPending=true; display daysRemaining countdown (FR-006); verify dark mode rendering and use docs/DESIGN_SYSTEM.md warning color tokens
+- [x] T017 [US1] Update Settings page to include "Delete Account" danger section with trigger button in `app/pages/settings.vue` — follow existing Settings layout pattern; button opens confirmation modal (FR-001); verify dark mode rendering and use docs/DESIGN_SYSTEM.md danger section color tokens
+- [x] T018 [US1] Implement deletion confirmation modal with email and password fields in `app/pages/settings.vue` — UModal with email input, password input, confirm/cancel buttons; call useRequestDeletion on confirm; show toast success/error; close modal on success (FR-002); consult Nuxt UI 4 docs via Context7 for UModal and form input APIs
+- [x] T019 [P] [US1] Display deletion status banner with days remaining when deletion is pending in `app/pages/settings.vue` — show prominent warning banner when useDeletionStatusQuery returns isPending=true; display daysRemaining countdown (FR-006); verify dark mode rendering and use docs/DESIGN_SYSTEM.md warning color tokens
 
 **Checkpoint**: User Story 1 complete - users can request deletion with password confirmation, receive confirmation email, and see deletion status
 
@@ -102,17 +102,17 @@ This is a Nuxt 4 web application with:
 
 ### Database Layer for User Story 2
 
-- [ ] T020 [US2] Implement cancelAccountDeletion() function in `app/lib/supabase/account-deletion.ts` — enforce BR-005 (must have pending deletion), set deletion_requested_at = NULL, call log_deletion_event('cancel'); return Result<DeletionStatus>
-- [ ] T021 [P] [US2] Add cancellation tests to `app/lib/supabase/account-deletion.test.ts` — test cancelAccountDeletion (success clears timestamp, no-pending-request error)
+- [x] T020 [US2] Implement cancelAccountDeletion() function in `app/lib/supabase/account-deletion.ts` — enforce BR-005 (must have pending deletion), set deletion_requested_at = NULL, call log_deletion_event('cancel'); return Result<DeletionStatus>
+- [x] T021 [P] [US2] Add cancellation tests to `app/lib/supabase/account-deletion.test.ts` — test cancelAccountDeletion (success clears timestamp, no-pending-request error)
 
 ### Composable Layer for User Story 2
 
-- [ ] T022 [US2] Implement useCancelDeletion() mutation with optimistic update in `app/composables/useAccountDeletion.ts` — immediate optimistic update (set isPending=false in cache), call cancelAccountDeletion(), rollback on error per constitution Principle VI, invalidate status query on success
+- [x] T022 [US2] Implement useCancelDeletion() mutation with optimistic update in `app/composables/useAccountDeletion.ts` — immediate optimistic update (set isPending=false in cache), call cancelAccountDeletion(), rollback on error per constitution Principle VI, invalidate status query on success
 - [ ] T023 [P] [US2] Add cancellation tests to `app/composables/useAccountDeletion.test.ts` — test useCancelDeletion (optimistic update, rollback on error, success invalidates cache)
 
 ### UI Layer for User Story 2
 
-- [ ] T024 [US2] Add "Cancel Deletion" button to deletion status banner in `app/pages/settings.vue` — button inside the pending-deletion banner from T019; call useCancelDeletion on click; show toast confirmation; banner disappears when deletion is canceled (FR-005); verify dark mode rendering and use docs/DESIGN_SYSTEM.md action button color tokens; consult Nuxt UI 4 docs for UButton API; add explicit test verifying auth middleware does not restrict users with deletion_requested_at during grace period (FR-012 validation)
+- [x] T024 [US2] Add "Cancel Deletion" button to deletion status banner in `app/pages/settings.vue` — button inside the pending-deletion banner from T019; call useCancelDeletion on click; show toast confirmation; banner disappears when deletion is canceled (FR-005); verify dark mode rendering and use docs/DESIGN_SYSTEM.md action button color tokens; consult Nuxt UI 4 docs for UButton API; add explicit test verifying auth middleware does not restrict users with deletion_requested_at during grace period (FR-012 validation)
 
 **Checkpoint**: User Stories 1 AND 2 complete - users can request deletion and cancel it during grace period
 
@@ -130,16 +130,16 @@ This is a Nuxt 4 web application with:
 
 ### Edge Function for User Story 3
 
-- [ ] T025 [US3] Create process-account-deletions Edge Function scaffold in `supabase/functions/process-account-deletions/index.ts` — Deno Edge Function with service role auth, two-phase architecture per research.md Decision 6
-- [ ] T026 [US3] Implement Phase 1 (Deletion): query users where `deletion_requested_at + INTERVAL '30 days' < NOW()` in process-account-deletions — for each: generate anonymized ref, call log_deletion_event('complete'), call `auth.admin.deleteUser()` (CASCADE deletes all data per FR-008, FR-009); return processedCount + errors (FR-007, FR-010: audit logs retained with anonymized refs)
-- [ ] T027 [US3] Implement Phase 2 (Reminders): query users where `deletion_requested_at + INTERVAL '23 days' < NOW() AND deletion_requested_at + INTERVAL '24 days' > NOW()` in process-account-deletions — for each: call send-deletion-email Edge Function with type `deletion_reminder`; log failures but do NOT affect Phase 1 results (FR-014: failures must not block/delay deletions)
-- [ ] T028 [P] [US3] Add idempotency test for process-account-deletions in `supabase/functions/process-account-deletions/index.test.ts`: verify Edge Function handles partial failures gracefully (re-run skips already-deleted users, no duplicate audit entries)
-- [ ] T029 [P] [US3] Add PII verification test: (1) after permanent deletion, query all tables (user_profiles, projects, stints, user_streaks, daily_summaries) for deleted user_id and confirm zero rows exist (validates SC-005 GDPR compliance); (2) verify same email can re-register successfully and is treated as new user with no residual data (edge case: re-registration after deletion); (3) add integration test verifying full deletion lifecycle (request → cancel → re-request → complete) logs all four event types correctly with proper anonymization
+- [x] T025 [US3] Create process-account-deletions Edge Function scaffold in `supabase/functions/process-account-deletions/index.ts` — Deno Edge Function with service role auth, two-phase architecture per research.md Decision 6
+- [x] T026 [US3] Implement Phase 1 (Deletion): query users where `deletion_requested_at + INTERVAL '30 days' < NOW()` in process-account-deletions — for each: generate anonymized ref, call log_deletion_event('complete'), call `auth.admin.deleteUser()` (CASCADE deletes all data per FR-008, FR-009); return processedCount + errors (FR-007, FR-010: audit logs retained with anonymized refs)
+- [x] T027 [US3] Implement Phase 2 (Reminders): query users where `deletion_requested_at + INTERVAL '23 days' < NOW() AND deletion_requested_at + INTERVAL '24 days' > NOW()` in process-account-deletions — for each: call send-deletion-email Edge Function with type `deletion_reminder`; log failures but do NOT affect Phase 1 results (FR-014: failures must not block/delay deletions)
+- [x] T028 [P] [US3] Add idempotency test for process-account-deletions in `supabase/functions/process-account-deletions/index.test.ts`: verify Edge Function handles partial failures gracefully (re-run skips already-deleted users, no duplicate audit entries)
+- [x] T029 [P] [US3] Add PII verification test: (1) after permanent deletion, query all tables (user_profiles, projects, stints, user_streaks, daily_summaries) for deleted user_id and confirm zero rows exist (validates SC-005 GDPR compliance); (2) verify same email can re-register successfully and is treated as new user with no residual data (edge case: re-registration after deletion); (3) add integration test verifying full deletion lifecycle (request → cancel → re-request → complete) logs all four event types correctly with proper anonymization
 
 ### Scheduled Job for User Story 3
 
-- [ ] T030 [US3] Create pg_cron migration in `supabase/migrations/[timestamp]_schedule_deletion_cleanup_cron.sql` — verify pg_net extension is enabled (⚠️ prerequisite from research.md), schedule daily cron job `process-account-deletions` to call Edge Function via pg_net HTTP POST
-- [ ] T031 [US3] Configure pg_net HTTP POST payload and auth headers in the cron migration — include service role key from vault/env, target Edge Function URL, verify job is scheduled via `SELECT * FROM cron.job`
+- [x] T030 [US3] Create pg_cron migration in `supabase/migrations/[timestamp]_schedule_deletion_cleanup_cron.sql` — verify pg_net extension is enabled (⚠️ prerequisite from research.md), schedule daily cron job `process-account-deletions` to call Edge Function via pg_net HTTP POST
+- [x] T031 [US3] Configure pg_net HTTP POST payload and auth headers in the cron migration — include service role key from vault/env, target Edge Function URL, verify job is scheduled via `SELECT * FROM cron.job`
 
 **Checkpoint**: All user stories complete - full deletion lifecycle works automatically with 7-day reminder emails
 

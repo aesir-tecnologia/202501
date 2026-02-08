@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthUser } from '~/composables/useAuthUser';
 import { usePreferencesQuery, useUpdatePreferences } from '~/composables/usePreferences';
+import { useDeletionStatusQuery, useRequestDeletion, useCancelDeletion } from '~/composables/useAccountDeletion';
 import { useSupabaseClient } from '#imports';
 import { PREFERENCES } from '~/constants';
 import type { StintDayAttribution } from '~/schemas/preferences';
@@ -288,35 +289,73 @@ function exportData() {
   });
 }
 
+const { data: deletionStatus } = useDeletionStatusQuery();
+const { mutateAsync: requestDeletion, isPending: isRequestPending } = useRequestDeletion();
+const { mutateAsync: cancelDeletion, isPending: isCancelPending } = useCancelDeletion();
+
 const showDeleteAccountDialog = ref(false);
-const deleteConfirmText = ref('');
+const deleteConfirmEmail = ref('');
+const deleteConfirmPassword = ref('');
 
-async function deleteAccount() {
-  if (deleteConfirmText.value !== accountForm.value.email) {
-    toast.add({
-      title: 'Email does not match',
-      color: 'error',
-      icon: 'i-lucide-alert-circle',
-    });
-    return;
-  }
+const deletionDaysRemaining = computed(() => deletionStatus.value?.daysRemaining ?? 0);
+const deletionExpiresAt = computed(() => {
+  if (!deletionStatus.value?.expiresAt) return '';
+  return new Date(deletionStatus.value.expiresAt).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+});
 
+function openDeleteModal() {
+  deleteConfirmEmail.value = '';
+  deleteConfirmPassword.value = '';
+  showDeleteAccountDialog.value = true;
+}
+
+async function handleRequestDeletion() {
   try {
-    // In a real app, you'd call an API to delete the account
+    await requestDeletion({
+      email: deleteConfirmEmail.value,
+      password: deleteConfirmPassword.value,
+    });
+
     toast.add({
-      title: 'Account deletion requested',
-      description: 'This action cannot be undone',
-      color: 'warning',
-      icon: 'i-lucide-alert-triangle',
+      title: 'Account deletion scheduled',
+      description: 'You have 30 days to cancel this request.',
+      color: 'success',
+      icon: 'i-lucide-check-circle',
     });
 
     showDeleteAccountDialog.value = false;
-    deleteConfirmText.value = '';
+    deleteConfirmEmail.value = '';
+    deleteConfirmPassword.value = '';
   }
   catch (error) {
     toast.add({
-      title: 'Failed to delete account',
-      description: error instanceof Error ? error.message : 'An error occurred',
+      title: 'Failed to request deletion',
+      description: error instanceof Error ? error.message : 'Unexpected error',
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    });
+  }
+}
+
+async function handleCancelDeletion() {
+  try {
+    await cancelDeletion();
+
+    toast.add({
+      title: 'Account deletion canceled',
+      description: 'Your account is now active.',
+      color: 'success',
+      icon: 'i-lucide-check-circle',
+    });
+  }
+  catch (error) {
+    toast.add({
+      title: 'Failed to cancel deletion',
+      description: error instanceof Error ? error.message : 'Unexpected error',
       color: 'error',
       icon: 'i-lucide-alert-circle',
     });
@@ -375,6 +414,17 @@ const timezones = computed(() => {
           Manage your account settings and preferences
         </p>
       </div>
+
+      <!-- Deletion Status Banner -->
+      <UAlert
+        v-if="deletionStatus?.isPending"
+        color="warning"
+        variant="subtle"
+        icon="i-lucide-alert-triangle"
+        :title="`Your account is scheduled for deletion in ${deletionDaysRemaining} day${deletionDaysRemaining === 1 ? '' : 's'}`"
+        :description="`Scheduled deletion date: ${deletionExpiresAt}. You can cancel this request before then.`"
+        :actions="[{ label: 'Cancel Deletion', color: 'warning' as const, variant: 'solid' as const, loading: isCancelPending, onClick: handleCancelDeletion }]"
+      />
 
       <!-- Account Section -->
       <UCard class="bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-stone-700 dark:bg-stone-800">
@@ -670,20 +720,6 @@ const timezones = computed(() => {
           >
             <USwitch v-model="analyticsOptOut" />
           </UFormField>
-
-          <div class="pt-2 border-t border-stone-200 dark:border-stone-700">
-            <UButton
-              color="error"
-              variant="outline"
-              @click="showDeleteAccountDialog = true"
-            >
-              <Icon
-                name="i-lucide-trash"
-                class="h-4 w-4 mr-2"
-              />
-              Delete Account
-            </UButton>
-          </div>
         </div>
       </UCard>
 
@@ -760,6 +796,39 @@ const timezones = computed(() => {
           </div>
         </div>
       </UCard>
+
+      <!-- Danger Zone Section -->
+      <UCard class="border-red-200 bg-white/80 shadow-sm backdrop-blur transition-colors duration-200 dark:border-red-900 dark:bg-stone-800">
+        <template #header>
+          <div class="flex items-center gap-2">
+            <Icon
+              name="i-lucide-alert-triangle"
+              class="h-5 w-5 text-red-500"
+            />
+            <h2 class="text-lg font-medium text-red-600 dark:text-red-400">
+              Danger Zone
+            </h2>
+          </div>
+        </template>
+
+        <div class="space-y-3">
+          <p class="text-sm text-stone-600 dark:text-stone-400">
+            Deleting your account is permanent. After a 30-day grace period, all your data — including projects, stints, and preferences — will be irreversibly removed.
+          </p>
+          <UButton
+            color="error"
+            variant="outline"
+            :disabled="deletionStatus?.isPending"
+            @click="openDeleteModal"
+          >
+            <Icon
+              name="i-lucide-trash"
+              class="h-4 w-4 mr-2"
+            />
+            {{ deletionStatus?.isPending ? 'Deletion Pending' : 'Delete Account' }}
+          </UButton>
+        </div>
+      </UCard>
     </div>
 
     <!-- Password Change Dialog -->
@@ -824,27 +893,39 @@ const timezones = computed(() => {
     <!-- Delete Account Dialog -->
     <UModal
       v-model:open="showDeleteAccountDialog"
-      title="Delete Account"
+      title="Delete Your Account"
+      description="This action will schedule your account for permanent deletion."
       :ui="{ footer: 'justify-end' }"
     >
       <template #body>
         <div class="space-y-4">
           <UAlert
             color="error"
-            variant="soft"
+            variant="subtle"
             icon="i-lucide-alert-triangle"
-          >
-            This action cannot be undone. All your data will be permanently deleted.
-          </UAlert>
+            title="This is permanent"
+            description="After a 30-day grace period, all your data will be irreversibly deleted. You can cancel during the grace period."
+          />
 
           <UFormField
-            label="Type your email to confirm"
-            name="deleteConfirm"
+            label="Confirm your email"
+            name="deleteConfirmEmail"
           >
             <UInput
-              v-model="deleteConfirmText"
+              v-model="deleteConfirmEmail"
               type="email"
               placeholder="your@email.com"
+            />
+          </UFormField>
+
+          <UFormField
+            label="Enter your password"
+            name="deleteConfirmPassword"
+          >
+            <UInput
+              v-model="deleteConfirmPassword"
+              type="password"
+              placeholder="Your current password"
             />
           </UFormField>
         </div>
@@ -853,16 +934,18 @@ const timezones = computed(() => {
       <template #footer>
         <UButton
           variant="ghost"
+          :disabled="isRequestPending"
           @click="showDeleteAccountDialog = false"
         >
           Cancel
         </UButton>
         <UButton
           color="error"
-          :disabled="deleteConfirmText !== accountForm.email"
-          @click="deleteAccount"
+          :loading="isRequestPending"
+          :disabled="!deleteConfirmEmail || !deleteConfirmPassword"
+          @click="handleRequestDeletion"
         >
-          Delete Account
+          Delete My Account
         </UButton>
       </template>
     </UModal>

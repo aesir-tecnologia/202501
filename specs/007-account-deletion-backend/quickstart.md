@@ -239,7 +239,9 @@ npm run test:run -- account-deletion.integration
 
 ### Edge Functions (supabase/functions/)
 - [ ] `process-account-deletions/index.ts`
+- [ ] `process-account-deletions/index.test.ts`
 - [ ] `send-deletion-email/index.ts`
+- [ ] `send-deletion-email/index.test.ts`
 
 ### Database Layer (app/lib/supabase/)
 - [ ] `account-deletion.ts`
