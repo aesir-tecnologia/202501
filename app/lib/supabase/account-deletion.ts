@@ -1,6 +1,7 @@
 import type { TypedSupabaseClient } from '~/utils/supabase';
 import type { DeletionStatus } from '~/schemas/account-deletion';
 import { requireUserId, type Result } from './auth';
+import { logger } from '~/utils/logger';
 
 export type { DeletionStatus };
 
@@ -95,12 +96,16 @@ export async function requestAccountDeletion(
 
   if (updateError) return { data: null, error: updateError };
 
+  // Best-effort audit logging - don't fail the operation if logging fails
   const { error: rpcError } = await client.rpc('log_deletion_event', {
     p_user_id: userId,
     p_event_type: 'request',
   });
 
-  if (rpcError) return { data: null, error: rpcError };
+  if (rpcError) {
+    // Log for monitoring but don't block the user's request
+    logger.error('Failed to log deletion request event', rpcError);
+  }
 
   return getDeletionStatus(client);
 }
@@ -127,12 +132,16 @@ export async function cancelAccountDeletion(
 
   if (updateError) return { data: null, error: updateError };
 
+  // Best-effort audit logging - don't fail the operation if logging fails
   const { error: rpcError } = await client.rpc('log_deletion_event', {
     p_user_id: userId,
     p_event_type: 'cancel',
   });
 
-  if (rpcError) return { data: null, error: rpcError };
+  if (rpcError) {
+    // Log for monitoring but don't block the user's request
+    logger.error('Failed to log deletion cancellation event', rpcError);
+  }
 
   return getDeletionStatus(client);
 }
