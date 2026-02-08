@@ -17,12 +17,20 @@ export const requestDeletionSchema = z.object({
     .min(ACCOUNT_DELETION_SCHEMA_LIMITS.PASSWORD_MIN_LENGTH, 'Password is required'),
 });
 
-export const deletionStatusSchema = z.object({
-  isPending: z.boolean(),
-  requestedAt: z.string().nullable(),
-  expiresAt: z.string().nullable(),
-  daysRemaining: z.number().int().nullable(),
-});
+export const deletionStatusSchema = z.discriminatedUnion('isPending', [
+  z.object({
+    isPending: z.literal(false),
+    requestedAt: z.null(),
+    expiresAt: z.null(),
+    daysRemaining: z.null(),
+  }),
+  z.object({
+    isPending: z.literal(true),
+    requestedAt: z.string(),
+    expiresAt: z.string(),
+    daysRemaining: z.number().int().min(0),
+  }),
+]);
 
 export type RequestDeletionPayload = z.infer<typeof requestDeletionSchema>;
 export type DeletionStatus = z.infer<typeof deletionStatusSchema>;

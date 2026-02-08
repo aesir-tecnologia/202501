@@ -13,6 +13,7 @@ import {
   cleanupTestData,
   createTestProject,
   createActiveStint,
+  createPausedStint,
   createCompletedStint,
 } from './test-utils';
 
@@ -59,6 +60,16 @@ describe('account-deletion.ts - Integration Tests', () => {
     it('should return true when active stint exists', async () => {
       const project = await createTestProject(serviceClient, testUserId, { name: 'Active Project' });
       await createActiveStint(serviceClient, project.id, testUserId);
+
+      const result = await hasActiveStint(authenticatedClient);
+
+      expect(result.error).toBeNull();
+      expect(result.data).toBe(true);
+    });
+
+    it('should return true when paused stint exists', async () => {
+      const project = await createTestProject(serviceClient, testUserId, { name: 'Paused Project' });
+      await createPausedStint(serviceClient, project.id, testUserId);
 
       const result = await hasActiveStint(authenticatedClient);
 
@@ -165,7 +176,12 @@ describe('account-deletion.ts - Integration Tests', () => {
         .order('event_timestamp', { ascending: false })
         .limit(1);
       expect(auditLogs).not.toBeNull();
-      expect(auditLogs!.length).toBeGreaterThan(0);
+      expect(auditLogs!).toHaveLength(1);
+
+      const { data: expectedRef } = await serviceClient.rpc('generate_anonymized_user_ref', {
+        user_id: testUserId,
+      });
+      expect(auditLogs![0]?.anonymized_user_ref).toBe(expectedRef);
     });
 
     it('should fail with error when user has active stint', async () => {
@@ -229,7 +245,12 @@ describe('account-deletion.ts - Integration Tests', () => {
         .order('event_timestamp', { ascending: false })
         .limit(1);
       expect(auditLogs).not.toBeNull();
-      expect(auditLogs!.length).toBeGreaterThan(0);
+      expect(auditLogs!).toHaveLength(1);
+
+      const { data: expectedRef } = await serviceClient.rpc('generate_anonymized_user_ref', {
+        user_id: testUserId,
+      });
+      expect(auditLogs![0]?.anonymized_user_ref).toBe(expectedRef);
     });
 
     it('should fail when no pending deletion exists', async () => {
