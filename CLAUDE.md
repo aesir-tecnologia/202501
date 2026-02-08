@@ -112,10 +112,6 @@ Direct Supabase queries with type safety. Functions enforce user authentication 
 - User ID automatically injected via `requireUserId()`
 - Examples: `listProjects()`, `createProject()`, `updateProject()`
 
-**Files:**
-- `app/lib/supabase/projects.ts` - Project CRUD operations
-- `app/lib/supabase/stints.ts` - Stint CRUD operations
-
 #### 2. Schema Layer (`app/schemas/`)
 Zod schemas for validation and type inference. Use camelCase for API surface.
 
@@ -124,10 +120,6 @@ Zod schemas for validation and type inference. Use camelCase for API surface.
 - Base schemas with common validations
 - Separate create/update schemas with appropriate defaults
 - Export inferred TypeScript types
-
-**Files:**
-- `app/schemas/projects.ts` - Project validation rules
-- `app/schemas/stints.ts` - Stint validation rules
 
 #### 3. Composable Layer (`app/composables/`)
 TanStack Query (Vue Query) hooks for data fetching and mutations. Provides automatic caching, optimistic updates, and automatic rollback on failure. Bridges camelCase schemas to snake_case database.
@@ -141,10 +133,6 @@ TanStack Query (Vue Query) hooks for data fetching and mutations. Provides autom
 
 **Key Function:**
 - `toDbPayload()` - Transforms camelCase → snake_case for database operations
-
-**Files:**
-- `app/composables/useProjects.ts` - Project queries and mutations
-- `app/composables/usePreferences.ts` - User preferences queries and mutations
 
 **Usage:**
 ```ts
@@ -204,6 +192,15 @@ All mutations implement optimistic updates with automatic cache rollback on erro
 - `onMutate`: Snapshots current cache state, applies optimistic update
 - `onError`: Restores snapshot if mutation fails
 - `onSuccess`: Invalidates affected queries for refetch
+
+**Best-Effort Operations:**
+For non-critical operations (e.g., audit logging), log failures but don't block the main operation:
+```typescript
+if (error) {
+  logger.error('Audit log failed', error);  // Log for monitoring
+  // Continue - don't return error to user
+}
+```
 
 ### Logging
 
@@ -284,6 +281,17 @@ Use `useTypedSupabaseClient()` from `~/utils/supabase` instead of `useSupabaseCl
 - `auth.ts` - Protects authenticated routes (client-side only, skips on server)
 - `guest.ts` - Redirects authenticated users away from auth pages
 
+### Edge Functions
+
+Supabase Edge Functions in `supabase/functions/`:
+- `process-account-deletions` - Cron-triggered cleanup of accounts past grace period
+- `send-deletion-email` - Sends account deletion confirmation/cancellation emails
+
+**Logging in Edge Functions:**
+- Use `console.error()` / `console.log()` (NOT the `logger` utility from main app)
+- Logs appear in: Supabase Dashboard → Edge Functions → Logs, or `supabase functions logs <name>`
+- Validate required env vars at startup (fail fast before first request)
+
 ### Styling
 
 **Nuxt UI 4** with Tailwind CSS. For colors, typography, tokens, and component patterns, see **`docs/DESIGN_SYSTEM.md`**.
@@ -309,31 +317,7 @@ Tests are **co-located** with the files they test for better discoverability and
 
 ### Test Organization
 
-Tests live alongside their source files with a `.test.ts` suffix:
-
-```
-app/
-├── lib/
-│   └── supabase/
-│       ├── projects.ts           # Source file
-│       ├── projects.test.ts      # Test file
-│       ├── stints.ts
-│       ├── stints.test.ts
-│       ├── preferences.ts
-│       └── preferences.test.ts
-├── composables/
-│   ├── useProjects.ts
-│   ├── useProjects.test.ts
-│   ├── useStints.ts
-│   ├── useStints.test.ts
-│   └── usePreferences.ts
-├── schemas/
-│   ├── projects.ts
-│   ├── projects.test.ts
-│   ├── stints.ts
-│   ├── stints.test.ts
-│   └── preferences.ts
-```
+Tests live alongside their source files with a `.test.ts` suffix (e.g., `projects.ts` → `projects.test.ts`).
 
 ### Testing Philosophy
 
@@ -377,6 +361,18 @@ This codebase follows a **three-layer testing architecture** where each layer is
 - ❌ Cache operations → Verified through E2E tests, not unit tests
 
 This architecture ensures complete coverage while avoiding brittle tests that break when framework APIs change.
+
+## Schema Design Patterns
+
+**Discriminated Unions for State:**
+Use Zod discriminated unions to prevent invalid state combinations:
+```typescript
+z.discriminatedUnion('isPending', [
+  z.object({ isPending: z.literal(false), data: z.null() }),
+  z.object({ isPending: z.literal(true), data: z.string() }),
+])
+```
+Makes states like `{ isPending: true, data: null }` unrepresentable at compile time.
 
 ## Environment Variables
 
