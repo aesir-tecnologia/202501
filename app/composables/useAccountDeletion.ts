@@ -34,7 +34,10 @@ export function useRequestDeletion() {
         throw new Error(validation.error.issues[0]?.message || 'Validation failed');
       }
 
-      const { data: userData } = await client.auth.getUser();
+      const { data: userData, error: userError } = await client.auth.getUser();
+      if (userError) {
+        throw new Error('Session expired. Please sign in again.');
+      }
       if (!userData?.user?.email || userData.user.email !== validation.data.email) {
         throw new Error('The email address does not match your account');
       }

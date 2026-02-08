@@ -44,6 +44,7 @@ export async function cleanupTestData(client: TypedSupabaseClient, userId: strin
   await client.from('stints').delete().eq('user_id', userId);
   await client.from('projects').delete().eq('user_id', userId);
   await client.from('user_streaks').delete().eq('user_id', userId);
+  await client.from('deletion_audit_log').delete().eq('user_id', userId);
 }
 
 export async function createTestProject(

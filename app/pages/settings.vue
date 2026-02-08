@@ -328,8 +328,6 @@ async function handleRequestDeletion() {
     });
 
     showDeleteAccountDialog.value = false;
-    deleteConfirmEmail.value = '';
-    deleteConfirmPassword.value = '';
   }
   catch (error) {
     toast.add({
