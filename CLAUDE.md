@@ -188,10 +188,16 @@ toast.add({
 ```
 
 **Automatic Rollback:**
-All mutations implement optimistic updates with automatic cache rollback on error:
-- `onMutate`: Snapshots current cache state, applies optimistic update
-- `onError`: Restores snapshot if mutation fails
-- `onSuccess`: Invalidates affected queries for refetch
+Mutations use two distinct cache update patterns:
+
+1. **Optimistic update** (for instant UX on predictable operations like cancel):
+   - `onMutate`: Snapshot cache, apply optimistic update before server responds
+   - `onError`: Restore snapshot if mutation fails
+   - `onSettled`: Invalidate queries for background refetch
+
+2. **Seed and revalidate** (for operations requiring server validation like password-gated requests):
+   - `onSuccess`: `setQueryData()` with mutation response for instant UI, then `invalidateQueries()` for background refetch
+   - No `onMutate` — cache only updates after server confirms success
 
 **Best-Effort Operations:**
 For non-critical operations (e.g., audit logging), log failures but don't block the main operation:
