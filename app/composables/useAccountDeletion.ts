@@ -39,6 +39,7 @@ export function useRequestDeletion() {
         throw new Error('The email address does not match your account');
       }
 
+      // signInWithPassword replaces the current session — revisit if MFA is added
       const { error: authError } = await client.auth.signInWithPassword({
         email: validation.data.email,
         password: validation.data.password,
