@@ -420,6 +420,7 @@ function stopServerSync(): void {
  */
 async function syncWithServer(stintId: string): Promise<void> {
   if (!globalTimerState.worker) return;
+  if (globalTimerState.isPaused.value) return;
 
   try {
     const supabase = useSupabaseClient();
@@ -461,6 +462,12 @@ async function syncWithServer(stintId: string): Promise<void> {
           icon: 'i-lucide-refresh-cw',
         });
       }
+      return;
+    }
+
+    if (data.status === 'paused') {
+      log.info('Sync detected stint paused, stopping sync...');
+      stopServerSync();
       return;
     }
 

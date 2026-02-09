@@ -112,10 +112,6 @@ Direct Supabase queries with type safety. Functions enforce user authentication 
 - User ID automatically injected via `requireUserId()`
 - Examples: `listProjects()`, `createProject()`, `updateProject()`
 
-**Files:**
-- `app/lib/supabase/projects.ts` - Project CRUD operations
-- `app/lib/supabase/stints.ts` - Stint CRUD operations
-
 #### 2. Schema Layer (`app/schemas/`)
 Zod schemas for validation and type inference. Use camelCase for API surface.
 
@@ -124,10 +120,6 @@ Zod schemas for validation and type inference. Use camelCase for API surface.
 - Base schemas with common validations
 - Separate create/update schemas with appropriate defaults
 - Export inferred TypeScript types
-
-**Files:**
-- `app/schemas/projects.ts` - Project validation rules
-- `app/schemas/stints.ts` - Stint validation rules
 
 #### 3. Composable Layer (`app/composables/`)
 TanStack Query (Vue Query) hooks for data fetching and mutations. Provides automatic caching, optimistic updates, and automatic rollback on failure. Bridges camelCase schemas to snake_case database.
@@ -141,10 +133,6 @@ TanStack Query (Vue Query) hooks for data fetching and mutations. Provides autom
 
 **Key Function:**
 - `toDbPayload()` - Transforms camelCase → snake_case for database operations
-
-**Files:**
-- `app/composables/useProjects.ts` - Project queries and mutations
-- `app/composables/usePreferences.ts` - User preferences queries and mutations
 
 **Usage:**
 ```ts
@@ -200,10 +188,25 @@ toast.add({
 ```
 
 **Automatic Rollback:**
-All mutations implement optimistic updates with automatic cache rollback on error:
-- `onMutate`: Snapshots current cache state, applies optimistic update
-- `onError`: Restores snapshot if mutation fails
-- `onSuccess`: Invalidates affected queries for refetch
+Mutations use two distinct cache update patterns:
+
+1. **Optimistic update** (for instant UX on predictable operations like cancel):
+   - `onMutate`: Snapshot cache, apply optimistic update before server responds
+   - `onError`: Restore snapshot if mutation fails
+   - `onSettled`: Invalidate queries for background refetch
+
+2. **Seed and revalidate** (for operations requiring server validation like password-gated requests):
+   - `onSuccess`: `setQueryData()` with mutation response for instant UI, then `invalidateQueries()` for background refetch
+   - No `onMutate` — cache only updates after server confirms success
+
+**Best-Effort Operations:**
+For non-critical operations (e.g., audit logging), log failures but don't block the main operation:
+```typescript
+if (error) {
+  logger.error('Audit log failed', error);  // Log for monitoring
+  // Continue - don't return error to user
+}
+```
 
 ### Logging
 
@@ -284,6 +287,22 @@ Use `useTypedSupabaseClient()` from `~/utils/supabase` instead of `useSupabaseCl
 - `auth.ts` - Protects authenticated routes (client-side only, skips on server)
 - `guest.ts` - Redirects authenticated users away from auth pages
 
+### Edge Functions
+
+Supabase Edge Functions in `supabase/functions/`:
+- `process-account-deletions` - Cron-triggered cleanup of accounts past grace period
+- `send-deletion-email` - Sends account deletion confirmation and reminder emails
+
+**Account Deletion Gotchas:**
+- `deletion_audit_log` has NO `user_id` column — only `anonymized_user_ref` (SHA-256 hash). Query/cleanup by ref, not user ID.
+- `hasActiveStint()` intentionally blocks on both active AND paused stints (`ended_at IS NULL`). Users must fully end stints before requesting deletion.
+- Log audit events (especially `'complete'`) AFTER the destructive operation succeeds, not before.
+
+**Logging in Edge Functions:**
+- Use `console.error()` / `console.log()` (NOT the `logger` utility from main app)
+- Logs appear in: Supabase Dashboard → Edge Functions → Logs, or `supabase functions logs <name>`
+- Validate required env vars at startup (fail fast before first request)
+
 ### Styling
 
 **Nuxt UI 4** with Tailwind CSS. For colors, typography, tokens, and component patterns, see **`docs/DESIGN_SYSTEM.md`**.
@@ -309,31 +328,62 @@ Tests are **co-located** with the files they test for better discoverability and
 
 ### Test Organization
 
-Tests live alongside their source files with a `.test.ts` suffix:
+Tests live alongside their source files with a `.test.ts` suffix (e.g., `projects.ts` → `projects.test.ts`).
 
+### Testing Philosophy
+
+**"Test the unique logic, not the framework wiring."**
+
+This codebase follows a **three-layer testing architecture** where each layer is tested at the appropriate level of abstraction:
+
+#### Layer 1: Schema Tests (`app/schemas/*.test.ts`)
+- **What:** Zod schema validation rules, transformations, boundary conditions
+- **How:** Unit tests using `schema.safeParse()`
+- **Examples:** Valid/invalid payloads, min/max lengths, null handling, error messages
+
+#### Layer 2: Database Tests (`app/lib/supabase/*.test.ts`)
+- **What:** Business logic, CRUD operations, auth/RLS enforcement, data transformations
+- **How:** Integration tests against local Supabase database
+- **Pattern:** Test with three client types (authenticated, unauthenticated, service)
+- **Examples:** Query correctness, business rules (active stint blocks deletion), error handling
+
+#### Layer 3: Composable Tests (`app/composables/*.test.ts`)
+- **What:** Query key factory structure and consistency
+- **How:** Unit tests verifying cache key hierarchy
+- **Scope:** TanStack Query hooks (`useQuery`, `useMutation`) are **NOT tested directly**
+- **Rationale:**
+  - Composables are thin glue code that call database layer functions
+  - Business logic is already tested in Layers 1 and 2
+  - Framework behavior is tested by TanStack Query's own test suite
+  - Avoids complex mocking of framework internals
+  - Keeps tests focused, maintainable, and fast
+
+**Examples of Established Pattern:**
+- `useProjects.test.ts` - Only tests `projectKeys` factory
+- `useStints.test.ts` - Only tests `stintKeys` factory
+- `usePreferences.test.ts` - Only tests `preferencesKeys` factory
+- `useAccountDeletion.test.ts` - Only tests `accountDeletionKeys` factory
+
+**What This Means:**
+- ✅ Query key factories → Test structure and consistency
+- ✅ Business logic → Test in database layer with real Supabase
+- ✅ Validation → Test in schema layer with Zod
+- ❌ TanStack Query hooks → Do not mock/test at composable level
+- ❌ Cache operations → Verified through E2E tests, not unit tests
+
+This architecture ensures complete coverage while avoiding brittle tests that break when framework APIs change.
+
+## Schema Design Patterns
+
+**Discriminated Unions for State:**
+Use Zod discriminated unions to prevent invalid state combinations:
+```typescript
+z.discriminatedUnion('isPending', [
+  z.object({ isPending: z.literal(false), data: z.null() }),
+  z.object({ isPending: z.literal(true), data: z.string() }),
+])
 ```
-app/
-├── lib/
-│   └── supabase/
-│       ├── projects.ts           # Source file
-│       ├── projects.test.ts      # Test file
-│       ├── stints.ts
-│       ├── stints.test.ts
-│       ├── preferences.ts
-│       └── preferences.test.ts
-├── composables/
-│   ├── useProjects.ts
-│   ├── useProjects.test.ts
-│   ├── useStints.ts
-│   ├── useStints.test.ts
-│   └── usePreferences.ts
-├── schemas/
-│   ├── projects.ts
-│   ├── projects.test.ts
-│   ├── stints.ts
-│   ├── stints.test.ts
-│   └── preferences.ts
-```
+Makes states like `{ isPending: true, data: null }` unrepresentable at compile time.
 
 ## Environment Variables
 

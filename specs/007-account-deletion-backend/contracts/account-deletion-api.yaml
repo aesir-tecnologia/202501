@@ -1,0 +1,338 @@
+# Account Deletion API Contracts
+# These define the internal API surface for the account deletion feature
+# Implementation: app/lib/supabase/account-deletion.ts, app/composables/useAccountDeletion.ts
+
+openapi: 3.0.3
+info:
+  title: Account Deletion Internal API
+  version: 1.0.0
+  description: |
+    Internal API contracts for the account deletion feature.
+    These are implemented as Supabase database functions and Edge Functions,
+    not as traditional REST endpoints.
+
+paths:
+  # Conceptual - implemented as database function calls
+  /account/deletion-status:
+    get:
+      operationId: getDeletionStatus
+      summary: Get current deletion status for authenticated user
+      description: |
+        Returns the deletion status including whether deletion is pending,
+        when it was requested, and days remaining in grace period.
+
+        Implementation: `getDeletionStatus()` in `app/lib/supabase/account-deletion.ts`
+      security:
+        - supabaseAuth: []
+      responses:
+        '200':
+          description: Deletion status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionStatus'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /account/request-deletion:
+    post:
+      operationId: requestAccountDeletion
+      summary: Request account deletion with confirmation
+      description: |
+        Initiates the account deletion process. Requires email and password
+        confirmation. Sets 30-day grace period before permanent deletion.
+
+        Fails if:
+        - User has active (running) stint
+        - Email doesn't match authenticated user
+        - Password is incorrect
+        - Deletion already pending
+
+        Implementation: `requestAccountDeletion()` in `app/lib/supabase/account-deletion.ts`
+      security:
+        - supabaseAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestDeletionPayload'
+      responses:
+        '200':
+          description: Deletion request accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletionRequestResult'
+        '400':
+          description: Validation error (active stint, email mismatch, already pending)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated or incorrect password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /account/cancel-deletion:
+    post:
+      operationId: cancelAccountDeletion
+      summary: Cancel pending deletion request
+      description: |
+        Cancels a pending deletion request during the 30-day grace period.
+        Restores account to normal status immediately.
+
+        Fails if no deletion request is pending.
+
+        Implementation: `cancelAccountDeletion()` in `app/lib/supabase/account-deletion.ts`
+      security:
+        - supabaseAuth: []
+      responses:
+        '200':
+          description: Deletion canceled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelDeletionResult'
+        '400':
+          description: No pending deletion to cancel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Edge Function endpoint
+  /functions/v1/process-account-deletions:
+    post:
+      operationId: processAccountDeletions
+      summary: Process expired deletion requests (Edge Function)
+      description: |
+        Server-side Edge Function with two-phase architecture.
+        Called by pg_cron job daily, not directly by clients.
+
+        Phase 1 (Deletion) - runs first:
+        For each account past 30-day grace period:
+        1. Generate anonymized user reference
+        2. Log 'complete' event to audit table
+        3. Call auth.admin.deleteUser() to permanently delete
+        4. CASCADE deletes all user data
+
+        Phase 2 (Reminders) - runs after Phase 1 completes:
+        For each account at day 23 (7 days before expiry):
+        1. Call send-deletion-email with type deletion_reminder
+        2. Log failures but do not affect Phase 1 results (FR-014)
+
+        Implementation: `supabase/functions/process-account-deletions/index.ts`
+      security:
+        - serviceRole: []
+      responses:
+        '200':
+          description: Deletions processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessDeletionsResult'
+        '401':
+          description: Invalid service role key
+        '500':
+          description: Processing error
+
+  /functions/v1/send-deletion-email:
+    post:
+      operationId: sendDeletionEmail
+      summary: Send deletion-related emails (Edge Function)
+      description: |
+        Sends transactional emails related to account deletion.
+        Called after deletion request or before expiry (reminder).
+
+        Implementation: `supabase/functions/send-deletion-email/index.ts`
+      security:
+        - serviceRole: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEmailPayload'
+      responses:
+        '200':
+          description: Email sent or queued
+        '400':
+          description: Invalid payload
+        '500':
+          description: Email delivery failed (will retry)
+
+components:
+  securitySchemes:
+    supabaseAuth:
+      type: http
+      scheme: bearer
+      description: Supabase JWT token from authenticated session
+    serviceRole:
+      type: http
+      scheme: bearer
+      description: Supabase SERVICE_ROLE key (server-side only)
+
+  schemas:
+    DeletionStatus:
+      type: object
+      required:
+        - isPending
+        - requestedAt
+        - expiresAt
+        - daysRemaining
+      properties:
+        isPending:
+          type: boolean
+          description: Whether deletion is currently pending
+          example: true
+        requestedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: ISO timestamp when deletion was requested
+          example: "2026-02-03T10:30:00Z"
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: ISO timestamp when grace period expires (requestedAt + 30 days)
+          example: "2026-03-05T10:30:00Z"
+        daysRemaining:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 30
+          description: Days remaining in grace period
+          example: 28
+
+    RequestDeletionPayload:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address (must match authenticated user)
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          minLength: 1
+          description: User's current password for re-authentication
+          example: "********"
+
+    DeletionRequestResult:
+      type: object
+      required:
+        - success
+        - status
+      properties:
+        success:
+          type: boolean
+          example: true
+        status:
+          $ref: '#/components/schemas/DeletionStatus'
+        message:
+          type: string
+          description: Human-readable confirmation
+          example: "Account deletion scheduled. You have 30 days to cancel."
+
+    CancelDeletionResult:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          description: Human-readable confirmation
+          example: "Account deletion canceled. Your account is now active."
+
+    ProcessDeletionsResult:
+      type: object
+      properties:
+        processedCount:
+          type: integer
+          description: Number of accounts permanently deleted
+          example: 3
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              anonymizedRef:
+                type: string
+              error:
+                type: string
+          description: Any deletion errors encountered (with anonymized refs)
+        remindersCount:
+          type: integer
+          description: Number of 7-day reminder emails dispatched
+          example: 2
+        reminderErrors:
+          type: array
+          items:
+            type: object
+            properties:
+              anonymizedRef:
+                type: string
+              error:
+                type: string
+          description: Any reminder email errors (informational only, do not affect deletions)
+
+    SendEmailPayload:
+      type: object
+      required:
+        - type
+        - userId
+      properties:
+        type:
+          type: string
+          enum:
+            - deletion_confirmation
+            - deletion_reminder
+          description: Type of email to send
+        userId:
+          type: string
+          format: uuid
+          description: User ID to send email to
+
+    # Email content requirements (for implementation reference)
+    # The deletion_confirmation email MUST include:
+    # - The user's account ID (userId) displayed prominently
+    # - Explanation that this ID can be used to verify deletion history via support
+    # - The deletion request timestamp
+    # - The scheduled permanent deletion date (30 days from request)
+    # - Instructions to cancel deletion if requested in error
+
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Please end your active stint before requesting account deletion"
+        code:
+          type: string
+          description: Machine-readable error code
+          example: "ACTIVE_STINT_EXISTS"

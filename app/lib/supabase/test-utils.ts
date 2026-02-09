@@ -44,6 +44,10 @@ export async function cleanupTestData(client: TypedSupabaseClient, userId: strin
   await client.from('stints').delete().eq('user_id', userId);
   await client.from('projects').delete().eq('user_id', userId);
   await client.from('user_streaks').delete().eq('user_id', userId);
+  const { data: ref } = await client.rpc('generate_anonymized_user_ref', { user_id: userId });
+  if (ref) {
+    await client.from('deletion_audit_log').delete().eq('anonymized_user_ref', ref);
+  }
 }
 
 export async function createTestProject(
