@@ -7,7 +7,7 @@ export interface PreferencesData {
   celebrationAnimation: boolean
   desktopNotifications: boolean
   stintDayAttribution: StintDayAttribution
-  timezone: string | null
+  timezone: string
 }
 
 export type { Result };

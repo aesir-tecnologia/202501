@@ -148,6 +148,26 @@ describe('preferences.ts - Integration Tests', () => {
       expect(result.data?.stintDayAttribution).toBe('ask');
     });
 
+    it('should update timezone', async () => {
+      const result = await updatePreferences(authenticatedClient, {
+        timezone: 'America/New_York',
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data?.timezone).toBe('America/New_York');
+    });
+
+    it('should persist timezone across reads', async () => {
+      await updatePreferences(authenticatedClient, {
+        timezone: 'Asia/Tokyo',
+      });
+
+      const result = await getPreferences(authenticatedClient);
+
+      expect(result.error).toBeNull();
+      expect(result.data?.timezone).toBe('Asia/Tokyo');
+    });
+
     it('should enforce minimum duration constraint', async () => {
       const result = await updatePreferences(authenticatedClient, {
         defaultStintDuration: 3,

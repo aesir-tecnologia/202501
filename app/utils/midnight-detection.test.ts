@@ -82,6 +82,19 @@ describe('midnight-detection utils', () => {
       expect(resultNY.endDate).toBe('2025-01-15');
     });
 
+    it('falls back to UTC for invalid timezone string', () => {
+      const stint = createMockStint({
+        started_at: new Date('2025-01-15T23:30:00Z').toISOString(),
+        ended_at: new Date('2025-01-16T00:30:00Z').toISOString(),
+      });
+
+      const result = detectMidnightSpan(stint, 'Invalid/Timezone');
+
+      expect(result.spansMidnight).toBe(true);
+      expect(result.startDate).toBe('2025-01-15');
+      expect(result.endDate).toBe('2025-01-16');
+    });
+
     it('handles missing started_at gracefully', () => {
       const stint = createMockStint({
         started_at: null,
@@ -121,6 +134,19 @@ describe('midnight-detection utils', () => {
 
       expect(result.startLabel).toBe('Fri, Jan 31');
       expect(result.endLabel).toBe('Sat, Feb 1');
+    });
+
+    it('falls back to raw date string for invalid timezone', () => {
+      const info = {
+        spansMidnight: true,
+        startDate: '2025-01-15',
+        endDate: '2025-01-16',
+      };
+
+      const result = formatAttributionDates(info, 'Invalid/Timezone');
+
+      expect(result.startLabel).toBe('2025-01-15');
+      expect(result.endLabel).toBe('2025-01-16');
     });
   });
 });

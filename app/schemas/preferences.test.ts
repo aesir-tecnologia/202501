@@ -45,6 +45,15 @@ describe('preferences schema', () => {
         expect(result.data).toEqual({ desktopNotifications: true });
       });
 
+      it('should validate partial updates with only timezone', () => {
+        const result = preferencesUpdateSchema.safeParse({
+          timezone: 'America/New_York',
+        });
+
+        expect(result.success).toBe(true);
+        expect(result.data).toEqual({ timezone: 'America/New_York' });
+      });
+
       it('should validate empty object (no updates)', () => {
         const result = preferencesUpdateSchema.safeParse({});
 
@@ -125,6 +134,23 @@ describe('preferences schema', () => {
         expect(result.success).toBe(false);
       });
 
+      it('should reject empty timezone string', () => {
+        const result = preferencesUpdateSchema.safeParse({
+          timezone: '',
+        });
+
+        expect(result.success).toBe(false);
+        expect(result.error?.issues[0]?.message).toBe('Timezone cannot be empty');
+      });
+
+      it('should reject non-string timezone', () => {
+        const result = preferencesUpdateSchema.safeParse({
+          timezone: 123,
+        });
+
+        expect(result.success).toBe(false);
+      });
+
       it('should reject non-boolean desktopNotifications', () => {
         const result = preferencesUpdateSchema.safeParse({
           desktopNotifications: 1,
@@ -151,7 +177,7 @@ describe('preferences schema', () => {
         celebrationAnimation: true,
         desktopNotifications: false,
         stintDayAttribution: 'ask',
-        timezone: null,
+        timezone: 'UTC',
       });
     });
 

@@ -17,7 +17,7 @@ export const preferencesUpdateSchema = z.object({
   stintDayAttribution: z.enum(stintDayAttributionValues, {
     errorMap: () => ({ message: 'Invalid stint day attribution value' }),
   }).optional(),
-  timezone: z.string().nullable().optional(),
+  timezone: z.string().min(1, 'Timezone cannot be empty').optional(),
 });
 
 export type PreferencesUpdatePayload = z.infer<typeof preferencesUpdateSchema>;
@@ -27,5 +27,5 @@ export const DEFAULT_PREFERENCES = {
   celebrationAnimation: true,
   desktopNotifications: false,
   stintDayAttribution: 'ask' as StintDayAttribution,
-  timezone: null,
+  timezone: 'UTC',
 } as const;

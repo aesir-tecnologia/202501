@@ -7,6 +7,9 @@ import type { StintRow } from '~/lib/supabase/stints';
 import { startOfDay, addDays, format } from 'date-fns';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { detectMidnightSpan, formatAttributionDates } from '~/utils/midnight-detection';
+import { createLogger } from '~/utils/logger';
+
+const log = createLogger('dashboard');
 
 definePageMeta({
   title: 'Dashboard',
@@ -117,12 +120,17 @@ const dailyProgress = computed(() => {
 
 const midnightSpanInfo = computed(() => {
   if (!stintToComplete.value) return null;
-  return detectMidnightSpan(stintToComplete.value, preferencesData.value?.timezone ?? 'UTC');
+  if (!preferencesData.value?.timezone) {
+    log.warn('Timezone not available for midnight detection', { hasPreferences: !!preferencesData.value });
+    return null;
+  }
+  return detectMidnightSpan(stintToComplete.value, preferencesData.value.timezone);
 });
 
 const midnightSpanLabels = computed(() => {
   if (!midnightSpanInfo.value) return null;
-  return formatAttributionDates(midnightSpanInfo.value, preferencesData.value?.timezone ?? 'UTC');
+  if (!preferencesData.value?.timezone) return null;
+  return formatAttributionDates(midnightSpanInfo.value, preferencesData.value.timezone);
 });
 
 const shouldShowDayAttribution = computed(() => {
