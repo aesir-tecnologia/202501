@@ -41,6 +41,7 @@ describe('preferences.ts - Integration Tests', () => {
         celebrationAnimation: true,
         desktopNotifications: false,
         stintDayAttribution: 'ask',
+        timezone: 'UTC',
       });
     });
 

@@ -144,12 +144,12 @@ const dailyProgressMap = computed(() => {
 
 const midnightSpanInfo = computed(() => {
   if (!stintToComplete.value) return null;
-  return detectMidnightSpan(stintToComplete.value);
+  return detectMidnightSpan(stintToComplete.value, preferencesData.value?.timezone ?? 'UTC');
 });
 
 const midnightSpanLabels = computed(() => {
   if (!midnightSpanInfo.value) return null;
-  return formatAttributionDates(midnightSpanInfo.value);
+  return formatAttributionDates(midnightSpanInfo.value, preferencesData.value?.timezone ?? 'UTC');
 });
 
 const shouldShowDayAttribution = computed(() => {

@@ -151,6 +151,7 @@ describe('preferences schema', () => {
         celebrationAnimation: true,
         desktopNotifications: false,
         stintDayAttribution: 'ask',
+        timezone: null,
       });
     });
 
