@@ -82,6 +82,23 @@ describe('midnight-detection utils', () => {
       expect(resultNY.endDate).toBe('2025-01-15');
     });
 
+    it('detects midnight span introduced by positive-offset timezone', () => {
+      const stint = createMockStint({
+        started_at: new Date('2025-01-15T10:30:00Z').toISOString(),
+        ended_at: new Date('2025-01-15T11:30:00Z').toISOString(),
+      });
+
+      const resultUTC = detectMidnightSpan(stint, 'UTC');
+      expect(resultUTC.spansMidnight).toBe(false);
+      expect(resultUTC.startDate).toBe('2025-01-15');
+      expect(resultUTC.endDate).toBe('2025-01-15');
+
+      const resultAKL = detectMidnightSpan(stint, 'Pacific/Auckland');
+      expect(resultAKL.spansMidnight).toBe(true);
+      expect(resultAKL.startDate).toBe('2025-01-15');
+      expect(resultAKL.endDate).toBe('2025-01-16');
+    });
+
     it('falls back to UTC for invalid timezone string', () => {
       const stint = createMockStint({
         started_at: new Date('2025-01-15T23:30:00Z').toISOString(),

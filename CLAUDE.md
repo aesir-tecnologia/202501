@@ -74,9 +74,9 @@ npm run type-check       # Run TypeScript type checking
 
 ### Testing
 ```bash
-npm test                 # Run tests in watch mode
+npm run test:run         # Run tests once (CI mode) — PREFERRED
 npm run test:ui          # Run tests with Vitest UI
-npm run test:run         # Run tests once (CI mode)
+npm test                 # Run tests in watch mode (⚠️ never use from Claude)
 npm test -- path/to/file.test.ts  # Run single test file
 ```
 
