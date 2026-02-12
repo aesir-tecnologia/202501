@@ -186,6 +186,7 @@ describe('preferences schema', () => {
       expect(DEFAULT_PREFERENCES.celebrationAnimation).toBe(true);
       expect(DEFAULT_PREFERENCES.desktopNotifications).toBe(false);
       expect(DEFAULT_PREFERENCES.stintDayAttribution).toBe('ask');
+      expect(DEFAULT_PREFERENCES.timezone).toBe('UTC');
     });
   });
 

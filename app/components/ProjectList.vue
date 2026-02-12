@@ -145,8 +145,8 @@ const dailyProgressMap = computed(() => {
 const midnightSpanInfo = computed(() => {
   if (!stintToComplete.value) return null;
   const timezone = preferencesData.value?.timezone ?? 'UTC';
-  if (!preferencesData.value?.timezone) {
-    log.warn('Timezone not available for midnight detection, falling back to UTC', { hasPreferences: !!preferencesData.value });
+  if (preferencesData.value && !preferencesData.value.timezone) {
+    log.warn('Timezone missing from loaded preferences, falling back to UTC');
   }
   return detectMidnightSpan(stintToComplete.value, timezone);
 });
