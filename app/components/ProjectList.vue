@@ -17,8 +17,8 @@ import {
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
-import { startOfDay, addDays } from 'date-fns';
-import { parseSafeDate } from '~/utils/date-helpers';
+import { format } from 'date-fns';
+import { getStintEffectiveDate } from '~/utils/date-helpers';
 import { calculateRemainingSeconds } from '~/utils/stint-time';
 import { detectMidnightSpan, formatAttributionDates } from '~/utils/midnight-detection';
 import ProjectListCard from './ProjectListCard.vue';
@@ -101,17 +101,13 @@ function computeAllDailyProgress(
   projects: ProjectRow[],
   stints: StintRow[] | undefined,
 ): Map<string, DailyProgress> {
-  const today = startOfDay(new Date());
-  const tomorrow = addDays(today, 1);
-
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
   const completedCounts = new Map<string, number>();
 
   if (stints) {
     for (const stint of stints) {
-      if (stint.status !== 'completed' || !stint.ended_at) continue;
-
-      const endedAt = parseSafeDate(stint.ended_at);
-      if (endedAt && endedAt >= today && endedAt < tomorrow) {
+      if (stint.status !== 'completed') continue;
+      if (getStintEffectiveDate(stint) === todayStr) {
         const currentCount = completedCounts.get(stint.project_id) || 0;
         completedCounts.set(stint.project_id, currentCount + 1);
       }
