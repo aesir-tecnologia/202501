@@ -9,6 +9,7 @@ import {
   getStintById,
   getActiveStint,
   getPausedStints,
+  listCompletedStintsByDate,
   createStint,
   updateStint,
   deleteStint,
@@ -122,6 +123,138 @@ describe('stints.ts - Integration Tests', () => {
 
       expect(result.error).not.toBeNull();
       expect(result.error?.message).toContain('authenticated');
+    });
+  });
+
+  describe('listCompletedStintsByDate', () => {
+    function todayRange() {
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfTomorrow = new Date(startOfToday);
+      startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+      return { startOfToday, startOfTomorrow };
+    }
+
+    function makeStintTimes(endedAt: Date) {
+      return {
+        started_at: new Date(endedAt.getTime() - 25 * 60_000).toISOString(),
+        ended_at: endedAt.toISOString(),
+      };
+    }
+
+    it('should return only completed stints for given project and date range', async () => {
+      const { startOfToday, startOfTomorrow } = todayRange();
+
+      await createCompletedStint(serviceClient, testProject.id, testUserId,
+        makeStintTimes(new Date(startOfToday.getTime() + 3600_000)),
+      );
+
+      const result = await listCompletedStintsByDate(authenticatedClient, {
+        projectId: testProject.id,
+        dateStart: startOfToday.toISOString(),
+        dateEnd: startOfTomorrow.toISOString(),
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toHaveLength(1);
+      expect(result.data![0]!.status).toBe('completed');
+      expect(result.data![0]!.project_id).toBe(testProject.id);
+    });
+
+    it('should exclude stints with status other than completed', async () => {
+      const { startOfToday, startOfTomorrow } = todayRange();
+
+      await createActiveStint(serviceClient, testProject.id, testUserId);
+
+      const otherProject = await createTestProject(serviceClient, testUserId, {
+        name: 'Other Status Project',
+      });
+      await createPausedStint(serviceClient, otherProject.id, testUserId);
+
+      await createCompletedStint(serviceClient, testProject.id, testUserId,
+        makeStintTimes(new Date(startOfToday.getTime() + 3600_000)),
+      );
+
+      const result = await listCompletedStintsByDate(authenticatedClient, {
+        projectId: testProject.id,
+        dateStart: startOfToday.toISOString(),
+        dateEnd: startOfTomorrow.toISOString(),
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toHaveLength(1);
+      expect(result.data![0]!.status).toBe('completed');
+    });
+
+    it('should exclude stints outside the date range', async () => {
+      const { startOfToday, startOfTomorrow } = todayRange();
+
+      const yesterday = new Date(startOfToday.getTime() - 3600_000);
+      await createCompletedStint(serviceClient, testProject.id, testUserId,
+        makeStintTimes(yesterday),
+      );
+
+      const result = await listCompletedStintsByDate(authenticatedClient, {
+        projectId: testProject.id,
+        dateStart: startOfToday.toISOString(),
+        dateEnd: startOfTomorrow.toISOString(),
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual([]);
+    });
+
+    it('should return empty array when no matching stints exist', async () => {
+      const { startOfToday, startOfTomorrow } = todayRange();
+
+      const result = await listCompletedStintsByDate(authenticatedClient, {
+        projectId: testProject.id,
+        dateStart: startOfToday.toISOString(),
+        dateEnd: startOfTomorrow.toISOString(),
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual([]);
+    });
+
+    it('should require authentication', async () => {
+      const { startOfToday, startOfTomorrow } = todayRange();
+
+      const result = await listCompletedStintsByDate(unauthenticatedClient, {
+        projectId: testProject.id,
+        dateStart: startOfToday.toISOString(),
+        dateEnd: startOfTomorrow.toISOString(),
+      });
+
+      expect(result.error).not.toBeNull();
+      expect(result.error?.message).toContain('authenticated');
+    });
+
+    it('should return results ordered by ended_at descending', async () => {
+      const { startOfToday, startOfTomorrow } = todayRange();
+
+      const earlier = new Date(startOfToday.getTime() + 3600_000);
+      const later = new Date(startOfToday.getTime() + 7200_000);
+
+      await createCompletedStint(serviceClient, testProject.id, testUserId,
+        makeStintTimes(earlier),
+      );
+      await createCompletedStint(serviceClient, testProject.id, testUserId,
+        makeStintTimes(later),
+      );
+
+      const result = await listCompletedStintsByDate(authenticatedClient, {
+        projectId: testProject.id,
+        dateStart: startOfToday.toISOString(),
+        dateEnd: startOfTomorrow.toISOString(),
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toHaveLength(2);
+      const stints = result.data!;
+      expect(new Date(stints[0]!.ended_at!).getTime()).toBeGreaterThan(
+        new Date(stints[1]!.ended_at!).getTime(),
+      );
     });
   });
 

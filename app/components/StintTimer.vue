@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { StintRow } from '~/lib/supabase/stints';
-import { formatStintTime } from '~/utils/stint-time';
+import { formatCountdown, formatDuration } from '~/utils/time-format';
 
 const props = defineProps<{
   stint: StintRow | null
@@ -10,7 +10,7 @@ const props = defineProps<{
 const { secondsRemaining, isPaused, timerCompleted } = useStintTimer();
 
 // Format time using shared utility
-const formattedTime = computed(() => formatStintTime(secondsRemaining.value));
+const formattedTime = computed(() => formatCountdown(secondsRemaining.value));
 
 // Calculate pause duration (live updating)
 const pausedDuration = ref<string>('');
@@ -43,17 +43,8 @@ watch(
 );
 
 function updatePausedDuration(pausedAt: string): void {
-  const pausedMs = new Date(pausedAt).getTime();
-  const elapsedMs = Date.now() - pausedMs;
-  const mins = Math.floor(elapsedMs / 60000);
-  const secs = Math.floor((elapsedMs % 60000) / 1000);
-
-  if (mins > 0) {
-    pausedDuration.value = `${mins}m ${secs}s`;
-  }
-  else {
-    pausedDuration.value = `${secs}s`;
-  }
+  const elapsedSeconds = Math.floor((Date.now() - new Date(pausedAt).getTime()) / 1000);
+  pausedDuration.value = formatDuration(elapsedSeconds);
 }
 
 // Cleanup interval on unmount

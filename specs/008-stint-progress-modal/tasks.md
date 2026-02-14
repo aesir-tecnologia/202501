@@ -19,7 +19,7 @@
 
 **Purpose**: Core DB query function and query key that block all user story implementation
 
-- [ ] T001 Add `listCompletedStintsByDate()` function in `app/lib/supabase/stints.ts`
+- [X] T001 Add `listCompletedStintsByDate()` function in `app/lib/supabase/stints.ts`
   - Follow pattern of existing `listStints()` (lines 40-65)
   - Parameters: `client: TypedSupabaseClient`, options `{ projectId: string, dateStart: string, dateEnd: string }`
   - Query: `.from('stints').select('*').eq('user_id', userId).eq('project_id', projectId).eq('status', 'completed').gte('ended_at', dateStart).lt('ended_at', dateEnd).order('ended_at', { ascending: false })`
@@ -27,7 +27,7 @@
   - Return type: `Result<StintRow[]>`
   - The `.order('ended_at', { ascending: false })` satisfies **US3** (most recent first)
 
-- [ ] T002 [P] Add `stintKeys.completedByDate` to query key factory in `app/composables/useStints.ts`
+- [X] T002 [P] Add `stintKeys.completedByDate` to query key factory in `app/composables/useStints.ts`
   - Extend existing `stintKeys` object (lines 43-51) with:
     ```typescript
     completedByDate: (projectId: string, date: string) =>
@@ -49,7 +49,7 @@
 
 ### Implementation
 
-- [ ] T003 [US1] Add `useCompletedStintsByDateQuery()` composable in `app/composables/useStints.ts`
+- [X] T003 [US1] Add `useCompletedStintsByDateQuery()` composable in `app/composables/useStints.ts`
   - Follow pattern of `useStintsQuery()` (lines 161-172)
   - Parameters: `projectId: MaybeRef<string>`, `options?: { enabled?: MaybeRef<boolean> }`
   - Compute date boundaries client-side: `startOfDay(new Date()).toISOString()` and `addDays(startOfDay(new Date()), 1).toISOString()` (import from `date-fns`)
@@ -59,7 +59,7 @@
   - Config: `staleTime: 30_000` (30s), `gcTime: 5 * 60_000` (5min)
   - `enabled` tied to options parameter (defaults to `true`)
 
-- [ ] T004 [US1] Create `StintProgressModal.vue` component in `app/components/StintProgressModal.vue`
+- [X] T004 [US1] Create `StintProgressModal.vue` component in `app/components/StintProgressModal.vue`
   - Follow modal pattern from `ProjectEditModal.vue` (UModal with `v-model:open` + `defineModel<boolean>('open')`)
   - **Props**: `projectId: string`, `projectName: string`
   - **Data**: Call `useCompletedStintsByDateQuery(projectId, { enabled: isOpen })` — only fetch when modal is visible
@@ -85,7 +85,7 @@
   - Check Nuxt UI 4 docs via Context7 for UModal and UTable API before implementing
   - **Design system**: Verify color tokens, typography, and dark mode variants against `docs/DESIGN_SYSTEM.md`
 
-- [ ] T005 [US1] Make progress badge clickable and wire modal in `app/components/ProjectListCard.vue`
+- [X] T005 [US1] Make progress badge clickable and wire modal in `app/components/ProjectListCard.vue`
   - Add `showStintsModal` ref: `const showStintsModal = ref(false)`
   - Modify progress badge `<span>` (around lines 216-224):
     - Change to `<button type="button">` with `@click="showStintsModal = true"`
@@ -110,7 +110,7 @@
 
 **Purpose**: Automated verification per project testing architecture (Layer 2 + Layer 3)
 
-- [ ] T006 [P] Add integration tests for `listCompletedStintsByDate()` in `app/lib/supabase/stints.test.ts`
+- [X] T006 [P] Add integration tests for `listCompletedStintsByDate()` in `app/lib/supabase/stints.test.ts`
   - Follow existing test patterns in the same file
   - Test cases:
     1. Returns only completed stints for given project and date range
@@ -122,7 +122,7 @@
   - Use local Supabase instance
   - Run with: `npx vitest run app/lib/supabase/stints.test.ts`
 
-- [ ] T007 [P] Add query key unit tests for `stintKeys.completedByDate()` in `app/composables/useStints.test.ts`
+- [X] T007 [P] Add query key unit tests for `stintKeys.completedByDate()` in `app/composables/useStints.test.ts`
   - Follow existing `stintKeys` test patterns in the same file
   - Test cases:
     1. Returns correct key structure `['stints', 'list', 'completedByDate', projectId, date]`
@@ -138,7 +138,7 @@
 
 **Purpose**: Final validation and manual verification
 
-- [ ] T008 Run quickstart.md validation against all acceptance scenarios
+- [X] T008 Run quickstart.md validation against all acceptance scenarios
   - Verify: Badge click → modal opens with correct project stints
   - Verify: Badge count matches modal row count (SC-003)
   - Verify: All duration columns formatted via `formatDuration()` (SC-002)

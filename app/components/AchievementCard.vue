@@ -3,6 +3,7 @@ import type { TabsItem } from '@nuxt/ui';
 import { usePeriodNavigation } from '~/composables/usePeriodNavigation';
 import type { PeriodType } from '~/composables/usePeriodNavigation';
 import { useDailySummariesQuery } from '~/composables/useDailySummaries';
+import { formatDuration } from '~/utils/time-format';
 
 const {
   periodType,
@@ -48,32 +49,9 @@ const aggregatedStats = computed(() => {
   );
 });
 
-function formatTime(totalSeconds: number): string {
-  if (totalSeconds === 0) return '-';
-
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  const parts: string[] = [];
-
-  if (hours > 0) {
-    parts.push(`${hours}h`);
-    parts.push(`${minutes}m`);
-  }
-  else {
-    if (minutes > 0) {
-      parts.push(`${minutes}m`);
-    }
-    parts.push(`${seconds}s`);
-  }
-
-  return parts.join(' ');
-}
-
-const focusDisplay = computed(() => formatTime(aggregatedStats.value.focusSeconds));
-const totalDisplay = computed(() => formatTime(aggregatedStats.value.totalSeconds));
-const breakDisplay = computed(() => formatTime(aggregatedStats.value.breakSeconds));
+const focusDisplay = computed(() => formatDuration(aggregatedStats.value.focusSeconds, { dash: true }));
+const totalDisplay = computed(() => formatDuration(aggregatedStats.value.totalSeconds, { dash: true }));
+const breakDisplay = computed(() => formatDuration(aggregatedStats.value.breakSeconds, { dash: true }));
 
 const focusRatio = computed(() => {
   if (aggregatedStats.value.totalSeconds === 0) return 0;

@@ -65,12 +65,6 @@ export function transformDailySummary(row: DailySummaryResult): DailySummary {
   };
 }
 
-export function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  return `${hours}h ${minutes}m`;
-}
-
 export function getDateRange(
   period: 'today' | 'week' | 'month' | 'year',
 ): DailySummaryFilters {

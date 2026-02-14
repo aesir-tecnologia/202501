@@ -4,6 +4,7 @@ import type { StintRow } from '~/lib/supabase/stints';
 import { useStintsQuery } from '~/composables/useStints';
 import { useProjectsQuery } from '~/composables/useProjects';
 import { parseSafeDate } from '~/utils/date-helpers';
+import { formatDuration } from '~/utils/time-format';
 
 function getEffectiveDate(stint: StintRow): Date | null {
   if (stint.attributed_date) {
@@ -304,20 +305,6 @@ const maxWeekStints = computed(() => {
   return Math.max(...weekDataByDay.value.map(d => d.stintCount));
 });
 
-// Format time helpers
-function formatTime(minutes: number): string {
-  if (minutes < 60) {
-    return `${minutes}m`;
-  }
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-}
-
-function formatTimeSeconds(seconds: number): string {
-  return formatTime(Math.round(seconds / 60));
-}
-
 const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
 </script>
 
@@ -422,7 +409,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                     Total Focus Time
                   </p>
                   <p class="text-2xl font-bold">
-                    {{ formatTimeSeconds(todayTotalTime) }}
+                    {{ formatDuration(todayTotalTime) }}
                   </p>
                 </div>
               </div>
@@ -528,7 +515,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                 Total Focus Time
               </p>
               <p class="text-2xl font-bold">
-                {{ formatTimeSeconds(weekTotalTime) }}
+                {{ formatDuration(weekTotalTime) }}
               </p>
             </UCard>
 
@@ -582,7 +569,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                   </div>
                 </div>
                 <div class="w-20 text-sm text-stone-600 dark:text-stone-400 text-right">
-                  {{ formatTime(day.totalTimeMinutes) }}
+                  {{ formatDuration(day.totalTimeMinutes * 60) }}
                 </div>
               </div>
             </div>
@@ -614,7 +601,7 @@ const isLoading = computed(() => stintsLoading.value || projectsLoading.value);
                     </span>
                   </div>
                   <div class="text-sm text-stone-600 dark:text-stone-400">
-                    {{ item.stintCount }} {{ item.stintCount === 1 ? 'stint' : 'stints' }} · {{ formatTime(item.totalTime) }}
+                    {{ item.stintCount }} {{ item.stintCount === 1 ? 'stint' : 'stints' }} · {{ formatDuration(item.totalTime * 60) }}
                   </div>
                 </div>
                 <div class="relative h-2 bg-stone-100 dark:bg-stone-800 rounded overflow-hidden">

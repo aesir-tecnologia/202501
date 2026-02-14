@@ -7,6 +7,7 @@ import {
   getStintById,
   getActiveStint,
   getPausedStints,
+  listCompletedStintsByDate,
   updateStint as updateStintDb,
   deleteStint as deleteStintDb,
   pauseStint as pauseStintDb,
@@ -44,6 +45,8 @@ export const stintKeys = {
   all: ['stints'] as const,
   lists: () => [...stintKeys.all, 'list'] as const,
   list: (filters?: StintListFilters) => [...stintKeys.lists(), filters] as const,
+  completedByDate: (projectId: string, date: string) =>
+    [...stintKeys.lists(), 'completedByDate', projectId, date] as const,
   details: () => [...stintKeys.all, 'detail'] as const,
   detail: (id: string) => [...stintKeys.details(), id] as const,
   active: () => [...stintKeys.all, 'active'] as const,
@@ -147,6 +150,38 @@ function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
 // ============================================================================
 // Query Hooks
 // ============================================================================
+
+export function useCompletedStintsByDateQuery(
+  projectId: MaybeRefOrGetter<string>,
+  options?: { enabled?: MaybeRefOrGetter<boolean> },
+) {
+  const client = useTypedSupabaseClient();
+
+  return useQuery({
+    queryKey: computed(() => {
+      const today = new Date();
+      const todayDateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      return stintKeys.completedByDate(toValue(projectId), todayDateString);
+    }),
+    queryFn: async () => {
+      const today = new Date();
+      const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const startOfTomorrow = new Date(startOfToday);
+      startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+
+      const { data, error } = await listCompletedStintsByDate(client, {
+        projectId: toValue(projectId),
+        dateStart: startOfToday.toISOString(),
+        dateEnd: startOfTomorrow.toISOString(),
+      });
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    enabled: () => toValue(options?.enabled) !== false,
+  });
+}
 
 /**
  * Fetches stints with optional filtering and automatic caching.
