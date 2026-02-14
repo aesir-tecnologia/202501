@@ -1,0 +1,325 @@
+name: PR Review
+
+on:
+  pull_request:
+    types: [review_requested]
+
+jobs:
+  acknowledge:
+    if: github.event.requested_reviewer.login == 'aesir-claude-bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Post acknowledgment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body '🚀 **Claude review started** — running 6 specialized agents in parallel...
+
+          | Agent | Focus |
+          |-------|-------|
+          | 🔍 Code Reviewer | Bugs, guidelines, code quality |
+          | ✨ Code Simplifier | Clarity, consistency, maintainability |
+          | 💬 Comment Analyzer | Comment accuracy, long-term value |
+          | 🧪 Test Analyzer | Test coverage quality and gaps |
+          | 🔇 Silent Failure Hunter | Error handling, silent failures |
+          | 🏗️ Type Design Analyzer | Type invariants, encapsulation |'
+
+  code-reviewer:
+    needs: acknowledge
+    if: github.event.requested_reviewer.login == 'aesir-claude-bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are the **Code Reviewer** agent for automated PR review.
+
+            **Setup:**
+            1. Read your review guidelines from `.github/review-agents/code-reviewer.md`
+            2. Read `CLAUDE.md` for project-specific conventions and patterns
+
+            **Review:**
+            3. Run `gh pr diff ${{ github.event.pull_request.number }}` to get the full diff
+            4. Read changed files to understand context beyond just the diff
+            5. Analyze changes according to your review guidelines
+
+            **Submit findings:**
+            Submit a GitHub PR review with inline comments on specific changed lines.
+            Write your review JSON to /tmp/review.json, then run:
+              gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews --method POST --input /tmp/review.json
+
+            The JSON structure:
+            {
+              "event": "COMMENT",
+              "body": "## 🔍 Code Reviewer\n\nYour summary here...",
+              "comments": [
+                {"path": "relative/file.ts", "line": 42, "side": "RIGHT", "body": "Issue description"}
+              ]
+            }
+
+            - side: "RIGHT" for added/modified lines, "LEFT" for deleted lines
+            - line: line number in the file at the PR head commit
+            - If no significant issues, submit with summary only and empty comments array
+            - Quality over quantity — only report high-confidence findings
+          claude_args: '--model claude-opus-4-6 --disallowed-tools Edit,Write,NotebookEdit'
+
+  code-simplifier:
+    needs: acknowledge
+    if: github.event.requested_reviewer.login == 'aesir-claude-bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are the **Code Simplifier** agent for automated PR review.
+
+            **Setup:**
+            1. Read your review guidelines from `.github/review-agents/code-simplifier.md`
+            2. Read `CLAUDE.md` for project-specific conventions and patterns
+
+            **Review:**
+            3. Run `gh pr diff ${{ github.event.pull_request.number }}` to get the full diff
+            4. Read changed files to understand context beyond just the diff
+            5. Analyze changes according to your review guidelines — focus on clarity, consistency, and maintainability
+
+            **Submit findings:**
+            Submit a GitHub PR review with inline comments on specific changed lines.
+            Write your review JSON to /tmp/review.json, then run:
+              gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews --method POST --input /tmp/review.json
+
+            The JSON structure:
+            {
+              "event": "COMMENT",
+              "body": "## ✨ Code Simplifier\n\nYour summary here...",
+              "comments": [
+                {"path": "relative/file.ts", "line": 42, "side": "RIGHT", "body": "Simplification suggestion"}
+              ]
+            }
+
+            - side: "RIGHT" for added/modified lines, "LEFT" for deleted lines
+            - line: line number in the file at the PR head commit
+            - If no significant issues, submit with summary only and empty comments array
+            - Focus on meaningful simplifications, not nitpicks
+          claude_args: '--model claude-opus-4-6 --disallowed-tools Edit,Write,NotebookEdit'
+
+  comment-analyzer:
+    needs: acknowledge
+    if: github.event.requested_reviewer.login == 'aesir-claude-bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are the **Comment Analyzer** agent for automated PR review.
+
+            **Setup:**
+            1. Read your review guidelines from `.github/review-agents/comment-analyzer.md`
+            2. Read `CLAUDE.md` for project-specific conventions and patterns
+
+            **Review:**
+            3. Run `gh pr diff ${{ github.event.pull_request.number }}` to get the full diff
+            4. Read changed files to understand context beyond just the diff
+            5. Analyze all comments (code comments, docstrings, TODOs) in the changed code according to your review guidelines
+
+            **Submit findings:**
+            Submit a GitHub PR review with inline comments on specific changed lines.
+            Write your review JSON to /tmp/review.json, then run:
+              gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews --method POST --input /tmp/review.json
+
+            The JSON structure:
+            {
+              "event": "COMMENT",
+              "body": "## 💬 Comment Analyzer\n\nYour summary here...",
+              "comments": [
+                {"path": "relative/file.ts", "line": 42, "side": "RIGHT", "body": "Comment issue description"}
+              ]
+            }
+
+            - side: "RIGHT" for added/modified lines, "LEFT" for deleted lines
+            - line: line number in the file at the PR head commit
+            - If no significant issues, submit with summary only and empty comments array
+            - Focus on accuracy, misleading comments, and comment rot — not style preferences
+          claude_args: '--model claude-opus-4-6 --disallowed-tools Edit,Write,NotebookEdit'
+
+  pr-test-analyzer:
+    needs: acknowledge
+    if: github.event.requested_reviewer.login == 'aesir-claude-bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are the **Test Analyzer** agent for automated PR review.
+
+            **Setup:**
+            1. Read your review guidelines from `.github/review-agents/pr-test-analyzer.md`
+            2. Read `CLAUDE.md` for project-specific conventions and testing patterns
+
+            **Review:**
+            3. Run `gh pr diff ${{ github.event.pull_request.number }}` to get the full diff
+            4. Read changed files and their corresponding test files
+            5. Analyze test coverage quality according to your review guidelines
+
+            **Submit findings:**
+            Submit a GitHub PR review with inline comments on specific changed lines.
+            Write your review JSON to /tmp/review.json, then run:
+              gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews --method POST --input /tmp/review.json
+
+            The JSON structure:
+            {
+              "event": "COMMENT",
+              "body": "## 🧪 Test Analyzer\n\nYour summary here...",
+              "comments": [
+                {"path": "relative/file.ts", "line": 42, "side": "RIGHT", "body": "Test coverage gap description"}
+              ]
+            }
+
+            - side: "RIGHT" for added/modified lines, "LEFT" for deleted lines
+            - line: line number in the file at the PR head commit
+            - If test coverage is adequate, submit with a positive summary and empty comments array
+            - Focus on critical gaps (rating 8+), not academic completeness
+          claude_args: '--model claude-opus-4-6 --disallowed-tools Edit,Write,NotebookEdit'
+
+  silent-failure-hunter:
+    needs: acknowledge
+    if: github.event.requested_reviewer.login == 'aesir-claude-bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are the **Silent Failure Hunter** agent for automated PR review.
+
+            **Setup:**
+            1. Read your review guidelines from `.github/review-agents/silent-failure-hunter.md`
+            2. Read `CLAUDE.md` for project-specific error handling patterns
+
+            **Review:**
+            3. Run `gh pr diff ${{ github.event.pull_request.number }}` to get the full diff
+            4. Read changed files to understand the full error handling context
+            5. Hunt for silent failures, inadequate error handling, and inappropriate fallbacks according to your review guidelines
+
+            **Submit findings:**
+            Submit a GitHub PR review with inline comments on specific changed lines.
+            Write your review JSON to /tmp/review.json, then run:
+              gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews --method POST --input /tmp/review.json
+
+            The JSON structure:
+            {
+              "event": "COMMENT",
+              "body": "## 🔇 Silent Failure Hunter\n\nYour summary here...",
+              "comments": [
+                {"path": "relative/file.ts", "line": 42, "side": "RIGHT", "body": "Silent failure description"}
+              ]
+            }
+
+            - side: "RIGHT" for added/modified lines, "LEFT" for deleted lines
+            - line: line number in the file at the PR head commit
+            - If no silent failures found, submit with a positive summary and empty comments array
+            - Flag every instance of inadequate error handling — this is your specialty
+          claude_args: '--model claude-opus-4-6 --disallowed-tools Edit,Write,NotebookEdit'
+
+  type-design-analyzer:
+    needs: acknowledge
+    if: github.event.requested_reviewer.login == 'aesir-claude-bot'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            You are the **Type Design Analyzer** agent for automated PR review.
+
+            **Setup:**
+            1. Read your review guidelines from `.github/review-agents/type-design-analyzer.md`
+            2. Read `CLAUDE.md` for project-specific type patterns and conventions
+
+            **Review:**
+            3. Run `gh pr diff ${{ github.event.pull_request.number }}` to get the full diff
+            4. Read changed files to understand the full type context
+            5. Analyze any new or modified types according to your review guidelines
+
+            **Submit findings:**
+            Submit a GitHub PR review with inline comments on specific changed lines.
+            Write your review JSON to /tmp/review.json, then run:
+              gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews --method POST --input /tmp/review.json
+
+            The JSON structure:
+            {
+              "event": "COMMENT",
+              "body": "## 🏗️ Type Design Analyzer\n\nYour summary here...",
+              "comments": [
+                {"path": "relative/file.ts", "line": 42, "side": "RIGHT", "body": "Type design issue"}
+              ]
+            }
+
+            - side: "RIGHT" for added/modified lines, "LEFT" for deleted lines
+            - line: line number in the file at the PR head commit
+            - If no type changes or no issues found, submit with a brief summary and empty comments array
+            - Focus on invariant violations and encapsulation issues, not style
+          claude_args: '--model claude-opus-4-6 --disallowed-tools Edit,Write,NotebookEdit'

@@ -4,6 +4,8 @@ import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
 import { PROJECT, STINT, type ProjectColor } from '~/constants';
+import { formatDuration, formatClockTime, formatRelativeTime } from '~/utils/time-format';
+import { createLogger } from '~/utils/logger';
 
 const props = defineProps<{
   project: ProjectRow
@@ -17,6 +19,8 @@ const props = defineProps<{
   isCompleting?: boolean
 }>();
 
+const log = createLogger('project-list-card');
+
 const emit = defineEmits<{
   edit: [project: ProjectRow]
   toggleActive: [project: ProjectRow]
@@ -26,16 +30,9 @@ const emit = defineEmits<{
   completeStint: [stint: StintRow]
 }>();
 
-function formatDuration(minutes: number | null): string {
+function formatProjectDuration(minutes: number | null): string {
   const mins = minutes ?? STINT.DURATION_MINUTES.DEFAULT;
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  const remainder = mins % 60;
-  return remainder > 0 ? `${hours}h ${remainder}m` : `${hours}h`;
-}
-
-function formatTime(date: Date): string {
-  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return formatDuration(mins * 60);
 }
 
 const now = ref(new Date());
@@ -43,20 +40,6 @@ const now = ref(new Date());
 useIntervalFn(() => {
   now.value = new Date();
 }, 30000);
-
-function formatRelativeTime(date: Date, currentTime: Date): string {
-  const diffMs = currentTime.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-
-  if (diffMins < 1) return 'just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
-}
 
 function parseSafeDate(dateStr: string | null | undefined): Date | null {
   if (!dateStr) return null;
@@ -74,11 +57,13 @@ const hasPausedStint = computed(() => {
 
 const { isPaused } = useStintTimer();
 
+const showStintsModal = ref(false);
+
 const metaText = computed(() => {
   if (hasActiveStint.value && !isPaused.value) {
     const startedAt = parseSafeDate(props.activeStint?.started_at);
     if (startedAt) {
-      return `Started ${formatTime(startedAt)}`;
+      return `Started ${formatClockTime(startedAt)}`;
     }
   }
 
@@ -93,7 +78,7 @@ const metaText = computed(() => {
     return 'Inactive';
   }
 
-  return `${formatDuration(props.project.custom_stint_duration)} per stint`;
+  return `${formatProjectDuration(props.project.custom_stint_duration)} per stint`;
 });
 
 const extraStints = computed(() => {
@@ -140,7 +125,7 @@ function handleStartStint() {
 
 function handlePauseStint() {
   if (!props.activeStint) {
-    console.error('[ProjectListCard] handlePauseStint called but activeStint is null');
+    log.error('[ProjectListCard] handlePauseStint called but activeStint is null');
     return;
   }
   emit('pauseStint', props.activeStint);
@@ -155,13 +140,13 @@ function handleResumeStint() {
     emit('resumeStint', props.pausedStint);
     return;
   }
-  console.error('[ProjectListCard] handleResumeStint called without active or paused stint');
+  log.error('[ProjectListCard] handleResumeStint called without active or paused stint');
 }
 
 function handleCompleteStint() {
   const stint = props.activeStint || props.pausedStint;
   if (!stint) {
-    console.error('[ProjectListCard] handleCompleteStint called without any stint');
+    log.error('[ProjectListCard] handleCompleteStint called without any stint');
     return;
   }
   emit('completeStint', stint);
@@ -213,7 +198,12 @@ function handleCompleteStint() {
       </div>
     </div>
 
-    <span class="progress-badge">
+    <button
+      type="button"
+      class="progress-badge progress-badge-btn"
+      aria-label="View completed stints"
+      @click="showStintsModal = true"
+    >
       <span class="filled">{{ dailyProgress.completed }}</span>
       <span class="sep">/</span>
       <span>{{ dailyProgress.expected }}</span>
@@ -221,7 +211,13 @@ function handleCompleteStint() {
         v-if="extraStints > 0"
         class="extra"
       >+{{ extraStints }}</span>
-    </span>
+    </button>
+
+    <StintProgressModal
+      v-model:open="showStintsModal"
+      :project-id="project.id"
+      :project-name="project.name"
+    />
 
     <UTooltip text="Edit Project">
       <button
@@ -483,6 +479,21 @@ function handleCompleteStint() {
 
 :root.dark .progress-badge .filled {
   color: #4ade80;
+}
+
+.progress-badge-btn {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.progress-badge-btn:hover {
+  background: rgba(120, 113, 108, 0.15);
+  border-color: var(--color-stone-300);
+}
+
+:root.dark .progress-badge-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--color-stone-600);
 }
 
 .progress-badge .sep {

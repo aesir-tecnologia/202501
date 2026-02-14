@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatStintTime } from '~/utils/stint-time';
+import { formatCountdown } from '~/utils/time-format';
 import { SpeedInsights } from '@vercel/speed-insights/vue';
 
 const appConfig = useAppConfig();
@@ -54,7 +54,7 @@ const { data: activeStint } = import.meta.client
   ? useActiveStintQuery()
   : { data: ref(null) };
 
-const formattedTime = computed(() => formatStintTime(secondsRemaining.value));
+const formattedTime = computed(() => formatCountdown(secondsRemaining.value));
 </script>
 
 <template>

@@ -3,7 +3,7 @@ import type { StintRow } from '~/lib/supabase/stints';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import { useStintTimer } from '~/composables/useStintTimer';
 import { parseSafeDate } from '~/utils/date-helpers';
-import { formatStintTime } from '~/utils/stint-time';
+import { formatCountdown, formatDuration } from '~/utils/time-format';
 
 interface DailyProgress {
   completed: number
@@ -39,12 +39,6 @@ const snapshotMeta = ref<{
   ends: string
 } | null>(null);
 
-function formatPausedTime(seconds: number): string {
-  if (seconds <= 0) return '';
-  if (seconds < 60) return `+${seconds}s`;
-  const minutes = Math.round(seconds / 60);
-  return `+${minutes}m`;
-}
 const snapshotIsOvertime = ref(false);
 const snapshotIsPaused = ref(false);
 
@@ -61,7 +55,7 @@ watch(
   secondsRemaining,
   (seconds) => {
     if (props.activeStint) {
-      snapshotTimerDisplay.value = formatStintTime(seconds);
+      snapshotTimerDisplay.value = formatCountdown(seconds);
       snapshotIsOvertime.value = seconds < 0;
     }
   },
@@ -92,16 +86,10 @@ watch(
 
     const endTime = new Date(startedAt.getTime() + (plannedMinutes * 60 * 1000) + (pausedSeconds * 1000));
 
-    const plannedHours = Math.floor(plannedMinutes / 60);
-    const plannedMins = plannedMinutes % 60;
-    const formattedPlannedDuration = plannedHours > 0
-      ? `${plannedHours}h ${plannedMins}m`
-      : `${plannedMinutes}m`;
-
     snapshotMeta.value = {
       started: startedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      plannedDuration: formattedPlannedDuration,
-      pausedDisplay: formatPausedTime(pausedSeconds),
+      plannedDuration: formatDuration(plannedMinutes * 60),
+      pausedDisplay: formatDuration(pausedSeconds, { delta: true }),
       ends: endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
   },

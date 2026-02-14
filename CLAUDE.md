@@ -508,3 +508,10 @@ Use `Sentry.createConsolaReporter()` (reporter pattern), not `consolaIntegration
 - **Nitro** - Static site generation engine (Nuxt 4 built-in)
 - **Vite** - Build tool and dev server (Nuxt 4 built-in)
 - **Target Platform** - Vercel or any static hosting provider
+
+## Active Technologies
+- TypeScript 5 / Vue 3 / Nuxt 4 + Nuxt UI 4 (UModal, UTable, UTooltip), TanStack Query (Vue Query) (008-stint-progress-modal)
+- Supabase PostgreSQL (existing `stints` table — read-only access, no migrations) (008-stint-progress-modal)
+
+## Recent Changes
+- 008-stint-progress-modal: Added TypeScript 5 / Vue 3 / Nuxt 4 + Nuxt UI 4 (UModal, UTable, UTooltip), TanStack Query (Vue Query)

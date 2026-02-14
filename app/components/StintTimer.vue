@@ -1,36 +1,29 @@
 <script setup lang="ts">
 import type { StintRow } from '~/lib/supabase/stints';
-import { formatStintTime } from '~/utils/stint-time';
+import { formatCountdown, formatDuration } from '~/utils/time-format';
 
 const props = defineProps<{
   stint: StintRow | null
 }>();
 
-// Get timer state from singleton composable
 const { secondsRemaining, isPaused, timerCompleted } = useStintTimer();
 
-// Format time using shared utility
-const formattedTime = computed(() => formatStintTime(secondsRemaining.value));
+const formattedTime = computed(() => formatCountdown(secondsRemaining.value));
 
-// Calculate pause duration (live updating)
 const pausedDuration = ref<string>('');
 let pausedIntervalId: ReturnType<typeof setInterval> | null = null;
 
-// Update paused duration every second
 watch(
   () => props.stint?.paused_at,
   (pausedAt) => {
-    // Clear existing interval
     if (pausedIntervalId) {
       clearInterval(pausedIntervalId);
       pausedIntervalId = null;
     }
 
     if (pausedAt && isPaused.value) {
-      // Update immediately
       updatePausedDuration(pausedAt);
 
-      // Then update every second
       pausedIntervalId = setInterval(() => {
         updatePausedDuration(pausedAt);
       }, 1000);
@@ -43,33 +36,21 @@ watch(
 );
 
 function updatePausedDuration(pausedAt: string): void {
-  const pausedMs = new Date(pausedAt).getTime();
-  const elapsedMs = Date.now() - pausedMs;
-  const mins = Math.floor(elapsedMs / 60000);
-  const secs = Math.floor((elapsedMs % 60000) / 1000);
-
-  if (mins > 0) {
-    pausedDuration.value = `${mins}m ${secs}s`;
-  }
-  else {
-    pausedDuration.value = `${secs}s`;
-  }
+  const elapsedSeconds = Math.floor((Date.now() - new Date(pausedAt).getTime()) / 1000);
+  pausedDuration.value = formatDuration(elapsedSeconds);
 }
 
-// Cleanup interval on unmount
 onUnmounted(() => {
   if (pausedIntervalId) {
     clearInterval(pausedIntervalId);
   }
 });
 
-// Animation state
 const showCompletionAnimation = ref(false);
 
 watch(timerCompleted, (completed) => {
   if (completed) {
     showCompletionAnimation.value = true;
-    // Hide animation after 3 seconds
     setTimeout(() => {
       showCompletionAnimation.value = false;
     }, 3000);
