@@ -53,7 +53,7 @@
   - Follow pattern of `useStintsQuery()` (lines 161-172)
   - Parameters: `projectId: MaybeRef<string>`, `options?: { enabled?: MaybeRef<boolean> }`
   - Compute date boundaries client-side: `startOfDay(new Date()).toISOString()` and `addDays(startOfDay(new Date()), 1).toISOString()` (import from `date-fns`)
-  - Also compute `todayDateString` as `format(new Date(), 'yyyy-MM-dd')` for the query key
+  - Also compute `todayDateString` as a `YYYY-MM-DD` string for the query key (manual formatting — no date-fns import needed)
   - Query key: `stintKeys.completedByDate(toValue(projectId), todayDateString)`
   - Call `listCompletedStintsByDate()` from database layer
   - Config: `staleTime: 30_000` (30s), `gcTime: 5 * 60_000` (5min)
