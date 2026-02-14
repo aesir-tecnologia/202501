@@ -46,6 +46,7 @@ node_modules/
 # tasks.json
 # tasks/ 
 .vercel
+supabase/snippets/
 
 # Claude Code local settings
 .claude/settings.json

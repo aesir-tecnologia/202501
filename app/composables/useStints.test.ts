@@ -124,6 +124,27 @@ describe('useStints', () => {
       expect(Array.isArray(stintKeys.paused())).toBe(true);
     });
 
+    it('should generate completedByDate key with correct structure', () => {
+      const key = stintKeys.completedByDate('project-123', '2026-02-13');
+      expect(key).toEqual(['stints', 'list', 'completedByDate', 'project-123', '2026-02-13']);
+    });
+
+    it('should produce different completedByDate keys for different projectIds', () => {
+      const key1 = stintKeys.completedByDate('project-a', '2026-02-13');
+      const key2 = stintKeys.completedByDate('project-b', '2026-02-13');
+      expect(key1).not.toEqual(key2);
+      expect(key1[3]).toBe('project-a');
+      expect(key2[3]).toBe('project-b');
+    });
+
+    it('should produce different completedByDate keys for different dates', () => {
+      const key1 = stintKeys.completedByDate('project-123', '2026-02-13');
+      const key2 = stintKeys.completedByDate('project-123', '2026-02-14');
+      expect(key1).not.toEqual(key2);
+      expect(key1[4]).toBe('2026-02-13');
+      expect(key2[4]).toBe('2026-02-14');
+    });
+
     it('should have distinct keys for active and paused queries', () => {
       const activeKey = stintKeys.active();
       const pausedKey = stintKeys.paused();

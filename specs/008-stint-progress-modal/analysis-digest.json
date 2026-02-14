@@ -1,0 +1,605 @@
+{
+  "requirements": [
+    {
+      "slug": "progress-badge-must-be-clickable",
+      "type": "functional",
+      "text": "The progress badge on each project card MUST be clickable with appropriate cursor and hover feedback",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "clicking-badge-opens-modal-with-todays-stints",
+      "type": "functional",
+      "text": "Clicking the progress badge MUST open a modal dialog displaying today's completed stints for that project",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "modal-displays-all-required-columns",
+      "type": "functional",
+      "text": "The modal MUST display a table with columns: Started, Ended, Planned/Actual/Paused Duration, Status, Completion Type, Attributed Date, Notes",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "durations-formatted-via-helper",
+      "type": "functional",
+      "text": "Duration columns (Planned, Actual, Paused) MUST be formatted using the existing formatDuration helper",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "started-ended-human-readable-datetime",
+      "type": "functional",
+      "text": "Started and Ended columns MUST display human-readable date and time (e.g., 'Feb 12, 2:30 PM')",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "attributed-date-human-readable",
+      "type": "functional",
+      "text": "The Attributed Date column MUST display a human-readable date (e.g., 'Feb 12, 2026')",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "stints-sorted-most-recent-first",
+      "type": "functional",
+      "text": "Stints MUST be sorted by ended time descending (most recent first)",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US3"]
+    },
+    {
+      "slug": "modal-shows-empty-state",
+      "type": "functional",
+      "text": "The modal MUST show an empty state when no completed stints exist for today",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "modal-includes-project-name-in-header",
+      "type": "functional",
+      "text": "The modal MUST include the project name in its header/title for context",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "null-fields-show-dash",
+      "type": "functional",
+      "text": "Null or empty optional fields (notes, attributed date) MUST display a dash rather than empty space or 'null'",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "modal-dismissible-via-standard-interactions",
+      "type": "functional",
+      "text": "The modal MUST be dismissible via clicking outside, pressing Escape, or a close button",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "modal-content-scrollable",
+      "type": "functional",
+      "text": "The modal content MUST be scrollable when stints exceed the visible area",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "modal-fetches-via-dedicated-query",
+      "type": "functional",
+      "text": "The modal MUST fetch stints via its own dedicated query when opened (not read from external cache)",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "notes-truncated-with-tooltip",
+      "type": "functional",
+      "text": "The Notes column MUST truncate text beyond ~50 characters with an ellipsis, displaying full text in a hover tooltip",
+      "location": "spec.md:§Requirements>Functional Requirements",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "view-stint-details-within-one-click",
+      "type": "non-functional",
+      "text": "Users can view stint details within 1 click from the project card (click badge then see modal)",
+      "location": "spec.md:§Success Criteria",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "consistent-duration-formatting",
+      "type": "non-functional",
+      "text": "All duration values in the modal are consistently formatted using the same helper (no raw seconds)",
+      "location": "spec.md:§Success Criteria",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "modal-count-matches-badge-count",
+      "type": "non-functional",
+      "text": "The modal accurately reflects the same count shown in the progress badge (badge says '3/5' then modal shows 3 stints)",
+      "location": "spec.md:§Success Criteria",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "modal-usable-on-all-viewports",
+      "type": "non-functional",
+      "text": "The modal is fully usable on both desktop and mobile viewports",
+      "location": "spec.md:§Success Criteria",
+      "measurable": false,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "modal-opens-within-500ms",
+      "type": "non-functional",
+      "text": "Modal opens and displays data within 500ms (single query, small result set)",
+      "location": "plan.md:§Technical Context",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    }
+  ],
+  "userStories": [
+    {
+      "id": "US1",
+      "title": "View Today's Completed Stints",
+      "priority": "P1",
+      "scenarioCount": 3,
+      "hasAcceptanceCriteria": true,
+      "mappedRequirements": [
+        "progress-badge-must-be-clickable",
+        "clicking-badge-opens-modal-with-todays-stints",
+        "modal-shows-empty-state",
+        "modal-includes-project-name-in-header",
+        "modal-dismissible-via-standard-interactions",
+        "modal-content-scrollable",
+        "modal-fetches-via-dedicated-query",
+        "view-stint-details-within-one-click",
+        "modal-count-matches-badge-count",
+        "modal-usable-on-all-viewports",
+        "modal-opens-within-500ms"
+      ]
+    },
+    {
+      "id": "US2",
+      "title": "Review Stint Details in Modal",
+      "priority": "P2",
+      "scenarioCount": 3,
+      "hasAcceptanceCriteria": true,
+      "mappedRequirements": [
+        "modal-displays-all-required-columns",
+        "durations-formatted-via-helper",
+        "started-ended-human-readable-datetime",
+        "attributed-date-human-readable",
+        "null-fields-show-dash",
+        "notes-truncated-with-tooltip",
+        "consistent-duration-formatting"
+      ]
+    },
+    {
+      "id": "US3",
+      "title": "Stints Sorted by Recency",
+      "priority": "P3",
+      "scenarioCount": 1,
+      "hasAcceptanceCriteria": true,
+      "mappedRequirements": [
+        "stints-sorted-most-recent-first"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T001",
+      "phase": "Foundational",
+      "storyLabel": null,
+      "description": "Add listCompletedStintsByDate() function in app/lib/supabase/stints.ts",
+      "files": ["app/lib/supabase/stints.ts"],
+      "isParallel": true,
+      "inferredRequirements": [
+        "clicking-badge-opens-modal-with-todays-stints",
+        "stints-sorted-most-recent-first",
+        "modal-fetches-via-dedicated-query"
+      ]
+    },
+    {
+      "id": "T002",
+      "phase": "Foundational",
+      "storyLabel": null,
+      "description": "Add stintKeys.completedByDate to query key factory in app/composables/useStints.ts",
+      "files": ["app/composables/useStints.ts"],
+      "isParallel": true,
+      "inferredRequirements": [
+        "modal-fetches-via-dedicated-query"
+      ]
+    },
+    {
+      "id": "T003",
+      "phase": "Core",
+      "storyLabel": "US1",
+      "description": "Add useCompletedStintsByDateQuery() composable in app/composables/useStints.ts",
+      "files": ["app/composables/useStints.ts"],
+      "isParallel": false,
+      "inferredRequirements": [
+        "modal-fetches-via-dedicated-query",
+        "modal-opens-within-500ms"
+      ]
+    },
+    {
+      "id": "T004",
+      "phase": "Core",
+      "storyLabel": "US1",
+      "description": "Create StintProgressModal.vue component in app/components/StintProgressModal.vue",
+      "files": ["app/components/StintProgressModal.vue"],
+      "isParallel": false,
+      "inferredRequirements": [
+        "modal-displays-all-required-columns",
+        "durations-formatted-via-helper",
+        "started-ended-human-readable-datetime",
+        "attributed-date-human-readable",
+        "stints-sorted-most-recent-first",
+        "modal-shows-empty-state",
+        "modal-includes-project-name-in-header",
+        "null-fields-show-dash",
+        "modal-dismissible-via-standard-interactions",
+        "modal-content-scrollable",
+        "notes-truncated-with-tooltip",
+        "modal-usable-on-all-viewports"
+      ]
+    },
+    {
+      "id": "T005",
+      "phase": "Integration",
+      "storyLabel": "US1",
+      "description": "Make progress badge clickable and wire modal in app/components/ProjectListCard.vue",
+      "files": ["app/components/ProjectListCard.vue"],
+      "isParallel": false,
+      "inferredRequirements": [
+        "progress-badge-must-be-clickable",
+        "clicking-badge-opens-modal-with-todays-stints",
+        "view-stint-details-within-one-click"
+      ]
+    },
+    {
+      "id": "T006",
+      "phase": "Tests",
+      "storyLabel": null,
+      "description": "Add integration tests for listCompletedStintsByDate() in app/lib/supabase/stints.test.ts",
+      "files": ["app/lib/supabase/stints.test.ts"],
+      "isParallel": true,
+      "inferredRequirements": [
+        "stints-sorted-most-recent-first",
+        "modal-count-matches-badge-count"
+      ]
+    },
+    {
+      "id": "T007",
+      "phase": "Tests",
+      "storyLabel": null,
+      "description": "Add query key unit tests for stintKeys.completedByDate() in app/composables/useStints.test.ts",
+      "files": ["app/composables/useStints.test.ts"],
+      "isParallel": true,
+      "inferredRequirements": [
+        "modal-fetches-via-dedicated-query"
+      ]
+    },
+    {
+      "id": "T008",
+      "phase": "Polish",
+      "storyLabel": null,
+      "description": "Run quickstart.md validation against all acceptance scenarios",
+      "files": [],
+      "isParallel": false,
+      "inferredRequirements": [
+        "progress-badge-must-be-clickable",
+        "clicking-badge-opens-modal-with-todays-stints",
+        "modal-displays-all-required-columns",
+        "durations-formatted-via-helper",
+        "modal-shows-empty-state",
+        "notes-truncated-with-tooltip",
+        "null-fields-show-dash",
+        "modal-dismissible-via-standard-interactions",
+        "modal-count-matches-badge-count",
+        "modal-usable-on-all-viewports"
+      ]
+    }
+  ],
+  "architecture": {
+    "stack": [
+      "TypeScript 5",
+      "Vue 3",
+      "Nuxt 4",
+      "Nuxt UI 4 (Reka UI)",
+      "TanStack Query (Vue Query)",
+      "date-fns",
+      "Supabase PostgreSQL",
+      "Tailwind CSS v4",
+      "Vitest",
+      "Sentry",
+      "Consola"
+    ],
+    "patterns": [
+      "Three-Layer Data Access (DB → Composable → Component)",
+      "Three-Layer Testing (Schema → DB Integration → Query Key Unit)",
+      "Query Key Factory",
+      "SSG + Client-Side Auth",
+      "Optimistic Updates / Seed-and-Revalidate",
+      "Result<T> Error Propagation",
+      "Co-located Tests",
+      "Singleton Timer (Web Worker)"
+    ],
+    "entities": [
+      "Stint",
+      "Project",
+      "Daily Progress",
+      "User Preferences"
+    ],
+    "constraints": [
+      "SSG with client-side auth — protected routes use ssr: false",
+      "No new database migrations — read-only access to existing stints table",
+      "Modal owns its data via dedicated query (not coupled to dashboard cache)",
+      "planned_duration stored in minutes — must multiply by 60 for formatDuration(seconds)",
+      "Date boundaries computed client-side via startOfDay() to match badge timezone logic",
+      "Only anon keys embedded at build time (no service role keys)",
+      "Must use useTypedSupabaseClient() instead of useSupabaseClient()",
+      "Nuxt UI 4 built on Reka UI — must check Context7 docs before using components"
+    ]
+  },
+  "constitutionRules": [
+    {
+      "principle": "I. Three-Layer Data Access Architecture",
+      "normative": "MUST",
+      "summary": "All data access follows DB layer -> Schema layer -> Composable layer pattern with type safety and RLS",
+      "checkpoints": [
+        "Export typed helpers (Row, Insert, Update)",
+        "Require TypedSupabaseClient parameter",
+        "Enforce user authentication and RLS",
+        "Return Result<T> = { data, error } with user-friendly messages",
+        "Use camelCase for API surface in schemas",
+        "Export schema limits as constants",
+        "Query hooks for fetching, mutation hooks with cache strategies",
+        "Transform camelCase to snake_case via toDbPayload()"
+      ]
+    },
+    {
+      "principle": "II. Three-Layer Testing Architecture",
+      "normative": "MUST",
+      "summary": "Test unique logic not framework wiring: schema validation, DB integration, query key factories only",
+      "checkpoints": [
+        "Layer 1: Schema tests with safeParse()",
+        "Layer 2: DB integration tests against local Supabase with three client types",
+        "Layer 3: Query key factory structure tests only — no TanStack hook mocking",
+        "Co-located tests with .test.ts suffix",
+        "Minimal mocking — prefer real implementations"
+      ]
+    },
+    {
+      "principle": "III. Static Site Generation (SSG) + Client-Side Auth",
+      "normative": "MUST",
+      "summary": "Public routes pre-rendered at build; protected routes use ssr: false with client-side auth middleware",
+      "checkpoints": [
+        "Public routes (/, /auth/*) pre-rendered at build time",
+        "Protected routes use ssr: false",
+        "Auth middleware only runs on client",
+        "Only anon keys embedded at build time",
+        "Never commit service role keys"
+      ]
+    },
+    {
+      "principle": "IV. Type Safety & Code Generation",
+      "normative": "MUST",
+      "summary": "Type safety enforced via generated Supabase types, TypedSupabaseClient, Zod schemas, and layer exports",
+      "checkpoints": [
+        "Use auto-generated database.types.ts",
+        "Use TypedSupabaseClient wrapper (useTypedSupabaseClient())",
+        "Zod schemas for runtime validation with TypeScript inference",
+        "Each layer exports its own types",
+        "Run supabase:types after schema changes"
+      ]
+    },
+    {
+      "principle": "V. User-Friendly Error Handling",
+      "normative": "MUST",
+      "summary": "Three-layer error propagation: DB translates errors, composable validates with Zod, component uses toast",
+      "checkpoints": [
+        "DB layer translates PostgreSQL errors to user-friendly messages",
+        "Composable layer validates with Zod and throws for TanStack Query",
+        "Component layer uses try-catch with toast.add()",
+        "Best-effort operations log failures but don't block main operation"
+      ]
+    },
+    {
+      "principle": "VI. Cache Update Strategies",
+      "normative": "MUST",
+      "summary": "Mutations use either optimistic update (instant UX) or seed-and-revalidate (server-validated) pattern",
+      "checkpoints": [
+        "Pattern 1 — Optimistic: onMutate snapshot, onError restore, onSettled invalidate",
+        "Pattern 2 — Seed and Revalidate: onSuccess setQueryData then invalidateQueries",
+        "Never leave cache in inconsistent state"
+      ]
+    },
+    {
+      "principle": "VII. Query Key Factory Pattern",
+      "normative": "MUST",
+      "summary": "Centralized key factories for cache organization with broad/targeted/multiple invalidation strategies",
+      "checkpoints": [
+        "Centralized entityKeys object with all/lists/list/detail keys",
+        "Broad invalidation after create/delete",
+        "Targeted invalidation after updates",
+        "Full key matching required for getQueryData()"
+      ]
+    },
+    {
+      "principle": "VIII. Observability & Logging",
+      "normative": "MUST",
+      "summary": "Use structured logger/createLogger utilities instead of raw console calls; Sentry in production",
+      "checkpoints": [
+        "Use logger from ~/utils/logger for general logging",
+        "Use createLogger(module) for domain-specific tracing",
+        "Logs route to console in dev, Sentry in production",
+        "Edge Functions exception: use console.error()/console.log() directly"
+      ]
+    },
+    {
+      "principle": "State Management — TanStack Query Only",
+      "normative": "MUST",
+      "summary": "No Pinia/Vuex stores for server state; all server state through TanStack Query cache",
+      "checkpoints": [
+        "No Pinia or Vuex stores",
+        "Singleton pattern for global state (e.g., timer Web Worker)",
+        "Local component state with ref/reactive"
+      ]
+    },
+    {
+      "principle": "Component Library & Styling — Nuxt UI 4 + Tailwind CSS v4",
+      "normative": "MUST",
+      "summary": "Use Nuxt UI 4 (Reka UI) with Tailwind CSS v4 and design system compliance per docs/DESIGN_SYSTEM.md",
+      "checkpoints": [
+        "Nuxt UI 4 built on Reka UI (NOT Radix)",
+        "Tailwind CSS v4 via @theme directive",
+        "Lucide Icons with i-lucide-* prefix",
+        "Always provide dark mode variants",
+        "All styling follows docs/DESIGN_SYSTEM.md"
+      ]
+    },
+    {
+      "principle": "Database Operations — Local Supabase + RLS",
+      "normative": "MUST",
+      "summary": "Docker-based local Supabase with RLS enforced on all tables and type generation after schema changes",
+      "checkpoints": [
+        "RLS enforced on all tables",
+        "Migrations in supabase/migrations/",
+        "Type generation via npm run supabase:types"
+      ]
+    },
+    {
+      "principle": "Code Quality — ESLint + Naming Conventions",
+      "normative": "SHOULD",
+      "summary": "ESLint via @nuxt/eslint with stylistic rules; camelCase for API, snake_case for DB; no comments unless complex",
+      "checkpoints": [
+        "Run npm run lint:fix before committing",
+        "camelCase for API surface, snake_case for database",
+        "No comments unless logic is complex or explicitly requested"
+      ]
+    },
+    {
+      "principle": "Git Workflow — Never Auto-Commit",
+      "normative": "MUST",
+      "summary": "Only commit when explicitly requested; clear messages; atomic commits; verify before push",
+      "checkpoints": [
+        "Never auto-commit",
+        "Clear commit messages (what and why)",
+        "Atomic commits as logical units",
+        "Run tests and linting before pushing"
+      ]
+    },
+    {
+      "principle": "Constitution Authority",
+      "normative": "MUST",
+      "summary": "Constitution supersedes all other practices; all PRs must verify compliance; deviations must be justified",
+      "checkpoints": [
+        "All PRs verify compliance with principles",
+        "Architecture decisions justified if deviating",
+        "Complexity justified with simpler alternatives documented"
+      ]
+    }
+  ],
+  "terminology": [
+    {
+      "term": "stint",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md", "constitution.md"],
+      "variants": ["stint", "session", "work session", "focused work session", "work block"]
+    },
+    {
+      "term": "progress badge",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["progress badge", "progress indicator", "stint progress indicator", "badge"]
+    },
+    {
+      "term": "daily progress",
+      "usageLocations": ["spec.md"],
+      "variants": ["daily progress", "completed stints today vs expected daily stints"]
+    },
+    {
+      "term": "project card",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["project card", "ProjectListCard"]
+    },
+    {
+      "term": "formatDuration",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["formatDuration", "duration formatting helper", "duration helper", "existing duration formatting helper"]
+    },
+    {
+      "term": "attributed date",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["attributed date", "attributed_date"]
+    },
+    {
+      "term": "completion type",
+      "usageLocations": ["spec.md", "tasks.md"],
+      "variants": ["completion type", "completion_type"]
+    },
+    {
+      "term": "three-layer data access",
+      "usageLocations": ["plan.md", "tasks.md", "constitution.md"],
+      "variants": ["three-layer data access", "three-layer pattern", "DB → Composable → Component"]
+    },
+    {
+      "term": "query key factory",
+      "usageLocations": ["plan.md", "tasks.md", "constitution.md"],
+      "variants": ["query key factory", "stintKeys", "entityKeys", "key factory"]
+    },
+    {
+      "term": "RLS",
+      "usageLocations": ["plan.md", "constitution.md"],
+      "variants": ["RLS", "Row Level Security", "row level security"]
+    },
+    {
+      "term": "composable",
+      "usageLocations": ["plan.md", "tasks.md", "constitution.md"],
+      "variants": ["composable", "TanStack Query hook", "query hook", "mutation hook"]
+    },
+    {
+      "term": "empty state",
+      "usageLocations": ["spec.md", "tasks.md"],
+      "variants": ["empty state", "empty state message", "No stints completed today"]
+    },
+    {
+      "term": "planned_duration",
+      "usageLocations": ["plan.md", "tasks.md"],
+      "variants": ["planned_duration", "planned duration"]
+    },
+    {
+      "term": "seed and revalidate",
+      "usageLocations": ["constitution.md"],
+      "variants": ["seed and revalidate", "seed-and-revalidate"]
+    },
+    {
+      "term": "optimistic update",
+      "usageLocations": ["constitution.md"],
+      "variants": ["optimistic update", "optimistic updates"]
+    }
+  ],
+  "metrics": {
+    "totalRequirements": 19,
+    "totalStories": 3,
+    "totalTasks": 8,
+    "totalPhases": 4,
+    "totalEdgeCases": 4,
+    "totalPrinciples": 14
+  }
+}
