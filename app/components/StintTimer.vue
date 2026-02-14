@@ -6,31 +6,24 @@ const props = defineProps<{
   stint: StintRow | null
 }>();
 
-// Get timer state from singleton composable
 const { secondsRemaining, isPaused, timerCompleted } = useStintTimer();
 
-// Format time using shared utility
 const formattedTime = computed(() => formatCountdown(secondsRemaining.value));
 
-// Calculate pause duration (live updating)
 const pausedDuration = ref<string>('');
 let pausedIntervalId: ReturnType<typeof setInterval> | null = null;
 
-// Update paused duration every second
 watch(
   () => props.stint?.paused_at,
   (pausedAt) => {
-    // Clear existing interval
     if (pausedIntervalId) {
       clearInterval(pausedIntervalId);
       pausedIntervalId = null;
     }
 
     if (pausedAt && isPaused.value) {
-      // Update immediately
       updatePausedDuration(pausedAt);
 
-      // Then update every second
       pausedIntervalId = setInterval(() => {
         updatePausedDuration(pausedAt);
       }, 1000);
@@ -47,20 +40,17 @@ function updatePausedDuration(pausedAt: string): void {
   pausedDuration.value = formatDuration(elapsedSeconds);
 }
 
-// Cleanup interval on unmount
 onUnmounted(() => {
   if (pausedIntervalId) {
     clearInterval(pausedIntervalId);
   }
 });
 
-// Animation state
 const showCompletionAnimation = ref(false);
 
 watch(timerCompleted, (completed) => {
   if (completed) {
     showCompletionAnimation.value = true;
-    // Hide animation after 3 seconds
     setTimeout(() => {
       showCompletionAnimation.value = false;
     }, 3000);

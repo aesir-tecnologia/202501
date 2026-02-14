@@ -1,1 +1,0 @@
-UPDATE stints SET started_at = started_at - INTERVAL '1 day' WHERE status = 'active';

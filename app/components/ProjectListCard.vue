@@ -5,6 +5,7 @@ import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
 import { PROJECT, STINT, type ProjectColor } from '~/constants';
 import { formatDuration, formatClockTime, formatRelativeTime } from '~/utils/time-format';
+import { createLogger } from '~/utils/logger';
 
 const props = defineProps<{
   project: ProjectRow
@@ -17,6 +18,8 @@ const props = defineProps<{
   isPausing?: boolean
   isCompleting?: boolean
 }>();
+
+const log = createLogger('project-list-card');
 
 const emit = defineEmits<{
   edit: [project: ProjectRow]
@@ -122,7 +125,7 @@ function handleStartStint() {
 
 function handlePauseStint() {
   if (!props.activeStint) {
-    console.error('[ProjectListCard] handlePauseStint called but activeStint is null');
+    log.error('[ProjectListCard] handlePauseStint called but activeStint is null');
     return;
   }
   emit('pauseStint', props.activeStint);
@@ -137,13 +140,13 @@ function handleResumeStint() {
     emit('resumeStint', props.pausedStint);
     return;
   }
-  console.error('[ProjectListCard] handleResumeStint called without active or paused stint');
+  log.error('[ProjectListCard] handleResumeStint called without active or paused stint');
 }
 
 function handleCompleteStint() {
   const stint = props.activeStint || props.pausedStint;
   if (!stint) {
-    console.error('[ProjectListCard] handleCompleteStint called without any stint');
+    log.error('[ProjectListCard] handleCompleteStint called without any stint');
     return;
   }
   emit('completeStint', stint);

@@ -4,17 +4,24 @@ interface FormatDurationOptions {
 }
 
 export function formatCountdown(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+  if (!Number.isFinite(seconds)) return '--:--';
+
+  const negative = seconds < 0;
+  const abs = Math.abs(Math.floor(seconds));
+  const hours = Math.floor(abs / 3600);
+  const mins = Math.floor((abs % 3600) / 60);
+  const secs = abs % 60;
+
+  const prefix = negative ? '-' : '';
 
   if (hours > 0) {
-    return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${prefix}${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  return `${prefix}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
 export function formatDuration(seconds: number, options?: FormatDurationOptions): string {
+  if (!Number.isFinite(seconds)) return options?.dash ? '-' : '0s';
   if (options?.delta && seconds <= 0) return '';
   if (seconds <= 0) return options?.dash ? '-' : '0s';
 
@@ -57,7 +64,9 @@ export function formatRelativeTime(date: Date, referenceDate: Date): string {
 
 export function formatTimestamp(isoString: string | null): string {
   if (!isoString) return '\u2014';
-  return new Date(isoString).toLocaleString('en-US', {
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return '\u2014';
+  return date.toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',

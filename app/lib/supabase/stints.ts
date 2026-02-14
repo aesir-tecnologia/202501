@@ -513,7 +513,7 @@ export async function listCompletedStintsByDate(
     .lt('ended_at', options.dateEnd)
     .order('ended_at', { ascending: false });
 
-  if (error) return { data: null, error };
+  if (error) return { data: null, error: new Error('Failed to load completed stints') };
   return { data: data || [], error: null };
 }
 

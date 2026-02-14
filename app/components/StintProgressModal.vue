@@ -87,7 +87,9 @@ const columns: TableColumn<StintRow>[] = [
     cell: ({ row }) => {
       const val: string | null = row.getValue('attributed_date');
       if (!val) return '\u2014';
-      return new Date(`${val}T12:00:00`).toLocaleDateString('en-US', {
+      const date = new Date(`${val}T12:00:00`);
+      if (isNaN(date.getTime())) return '\u2014';
+      return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -121,6 +123,19 @@ function closeModal() {
           name="i-lucide-loader-2"
           class="w-6 h-6 animate-spin text-stone-400"
         />
+      </div>
+
+      <div
+        v-else-if="error"
+        class="flex flex-col items-center justify-center py-12 text-red-500 dark:text-red-400"
+      >
+        <UIcon
+          name="i-lucide-alert-triangle"
+          class="w-8 h-8 mb-2 opacity-50"
+        />
+        <p class="text-sm">
+          Failed to load stints
+        </p>
       </div>
 
       <div

@@ -1,1 +1,0 @@
-SELECT * from stints WHERE id='5c4bbd0f-e0d0-4974-ac43-54905deffd90'

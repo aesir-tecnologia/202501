@@ -157,15 +157,19 @@ export function useCompletedStintsByDateQuery(
 ) {
   const client = useTypedSupabaseClient();
 
+  const todayDateString = computed(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  });
+
   return useQuery({
-    queryKey: computed(() => {
-      const today = new Date();
-      const todayDateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      return stintKeys.completedByDate(toValue(projectId), todayDateString);
-    }),
+    queryKey: computed(() =>
+      stintKeys.completedByDate(toValue(projectId), todayDateString.value),
+    ),
     queryFn: async () => {
-      const today = new Date();
-      const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const dateStr = todayDateString.value;
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const startOfToday = new Date(year!, month! - 1, day!);
       const startOfTomorrow = new Date(startOfToday);
       startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
 
@@ -445,7 +449,7 @@ export function useUpdateStint() {
  * @example
  * ```ts
  * const { mutateAsync } = useCompleteStint()
- * await mutateAsync({ stintId: '123', durationMinutes: 25, completed: true })
+ * await mutateAsync({ stintId: '123', completionType: 'natural' })
  * ```
  */
 export function useCompleteStint() {

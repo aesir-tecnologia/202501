@@ -1212,6 +1212,34 @@ describe('stints.ts - Integration Tests', () => {
       expect(result.error).not.toBeNull();
       expect(result.error?.message).toContain('do not have permission');
     });
+
+    it('should not return User A completed stints in User B listCompletedStintsByDate query', async () => {
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startOfTomorrow = new Date(startOfToday);
+      startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+
+      const endedAt = new Date(startOfToday.getTime() + 3600_000);
+      const startedAt = new Date(endedAt.getTime() - 25 * 60_000);
+
+      await createCompletedStint(serviceClient, testProject.id, testUserId, {
+        started_at: startedAt.toISOString(),
+        ended_at: endedAt.toISOString(),
+      });
+
+      const otherProject = await createTestProject(serviceClient, otherUserId, {
+        name: 'Other User Project',
+      });
+
+      const resultB = await listCompletedStintsByDate(otherUserClient, {
+        projectId: otherProject.id,
+        dateStart: startOfToday.toISOString(),
+        dateEnd: startOfTomorrow.toISOString(),
+      });
+
+      expect(resultB.error).toBeNull();
+      expect(resultB.data).toEqual([]);
+    });
   });
 
   describe('pause-and-switch workflow', () => {
