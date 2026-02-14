@@ -35,7 +35,7 @@ As a user reviewing my daily stints, I want to see each stint's started time, en
 
 1. **Given** a stint with all fields populated, **When** the modal is displayed, **Then** all columns show the correct values: started time, ended time, planned duration (formatted via duration helper), actual duration (formatted), paused duration (formatted), status, completion type, attributed date, and notes.
 2. **Given** a stint with null/empty optional fields (e.g., no notes, no attributed date), **When** the modal is displayed, **Then** those columns show a dash or appropriate empty indicator rather than "null" or blank.
-3. **Given** durations are displayed, **When** viewing planned, actual, and paused duration columns, **Then** they are formatted using the existing duration formatting helper (e.g., "0h 25m", "1h 10m").
+3. **Given** durations are displayed, **When** viewing planned, actual, and paused duration columns, **Then** they are formatted using the existing duration formatting helper (e.g., "25m", "1h 10m").
 
 ---
 
@@ -67,7 +67,7 @@ As a user, I want the stints in the modal to be sorted with the most recent stin
 - **FR-001**: The progress badge on each project card MUST be clickable (with appropriate cursor and hover feedback).
 - **FR-002**: Clicking the progress badge MUST open a modal dialog displaying today's completed stints for that specific project.
 - **FR-003**: The modal MUST display a table with the following columns: Started, Ended, Planned Duration, Actual Duration, Paused Duration, Status, Completion Type, Attributed Date, and Notes.
-- **FR-004**: Duration columns (Planned, Actual, Paused) MUST be formatted using the existing `formatDuration` helper from `daily-summaries.ts`.
+- **FR-004**: Duration columns (Planned, Actual, Paused) MUST be formatted using the existing `formatDuration` helper from `time-format.ts`.
 - **FR-005**: Started and Ended columns MUST display human-readable date and time (e.g., "Feb 12, 2:30 PM").
 - **FR-006**: The Attributed Date column MUST display a human-readable date (e.g., "Feb 12, 2026").
 - **FR-007**: Stints MUST be sorted by ended time descending (most recent first).
@@ -81,7 +81,7 @@ As a user, I want the stints in the modal to be sorted with the most recent stin
 
 ### Key Entities
 
-- **Stint**: A focused work session belonging to a project. Key attributes: start/end times, planned/actual/paused durations, status (active/paused/completed/interrupted), completion type (manual/auto/interrupted), attributed date, and optional notes. **Note**: `planned_duration` is stored in **minutes**; `actual_duration` and `paused_duration` are stored in **seconds**. Multiply `planned_duration` by 60 before passing to `formatDuration(seconds)`.
+- **Stint**: A focused work session belonging to a project. Key attributes: start/end times, planned/actual/paused durations, status (active/paused/completed/interrupted), completion type (manual/auto/interrupted), attributed date, and optional notes. **Note**: `planned_duration` is stored in **minutes**; `actual_duration` and `paused_duration` are stored in **seconds**. Multiply `planned_duration` by 60 before passing to `formatDuration(seconds)`. Sub-hour durations display as `"25m"` or `"5m 10s"`; hour+ durations display as `"2h 15m"`.
 - **Daily Progress**: A per-project calculation of completed stints today vs. expected daily stints. Drives the progress badge display.
 
 ## Success Criteria *(mandatory)*
@@ -96,7 +96,7 @@ As a user, I want the stints in the modal to be sorted with the most recent stin
 ## Assumptions
 
 - The progress badge already displays completed stints for today — the modal will show the same set of stints using the same filtering logic.
-- The existing `formatDuration(seconds)` helper is sufficient for all three duration columns.
+- The existing `formatDuration(seconds)` helper from `time-format.ts` is sufficient for all three duration columns.
 - The modal will use existing Nuxt UI modal components consistent with the app's design system.
 - Started and Ended times will be displayed in the user's local timezone (browser default).
 - The "Status" column is included for completeness, though all stints shown will be "completed" (since only completed stints count toward progress). This field may be useful if the scope is later expanded to show all stints.

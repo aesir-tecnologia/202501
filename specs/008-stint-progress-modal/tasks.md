@@ -68,8 +68,8 @@
   - **UTable columns** (as `TableColumn<StintRow>[]` with `h()` render functions per research.md D4 order):
     | Column | `accessorKey` | Cell Renderer |
     |--------|--------------|---------------|
-    | Started | `started_at` | `new Date(val).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })` |
-    | Ended | `ended_at` | Same format as Started |
+    | Started | `started_at` | `formatTimestamp(val)` from `~/utils/time-format` |
+    | Ended | `ended_at` | `formatTimestamp(val)` from `~/utils/time-format` |
     | Actual | `actual_duration` | `formatDuration(val ?? 0)` — stored in seconds |
     | Planned | `planned_duration` | `formatDuration((val ?? 0) * 60)` — **stored in minutes, multiply by 60** (research.md D3) |
     | Paused | `paused_duration` | `formatDuration(val ?? 0)` — stored in seconds |
@@ -77,7 +77,7 @@
     | Notes | `notes` | Truncate at 50 chars + ellipsis, wrap in `UTooltip` if truncated (FR-014), "—" if null |
     | Date | `attributed_date` | `new Date(val + 'T12:00:00').toLocaleDateString(...)`, "—" if null |
     | Status | `status` | Capitalize first letter |
-  - Import `formatDuration` from `~/utils/daily-summaries`
+  - Import `formatDuration` and `formatTimestamp` from `~/utils/time-format`
   - Add a `watch` on the query's `error` ref: `logger.error('Failed to fetch completed stints', { projectId, error })` (constitution VIII)
   - Horizontal scroll wrapper (`overflow-x-auto`) for mobile (edge case: narrow viewports)
   - Vertical scroll for many stints (FR-012)

@@ -10,7 +10,8 @@
 | UModal slots: `#body`, `#footer` | `ProjectEditModal.vue`, `StintCompletionModal.vue` | Content structure |
 | UTable with `TableColumn<T>[]` + `h()` render functions | Nuxt UI 4 docs (TanStack Table) | Stint table columns |
 | UTooltip wrapping elements | `ProjectListCard.vue:226` | Notes truncation tooltip |
-| `formatDuration(seconds)` | `app/utils/daily-summaries.ts:68-72` | Duration columns |
+| `formatDuration(seconds)` | `app/utils/time-format.ts` | Duration columns |
+| `formatTimestamp(isoString)` | `app/utils/time-format.ts` | Started/Ended columns |
 | `listStints()` with filter options | `app/lib/supabase/stints.ts:40-65` | Pattern for new query function |
 | `stintKeys` factory | `app/composables/useStints.ts:43-51` | New query key |
 | `useStintsQuery()` with TanStack Query | `app/composables/useStints.ts:161-172` | Pattern for new query hook |
@@ -45,7 +46,7 @@ None. Every aspect of this feature maps to existing patterns in the codebase.
 
 **Decision**: Convert `planned_duration` from minutes to seconds (`* 60`) before passing to `formatDuration()`.
 
-**Rationale**: `planned_duration` is stored in minutes (DB schema), while `actual_duration` and `paused_duration` are in seconds. `formatDuration()` expects seconds. Failing to convert would show "0h 0m" for a 25-minute stint.
+**Rationale**: `planned_duration` is stored in minutes (DB schema), while `actual_duration` and `paused_duration` are in seconds. `formatDuration()` expects seconds. Failing to convert would show "0s" for a 25-minute stint.
 
 ### D4: Column Order
 
@@ -64,7 +65,8 @@ None. Every aspect of this feature maps to existing patterns in the codebase.
 ### Technical Dependencies
 - `date-fns`: `startOfDay`, `addDays` — already used in `ProjectList.vue`
 - `@nuxt/ui`: `UModal`, `UTable`, `UTooltip` — already in project
-- `formatDuration()` from `~/utils/daily-summaries` — already exists
+- `formatDuration()` from `~/utils/time-format` — already exists
+- `formatTimestamp()` from `~/utils/time-format` — already exists
 - `parseSafeDate()` from `~/utils/date-helpers` — already exists
 
 ### Task Dependencies

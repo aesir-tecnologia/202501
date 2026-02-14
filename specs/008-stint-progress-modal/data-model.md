@@ -8,11 +8,11 @@
 
 | Field | DB Type | Display Column | Format | Notes |
 |-------|---------|---------------|--------|-------|
-| `started_at` | `timestamptz` | Started | `"Feb 12, 2:30 PM"` | `toLocaleString('en-US', ...)` |
-| `ended_at` | `timestamptz` | Ended | `"Feb 12, 2:30 PM"` | Same as Started |
-| `planned_duration` | `integer` | Planned Duration | `"0h 25m"` | **Stored in minutes** — multiply by 60 for `formatDuration()` |
-| `actual_duration` | `integer` | Actual Duration | `"0h 25m"` | Stored in seconds — pass directly to `formatDuration()` |
-| `paused_duration` | `integer` | Paused Duration | `"0h 5m"` | Stored in seconds — pass directly to `formatDuration()` |
+| `started_at` | `timestamptz` | Started | `"Feb 12, 2:30 PM"` | `formatTimestamp()` from `time-format.ts` |
+| `ended_at` | `timestamptz` | Ended | `"Feb 12, 2:30 PM"` | `formatTimestamp()` from `time-format.ts` |
+| `planned_duration` | `integer` | Planned Duration | `"25m"` | **Stored in minutes** — multiply by 60 for `formatDuration()` |
+| `actual_duration` | `integer` | Actual Duration | `"25m"` | Stored in seconds — pass directly to `formatDuration()` |
+| `paused_duration` | `integer` | Paused Duration | `"5m"` | Stored in seconds — pass directly to `formatDuration()` |
 | `status` | `enum` | Status | `"completed"` | Values: `active`, `paused`, `completed`, `interrupted` |
 | `completion_type` | `enum` | Completion Type | `"manual"` | Values: `manual`, `auto`, `interrupted`. Nullable. |
 | `attributed_date` | `date` | Attributed Date | `"Feb 12, 2026"` | Nullable — show "—" if null |

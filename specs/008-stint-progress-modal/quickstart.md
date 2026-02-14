@@ -80,8 +80,8 @@ UModal(v-model:open, :title, :ui)
 
 | Column | `accessorKey` | Cell Renderer |
 |--------|--------------|---------------|
-| Started | `started_at` | `new Date(val).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })` |
-| Ended | `ended_at` | Same format as Started |
+| Started | `started_at` | `formatTimestamp(val)` from `~/utils/time-format` |
+| Ended | `ended_at` | `formatTimestamp(val)` from `~/utils/time-format` |
 | Actual | `actual_duration` | `formatDuration(val ?? 0)` |
 | Planned | `planned_duration` | `formatDuration(val * 60)` — **minutes → seconds** |
 | Paused | `paused_duration` | `formatDuration(val ?? 0)` |
@@ -166,6 +166,7 @@ Add test cases for `stintKeys.completedByDate()`:
 | `app/composables/useStints.ts` | Add key + hook | Composable |
 | `app/components/StintProgressModal.vue` | New file | Component |
 | `app/components/ProjectListCard.vue` | Modify badge + add modal | Component |
+| `app/utils/time-format.ts` | Read-only | Utility |
 | `app/lib/supabase/stints.test.ts` | Add test cases | Test |
 | `app/composables/useStints.test.ts` | Add test cases | Test |
 

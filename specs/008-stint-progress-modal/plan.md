@@ -63,7 +63,7 @@ app/
 │   ├── StintProgressModal.vue # NEW: Modal with UTable
 │   └── ProjectListCard.vue    # MODIFY: Make badge clickable, add modal
 └── utils/
-    └── daily-summaries.ts     # READ-ONLY: formatDuration() helper
+    └── time-format.ts         # READ-ONLY: formatDuration(), formatTimestamp() helpers
 ```
 
 **Structure Decision**: Existing Nuxt web application structure. All changes fit within the established three-layer architecture. No new directories needed.
@@ -92,7 +92,7 @@ No constitution violations — section not applicable.
 |-----------|-------------------|------------------|
 | `listCompletedStintsByDate()` | Integration test (local Supabase) | Returns only completed stints for given project + date range; excludes other statuses; requires auth |
 | `stintKeys.completedByDate()` | Unit test | Produces `['stints', 'list', 'completedByDate', projectId, date]` key structure |
-| `StintProgressModal.vue` | Manual testing | Modal shows correct stints, durations formatted correctly, notes truncated with tooltip, empty state works |
+| `StintProgressModal.vue` | Manual testing | Modal shows correct stints, durations formatted correctly (sub-hour: `"25m"`, hour+: `"2h 15m"`), notes truncated with tooltip, empty state works |
 | Progress badge click | Manual testing | Badge is clickable, cursor changes, modal opens with correct project's stints, badge count matches modal row count |
 | Duration unit conversion | Manual testing | `planned_duration` (minutes) displays correctly via `formatDuration(val * 60)` |
 | Mobile horizontal scroll | Manual testing | Table scrolls horizontally on narrow viewports without hiding columns |
