@@ -490,6 +490,33 @@ export async function startStint(
   return { data: newStint, error: null };
 }
 
+interface ListCompletedStintsByDateOptions {
+  projectId: string
+  dateStart: string
+  dateEnd: string
+}
+
+export async function listCompletedStintsByDate(
+  client: TypedSupabaseClient,
+  options: ListCompletedStintsByDateOptions,
+): Promise<Result<StintRow[]>> {
+  const userResult = await requireUserId(client, 'interact with stints');
+  if (userResult.error) return { data: null, error: userResult.error };
+
+  const { data, error } = await client
+    .from('stints')
+    .select('*')
+    .eq('user_id', userResult.data!)
+    .eq('project_id', options.projectId)
+    .eq('status', 'completed')
+    .gte('ended_at', options.dateStart)
+    .lt('ended_at', options.dateEnd)
+    .order('ended_at', { ascending: false });
+
+  if (error) return { data: null, error: new Error('Failed to load completed stints') };
+  return { data: data || [], error: null };
+}
+
 export async function syncStintCheck(
   client: TypedSupabaseClient,
   stintId: string,

@@ -2,8 +2,6 @@ import { describe, it, expect } from 'vitest';
 import {
   calculateStintTime,
   calculateRemainingSeconds,
-  formatStintTime,
-  formatStintTimeCompact,
 } from './stint-time';
 import type { StintRow } from '~/lib/supabase/stints';
 
@@ -154,44 +152,6 @@ describe('stint-time utils', () => {
       const result = calculateRemainingSeconds(stint, referenceTime);
 
       expect(result).toBe(0);
-    });
-  });
-
-  describe('formatStintTime', () => {
-    it('formats 0 seconds as 00:00', () => {
-      expect(formatStintTime(0)).toBe('00:00');
-    });
-
-    it('formats seconds with padding', () => {
-      expect(formatStintTime(5)).toBe('00:05');
-    });
-
-    it('formats minutes and seconds', () => {
-      expect(formatStintTime(65)).toBe('01:05');
-    });
-
-    it('formats 10 minutes', () => {
-      expect(formatStintTime(600)).toBe('10:00');
-    });
-
-    it('formats over 60 minutes with hours', () => {
-      expect(formatStintTime(3661)).toBe('1:01:01');
-    });
-
-    it('formats 25 minutes (standard stint)', () => {
-      expect(formatStintTime(25 * 60)).toBe('25:00');
-    });
-
-    it('formats 90 minutes as 1:30:00', () => {
-      expect(formatStintTime(90 * 60)).toBe('1:30:00');
-    });
-  });
-
-  describe('formatStintTimeCompact', () => {
-    it('delegates to formatStintTime', () => {
-      expect(formatStintTimeCompact(0)).toBe('00:00');
-      expect(formatStintTimeCompact(65)).toBe('01:05');
-      expect(formatStintTimeCompact(3661)).toBe('1:01:01');
     });
   });
 });

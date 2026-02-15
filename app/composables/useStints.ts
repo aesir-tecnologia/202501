@@ -7,6 +7,7 @@ import {
   getStintById,
   getActiveStint,
   getPausedStints,
+  listCompletedStintsByDate,
   updateStint as updateStintDb,
   deleteStint as deleteStintDb,
   pauseStint as pauseStintDb,
@@ -44,6 +45,8 @@ export const stintKeys = {
   all: ['stints'] as const,
   lists: () => [...stintKeys.all, 'list'] as const,
   list: (filters?: StintListFilters) => [...stintKeys.lists(), filters] as const,
+  completedByDate: (projectId: string, date: string) =>
+    [...stintKeys.lists(), 'completedByDate', projectId, date] as const,
   details: () => [...stintKeys.all, 'detail'] as const,
   detail: (id: string) => [...stintKeys.details(), id] as const,
   active: () => [...stintKeys.all, 'active'] as const,
@@ -147,6 +150,42 @@ function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
 // ============================================================================
 // Query Hooks
 // ============================================================================
+
+export function useCompletedStintsByDateQuery(
+  projectId: MaybeRefOrGetter<string>,
+  options?: { enabled?: MaybeRefOrGetter<boolean> },
+) {
+  const client = useTypedSupabaseClient();
+
+  const todayDateString = computed(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  });
+
+  return useQuery({
+    queryKey: computed(() =>
+      stintKeys.completedByDate(toValue(projectId), todayDateString.value),
+    ),
+    queryFn: async () => {
+      const dateStr = todayDateString.value;
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const startOfToday = new Date(year!, month! - 1, day!);
+      const startOfTomorrow = new Date(startOfToday);
+      startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+
+      const { data, error } = await listCompletedStintsByDate(client, {
+        projectId: toValue(projectId),
+        dateStart: startOfToday.toISOString(),
+        dateEnd: startOfTomorrow.toISOString(),
+      });
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    enabled: () => toValue(options?.enabled) !== false,
+  });
+}
 
 /**
  * Fetches stints with optional filtering and automatic caching.
@@ -410,7 +449,7 @@ export function useUpdateStint() {
  * @example
  * ```ts
  * const { mutateAsync } = useCompleteStint()
- * await mutateAsync({ stintId: '123', durationMinutes: 25, completed: true })
+ * await mutateAsync({ stintId: '123', completionType: 'natural' })
  * ```
  */
 export function useCompleteStint() {
