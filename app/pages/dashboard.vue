@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { useProjectsQuery, useArchivedProjectsQuery, useToggleProjectActive } from '~/composables/useProjects';
 import { useActiveStintQuery, usePauseStint, useResumeStint, useStintsQuery, useCompleteStint } from '~/composables/useStints';
-import { usePreferencesQuery, useUpdatePreferences } from '~/composables/usePreferences';
+import { useUpdatePreferences } from '~/composables/usePreferences';
+import { useTimezone } from '~/composables/useTimezone';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
+import { useMidnightAttribution } from '~/composables/useMidnightAttribution';
 import { getStintEffectiveDate, getTodayInTimezone } from '~/utils/date-helpers';
-import { detectMidnightSpan, formatAttributionDates } from '~/utils/midnight-detection';
-import { createLogger } from '~/utils/logger';
-
-const log = createLogger('dashboard');
 
 definePageMeta({
   title: 'Dashboard',
@@ -73,9 +71,8 @@ const { mutateAsync: pauseStint, isPending: _isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: _isResuming } = useResumeStint();
 const { mutateAsync: completeStint, isPending: _isCompleting } = useCompleteStint();
 const { data: allStints } = useStintsQuery();
-const { data: preferencesData } = usePreferencesQuery();
 const { mutateAsync: updatePreferences } = useUpdatePreferences();
-const timezone = computed(() => preferencesData.value?.timezone ?? 'UTC');
+const { timezone, preferencesData } = useTimezone();
 
 const activeProject = computed(() => {
   const stint = activeStint.value;
@@ -105,34 +102,8 @@ const dailyProgress = computed(() => {
   return { completed, expected };
 });
 
-watchEffect(() => {
-  if (preferencesData.value && !preferencesData.value.timezone) {
-    log.warn('Timezone missing from loaded preferences, falling back to UTC');
-  }
-});
-
-const midnightSpanInfo = computed(() => {
-  if (!stintToComplete.value) return null;
-  return detectMidnightSpan(stintToComplete.value, timezone.value);
-});
-
-const midnightSpanLabels = computed(() => {
-  if (!midnightSpanInfo.value) return null;
-  return formatAttributionDates(midnightSpanInfo.value, timezone.value);
-});
-
-const shouldShowDayAttribution = computed(() => {
-  if (!midnightSpanInfo.value?.spansMidnight) return false;
-  return preferencesData.value?.stintDayAttribution === 'ask';
-});
-
-const presetAttributedDate = computed(() => {
-  if (!midnightSpanInfo.value?.spansMidnight) return undefined;
-  const preference = preferencesData.value?.stintDayAttribution;
-  if (preference === 'start_date') return midnightSpanInfo.value.startDate;
-  if (preference === 'end_date') return midnightSpanInfo.value.endDate;
-  return undefined;
-});
+const { midnightSpanInfo, midnightSpanLabels, shouldShowDayAttribution, presetAttributedDate }
+  = useMidnightAttribution(stintToComplete, timezone, preferencesData);
 
 function openCreateModal() {
   showCreateModal.value = true;

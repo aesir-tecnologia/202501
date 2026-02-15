@@ -104,11 +104,7 @@ const colorRingClass = computed(() => {
   return ringColorMap[color as ProjectColor];
 });
 
-const canStartStint = computed(() => {
-  if (!props.project.is_active) return false;
-  if (hasActiveStint.value) return false;
-  return true;
-});
+const canStartStint = computed(() => props.project.is_active && !hasActiveStint.value);
 
 function handleEdit() {
   emit('edit', props.project);

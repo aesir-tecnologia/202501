@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { StintRow } from '~/lib/supabase/stints';
-import { getStintEffectiveDate, getTodayInTimezone, parseSafeDate } from './date-helpers';
+import { formatDateYMD, getStintEffectiveDate, getTodayInTimezone, parseSafeDate } from './date-helpers';
 
 function makeStint(overrides: Partial<StintRow> = {}): StintRow {
   return {
@@ -44,6 +44,26 @@ describe('parseSafeDate', () => {
 
   it('returns null for invalid date string', () => {
     expect(parseSafeDate('not-a-date')).toBeNull();
+  });
+});
+
+describe('formatDateYMD', () => {
+  it('formats a date in the given timezone', () => {
+    const date = new Date('2026-02-15T23:30:00Z');
+    expect(formatDateYMD(date, 'UTC')).toBe('2026-02-15');
+    expect(formatDateYMD(date, 'Asia/Tokyo')).toBe('2026-02-16');
+  });
+
+  it('falls back to UTC for invalid timezone', () => {
+    const date = new Date('2026-02-15T12:00:00Z');
+    const result = formatDateYMD(date, 'Invalid/Timezone');
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('handles NaN date with fallback', () => {
+    const date = new Date('not-a-date');
+    const result = formatDateYMD(date, 'UTC');
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });
 

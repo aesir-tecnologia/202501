@@ -2,7 +2,9 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import { useSortable } from '@vueuse/integrations/useSortable';
 import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
-import { usePreferencesQuery, useUpdatePreferences } from '~/composables/usePreferences';
+import { useMidnightAttribution } from '~/composables/useMidnightAttribution';
+import { useUpdatePreferences } from '~/composables/usePreferences';
+import { useTimezone } from '~/composables/useTimezone';
 import { createLogger } from '~/utils/logger';
 import {
   stintKeys,
@@ -19,7 +21,6 @@ import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
 import { getStintEffectiveDate, getTodayInTimezone } from '~/utils/date-helpers';
 import { calculateRemainingSeconds } from '~/utils/stint-time';
-import { detectMidnightSpan, formatAttributionDates } from '~/utils/midnight-detection';
 import ProjectListCard from './ProjectListCard.vue';
 import StintConflictDialog, { type ConflictResolutionAction } from './StintConflictDialog.vue';
 
@@ -75,9 +76,8 @@ const { mutateAsync: startStint, isPending: isStarting } = useStartStint();
 const { mutateAsync: pauseStint, isPending: isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint();
 const { mutateAsync: completeStint, isPending: isCompleting } = useCompleteStint();
-const { data: preferencesData } = usePreferencesQuery();
 const { mutateAsync: updatePreferences } = useUpdatePreferences();
-const timezone = computed(() => preferencesData.value?.timezone ?? 'UTC');
+const { timezone, preferencesData } = useTimezone();
 
 const showCompletionModal = ref(false);
 const stintToComplete = ref<StintRow | null>(null);
@@ -139,34 +139,8 @@ const dailyProgressMap = computed(() => {
   return computeAllDailyProgress(props.projects, allStints.value, timezone.value);
 });
 
-watchEffect(() => {
-  if (preferencesData.value && !preferencesData.value.timezone) {
-    log.warn('Timezone missing from loaded preferences, falling back to UTC');
-  }
-});
-
-const midnightSpanInfo = computed(() => {
-  if (!stintToComplete.value) return null;
-  return detectMidnightSpan(stintToComplete.value, timezone.value);
-});
-
-const midnightSpanLabels = computed(() => {
-  if (!midnightSpanInfo.value) return null;
-  return formatAttributionDates(midnightSpanInfo.value, timezone.value);
-});
-
-const shouldShowDayAttribution = computed(() => {
-  if (!midnightSpanInfo.value?.spansMidnight) return false;
-  return preferencesData.value?.stintDayAttribution === 'ask';
-});
-
-const presetAttributedDate = computed(() => {
-  if (!midnightSpanInfo.value?.spansMidnight) return undefined;
-  const preference = preferencesData.value?.stintDayAttribution;
-  if (preference === 'start_date') return midnightSpanInfo.value.startDate;
-  if (preference === 'end_date') return midnightSpanInfo.value.endDate;
-  return undefined;
-});
+const { midnightSpanInfo, midnightSpanLabels, shouldShowDayAttribution, presetAttributedDate }
+  = useMidnightAttribution(stintToComplete, timezone, preferencesData);
 
 // Update local projects when props change (but not during drag)
 watch(() => props.projects, (newProjects) => {

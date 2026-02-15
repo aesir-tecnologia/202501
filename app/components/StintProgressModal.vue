@@ -3,7 +3,7 @@ import { h, resolveComponent } from 'vue';
 import type { TableColumn } from '@nuxt/ui';
 import type { StintRow } from '~/lib/supabase/stints';
 import { useCompletedStintsByDateQuery } from '~/composables/useStints';
-import { usePreferencesQuery } from '~/composables/usePreferences';
+import { useTimezone } from '~/composables/useTimezone';
 import { formatDuration, formatTimestamp } from '~/utils/time-format';
 import { createLogger } from '~/utils/logger';
 
@@ -18,8 +18,7 @@ const props = defineProps<{
 const isOpen = defineModel<boolean>('open');
 const toast = useToast();
 
-const { data: preferencesData } = usePreferencesQuery();
-const timezone = computed(() => preferencesData.value?.timezone ?? 'UTC');
+const { timezone, preferencesData } = useTimezone();
 
 const { data: stints, isLoading, error } = useCompletedStintsByDateQuery(
   () => props.projectId,
