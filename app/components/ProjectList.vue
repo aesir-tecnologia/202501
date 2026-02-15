@@ -139,12 +139,15 @@ const dailyProgressMap = computed(() => {
   return computeAllDailyProgress(props.projects, allStints.value, timezone);
 });
 
-const midnightSpanInfo = computed(() => {
-  if (!stintToComplete.value) return null;
-  const timezone = preferencesData.value?.timezone ?? 'UTC';
+watchEffect(() => {
   if (preferencesData.value && !preferencesData.value.timezone) {
     log.warn('Timezone missing from loaded preferences, falling back to UTC');
   }
+});
+
+const midnightSpanInfo = computed(() => {
+  if (!stintToComplete.value) return null;
+  const timezone = preferencesData.value?.timezone ?? 'UTC';
   return detectMidnightSpan(stintToComplete.value, timezone);
 });
 

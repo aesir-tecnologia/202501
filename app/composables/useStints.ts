@@ -174,6 +174,7 @@ export function useCompletedStintsByDateQuery(
 
       const { data, error } = await listCompletedStintsByDate(client, {
         projectId: toValue(projectId),
+        dateString: todayDateString.value,
         dateStart: todayStart.toISOString(),
         dateEnd: tomorrowStart.toISOString(),
       });

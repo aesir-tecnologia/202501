@@ -25,6 +25,8 @@ export function formatDuration(seconds: number, options?: FormatDurationOptions)
   if (options?.delta && seconds <= 0) return '';
   if (seconds <= 0) return options?.dash ? '-' : '0s';
 
+  seconds = Math.floor(seconds);
+
   const hours = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;

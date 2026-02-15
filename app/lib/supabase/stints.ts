@@ -492,6 +492,7 @@ export async function startStint(
 
 interface ListCompletedStintsByDateOptions {
   projectId: string
+  dateString: string
   dateStart: string
   dateEnd: string
 }
@@ -509,8 +510,7 @@ export async function listCompletedStintsByDate(
     .eq('user_id', userResult.data!)
     .eq('project_id', options.projectId)
     .eq('status', 'completed')
-    .gte('ended_at', options.dateStart)
-    .lt('ended_at', options.dateEnd)
+    .or(`attributed_date.eq.${options.dateString},and(attributed_date.is.null,ended_at.gte.${options.dateStart},ended_at.lt.${options.dateEnd})`)
     .order('ended_at', { ascending: false });
 
   if (error) return { data: null, error: new Error('Failed to load completed stints') };

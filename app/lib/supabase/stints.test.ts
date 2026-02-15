@@ -132,7 +132,8 @@ describe('stints.ts - Integration Tests', () => {
       const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const startOfTomorrow = new Date(startOfToday);
       startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
-      return { startOfToday, startOfTomorrow };
+      const dateString = `${startOfToday.getFullYear()}-${String(startOfToday.getMonth() + 1).padStart(2, '0')}-${String(startOfToday.getDate()).padStart(2, '0')}`;
+      return { startOfToday, startOfTomorrow, dateString };
     }
 
     function makeStintTimes(endedAt: Date) {
@@ -143,7 +144,7 @@ describe('stints.ts - Integration Tests', () => {
     }
 
     it('should return only completed stints for given project and date range', async () => {
-      const { startOfToday, startOfTomorrow } = todayRange();
+      const { startOfToday, startOfTomorrow, dateString } = todayRange();
 
       await createCompletedStint(serviceClient, testProject.id, testUserId,
         makeStintTimes(new Date(startOfToday.getTime() + 3600_000)),
@@ -151,6 +152,7 @@ describe('stints.ts - Integration Tests', () => {
 
       const result = await listCompletedStintsByDate(authenticatedClient, {
         projectId: testProject.id,
+        dateString,
         dateStart: startOfToday.toISOString(),
         dateEnd: startOfTomorrow.toISOString(),
       });
@@ -162,7 +164,7 @@ describe('stints.ts - Integration Tests', () => {
     });
 
     it('should exclude stints with status other than completed', async () => {
-      const { startOfToday, startOfTomorrow } = todayRange();
+      const { startOfToday, startOfTomorrow, dateString } = todayRange();
 
       await createActiveStint(serviceClient, testProject.id, testUserId);
 
@@ -177,6 +179,7 @@ describe('stints.ts - Integration Tests', () => {
 
       const result = await listCompletedStintsByDate(authenticatedClient, {
         projectId: testProject.id,
+        dateString,
         dateStart: startOfToday.toISOString(),
         dateEnd: startOfTomorrow.toISOString(),
       });
@@ -187,7 +190,7 @@ describe('stints.ts - Integration Tests', () => {
     });
 
     it('should exclude stints outside the date range', async () => {
-      const { startOfToday, startOfTomorrow } = todayRange();
+      const { startOfToday, startOfTomorrow, dateString } = todayRange();
 
       const yesterday = new Date(startOfToday.getTime() - 3600_000);
       await createCompletedStint(serviceClient, testProject.id, testUserId,
@@ -196,6 +199,7 @@ describe('stints.ts - Integration Tests', () => {
 
       const result = await listCompletedStintsByDate(authenticatedClient, {
         projectId: testProject.id,
+        dateString,
         dateStart: startOfToday.toISOString(),
         dateEnd: startOfTomorrow.toISOString(),
       });
@@ -205,10 +209,11 @@ describe('stints.ts - Integration Tests', () => {
     });
 
     it('should return empty array when no matching stints exist', async () => {
-      const { startOfToday, startOfTomorrow } = todayRange();
+      const { startOfToday, startOfTomorrow, dateString } = todayRange();
 
       const result = await listCompletedStintsByDate(authenticatedClient, {
         projectId: testProject.id,
+        dateString,
         dateStart: startOfToday.toISOString(),
         dateEnd: startOfTomorrow.toISOString(),
       });
@@ -218,10 +223,11 @@ describe('stints.ts - Integration Tests', () => {
     });
 
     it('should require authentication', async () => {
-      const { startOfToday, startOfTomorrow } = todayRange();
+      const { startOfToday, startOfTomorrow, dateString } = todayRange();
 
       const result = await listCompletedStintsByDate(unauthenticatedClient, {
         projectId: testProject.id,
+        dateString,
         dateStart: startOfToday.toISOString(),
         dateEnd: startOfTomorrow.toISOString(),
       });
@@ -231,7 +237,7 @@ describe('stints.ts - Integration Tests', () => {
     });
 
     it('should return results ordered by ended_at descending', async () => {
-      const { startOfToday, startOfTomorrow } = todayRange();
+      const { startOfToday, startOfTomorrow, dateString } = todayRange();
 
       const earlier = new Date(startOfToday.getTime() + 3600_000);
       const later = new Date(startOfToday.getTime() + 7200_000);
@@ -245,6 +251,7 @@ describe('stints.ts - Integration Tests', () => {
 
       const result = await listCompletedStintsByDate(authenticatedClient, {
         projectId: testProject.id,
+        dateString,
         dateStart: startOfToday.toISOString(),
         dateEnd: startOfTomorrow.toISOString(),
       });
@@ -255,6 +262,50 @@ describe('stints.ts - Integration Tests', () => {
       expect(new Date(stints[0]!.ended_at!).getTime()).toBeGreaterThan(
         new Date(stints[1]!.ended_at!).getTime(),
       );
+    });
+
+    it('should include stint with attributed_date matching dateString even when ended_at is outside range', async () => {
+      const { startOfToday, startOfTomorrow, dateString } = todayRange();
+
+      const yesterday = new Date(startOfToday.getTime() - 3600_000);
+      await createCompletedStint(serviceClient, testProject.id, testUserId, {
+        ...makeStintTimes(yesterday),
+        attributed_date: dateString,
+      });
+
+      const result = await listCompletedStintsByDate(authenticatedClient, {
+        projectId: testProject.id,
+        dateString,
+        dateStart: startOfToday.toISOString(),
+        dateEnd: startOfTomorrow.toISOString(),
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toHaveLength(1);
+      expect(result.data![0]!.attributed_date).toBe(dateString);
+    });
+
+    it('should exclude stint with attributed_date on a different day even when ended_at is inside range', async () => {
+      const { startOfToday, startOfTomorrow, dateString } = todayRange();
+
+      const yesterdayDate = new Date(startOfToday);
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+      const yesterdayString = `${yesterdayDate.getFullYear()}-${String(yesterdayDate.getMonth() + 1).padStart(2, '0')}-${String(yesterdayDate.getDate()).padStart(2, '0')}`;
+
+      await createCompletedStint(serviceClient, testProject.id, testUserId, {
+        ...makeStintTimes(new Date(startOfToday.getTime() + 3600_000)),
+        attributed_date: yesterdayString,
+      });
+
+      const result = await listCompletedStintsByDate(authenticatedClient, {
+        projectId: testProject.id,
+        dateString,
+        dateStart: startOfToday.toISOString(),
+        dateEnd: startOfTomorrow.toISOString(),
+      });
+
+      expect(result.error).toBeNull();
+      expect(result.data).toEqual([]);
     });
   });
 
@@ -1218,6 +1269,7 @@ describe('stints.ts - Integration Tests', () => {
       const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const startOfTomorrow = new Date(startOfToday);
       startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+      const dateString = `${startOfToday.getFullYear()}-${String(startOfToday.getMonth() + 1).padStart(2, '0')}-${String(startOfToday.getDate()).padStart(2, '0')}`;
 
       const endedAt = new Date(startOfToday.getTime() + 3600_000);
       const startedAt = new Date(endedAt.getTime() - 25 * 60_000);
@@ -1233,6 +1285,7 @@ describe('stints.ts - Integration Tests', () => {
 
       const resultB = await listCompletedStintsByDate(otherUserClient, {
         projectId: otherProject.id,
+        dateString,
         dateStart: startOfToday.toISOString(),
         dateEnd: startOfTomorrow.toISOString(),
       });
