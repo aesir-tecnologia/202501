@@ -492,6 +492,7 @@ export async function startStint(
 
 interface ListCompletedStintsByDateOptions {
   projectId: string
+  dateString: string
   dateStart: string
   dateEnd: string
 }
@@ -503,14 +504,17 @@ export async function listCompletedStintsByDate(
   const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(options.dateString)) {
+    return { data: null, error: new Error(`Invalid date string format: ${options.dateString}`) };
+  }
+
   const { data, error } = await client
     .from('stints')
     .select('*')
     .eq('user_id', userResult.data!)
     .eq('project_id', options.projectId)
     .eq('status', 'completed')
-    .gte('ended_at', options.dateStart)
-    .lt('ended_at', options.dateEnd)
+    .or(`attributed_date.eq.${options.dateString},and(attributed_date.is.null,ended_at.gte.${options.dateStart},ended_at.lt.${options.dateEnd})`)
     .order('ended_at', { ascending: false });
 
   if (error) return { data: null, error: new Error('Failed to load completed stints') };

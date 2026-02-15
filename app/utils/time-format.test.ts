@@ -81,6 +81,10 @@ describe('time-format utils', () => {
       expect(formatDuration(2 * 3600 + 15 * 60)).toBe('2h 15m');
     });
 
+    it('floors fractional seconds', () => {
+      expect(formatDuration(67.8)).toBe('1m 7s');
+    });
+
     it('returns 0s for NaN', () => {
       expect(formatDuration(NaN)).toBe('0s');
     });

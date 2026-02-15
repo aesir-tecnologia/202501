@@ -18,6 +18,9 @@ import {
   type StintRow,
   type UpdateStintPayload as DbUpdateStintPayload,
 } from '~/lib/supabase/stints';
+import { getTodayInTimezone } from '~/utils/date-helpers';
+import { TZDate } from '@date-fns/tz';
+import { startOfDay, addDays } from 'date-fns';
 import {
   stintStartSchema,
   stintUpdateSchema,
@@ -134,9 +137,7 @@ export type SyncStintCheckMutation = UseMutationReturnType<
 // Helper Functions
 // ============================================================================
 
-/**
- * Transforms camelCase update payload to snake_case for database operations
- */
+/** Prepares the update payload for the database layer */
 function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
   const result: Record<string, unknown> = {};
 
@@ -153,30 +154,35 @@ function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
 
 export function useCompletedStintsByDateQuery(
   projectId: MaybeRefOrGetter<string>,
+  timezone: MaybeRefOrGetter<string>,
   options?: { enabled?: MaybeRefOrGetter<boolean> },
 ) {
   const client = useTypedSupabaseClient();
 
-  const todayDateString = computed(() => {
-    const today = new Date();
-    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  });
+  const todayDateString = computed(() => getTodayInTimezone(toValue(timezone)));
 
   return useQuery({
     queryKey: computed(() =>
       stintKeys.completedByDate(toValue(projectId), todayDateString.value),
     ),
     queryFn: async () => {
-      const dateStr = todayDateString.value;
-      const [year, month, day] = dateStr.split('-').map(Number);
-      const startOfToday = new Date(year!, month! - 1, day!);
-      const startOfTomorrow = new Date(startOfToday);
-      startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+      const tz = toValue(timezone);
+      let todayStart: Date;
+      let tomorrowStart: Date;
+      try {
+        todayStart = startOfDay(new TZDate(new Date(), tz));
+        tomorrowStart = addDays(todayStart, 1);
+      }
+      catch (error) {
+        log.error('Invalid timezone in completed stints query', { timezone: tz, error });
+        throw new Error('Could not determine today\'s date. Please check your timezone in settings.');
+      }
 
       const { data, error } = await listCompletedStintsByDate(client, {
         projectId: toValue(projectId),
-        dateStart: startOfToday.toISOString(),
-        dateEnd: startOfTomorrow.toISOString(),
+        dateString: todayDateString.value,
+        dateStart: todayStart.toISOString(),
+        dateEnd: tomorrowStart.toISOString(),
       });
       if (error) throw error;
       return data || [];

@@ -7,6 +7,7 @@ export interface PreferencesData {
   celebrationAnimation: boolean
   desktopNotifications: boolean
   stintDayAttribution: StintDayAttribution
+  timezone: string
 }
 
 export type { Result };
@@ -22,7 +23,7 @@ export async function getPreferences(
 
   const { data, error } = await client
     .from('user_profiles')
-    .select('default_stint_duration, celebration_animation, desktop_notifications, stint_day_attribution')
+    .select('default_stint_duration, celebration_animation, desktop_notifications, stint_day_attribution, timezone')
     .eq('id', userId)
     .single();
 
@@ -40,6 +41,7 @@ export async function getPreferences(
       celebrationAnimation: data.celebration_animation,
       desktopNotifications: data.desktop_notifications,
       stintDayAttribution: data.stint_day_attribution as StintDayAttribution,
+      timezone: data.timezone,
     },
     error: null,
   };
@@ -68,12 +70,15 @@ export async function updatePreferences(
   if ('stintDayAttribution' in updates) {
     dbUpdates.stint_day_attribution = updates.stintDayAttribution;
   }
+  if ('timezone' in updates) {
+    dbUpdates.timezone = updates.timezone;
+  }
 
   const { data, error } = await client
     .from('user_profiles')
     .update(dbUpdates)
     .eq('id', userId)
-    .select('default_stint_duration, celebration_animation, desktop_notifications, stint_day_attribution')
+    .select('default_stint_duration, celebration_animation, desktop_notifications, stint_day_attribution, timezone')
     .single();
 
   if (error) {
@@ -86,6 +91,7 @@ export async function updatePreferences(
       celebrationAnimation: data.celebration_animation,
       desktopNotifications: data.desktop_notifications,
       stintDayAttribution: data.stint_day_attribution as StintDayAttribution,
+      timezone: data.timezone,
     },
     error: null,
   };

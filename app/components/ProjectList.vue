@@ -2,7 +2,9 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import { useSortable } from '@vueuse/integrations/useSortable';
 import { useReorderProjects, useToggleProjectActive } from '~/composables/useProjects';
-import { usePreferencesQuery, useUpdatePreferences } from '~/composables/usePreferences';
+import { useMidnightAttribution } from '~/composables/useMidnightAttribution';
+import { useUpdatePreferences } from '~/composables/usePreferences';
+import { useTimezone } from '~/composables/useTimezone';
 import { createLogger } from '~/utils/logger';
 import {
   stintKeys,
@@ -17,10 +19,8 @@ import {
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
-import { startOfDay, addDays } from 'date-fns';
-import { parseSafeDate } from '~/utils/date-helpers';
+import { getStintEffectiveDate, getTodayInTimezone } from '~/utils/date-helpers';
 import { calculateRemainingSeconds } from '~/utils/stint-time';
-import { detectMidnightSpan, formatAttributionDates } from '~/utils/midnight-detection';
 import ProjectListCard from './ProjectListCard.vue';
 import StintConflictDialog, { type ConflictResolutionAction } from './StintConflictDialog.vue';
 
@@ -76,8 +76,8 @@ const { mutateAsync: startStint, isPending: isStarting } = useStartStint();
 const { mutateAsync: pauseStint, isPending: isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint();
 const { mutateAsync: completeStint, isPending: isCompleting } = useCompleteStint();
-const { data: preferencesData } = usePreferencesQuery();
 const { mutateAsync: updatePreferences } = useUpdatePreferences();
+const { timezone, preferencesData } = useTimezone();
 
 const showCompletionModal = ref(false);
 const stintToComplete = ref<StintRow | null>(null);
@@ -100,18 +100,15 @@ function getProjectName(projectId: string): string {
 function computeAllDailyProgress(
   projects: ProjectRow[],
   stints: StintRow[] | undefined,
+  timezone: string,
 ): Map<string, DailyProgress> {
-  const today = startOfDay(new Date());
-  const tomorrow = addDays(today, 1);
-
+  const todayStr = getTodayInTimezone(timezone);
   const completedCounts = new Map<string, number>();
 
   if (stints) {
     for (const stint of stints) {
-      if (stint.status !== 'completed' || !stint.ended_at) continue;
-
-      const endedAt = parseSafeDate(stint.ended_at);
-      if (endedAt && endedAt >= today && endedAt < tomorrow) {
+      if (stint.status !== 'completed') continue;
+      if (getStintEffectiveDate(stint, timezone) === todayStr) {
         const currentCount = completedCounts.get(stint.project_id) || 0;
         completedCounts.set(stint.project_id, currentCount + 1);
       }
@@ -139,31 +136,11 @@ function computeAllDailyProgress(
 }
 
 const dailyProgressMap = computed(() => {
-  return computeAllDailyProgress(props.projects, allStints.value);
+  return computeAllDailyProgress(props.projects, allStints.value, timezone.value);
 });
 
-const midnightSpanInfo = computed(() => {
-  if (!stintToComplete.value) return null;
-  return detectMidnightSpan(stintToComplete.value);
-});
-
-const midnightSpanLabels = computed(() => {
-  if (!midnightSpanInfo.value) return null;
-  return formatAttributionDates(midnightSpanInfo.value);
-});
-
-const shouldShowDayAttribution = computed(() => {
-  if (!midnightSpanInfo.value?.spansMidnight) return false;
-  return preferencesData.value?.stintDayAttribution === 'ask';
-});
-
-const presetAttributedDate = computed(() => {
-  if (!midnightSpanInfo.value?.spansMidnight) return undefined;
-  const preference = preferencesData.value?.stintDayAttribution;
-  if (preference === 'start_date') return midnightSpanInfo.value.startDate;
-  if (preference === 'end_date') return midnightSpanInfo.value.endDate;
-  return undefined;
-});
+const { midnightSpanInfo, midnightSpanLabels, shouldShowDayAttribution, presetAttributedDate }
+  = useMidnightAttribution(stintToComplete, timezone, preferencesData);
 
 // Update local projects when props change (but not during drag)
 watch(() => props.projects, (newProjects) => {
