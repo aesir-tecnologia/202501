@@ -77,6 +77,7 @@ const { mutateAsync: resumeStint, isPending: isResuming } = useResumeStint();
 const { mutateAsync: completeStint, isPending: isCompleting } = useCompleteStint();
 const { data: preferencesData } = usePreferencesQuery();
 const { mutateAsync: updatePreferences } = useUpdatePreferences();
+const timezone = computed(() => preferencesData.value?.timezone ?? 'UTC');
 
 const showCompletionModal = ref(false);
 const stintToComplete = ref<StintRow | null>(null);
@@ -135,8 +136,7 @@ function computeAllDailyProgress(
 }
 
 const dailyProgressMap = computed(() => {
-  const timezone = preferencesData.value?.timezone ?? 'UTC';
-  return computeAllDailyProgress(props.projects, allStints.value, timezone);
+  return computeAllDailyProgress(props.projects, allStints.value, timezone.value);
 });
 
 watchEffect(() => {
@@ -147,13 +147,12 @@ watchEffect(() => {
 
 const midnightSpanInfo = computed(() => {
   if (!stintToComplete.value) return null;
-  const timezone = preferencesData.value?.timezone ?? 'UTC';
-  return detectMidnightSpan(stintToComplete.value, timezone);
+  return detectMidnightSpan(stintToComplete.value, timezone.value);
 });
 
 const midnightSpanLabels = computed(() => {
   if (!midnightSpanInfo.value) return null;
-  return formatAttributionDates(midnightSpanInfo.value, preferencesData.value?.timezone ?? 'UTC');
+  return formatAttributionDates(midnightSpanInfo.value, timezone.value);
 });
 
 const shouldShowDayAttribution = computed(() => {

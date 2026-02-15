@@ -5,6 +5,7 @@ import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
 import { PROJECT, STINT, type ProjectColor } from '~/constants';
 import { formatDuration, formatClockTime, formatRelativeTime } from '~/utils/time-format';
+import { parseSafeDate } from '~/utils/date-helpers';
 import { createLogger } from '~/utils/logger';
 
 const props = defineProps<{
@@ -40,12 +41,6 @@ const now = ref(new Date());
 useIntervalFn(() => {
   now.value = new Date();
 }, 30000);
-
-function parseSafeDate(dateStr: string | null | undefined): Date | null {
-  if (!dateStr) return null;
-  const date = new Date(dateStr);
-  return isNaN(date.getTime()) ? null : date;
-}
 
 const hasActiveStint = computed(() => {
   return props.activeStint?.project_id === props.project.id;

@@ -44,11 +44,10 @@ const hasInactiveProjects = computed(() => projects.value.some(p => !p.is_active
 
 const hasCompletedStintsToday = computed(() => {
   if (!allStints.value) return false;
-  const timezone = preferencesData.value?.timezone ?? 'UTC';
-  const todayStr = getTodayInTimezone(timezone);
+  const todayStr = getTodayInTimezone(timezone.value);
   return allStints.value.some((stint) => {
     if (stint.status !== 'completed') return false;
-    return getStintEffectiveDate(stint, timezone) === todayStr;
+    return getStintEffectiveDate(stint, timezone.value) === todayStr;
   });
 });
 
@@ -76,6 +75,7 @@ const { mutateAsync: completeStint, isPending: _isCompleting } = useCompleteStin
 const { data: allStints } = useStintsQuery();
 const { data: preferencesData } = usePreferencesQuery();
 const { mutateAsync: updatePreferences } = useUpdatePreferences();
+const timezone = computed(() => preferencesData.value?.timezone ?? 'UTC');
 
 const activeProject = computed(() => {
   const stint = activeStint.value;
@@ -90,14 +90,13 @@ const dailyProgress = computed(() => {
   const expected = project.expected_daily_stints ?? 0;
   let completed = 0;
 
-  const timezone = preferencesData.value?.timezone ?? 'UTC';
-  const todayStr = getTodayInTimezone(timezone);
+  const todayStr = getTodayInTimezone(timezone.value);
 
   if (allStints.value) {
     for (const stint of allStints.value) {
       if (stint.project_id !== project.id) continue;
       if (stint.status !== 'completed') continue;
-      if (getStintEffectiveDate(stint, timezone) === todayStr) {
+      if (getStintEffectiveDate(stint, timezone.value) === todayStr) {
         completed++;
       }
     }
@@ -114,13 +113,12 @@ watchEffect(() => {
 
 const midnightSpanInfo = computed(() => {
   if (!stintToComplete.value) return null;
-  const timezone = preferencesData.value?.timezone ?? 'UTC';
-  return detectMidnightSpan(stintToComplete.value, timezone);
+  return detectMidnightSpan(stintToComplete.value, timezone.value);
 });
 
 const midnightSpanLabels = computed(() => {
   if (!midnightSpanInfo.value) return null;
-  return formatAttributionDates(midnightSpanInfo.value, preferencesData.value?.timezone ?? 'UTC');
+  return formatAttributionDates(midnightSpanInfo.value, timezone.value);
 });
 
 const shouldShowDayAttribution = computed(() => {
