@@ -4,12 +4,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## ⛔ Do NOT Start Dev Server Automatically
-
-**Never run `npm run dev` or start the dev server unless the user explicitly asks.**
-
----
-
 ## ⛔ CRITICAL: No Assumptions Policy
 
 **DO NOT MAKE ASSUMPTIONS. EVER.**
@@ -53,8 +47,6 @@ Project documentation is available in the `docs/` folder, including:
 **Use GitHub Issues for tracking implementation status** — not manual updates to `docs/07-development-roadmap.md`. Link PRs to issues using `Closes #123` in the PR description.
 
 For issue workflow details, CLI commands, and best practices, see **`docs/ISSUE_WORKFLOW.md`**.
-
-> **Claude-specific:** When resolving documentation-sourced issues (marked `docs-sync-required`), always update the referenced documentation as part of the PR. The PR is not complete until docs are synced.
 
 ## Key Commands
 
