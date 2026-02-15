@@ -151,6 +151,15 @@ describe('preferences schema', () => {
         expect(result.success).toBe(false);
       });
 
+      it('should reject invalid IANA timezone identifier', () => {
+        const result = preferencesUpdateSchema.safeParse({
+          timezone: 'Invalid/Timezone',
+        });
+
+        expect(result.success).toBe(false);
+        expect(result.error?.issues[0]?.message).toBe('Invalid timezone identifier');
+      });
+
       it('should reject non-boolean desktopNotifications', () => {
         const result = preferencesUpdateSchema.safeParse({
           desktopNotifications: 1,

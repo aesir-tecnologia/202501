@@ -17,7 +17,15 @@ export const preferencesUpdateSchema = z.object({
   stintDayAttribution: z.enum(stintDayAttributionValues, {
     errorMap: () => ({ message: 'Invalid stint day attribution value' }),
   }).optional(),
-  timezone: z.string().min(1, 'Timezone cannot be empty').optional(),
+  timezone: z.string().min(1, 'Timezone cannot be empty').refine((tz) => {
+    try {
+      Intl.DateTimeFormat(undefined, { timeZone: tz });
+      return true;
+    }
+    catch {
+      return false;
+    }
+  }, { message: 'Invalid timezone identifier' }).optional(),
 });
 
 export type PreferencesUpdatePayload = z.infer<typeof preferencesUpdateSchema>;
