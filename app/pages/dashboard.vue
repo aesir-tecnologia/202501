@@ -4,8 +4,7 @@ import { useActiveStintQuery, usePauseStint, useResumeStint, useStintsQuery, use
 import { usePreferencesQuery, useUpdatePreferences } from '~/composables/usePreferences';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
-import { format } from 'date-fns';
-import { getStintEffectiveDate } from '~/utils/date-helpers';
+import { getStintEffectiveDate, getTodayInTimezone } from '~/utils/date-helpers';
 import { detectMidnightSpan, formatAttributionDates } from '~/utils/midnight-detection';
 import { createLogger } from '~/utils/logger';
 
@@ -45,10 +44,11 @@ const hasInactiveProjects = computed(() => projects.value.some(p => !p.is_active
 
 const hasCompletedStintsToday = computed(() => {
   if (!allStints.value) return false;
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const timezone = preferencesData.value?.timezone ?? 'UTC';
+  const todayStr = getTodayInTimezone(timezone);
   return allStints.value.some((stint) => {
     if (stint.status !== 'completed') return false;
-    return getStintEffectiveDate(stint) === todayStr;
+    return getStintEffectiveDate(stint, timezone) === todayStr;
   });
 });
 
@@ -90,13 +90,14 @@ const dailyProgress = computed(() => {
   const expected = project.expected_daily_stints ?? 0;
   let completed = 0;
 
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const timezone = preferencesData.value?.timezone ?? 'UTC';
+  const todayStr = getTodayInTimezone(timezone);
 
   if (allStints.value) {
     for (const stint of allStints.value) {
       if (stint.project_id !== project.id) continue;
       if (stint.status !== 'completed') continue;
-      if (getStintEffectiveDate(stint) === todayStr) {
+      if (getStintEffectiveDate(stint, timezone) === todayStr) {
         completed++;
       }
     }

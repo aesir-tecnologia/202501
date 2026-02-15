@@ -17,8 +17,7 @@ import {
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
 import type { DailyProgress } from '~/types/progress';
-import { format } from 'date-fns';
-import { getStintEffectiveDate } from '~/utils/date-helpers';
+import { getStintEffectiveDate, getTodayInTimezone } from '~/utils/date-helpers';
 import { calculateRemainingSeconds } from '~/utils/stint-time';
 import { detectMidnightSpan, formatAttributionDates } from '~/utils/midnight-detection';
 import ProjectListCard from './ProjectListCard.vue';
@@ -100,14 +99,15 @@ function getProjectName(projectId: string): string {
 function computeAllDailyProgress(
   projects: ProjectRow[],
   stints: StintRow[] | undefined,
+  timezone: string,
 ): Map<string, DailyProgress> {
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const todayStr = getTodayInTimezone(timezone);
   const completedCounts = new Map<string, number>();
 
   if (stints) {
     for (const stint of stints) {
       if (stint.status !== 'completed') continue;
-      if (getStintEffectiveDate(stint) === todayStr) {
+      if (getStintEffectiveDate(stint, timezone) === todayStr) {
         const currentCount = completedCounts.get(stint.project_id) || 0;
         completedCounts.set(stint.project_id, currentCount + 1);
       }
@@ -135,7 +135,8 @@ function computeAllDailyProgress(
 }
 
 const dailyProgressMap = computed(() => {
-  return computeAllDailyProgress(props.projects, allStints.value);
+  const timezone = preferencesData.value?.timezone ?? 'UTC';
+  return computeAllDailyProgress(props.projects, allStints.value, timezone);
 });
 
 const midnightSpanInfo = computed(() => {
