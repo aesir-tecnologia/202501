@@ -137,9 +137,7 @@ export type SyncStintCheckMutation = UseMutationReturnType<
 // Helper Functions
 // ============================================================================
 
-/**
- * Transforms camelCase update payload to snake_case for database operations
- */
+/** Prepares the update payload for the database layer */
 function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
   const result: Record<string, unknown> = {};
 

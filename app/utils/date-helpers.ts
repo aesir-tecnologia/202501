@@ -17,10 +17,7 @@ export function parseSafeDate(dateString: string | null | undefined): Date | nul
   return date;
 }
 
-/**
- * Gets today's date in YYYY-MM-DD format for a given timezone.
- * Uses TZDate from @date-fns/tz for timezone-aware date formatting.
- */
+/** Gets today's date in YYYY-MM-DD format for a given timezone. */
 export function getTodayInTimezone(timezone: string): string {
   try {
     return format(new TZDate(new Date(), timezone), 'yyyy-MM-dd');
@@ -31,6 +28,7 @@ export function getTodayInTimezone(timezone: string): string {
   }
 }
 
+/** Returns the effective date a stint counts toward: attributed_date > ended_at in timezone > null. */
 export function getStintEffectiveDate(stint: StintRow, timezone: string): string | null {
   if (stint.attributed_date) return stint.attributed_date;
   const endedAt = parseSafeDate(stint.ended_at);
@@ -40,10 +38,9 @@ export function getStintEffectiveDate(stint: StintRow, timezone: string): string
     return format(new TZDate(endedAt, timezone), 'yyyy-MM-dd');
   }
   catch (error) {
-    const safeDate = isNaN(endedAt.getTime()) ? String(endedAt) : endedAt.toISOString();
     log.error('Failed to format ended_at in timezone, falling back to UTC', {
       timezone,
-      date: safeDate,
+      date: endedAt.toISOString(),
       error,
     });
     return format(new TZDate(endedAt, 'UTC'), 'yyyy-MM-dd');

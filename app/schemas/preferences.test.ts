@@ -168,7 +168,7 @@ describe('preferences schema', () => {
         expect(result.success).toBe(false);
       });
 
-      it('should reject unknown fields (strict mode)', () => {
+      it('should strip unknown fields', () => {
         const result = preferencesUpdateSchema.safeParse({
           unknownField: 'value',
         });

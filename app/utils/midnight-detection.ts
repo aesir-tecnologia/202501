@@ -11,10 +11,7 @@ export interface MidnightSpanInfo {
   endDate: string
 }
 
-/**
- * Gets the date in YYYY-MM-DD format for a given timezone.
- * Uses TZDate from @date-fns/tz for timezone-aware date formatting.
- */
+/** Gets the date in YYYY-MM-DD format for a given timezone. */
 function getDateInTimezone(date: Date, timezone: string): string {
   try {
     return format(new TZDate(date, timezone), 'yyyy-MM-dd');
@@ -49,10 +46,7 @@ export function detectMidnightSpan(
   };
 }
 
-/**
- * Formats the midnight span dates for display.
- * Uses TZDate from @date-fns/tz for timezone-aware formatting.
- */
+/** Formats the midnight span dates for display. */
 export function formatAttributionDates(
   info: MidnightSpanInfo,
   timezone: string,
