@@ -18,6 +18,9 @@ import {
   type StintRow,
   type UpdateStintPayload as DbUpdateStintPayload,
 } from '~/lib/supabase/stints';
+import { getTodayInTimezone } from '~/utils/date-helpers';
+import { TZDate } from '@date-fns/tz';
+import { startOfDay, addDays } from 'date-fns';
 import {
   stintStartSchema,
   stintUpdateSchema,
@@ -153,30 +156,26 @@ function toDbUpdatePayload(payload: StintUpdatePayload): DbUpdateStintPayload {
 
 export function useCompletedStintsByDateQuery(
   projectId: MaybeRefOrGetter<string>,
+  timezone: MaybeRefOrGetter<string>,
   options?: { enabled?: MaybeRefOrGetter<boolean> },
 ) {
   const client = useTypedSupabaseClient();
 
-  const todayDateString = computed(() => {
-    const today = new Date();
-    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  });
+  const todayDateString = computed(() => getTodayInTimezone(toValue(timezone)));
 
   return useQuery({
     queryKey: computed(() =>
       stintKeys.completedByDate(toValue(projectId), todayDateString.value),
     ),
     queryFn: async () => {
-      const dateStr = todayDateString.value;
-      const [year, month, day] = dateStr.split('-').map(Number);
-      const startOfToday = new Date(year!, month! - 1, day!);
-      const startOfTomorrow = new Date(startOfToday);
-      startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+      const tz = toValue(timezone);
+      const todayStart = startOfDay(new TZDate(new Date(), tz));
+      const tomorrowStart = addDays(todayStart, 1);
 
       const { data, error } = await listCompletedStintsByDate(client, {
         projectId: toValue(projectId),
-        dateStart: startOfToday.toISOString(),
-        dateEnd: startOfTomorrow.toISOString(),
+        dateStart: todayStart.toISOString(),
+        dateEnd: tomorrowStart.toISOString(),
       });
       if (error) throw error;
       return data || [];
