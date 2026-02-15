@@ -24,7 +24,7 @@ const timezone = computed(() => preferencesData.value?.timezone ?? 'UTC');
 const { data: stints, isLoading, error } = useCompletedStintsByDateQuery(
   () => props.projectId,
   timezone,
-  { enabled: computed(() => isOpen.value === true) },
+  { enabled: computed(() => isOpen.value === true && preferencesData.value !== undefined) },
 );
 
 watch(error, (err) => {

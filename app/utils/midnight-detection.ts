@@ -17,6 +17,7 @@ function getDateInTimezone(date: Date, timezone: string): string {
     return format(new TZDate(date, timezone), 'yyyy-MM-dd');
   }
   catch (error) {
+    if (!(error instanceof RangeError)) throw error;
     const safeDate = isNaN(date.getTime()) ? String(date) : date.toISOString();
     log.error('Failed to format date in timezone, falling back to UTC', { timezone, date: safeDate, error });
     return format(new TZDate(date, 'UTC'), 'yyyy-MM-dd');
@@ -57,6 +58,7 @@ export function formatAttributionDates(
       return format(date, 'EEE, MMM d');
     }
     catch (error) {
+      if (!(error instanceof RangeError)) throw error;
       log.error('Failed to format attribution date, returning raw date', { timezone, dateStr, error });
       return dateStr;
     }

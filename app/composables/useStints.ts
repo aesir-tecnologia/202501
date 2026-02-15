@@ -167,8 +167,16 @@ export function useCompletedStintsByDateQuery(
     ),
     queryFn: async () => {
       const tz = toValue(timezone);
-      const todayStart = startOfDay(new TZDate(new Date(), tz));
-      const tomorrowStart = addDays(todayStart, 1);
+      let todayStart: Date;
+      let tomorrowStart: Date;
+      try {
+        todayStart = startOfDay(new TZDate(new Date(), tz));
+        tomorrowStart = addDays(todayStart, 1);
+      }
+      catch (error) {
+        log.error('Invalid timezone in completed stints query', { timezone: tz, error });
+        throw new Error('Could not determine today\'s date. Please check your timezone in settings.');
+      }
 
       const { data, error } = await listCompletedStintsByDate(client, {
         projectId: toValue(projectId),

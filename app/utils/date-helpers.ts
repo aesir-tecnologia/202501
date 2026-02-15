@@ -23,6 +23,7 @@ export function getTodayInTimezone(timezone: string): string {
     return format(new TZDate(new Date(), timezone), 'yyyy-MM-dd');
   }
   catch (error) {
+    if (!(error instanceof RangeError)) throw error;
     log.error('Failed to get today in timezone, falling back to UTC', { timezone, error });
     return format(new TZDate(new Date(), 'UTC'), 'yyyy-MM-dd');
   }
@@ -38,6 +39,7 @@ export function getStintEffectiveDate(stint: StintRow, timezone: string): string
     return format(new TZDate(endedAt, timezone), 'yyyy-MM-dd');
   }
   catch (error) {
+    if (!(error instanceof RangeError)) throw error;
     log.error('Failed to format ended_at in timezone, falling back to UTC', {
       timezone,
       date: endedAt.toISOString(),

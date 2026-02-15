@@ -504,6 +504,10 @@ export async function listCompletedStintsByDate(
   const userResult = await requireUserId(client, 'interact with stints');
   if (userResult.error) return { data: null, error: userResult.error };
 
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(options.dateString)) {
+    return { data: null, error: new Error(`Invalid date string format: ${options.dateString}`) };
+  }
+
   const { data, error } = await client
     .from('stints')
     .select('*')
