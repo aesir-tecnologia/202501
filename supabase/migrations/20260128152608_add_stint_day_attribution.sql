@@ -59,7 +59,7 @@ BEGIN
   VALUES (
     NEW.id,
     NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'timezone', 'UTC'),
+    COALESCE(NULLIF(NEW.raw_user_meta_data->>'timezone', ''), 'UTC'),
     NULL,   -- Use system default (120 min)
     true,   -- Celebration animation enabled by default
     false,  -- Desktop notifications disabled by default (requires permission)
@@ -132,7 +132,7 @@ BEGIN
 
   -- Validate attributed_date if provided (defense-in-depth)
   IF p_attributed_date IS NOT NULL THEN
-    SELECT COALESCE(timezone, 'UTC') INTO v_user_timezone
+    SELECT COALESCE(NULLIF(timezone, ''), 'UTC') INTO v_user_timezone
     FROM public.user_profiles
     WHERE id = v_current_user_id;
 
@@ -200,7 +200,7 @@ BEGIN
   FROM public.user_profiles
   WHERE id = p_user_id;
 
-  IF v_timezone IS NULL THEN
+  IF v_timezone IS NULL OR v_timezone = '' THEN
     -- Check if user exists
     IF NOT EXISTS (SELECT 1 FROM public.user_profiles WHERE id = p_user_id) THEN
       RETURN jsonb_build_object(
@@ -454,9 +454,10 @@ AS $$
 DECLARE
   v_timezone TEXT;
   v_today DATE;
+  v_live_id UUID;
 BEGIN
   -- Get user's timezone (default to UTC if not set)
-  SELECT COALESCE(up.timezone, 'UTC') INTO v_timezone
+  SELECT COALESCE(NULLIF(up.timezone, ''), 'UTC') INTO v_timezone
   FROM public.user_profiles up
   WHERE up.id = p_user_id;
 
@@ -466,6 +467,11 @@ BEGIN
 
   -- Calculate today's date in user's timezone
   v_today := (now() AT TIME ZONE v_timezone)::date;
+
+  v_live_id := uuid_generate_v5(
+    '6ba7b810-9dad-11d1-80b4-00c04fd430c8'::uuid,
+    p_user_id::text || ':' || v_today::text
+  );
 
   RETURN QUERY
 
@@ -488,7 +494,7 @@ BEGIN
   -- Part 2: Live data for today (only if today is within requested range)
   -- Uses attributed_date if set, otherwise falls back to ended_at date
   SELECT
-    gen_random_uuid() AS id,
+    v_live_id AS id,
     v_today AS date,
     COALESCE(live.total_stints, 0)::INTEGER AS total_stints,
     COALESCE(live.total_focus_seconds, 0)::INTEGER AS total_focus_seconds,
@@ -588,7 +594,7 @@ BEGIN
     IF v_stint_record.working_seconds >= (v_stint_record.planned_duration * 60) THEN
       BEGIN
         -- Get user's preference and timezone
-        SELECT stint_day_attribution, COALESCE(timezone, 'UTC')
+        SELECT stint_day_attribution, COALESCE(NULLIF(timezone, ''), 'UTC')
         INTO v_user_preference, v_user_timezone
         FROM user_profiles
         WHERE id = v_stint_record.user_id;
