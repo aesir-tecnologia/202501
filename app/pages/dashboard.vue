@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useProjectsQuery, useArchivedProjectsQuery, useToggleProjectActive } from '~/composables/useProjects';
 import { useActiveStintQuery, usePauseStint, useResumeStint, useStintsQuery, useCompleteStint } from '~/composables/useStints';
-import { usePreferencesQuery, useUpdatePreferences } from '~/composables/usePreferences';
+import { useUpdatePreferences } from '~/composables/usePreferences';
+import { useTimezone } from '~/composables/useTimezone';
 import type { ProjectRow } from '~/lib/supabase/projects';
 import type { StintRow } from '~/lib/supabase/stints';
-import { startOfDay, addDays, format } from 'date-fns';
-import { parseSafeDate } from '~/utils/date-helpers';
-import { detectMidnightSpan, formatAttributionDates } from '~/utils/midnight-detection';
+import { useMidnightAttribution } from '~/composables/useMidnightAttribution';
+import { getStintEffectiveDate, getTodayInTimezone } from '~/utils/date-helpers';
 
 definePageMeta({
   title: 'Dashboard',
@@ -42,12 +42,10 @@ const hasInactiveProjects = computed(() => projects.value.some(p => !p.is_active
 
 const hasCompletedStintsToday = computed(() => {
   if (!allStints.value) return false;
-  const todayStart = startOfDay(new Date());
-  const tomorrow = addDays(todayStart, 1);
+  const todayStr = getTodayInTimezone(timezone.value);
   return allStints.value.some((stint) => {
-    if (stint.status !== 'completed' || !stint.ended_at) return false;
-    const endedAt = parseSafeDate(stint.ended_at);
-    return endedAt && endedAt >= todayStart && endedAt < tomorrow;
+    if (stint.status !== 'completed') return false;
+    return getStintEffectiveDate(stint, timezone.value) === todayStr;
   });
 });
 
@@ -73,8 +71,8 @@ const { mutateAsync: pauseStint, isPending: _isPausing } = usePauseStint();
 const { mutateAsync: resumeStint, isPending: _isResuming } = useResumeStint();
 const { mutateAsync: completeStint, isPending: _isCompleting } = useCompleteStint();
 const { data: allStints } = useStintsQuery();
-const { data: preferencesData } = usePreferencesQuery();
 const { mutateAsync: updatePreferences } = useUpdatePreferences();
+const { timezone, preferencesData } = useTimezone();
 
 const activeProject = computed(() => {
   const stint = activeStint.value;
@@ -89,25 +87,14 @@ const dailyProgress = computed(() => {
   const expected = project.expected_daily_stints ?? 0;
   let completed = 0;
 
-  const todayStart = startOfDay(new Date());
-  const tomorrow = addDays(todayStart, 1);
-  const todayStr = format(todayStart, 'yyyy-MM-dd');
+  const todayStr = getTodayInTimezone(timezone.value);
 
   if (allStints.value) {
     for (const stint of allStints.value) {
       if (stint.project_id !== project.id) continue;
-      if (stint.status !== 'completed' || !stint.ended_at) continue;
-
-      if (stint.attributed_date) {
-        if (stint.attributed_date === todayStr) {
-          completed++;
-        }
-      }
-      else {
-        const endedAt = parseSafeDate(stint.ended_at);
-        if (endedAt && endedAt >= todayStart && endedAt < tomorrow) {
-          completed++;
-        }
+      if (stint.status !== 'completed') continue;
+      if (getStintEffectiveDate(stint, timezone.value) === todayStr) {
+        completed++;
       }
     }
   }
@@ -115,28 +102,8 @@ const dailyProgress = computed(() => {
   return { completed, expected };
 });
 
-const midnightSpanInfo = computed(() => {
-  if (!stintToComplete.value) return null;
-  return detectMidnightSpan(stintToComplete.value);
-});
-
-const midnightSpanLabels = computed(() => {
-  if (!midnightSpanInfo.value) return null;
-  return formatAttributionDates(midnightSpanInfo.value);
-});
-
-const shouldShowDayAttribution = computed(() => {
-  if (!midnightSpanInfo.value?.spansMidnight) return false;
-  return preferencesData.value?.stintDayAttribution === 'ask';
-});
-
-const presetAttributedDate = computed(() => {
-  if (!midnightSpanInfo.value?.spansMidnight) return undefined;
-  const preference = preferencesData.value?.stintDayAttribution;
-  if (preference === 'start_date') return midnightSpanInfo.value.startDate;
-  if (preference === 'end_date') return midnightSpanInfo.value.endDate;
-  return undefined;
-});
+const { midnightSpanInfo, midnightSpanLabels, shouldShowDayAttribution, presetAttributedDate }
+  = useMidnightAttribution(stintToComplete, timezone, preferencesData);
 
 function openCreateModal() {
   showCreateModal.value = true;

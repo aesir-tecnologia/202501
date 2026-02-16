@@ -362,7 +362,7 @@ date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
 ### Implementation Reference
 
-See `app/utils/stint-time.ts` (`formatStintTime`) for the canonical implementation of timer formatting; UI usage examples can be found in `DashboardTimerHero.vue`.
+See `app/utils/time-format.ts` (`formatCountdown`) for the canonical implementation of timer formatting; UI usage examples can be found in `DashboardTimerHero.vue`.
 
 ---
 

@@ -4,12 +4,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## ⛔ Do NOT Start Dev Server Automatically
-
-**Never run `npm run dev` or start the dev server unless the user explicitly asks.**
-
----
-
 ## ⛔ CRITICAL: No Assumptions Policy
 
 **DO NOT MAKE ASSUMPTIONS. EVER.**
@@ -54,8 +48,6 @@ Project documentation is available in the `docs/` folder, including:
 
 For issue workflow details, CLI commands, and best practices, see **`docs/ISSUE_WORKFLOW.md`**.
 
-> **Claude-specific:** When resolving documentation-sourced issues (marked `docs-sync-required`), always update the referenced documentation as part of the PR. The PR is not complete until docs are synced.
-
 ## Key Commands
 
 ### Development
@@ -74,9 +66,9 @@ npm run type-check       # Run TypeScript type checking
 
 ### Testing
 ```bash
-npm test                 # Run tests in watch mode
+npm run test:run         # Run tests once (CI mode) — PREFERRED
 npm run test:ui          # Run tests with Vitest UI
-npm run test:run         # Run tests once (CI mode)
+npm test                 # Run tests in watch mode (⚠️ never use from Claude)
 npm test -- path/to/file.test.ts  # Run single test file
 ```
 

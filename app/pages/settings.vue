@@ -596,6 +596,7 @@ const timezones = computed(() => {
                 v-model="localStintDayAttribution"
                 :items="stintDayAttributionOptions"
                 :disabled="isLoadingPreferences"
+                class="w-full"
               />
             </UFormField>
           </div>
