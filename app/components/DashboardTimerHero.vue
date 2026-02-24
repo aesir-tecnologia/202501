@@ -127,7 +127,7 @@ function handleComplete(stint: StintRow) {
     <!-- Active Session State -->
     <div class="session-content">
       <div class="session-header">
-        <h2 class="session-project font-serif">
+        <h2 class="session-project">
           {{ displayProjectName }}
         </h2>
       </div>
@@ -330,7 +330,7 @@ function handleComplete(stint: StintRow) {
 }
 
 .meta-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -356,7 +356,7 @@ function handleComplete(stint: StintRow) {
   font-size: 48px;
   font-weight: 600;
   color: var(--text-primary);
-  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
   line-height: 1;
   text-shadow: 0 0 40px var(--accent-primary-glow);
 }

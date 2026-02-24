@@ -67,8 +67,8 @@ All design tokens are defined in `app/assets/css/tokens.css` with semantic CSS v
 
 #### Typography Tokens
 ```css
---font-serif: 'Fraunces', Georgia, serif;      /* Headings */
---font-sans: 'Instrument Sans', system-ui, sans-serif;  /* Body */
+--font-serif: 'Fraunces', Georgia, serif;      /* LifeStint logo only */
+--font-sans: 'Instrument Sans', system-ui, sans-serif;  /* Headings, body, UI elements */
 --font-mono: 'JetBrains Mono', monospace;      /* Timers, code */
 ```
 
@@ -99,7 +99,7 @@ All design tokens are defined in `app/assets/css/tokens.css` with semantic CSS v
 /* Text */
 --text-primary: #292524;      /* Stone-800 equivalent */
 --text-secondary: #57534e;    /* Stone-600 equivalent */
---text-muted: #a8a29e;        /* Stone-400 equivalent */
+--text-muted: #736b66;        /* Stone-400 equivalent */
 
 /* Accents */
 --accent-primary: #c2410c;    /* Terracotta - main accent */
@@ -112,6 +112,9 @@ All design tokens are defined in `app/assets/css/tokens.css` with semantic CSS v
 /* Borders */
 --border-light: #e7e5e4;      /* Stone-200 */
 --border-medium: #d6d3d1;     /* Stone-300 */
+
+/* Active Row */
+--bg-active-row: rgba(22, 163, 74, 0.05);     /* Background for active running project row */
 
 /* Shadows */
 --shadow-soft: 0 4px 20px rgba(120, 113, 108, 0.08);
@@ -131,7 +134,7 @@ All design tokens are defined in `app/assets/css/tokens.css` with semantic CSS v
 /* Text */
 --text-primary: #fafaf9;      /* Stone-50 */
 --text-secondary: #d6d3d1;    /* Stone-300 */
---text-muted: #78716c;        /* Stone-500 */
+--text-muted: #908984;        /* Stone-500 */
 
 /* Accents */
 --accent-primary: #ea580c;    /* Brighter orange for dark mode */
@@ -144,6 +147,9 @@ All design tokens are defined in `app/assets/css/tokens.css` with semantic CSS v
 /* Borders */
 --border-light: #3d3835;
 --border-medium: #4a4543;
+
+/* Active Row */
+--bg-active-row: rgba(34, 197, 94, 0.08);     /* Background for active running project row */
 
 /* Shadows */
 --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -183,7 +189,7 @@ The design system uses warm, earthy tones mapped to semantic purposes:
 | **Card** | White `#ffffff` | Stone-800 `#292524` | Custom | Card surfaces |
 | **Text Primary** | Stone-800 `#292524` | Stone-50 `#fafaf9` | `stone-800/50` | Main text |
 | **Text Secondary** | Stone-600 `#57534e` | Stone-300 `#d6d3d1` | `stone-600/300` | Secondary text |
-| **Text Muted** | Stone-400 `#a8a29e` | Stone-500 `#78716c` | `stone-400/500` | Muted text |
+| **Text Muted** | `#736b66` | `#908984` | `stone-400/500` | Muted text |
 | **Warning** | Amber `#d97706` | Amber `#fbbf24` | `amber-600/400` | Warnings, pause states |
 | **Error/Danger** | Red `#dc2626` | Red `#f87171` | `red-600/400` | Errors, destructive actions |
 | **Border Light** | Stone-200 `#e7e5e4` | Custom `#3d3835` | `stone-200` | Light borders |
@@ -200,7 +206,7 @@ The design system uses warm, earthy tones mapped to semantic purposes:
 
 <!-- Custom styling with tokens -->
 <div class="bg-[var(--bg-primary)] border-[var(--border-light)]">
-  <h2 class="text-[var(--accent-primary)] font-serif">Project Name</h2>
+  <h2 class="text-[var(--accent-primary)]">Project Name</h2>
 </div>
 
 <!-- Direct Tailwind with stone palette -->
@@ -241,8 +247,8 @@ The design system uses a distinctive typographic hierarchy with three font famil
 
 | Font | Variable | Usage | Characteristics |
 |------|----------|-------|-----------------|
-| **Fraunces** | `--font-serif` | Headings, display text | Warm, friendly serif with optical sizing |
-| **Instrument Sans** | `--font-sans` | Body text, UI elements | Clean, modern sans-serif |
+| **Fraunces** | `--font-serif` | LifeStint logo only | Warm, friendly serif with optical sizing |
+| **Instrument Sans** | `--font-sans` | All headings, body text, UI elements | Clean, modern sans-serif |
 | **JetBrains Mono** | `--font-mono` | Timers, code, numbers | Monospace with ligatures |
 
 ```css
@@ -273,16 +279,16 @@ The design system uses a distinctive typographic hierarchy with three font famil
 
 ### Typography Patterns
 
-**Page Title (Fraunces Serif):**
+**Page Title (Instrument Sans):**
 ```vue
-<h1 class="font-serif text-3xl font-bold text-stone-800 dark:text-stone-50">
+<h1 class="text-3xl font-bold text-stone-800 dark:text-stone-50">
   Dashboard
 </h1>
 ```
 
 **Section Header:**
 ```vue
-<h2 class="font-serif text-2xl font-semibold text-stone-800 dark:text-stone-100">
+<h2 class="text-2xl font-semibold text-stone-800 dark:text-stone-100">
   Active Projects
 </h2>
 ```
@@ -424,7 +430,7 @@ Container component for grouping related content with warm shadows.
 ```vue
 <UCard class="bg-white dark:bg-stone-800 shadow-warm">
   <template #header>
-    <h3 class="font-serif text-lg font-semibold">Card Title</h3>
+    <h3 class="text-lg font-semibold">Card Title</h3>
   </template>
   <p class="text-stone-700 dark:text-stone-300">Card content</p>
   <template #footer>
@@ -535,7 +541,7 @@ Uses Tailwind's default 4px base unit:
 |-------|-------|-------|
 | `gap-1` | 4px | Tight inline spacing |
 | `gap-2` | 8px | Default inline spacing |
-| `gap-3` | 12px | Component spacing |
+| `gap-3` | 12px | Component spacing, card gap |
 | `gap-4` | 16px | Section spacing |
 | `gap-6` | 24px | Large section spacing |
 | `gap-8` | 32px | Page section spacing |
@@ -799,7 +805,7 @@ Always respect `prefers-reduced-motion`:
     name="i-lucide-folder-open"
     class="h-12 w-12 mx-auto text-stone-400 dark:text-stone-600"
   />
-  <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
+  <h3 class="mt-4 text-lg font-medium text-stone-900 dark:text-stone-100">
     No projects yet
   </h3>
   <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">
@@ -904,6 +910,21 @@ toast.add({
 </div>
 ```
 
+### Project Color Indicators
+
+Project color indicators use **12px solid filled dots** to visually associate a project with its assigned color:
+
+```vue
+<span
+  class="inline-block h-3 w-3 rounded-full flex-shrink-0"
+  :style="{ backgroundColor: project.color }"
+/>
+```
+
+- **Size**: 12px (`h-3 w-3`)
+- **Shape**: Full circle (`rounded-full`)
+- **Style**: Solid filled (not hollow rings or borders)
+
 ### Stint Action Buttons
 
 Project list cards use custom-styled action buttons for stint control:
@@ -935,13 +956,16 @@ Project list cards use custom-styled action buttons for stint control:
 | **Danger** | `#dc2626` | `#f87171` | `--accent-danger` |
 | **Page Background** | `#fffbf5` | `#1c1917` | `--bg-primary` |
 | **Card Background** | `#ffffff` | `#292524` | `--bg-card` |
+| **Active Row Background** | `rgba(22,163,74,0.05)` | `rgba(34,197,94,0.08)` | `--bg-active-row` |
 | **Text Primary** | `#292524` | `#fafaf9` | `--text-primary` |
 | **Text Secondary** | `#57534e` | `#d6d3d1` | `--text-secondary` |
+| **Text Muted** | `#736b66` | `#908984` | `--text-muted` |
 | **Border Light** | `#e7e5e4` | `#3d3835` | `--border-light` |
 
 ### Typography Summary
 
-- **Headings**: Fraunces (serif) - `font-serif`
+- **Logo**: Fraunces (serif) - `font-serif` (LifeStint logo only)
+- **Headings**: Instrument Sans - `font-sans`
 - **Body**: Instrument Sans - `font-sans`
 - **Mono**: JetBrains Mono - `font-mono`
 - **Timer**: `font-mono text-5xl tabular-nums`
@@ -985,9 +1009,9 @@ Project list cards use custom-styled action buttons for stint control:
 
 **Semantic Heading Hierarchy:**
 ```vue
-<h1 class="font-serif text-3xl font-bold">Dashboard</h1>
+<h1 class="text-3xl font-bold">Dashboard</h1>
 <section>
-  <h2 class="font-serif text-2xl font-semibold">Active Projects</h2>
+  <h2 class="text-2xl font-semibold">Active Projects</h2>
   <article>
     <h3 class="text-lg font-semibold">Client Website</h3>
   </article>
@@ -1019,7 +1043,7 @@ nuxt.config.ts                # Nuxt config (UI module, color mode)
 1. **Use CSS Tokens**: Prefer `var(--token-name)` for design system values
 2. **Semantic Colors**: Use `color="primary"` not `color="orange"` in components
 3. **Dark Mode**: Always include `dark:` variants for custom styling
-4. **Typography**: Use `font-serif` for headings, `font-mono` for timers
+4. **Typography**: Use `font-sans` for headings and body text, `font-serif` only for the LifeStint logo, `font-mono` for timers
 5. **Icon Accessibility**: All icon-only buttons must have `UTooltip`
 6. **Warm Backgrounds**: Use `bg-[#fffbf5]` not pure white for page backgrounds
 7. **Consistent Spacing**: Use the spacing scale, avoid arbitrary values

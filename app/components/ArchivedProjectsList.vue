@@ -100,7 +100,7 @@ async function handlePermanentDelete() {
         class="h-12 w-12 mx-auto text-amber-500 dark:text-amber-400"
         aria-hidden="true"
       />
-      <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
+      <h3 class="mt-4 text-lg font-medium text-stone-900 dark:text-stone-100">
         Your archive is empty
       </h3>
       <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">

@@ -13,7 +13,7 @@
             />
             <span class="text-sm font-medium">Back to home</span>
           </NuxtLink>
-          <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
+          <h2 class="text-3xl font-semibold text-stone-800 dark:text-stone-50">
             Reset your password
           </h2>
           <p class="text-sm text-stone-600 dark:text-stone-400">

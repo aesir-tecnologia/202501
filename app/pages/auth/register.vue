@@ -174,7 +174,7 @@ watch([() => state.email, () => state.password, () => state.confirmPassword], ()
               </span>
             </NuxtLink>
 
-            <h2 class="text-3xl font-serif font-semibold text-stone-800 dark:text-stone-50">
+            <h2 class="text-3xl font-semibold text-stone-800 dark:text-stone-50">
               Create your account
             </h2>
             <p class="text-sm text-stone-600 dark:text-stone-400">

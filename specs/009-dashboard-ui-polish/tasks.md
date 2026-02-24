@@ -29,7 +29,7 @@
 
 **⚠️ CRITICAL**: US1's active row background (T003) depends on the `--bg-active-row` token defined here. US3's contrast compliance depends on the `--text-muted` values set here.
 
-- [ ] T001 Update `--text-muted` token values (light: `#a8a29e` → `#736b66`, dark: `#78716c` → `#908984`) and add new `--bg-active-row` token (light: `rgba(22, 163, 74, 0.05)`, dark: `rgba(34, 197, 94, 0.08)`) in `app/assets/css/tokens.css`
+- [x] T001 Update `--text-muted` token values (light: `#a8a29e` → `#736b66`, dark: `#78716c` → `#908984`) and add new `--bg-active-row` token (light: `rgba(22, 163, 74, 0.05)`, dark: `rgba(34, 197, 94, 0.08)`) in `app/assets/css/tokens.css`
 
 **Checkpoint**: Token foundation ready — all user stories can now proceed
 
@@ -45,8 +45,8 @@
 
 ### Implementation for User Story 1
 
-- [ ] T002 [P] [US1] Switch `UTabs` to `variant="link"` `color="neutral"` and remove `font-serif` class from "Your Projects" section heading in `app/pages/dashboard.vue`
-- [ ] T003 [P] [US1] Add `background: var(--bg-active-row)` to `.card-v27.state-running` CSS rule in `app/components/ProjectListCard.vue`
+- [x] T002 [P] [US1] Switch `UTabs` to `variant="link"` `color="neutral"` and remove `font-serif` class from "Your Projects" section heading in `app/pages/dashboard.vue`
+- [x] T003 [P] [US1] Add `background: var(--bg-active-row)` to `.card-v27.state-running` CSS rule in `app/components/ProjectListCard.vue`
 
 **Checkpoint**: Dashboard visual hierarchy established — active project stands out, tabs are lightweight
 
@@ -62,12 +62,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T004 [P] [US2] Remove `font-serif` from `.session-project`, remove `letter-spacing: 0.02em` from `.timer-display`, add `font-variant-numeric: tabular-nums` to `.timer-display`, and raise `.meta-label` font-size from `10px` to `11px` in `app/components/DashboardTimerHero.vue`
-- [ ] T005 [P] [US2] Remove `font-serif` from empty state headings in `app/components/ProjectList.vue` (~3 instances) and `app/components/ArchivedProjectsList.vue` (~1 instance)
-- [ ] T006 [P] [US2] Remove `font-serif` from page headings in `app/pages/auth/login.vue`, `app/pages/auth/register.vue`, `app/pages/auth/callback.vue` (~3 headings), `app/pages/auth/verify-email.vue`, `app/pages/auth/forgot-password.vue`, `app/pages/auth/reset-password.vue`
-- [ ] T007 [P] [US2] Remove `font-serif` from headings in `app/pages/index.vue` (~7 instances — hero, sections, CTA, pricing, FAQ) and page titles in `app/pages/legal/terms.vue`, `app/pages/legal/privacy.vue`
-- [ ] T008 [P] [US2] Remove `font-serif` from section headings in `app/pages/gallery.vue` (~5 instances) and layout title in `app/layouts/component-gallery.vue`
-- [ ] T009 [P] [US2] Update `docs/DESIGN_SYSTEM.md`: (a) change typography rules to reserve Fraunces exclusively for the LifeStint logo wordmark, Instrument Sans for all headings/titles/labels/body text, JetBrains Mono for timer digits — update Font Families table, Typography Patterns, Cards example, Empty States example, Typography Summary, Accessibility examples, and Best Practices sections; (b) update `--text-muted` hex values from `#a8a29e`/`#78716c` to `#736b66`/`#908984` in Token Reference, Color System table, and Quick Reference; (c) verify card spacing convention (12px gap) is consistent with Spacing Scale documentation
+- [x] T004 [P] [US2] Remove `font-serif` from `.session-project`, remove `letter-spacing: 0.02em` from `.timer-display`, add `font-variant-numeric: tabular-nums` to `.timer-display`, and raise `.meta-label` font-size from `10px` to `11px` in `app/components/DashboardTimerHero.vue`
+- [x] T005 [P] [US2] Remove `font-serif` from empty state headings in `app/components/ProjectList.vue` (~3 instances) and `app/components/ArchivedProjectsList.vue` (~1 instance)
+- [x] T006 [P] [US2] Remove `font-serif` from page headings in `app/pages/auth/login.vue`, `app/pages/auth/register.vue`, `app/pages/auth/callback.vue` (~3 headings), `app/pages/auth/verify-email.vue`, `app/pages/auth/forgot-password.vue`, `app/pages/auth/reset-password.vue`
+- [x] T007 [P] [US2] Remove `font-serif` from headings in `app/pages/index.vue` (~7 instances — hero, sections, CTA, pricing, FAQ) and page titles in `app/pages/legal/terms.vue`, `app/pages/legal/privacy.vue`
+- [x] T008 [P] [US2] Remove `font-serif` from section headings in `app/pages/gallery.vue` (~5 instances) and layout title in `app/layouts/component-gallery.vue`
+- [x] T009 [P] [US2] Update `docs/DESIGN_SYSTEM.md`: (a) change typography rules to reserve Fraunces exclusively for the LifeStint logo wordmark, Instrument Sans for all headings/titles/labels/body text, JetBrains Mono for timer digits — update Font Families table, Typography Patterns, Cards example, Empty States example, Typography Summary, Accessibility examples, and Best Practices sections; (b) update `--text-muted` hex values from `#a8a29e`/`#78716c` to `#736b66`/`#908984` in Token Reference, Color System table, and Quick Reference; (c) verify card spacing convention (12px gap) is consistent with Spacing Scale documentation
 
 **Checkpoint**: Typography system is consistent — serif appears only on logos, timer is cohesive, labels are readable
 
@@ -83,7 +83,7 @@
 
 ### Implementation for User Story 3
 
-- [ ] T010 [US3] Change project color indicators from hollow rings to solid filled dots in `app/components/ProjectListCard.vue` — update `.project-color` CSS (remove `background: transparent`, `border-width`, `border-style`; set `width: 12px`, `height: 12px`; add background fill) and update computed color classes from `border-*` to `bg-*` variants in the template
+- [x] T010 [US3] Change project color indicators from hollow rings to solid filled dots in `app/components/ProjectListCard.vue` — update `.project-color` CSS (remove `background: transparent`, `border-width`, `border-style`; set `width: 12px`, `height: 12px`; add background fill) and update computed color classes from `border-*` to `bg-*` variants in the template
 
 **Checkpoint**: Color usage is accessible and intentional — muted text passes WCAG AA, dots are clearly decorative
 
@@ -99,8 +99,8 @@
 
 ### Implementation for User Story 4
 
-- [ ] T011 [US4] Standardize `.card-v27` gap from `14px` to `12px` and padding from `14px 20px` to `12px 20px` in `app/components/ProjectListCard.vue`
-- [ ] T012 [P] [US4] Verify navigation grouping in `app/layouts/default.vue` — confirm existing `bg-[#fef7ed] dark:bg-[#1f1b18] p-1 rounded-full gap-1` container satisfies FR-008 (likely no-op; document finding)
+- [x] T011 [US4] Standardize `.card-v27` gap from `14px` to `12px` and padding from `14px 20px` to `12px 20px` in `app/components/ProjectListCard.vue`
+- [x] T012 [P] [US4] Verify navigation grouping in `app/layouts/default.vue` — confirm existing `bg-[#fef7ed] dark:bg-[#1f1b18] p-1 rounded-full gap-1` container satisfies FR-008 (likely no-op; document finding)
 
 **Checkpoint**: All spacing is consistent and aligned — card gaps follow design system scale, navigation is cohesive
 
@@ -110,9 +110,9 @@
 
 **Purpose**: Final verification across all stories, regression testing, cross-mode validation
 
-- [ ] T013 Verify `font-serif` removal completeness — run `grep -r "font-serif" app/` and confirm only 9 logo instances remain (per research.md inventory)
-- [ ] T014 Run `npm run lint:fix && npm run type-check && npm run test:run` to verify no regressions
-- [ ] T015 Visual review of all modified pages in both light and dark modes across viewports (768px, 1024px, 1440px, 1920px) — verify SC-001 through SC-006
+- [x] T013 Verify `font-serif` removal completeness — run `grep -r "font-serif" app/` and confirm only 9 logo instances remain (per research.md inventory)
+- [x] T014 Run `npm run lint:fix && npm run type-check && npm run test:run` to verify no regressions
+- [ ] T015 *(requires manual visual inspection)* Visual review of all modified pages in both light and dark modes across viewports (768px, 1024px, 1440px, 1920px) — verify SC-001 through SC-006
 
 ---
 

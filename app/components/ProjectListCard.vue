@@ -84,24 +84,24 @@ const extraStints = computed(() => {
   return 0;
 });
 
-const colorRingClass = computed(() => {
+const colorDotClass = computed(() => {
   const color = props.project.color_tag;
   if (!color || !PROJECT.COLORS.includes(color as ProjectColor)) {
-    return 'border-stone-400 dark:border-stone-500';
+    return 'bg-stone-400 dark:bg-stone-500';
   }
 
-  const ringColorMap: Record<ProjectColor, string> = {
-    red: 'border-red-500',
-    orange: 'border-orange-500',
-    amber: 'border-amber-500',
-    green: 'border-green-500',
-    teal: 'border-teal-500',
-    blue: 'border-blue-500',
-    purple: 'border-purple-500',
-    pink: 'border-pink-500',
+  const dotColorMap: Record<ProjectColor, string> = {
+    red: 'bg-red-500',
+    orange: 'bg-orange-500',
+    amber: 'bg-amber-500',
+    green: 'bg-green-500',
+    teal: 'bg-teal-500',
+    blue: 'bg-blue-500',
+    purple: 'bg-purple-500',
+    pink: 'bg-pink-500',
   };
 
-  return ringColorMap[color as ProjectColor];
+  return dotColorMap[color as ProjectColor];
 });
 
 const canStartStint = computed(() => props.project.is_active && !hasActiveStint.value);
@@ -166,7 +166,7 @@ function handleCompleteStint() {
     <div class="project-color-wrapper">
       <div
         class="project-color"
-        :class="colorRingClass"
+        :class="colorDotClass"
       />
       <span
         v-if="hasPausedStint || (hasActiveStint && isPaused)"
@@ -302,8 +302,8 @@ function handleCompleteStint() {
 .card-v27 {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 20px;
+  gap: 12px;
+  padding: 12px 20px;
   background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -319,6 +319,7 @@ function handleCompleteStint() {
 }
 
 .card-v27.state-running {
+  background: var(--bg-active-row);
   box-shadow: 0 2px 12px rgba(22, 163, 74, 0.1);
 }
 
@@ -375,13 +376,10 @@ function handleCompleteStint() {
 }
 
 .project-color {
-  width: 18px;
-  height: 18px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: transparent;
-  border-width: 3.5px;
-  border-style: solid;
 }
 
 .paused-indicator {
