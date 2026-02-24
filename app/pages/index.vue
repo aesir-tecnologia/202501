@@ -153,7 +153,7 @@ onUnmounted(() => {
               <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-700/50 text-sm text-orange-800 dark:text-orange-200 fade-up stagger-1">
                 Built for freelancers, consultants, and independents
               </div>
-              <h1 class="mt-5 text-4xl sm:text-5xl xl:text-6xl font-semibold leading-tight fade-up stagger-2 font-serif text-stone-900 dark:text-stone-50">
+              <h1 class="mt-5 text-4xl sm:text-5xl xl:text-6xl font-semibold leading-tight fade-up stagger-2 text-stone-900 dark:text-stone-50">
                 One stint at a time.<br>Zero context switching.
               </h1>
               <p class="mt-5 text-stone-600 dark:text-stone-300 text-lg max-w-2xl fade-up stagger-3">
@@ -333,7 +333,7 @@ onUnmounted(() => {
         <div class="text-center max-w-3xl mx-auto mb-10">
           <h2
             id="how-it-works-title"
-            class="text-3xl sm:text-4xl font-semibold font-serif text-stone-900 dark:text-stone-50"
+            class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-stone-50"
           >
             Run your day in stints
           </h2>
@@ -501,7 +501,7 @@ onUnmounted(() => {
     <section class="relative">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div class="text-center max-w-3xl mx-auto mb-10 fade-up">
-          <h2 class="text-3xl sm:text-4xl font-semibold font-serif text-stone-900 dark:text-stone-50">
+          <h2 class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-stone-50">
             Why not just use a time tracker?
           </h2>
           <p class="mt-3 text-stone-600 dark:text-stone-300 text-lg">
@@ -798,7 +798,7 @@ onUnmounted(() => {
         <div class="rounded-3xl bg-white dark:bg-stone-800 ring-1 ring-stone-200 dark:ring-stone-700 p-6 sm:p-10 shadow-lg">
           <div class="grid lg:grid-cols-2 gap-10 items-center">
             <div>
-              <h3 class="text-3xl font-semibold font-serif text-stone-900 dark:text-stone-50">
+              <h3 class="text-3xl font-semibold text-stone-900 dark:text-stone-50">
                 Focus evidence clients respect
               </h3>
               <p class="mt-3 text-stone-600 dark:text-stone-300 text-lg">
@@ -990,7 +990,7 @@ onUnmounted(() => {
           id="cta"
           class="mt-10 rounded-2xl bg-[#fffbf5] dark:bg-stone-800 border-3 border-orange-500 dark:border-orange-600 p-8 sm:p-10 text-center scale-in"
         >
-          <h3 class="text-3xl font-bold text-stone-900 dark:text-stone-50 font-serif">
+          <h3 class="text-3xl font-bold text-stone-900 dark:text-stone-50">
             Start demonstrating your focus quality
           </h3>
           <p class="mt-3 text-stone-600 dark:text-stone-300 text-lg max-w-2xl mx-auto">
@@ -1019,7 +1019,7 @@ onUnmounted(() => {
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div class="text-center">
-          <h3 class="text-3xl sm:text-4xl font-semibold font-serif text-stone-900 dark:text-stone-50">
+          <h3 class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-stone-50">
             Simple pricing for serious focus
           </h3>
           <p class="mt-3 text-stone-600 dark:text-stone-300 text-lg">
@@ -1263,7 +1263,7 @@ onUnmounted(() => {
       class="relative bg-[#fef7ed] dark:bg-stone-800/50"
     >
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <h3 class="text-3xl sm:text-4xl font-semibold text-center font-serif text-stone-900 dark:text-stone-50">
+        <h3 class="text-3xl sm:text-4xl font-semibold text-center text-stone-900 dark:text-stone-50">
           Frequently asked questions
         </h3>
         <div class="mt-10 grid md:grid-cols-2 gap-6">

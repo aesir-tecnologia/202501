@@ -500,7 +500,7 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
         class="h-12 w-12 mx-auto text-stone-400 dark:text-stone-600"
         aria-hidden="true"
       />
-      <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
+      <h3 class="mt-4 text-lg font-medium text-stone-900 dark:text-stone-100">
         Start your first project
       </h3>
       <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">
@@ -526,7 +526,7 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
         class="h-12 w-12 mx-auto text-stone-400 dark:text-stone-600"
         aria-hidden="true"
       />
-      <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
+      <h3 class="mt-4 text-lg font-medium text-stone-900 dark:text-stone-100">
         No active projects
       </h3>
       <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">
@@ -553,7 +553,7 @@ async function handleConflictResolution(action: ConflictResolutionAction): Promi
         class="h-12 w-12 mx-auto text-green-500 dark:text-green-400"
         aria-hidden="true"
       />
-      <h3 class="mt-4 font-serif text-lg font-medium text-stone-900 dark:text-stone-100">
+      <h3 class="mt-4 text-lg font-medium text-stone-900 dark:text-stone-100">
         All projects are active
       </h3>
       <p class="mt-2 text-sm text-stone-500 dark:text-stone-400">

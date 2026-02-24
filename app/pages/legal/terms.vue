@@ -28,7 +28,7 @@ useSeoMeta({
 
     <!-- Content -->
     <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 class="text-3xl sm:text-4xl font-semibold font-serif text-stone-900 dark:text-stone-50">
+      <h1 class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-stone-50">
         Terms of Service
       </h1>
       <p class="mt-2 text-stone-500 dark:text-stone-400">

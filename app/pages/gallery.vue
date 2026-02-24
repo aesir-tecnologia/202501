@@ -171,7 +171,7 @@ const mockExistingStint = {
             class="scroll-mt-24"
           >
             <div class="mb-6">
-              <h2 class="text-2xl font-bold font-serif text-stone-900 dark:text-white mb-2">
+              <h2 class="text-2xl font-bold text-stone-900 dark:text-white mb-2">
                 ProjectListCard
               </h2>
               <p class="text-stone-600 dark:text-stone-400">
@@ -254,7 +254,7 @@ const mockExistingStint = {
             class="scroll-mt-24"
           >
             <div class="mb-6">
-              <h2 class="text-2xl font-bold font-serif text-stone-900 dark:text-white mb-2">
+              <h2 class="text-2xl font-bold text-stone-900 dark:text-white mb-2">
                 StreakBanner
               </h2>
               <p class="text-stone-600 dark:text-stone-400">
@@ -331,7 +331,7 @@ const mockExistingStint = {
             class="scroll-mt-24"
           >
             <div class="mb-6">
-              <h2 class="text-2xl font-bold font-serif text-stone-900 dark:text-white mb-2">
+              <h2 class="text-2xl font-bold text-stone-900 dark:text-white mb-2">
                 StintTimer
               </h2>
               <p class="text-stone-600 dark:text-stone-400">
@@ -397,7 +397,7 @@ const mockExistingStint = {
             class="scroll-mt-24"
           >
             <div class="mb-6">
-              <h2 class="text-2xl font-bold font-serif text-stone-900 dark:text-white mb-2">
+              <h2 class="text-2xl font-bold text-stone-900 dark:text-white mb-2">
                 ProjectForm
               </h2>
               <p class="text-stone-600 dark:text-stone-400">
@@ -437,7 +437,7 @@ const mockExistingStint = {
             class="scroll-mt-24"
           >
             <div class="mb-6">
-              <h2 class="text-2xl font-bold font-serif text-stone-900 dark:text-white mb-2">
+              <h2 class="text-2xl font-bold text-stone-900 dark:text-white mb-2">
                 Modals & Dialogs
               </h2>
               <p class="text-stone-600 dark:text-stone-400">

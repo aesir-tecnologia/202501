@@ -24,7 +24,7 @@ function toggleDarkMode() {
             <span class="text-sm font-medium">Back</span>
           </NuxtLink>
           <div class="h-6 w-px bg-stone-200 dark:bg-stone-700" />
-          <h1 class="text-xl font-bold font-serif text-stone-900 dark:text-white">
+          <h1 class="text-xl font-bold text-stone-900 dark:text-white">
             Component Gallery
           </h1>
         </div>

@@ -119,7 +119,7 @@ onMounted(() => {
               name="i-lucide-loader-2"
               class="w-8 h-8 mx-auto text-orange-600 animate-spin dark:text-orange-500"
             />
-            <h2 class="text-xl font-serif font-semibold">
+            <h2 class="text-xl font-semibold">
               Verifying your account...
             </h2>
             <p class="text-stone-600 dark:text-stone-400">
@@ -135,7 +135,7 @@ onMounted(() => {
               name="i-lucide-triangle-alert"
               class="w-8 h-8 mx-auto text-red-500 dark:text-red-400"
             />
-            <h2 class="text-xl font-serif font-semibold">
+            <h2 class="text-xl font-semibold">
               Authentication Error
             </h2>
             <p class="text-stone-600 dark:text-stone-400">
@@ -167,7 +167,7 @@ onMounted(() => {
               name="i-lucide-circle-check"
               class="w-8 h-8 mx-auto text-green-600 dark:text-green-500"
             />
-            <h2 class="text-xl font-serif font-semibold">
+            <h2 class="text-xl font-semibold">
               Welcome to LifeStint!
             </h2>
             <p class="text-stone-600 dark:text-stone-400">
