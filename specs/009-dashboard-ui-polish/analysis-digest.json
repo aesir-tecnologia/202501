@@ -1,0 +1,565 @@
+{
+  "requirements": [
+    {
+      "slug": "tab-control-uses-lightweight-treatment",
+      "type": "functional",
+      "text": "Active/inactive tab control MUST use visually lightweight treatment instead of heavy filled background",
+      "location": "spec.md:§Requirements:FR-001",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "active-row-visually-distinct-for-running-stint",
+      "type": "functional",
+      "text": "Project row with running stint MUST be visually distinguished via background, accent border, or elevation",
+      "location": "spec.md:§Requirements:FR-002",
+      "measurable": true,
+      "relatedStories": ["US1"]
+    },
+    {
+      "slug": "all-text-uses-sans-serif-except-logo",
+      "type": "functional",
+      "text": "All app text MUST use sans-serif (Instrument Sans); serif (Fraunces) reserved exclusively for logo",
+      "location": "spec.md:§Requirements:FR-003",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "timer-digits-use-tabular-figures-cohesive-unit",
+      "type": "functional",
+      "text": "Timer digits MUST use tabular/monospaced figures and display as a single cohesive unit",
+      "location": "spec.md:§Requirements:FR-004",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    },
+    {
+      "slug": "muted-text-meets-wcag-aa-contrast",
+      "type": "non-functional",
+      "text": "All secondary/muted text MUST meet WCAG AA contrast (4.5:1 normal, 3:1 large) in both modes",
+      "location": "spec.md:§Requirements:FR-005",
+      "measurable": true,
+      "relatedStories": ["US3"]
+    },
+    {
+      "slug": "project-color-indicators-solid-filled-dots",
+      "type": "functional",
+      "text": "Project color indicators MUST be displayed as solid filled dots rather than hollow rings",
+      "location": "spec.md:§Requirements:FR-006",
+      "measurable": true,
+      "relatedStories": ["US3"]
+    },
+    {
+      "slug": "action-button-spacing-consistent-equal",
+      "type": "functional",
+      "text": "Action button spacing within project list rows MUST be consistent and equal across all items",
+      "location": "spec.md:§Requirements:FR-007",
+      "measurable": true,
+      "relatedStories": ["US4"]
+    },
+    {
+      "slug": "header-navigation-visually-grouped",
+      "type": "functional",
+      "text": "Header navigation items MUST be visually grouped as a cohesive navigation cluster",
+      "location": "spec.md:§Requirements:FR-008",
+      "measurable": true,
+      "relatedStories": ["US4"]
+    },
+    {
+      "slug": "secondary-labels-minimum-11px-size",
+      "type": "non-functional",
+      "text": "Secondary labels (Started, Duration, Ends) MUST be at least 11px equivalent for readability",
+      "location": "spec.md:§Requirements:FR-009",
+      "measurable": true,
+      "relatedStories": ["US2"]
+    }
+  ],
+  "userStories": [
+    {
+      "id": "US1",
+      "title": "Clear Visual Hierarchy on Dashboard",
+      "priority": "P1",
+      "scenarioCount": 3,
+      "hasAcceptanceCriteria": true,
+      "mappedRequirements": [
+        "tab-control-uses-lightweight-treatment",
+        "active-row-visually-distinct-for-running-stint"
+      ]
+    },
+    {
+      "id": "US2",
+      "title": "Readable and Consistent Typography",
+      "priority": "P2",
+      "scenarioCount": 3,
+      "hasAcceptanceCriteria": true,
+      "mappedRequirements": [
+        "all-text-uses-sans-serif-except-logo",
+        "timer-digits-use-tabular-figures-cohesive-unit",
+        "secondary-labels-minimum-11px-size"
+      ]
+    },
+    {
+      "id": "US3",
+      "title": "Accessible Color Contrast and Intentional Color Usage",
+      "priority": "P2",
+      "scenarioCount": 3,
+      "hasAcceptanceCriteria": true,
+      "mappedRequirements": [
+        "muted-text-meets-wcag-aa-contrast",
+        "project-color-indicators-solid-filled-dots"
+      ]
+    },
+    {
+      "id": "US4",
+      "title": "Balanced Spacing and Aligned Layout",
+      "priority": "P3",
+      "scenarioCount": 4,
+      "hasAcceptanceCriteria": true,
+      "mappedRequirements": [
+        "action-button-spacing-consistent-equal",
+        "header-navigation-visually-grouped"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T001",
+      "phase": "Foundational",
+      "storyLabel": null,
+      "description": "Update --text-muted token values and add --bg-active-row token in tokens.css",
+      "files": ["app/assets/css/tokens.css"],
+      "isParallel": false,
+      "inferredRequirements": [
+        "muted-text-meets-wcag-aa-contrast",
+        "active-row-visually-distinct-for-running-stint"
+      ]
+    },
+    {
+      "id": "T002",
+      "phase": "US1",
+      "storyLabel": "US1",
+      "description": "Switch UTabs to variant=link color=neutral, remove font-serif from section heading",
+      "files": ["app/pages/dashboard.vue"],
+      "isParallel": true,
+      "inferredRequirements": [
+        "tab-control-uses-lightweight-treatment",
+        "all-text-uses-sans-serif-except-logo"
+      ]
+    },
+    {
+      "id": "T003",
+      "phase": "US1",
+      "storyLabel": "US1",
+      "description": "Add background: var(--bg-active-row) to .card-v27.state-running CSS rule",
+      "files": ["app/components/ProjectListCard.vue"],
+      "isParallel": true,
+      "inferredRequirements": [
+        "active-row-visually-distinct-for-running-stint"
+      ]
+    },
+    {
+      "id": "T004",
+      "phase": "US2",
+      "storyLabel": "US2",
+      "description": "Remove font-serif, fix timer letter-spacing, add tabular-nums, raise label to 11px",
+      "files": ["app/components/DashboardTimerHero.vue"],
+      "isParallel": true,
+      "inferredRequirements": [
+        "all-text-uses-sans-serif-except-logo",
+        "timer-digits-use-tabular-figures-cohesive-unit",
+        "secondary-labels-minimum-11px-size"
+      ]
+    },
+    {
+      "id": "T005",
+      "phase": "US2",
+      "storyLabel": "US2",
+      "description": "Remove font-serif from empty state headings in ProjectList and ArchivedProjectsList",
+      "files": [
+        "app/components/ProjectList.vue",
+        "app/components/ArchivedProjectsList.vue"
+      ],
+      "isParallel": true,
+      "inferredRequirements": [
+        "all-text-uses-sans-serif-except-logo"
+      ]
+    },
+    {
+      "id": "T006",
+      "phase": "US2",
+      "storyLabel": "US2",
+      "description": "Remove font-serif from page headings in all auth/*.vue pages (6 files)",
+      "files": [
+        "app/pages/auth/login.vue",
+        "app/pages/auth/register.vue",
+        "app/pages/auth/callback.vue",
+        "app/pages/auth/verify-email.vue",
+        "app/pages/auth/forgot-password.vue",
+        "app/pages/auth/reset-password.vue"
+      ],
+      "isParallel": true,
+      "inferredRequirements": [
+        "all-text-uses-sans-serif-except-logo"
+      ]
+    },
+    {
+      "id": "T007",
+      "phase": "US2",
+      "storyLabel": "US2",
+      "description": "Remove font-serif from headings in index.vue (~7) and legal pages",
+      "files": [
+        "app/pages/index.vue",
+        "app/pages/legal/terms.vue",
+        "app/pages/legal/privacy.vue"
+      ],
+      "isParallel": true,
+      "inferredRequirements": [
+        "all-text-uses-sans-serif-except-logo"
+      ]
+    },
+    {
+      "id": "T008",
+      "phase": "US2",
+      "storyLabel": "US2",
+      "description": "Remove font-serif from gallery.vue (~5) and component-gallery.vue layout",
+      "files": [
+        "app/pages/gallery.vue",
+        "app/layouts/component-gallery.vue"
+      ],
+      "isParallel": true,
+      "inferredRequirements": [
+        "all-text-uses-sans-serif-except-logo"
+      ]
+    },
+    {
+      "id": "T009",
+      "phase": "US2",
+      "storyLabel": "US2",
+      "description": "Update typography rules in DESIGN_SYSTEM.md (Fraunces logo-only, Instrument Sans UI)",
+      "files": ["docs/DESIGN_SYSTEM.md"],
+      "isParallel": true,
+      "inferredRequirements": [
+        "all-text-uses-sans-serif-except-logo"
+      ]
+    },
+    {
+      "id": "T010",
+      "phase": "US3",
+      "storyLabel": "US3",
+      "description": "Change project color indicators from hollow rings to solid filled dots",
+      "files": ["app/components/ProjectListCard.vue"],
+      "isParallel": false,
+      "inferredRequirements": [
+        "project-color-indicators-solid-filled-dots"
+      ]
+    },
+    {
+      "id": "T011",
+      "phase": "US4",
+      "storyLabel": "US4",
+      "description": "Standardize .card-v27 gap from 14px to 12px and padding from 14px to 12px",
+      "files": ["app/components/ProjectListCard.vue"],
+      "isParallel": false,
+      "inferredRequirements": [
+        "action-button-spacing-consistent-equal"
+      ]
+    },
+    {
+      "id": "T012",
+      "phase": "US4",
+      "storyLabel": "US4",
+      "description": "Verify navigation grouping in default.vue satisfies FR-008 (likely no-op)",
+      "files": ["app/layouts/default.vue"],
+      "isParallel": true,
+      "inferredRequirements": [
+        "header-navigation-visually-grouped"
+      ]
+    },
+    {
+      "id": "T013",
+      "phase": "Polish",
+      "storyLabel": null,
+      "description": "Verify font-serif removal completeness (grep, confirm only 9 logo instances remain)",
+      "files": [],
+      "isParallel": false,
+      "inferredRequirements": [
+        "all-text-uses-sans-serif-except-logo"
+      ]
+    },
+    {
+      "id": "T014",
+      "phase": "Polish",
+      "storyLabel": null,
+      "description": "Run lint:fix, type-check, test:run to verify no regressions",
+      "files": [],
+      "isParallel": false,
+      "inferredRequirements": []
+    },
+    {
+      "id": "T015",
+      "phase": "Polish",
+      "storyLabel": null,
+      "description": "Visual review in light+dark modes across viewports (768, 1024, 1440, 1920px)",
+      "files": [],
+      "isParallel": false,
+      "inferredRequirements": [
+        "muted-text-meets-wcag-aa-contrast",
+        "tab-control-uses-lightweight-treatment",
+        "active-row-visually-distinct-for-running-stint",
+        "all-text-uses-sans-serif-except-logo",
+        "timer-digits-use-tabular-figures-cohesive-unit",
+        "project-color-indicators-solid-filled-dots",
+        "action-button-spacing-consistent-equal",
+        "header-navigation-visually-grouped",
+        "secondary-labels-minimum-11px-size"
+      ]
+    }
+  ],
+  "architecture": {
+    "stack": [
+      "TypeScript 5",
+      "Vue 3",
+      "Nuxt 4 (SSG)",
+      "Nuxt UI 4 (Reka UI)",
+      "Tailwind CSS v4",
+      "Google Fonts (Fraunces, Instrument Sans, JetBrains Mono)",
+      "Supabase (existing, read-only for this feature)",
+      "TanStack Query (Vue Query)",
+      "Vitest"
+    ],
+    "patterns": [
+      "Three-Layer Data Access (database/schema/composable)",
+      "Three-Layer Testing Architecture",
+      "SSG + Client-Side Auth",
+      "Query Key Factory Pattern",
+      "Cache Update Strategies (optimistic + seed-and-revalidate)",
+      "Design System Token System (tokens.css)",
+      "Scoped CSS for component-specific overrides"
+    ],
+    "entities": [
+      "Project",
+      "Stint",
+      "ProjectListCard",
+      "DashboardTimerHero",
+      "UTabs",
+      "Design Tokens (--text-muted, --bg-active-row, --font-sans, --font-serif, --font-mono)"
+    ],
+    "constraints": [
+      "SSG with client-side auth (no SSR for protected routes)",
+      "WCAG AA contrast compliance (4.5:1 normal text, 3:1 large text)",
+      "Both light and dark mode support required",
+      "Tablet+ viewports only (768px-1920px per SC-006)",
+      "No new functionality - visual polish only",
+      "No database changes",
+      "No component hierarchy restructuring",
+      "Existing component structure must remain intact",
+      "Serif font (Fraunces) reserved exclusively for LifeStint logo"
+    ]
+  },
+  "constitutionRules": [
+    {
+      "principle": "I. Three-Layer Data Access Architecture",
+      "normative": "MUST",
+      "summary": "All data access MUST follow database/schema/composable three-layer pattern with type safety",
+      "checkpoints": [
+        "Export typed helpers (Row, Insert, Update)",
+        "Require TypedSupabaseClient parameter",
+        "Enforce user authentication and RLS",
+        "Return Result<T> = { data, error }",
+        "Use camelCase for API surface",
+        "Export schema limits as constants",
+        "Transform camelCase to snake_case via toDbPayload()"
+      ]
+    },
+    {
+      "principle": "II. Three-Layer Testing Architecture",
+      "normative": "MUST",
+      "summary": "Test unique logic not framework wiring: schema validation, DB integration, query key factories",
+      "checkpoints": [
+        "Layer 1: Schema tests with safeParse()",
+        "Layer 2: Database tests against local Supabase",
+        "Layer 3: Composable tests for query key factories only",
+        "Do NOT test TanStack Query hooks directly",
+        "Co-located tests with .test.ts suffix",
+        "Minimal mocking philosophy"
+      ]
+    },
+    {
+      "principle": "III. Static Site Generation (SSG) + Client-Side Auth",
+      "normative": "MUST",
+      "summary": "Public routes pre-rendered at build time; protected routes use ssr:false and client-side auth",
+      "checkpoints": [
+        "Public routes (/, /auth/*) pre-rendered",
+        "Protected routes use ssr: false",
+        "Auth middleware client-only (import.meta.server guard)",
+        "Only anon keys in .env (embedded at build time)",
+        "Never commit service role keys"
+      ]
+    },
+    {
+      "principle": "IV. Type Safety & Code Generation",
+      "normative": "MUST",
+      "summary": "Type safety enforced via generated types, TypedSupabaseClient, Zod schemas at all levels",
+      "checkpoints": [
+        "Generated types from Supabase schema",
+        "Use useTypedSupabaseClient() not useSupabaseClient()",
+        "Zod schemas for runtime validation",
+        "Each layer exports own types",
+        "Run supabase:types after schema changes"
+      ]
+    },
+    {
+      "principle": "V. User-Friendly Error Handling",
+      "normative": "MUST",
+      "summary": "Three-layer error propagation: DB translates errors, composables validate, components toast",
+      "checkpoints": [
+        "Database layer translates PostgreSQL errors",
+        "Composable layer validates with Zod and throws",
+        "Component layer uses try-catch with toast.add()",
+        "Best-effort for non-critical operations (log, don't block)"
+      ]
+    },
+    {
+      "principle": "VI. Cache Update Strategies",
+      "normative": "MUST",
+      "summary": "Mutations MUST use optimistic update OR seed-and-revalidate; never leave cache inconsistent",
+      "checkpoints": [
+        "Optimistic: onMutate snapshot, onError restore, onSettled invalidate",
+        "Seed-and-revalidate: onSuccess setQueryData then invalidateQueries",
+        "Choose pattern based on operation reliability profile",
+        "Never leave cache in inconsistent state"
+      ]
+    },
+    {
+      "principle": "VII. Query Key Factory Pattern",
+      "normative": "MUST",
+      "summary": "Cache organization MUST use centralized key factories with all/lists/list/detail hierarchy",
+      "checkpoints": [
+        "Centralized key factories per entity",
+        "Hierarchical keys: all > lists > list(filters) > detail(id)",
+        "Full key match required for getQueryData()",
+        "Broad/targeted/multiple invalidation strategies"
+      ]
+    },
+    {
+      "principle": "VIII. Observability & Logging",
+      "normative": "MUST",
+      "summary": "All app code MUST use logger/createLogger utilities instead of raw console.* calls",
+      "checkpoints": [
+        "Use logger from ~/utils/logger",
+        "Use createLogger(module) for domain-specific tracing",
+        "Logs route to Sentry in production via createConsolaReporter()",
+        "Edge Functions exception: use console.* directly"
+      ]
+    },
+    {
+      "principle": "Component Library & Styling",
+      "normative": "MUST",
+      "summary": "Nuxt UI 4 (Reka UI) with Tailwind CSS v4; always provide dark mode variants; follow DESIGN_SYSTEM.md",
+      "checkpoints": [
+        "Nuxt UI 4 built on Reka UI (NOT Radix)",
+        "Tailwind CSS v4 via @theme directive",
+        "Always provide dark:* variants",
+        "Follow docs/DESIGN_SYSTEM.md for all styling",
+        "Check Nuxt UI 4 docs via Context7 before modifying components"
+      ]
+    },
+    {
+      "principle": "Code Quality",
+      "normative": "MUST",
+      "summary": "ESLint via @nuxt/eslint, run lint:fix before commit, no comments unless complex logic",
+      "checkpoints": [
+        "ESLint configured via @nuxt/eslint",
+        "Run lint:fix before committing",
+        "camelCase for API, snake_case for database",
+        "No comments unless logic is too complex"
+      ]
+    },
+    {
+      "principle": "Design System Compliance",
+      "normative": "MUST",
+      "summary": "ALL styling MUST follow docs/DESIGN_SYSTEM.md tokens, typography, spacing, and patterns",
+      "checkpoints": [
+        "Use documented color tokens (brand, ink, mint, amberx)",
+        "Follow typography scale and font families",
+        "Use Nuxt UI components with documented patterns",
+        "Apply spacing, layout, and animation guidelines",
+        "No custom styling deviating from design system without justification"
+      ]
+    }
+  ],
+  "terminology": [
+    {
+      "term": "stint",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md", "constitution.md"],
+      "variants": ["stint", "session", "work session", "focused work session"]
+    },
+    {
+      "term": "project",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md", "constitution.md"],
+      "variants": ["project", "client project"]
+    },
+    {
+      "term": "active row",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["active row", "active project row", "running row", "state-running"]
+    },
+    {
+      "term": "token",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md", "constitution.md"],
+      "variants": ["token", "design token", "CSS token", "color token"]
+    },
+    {
+      "term": "muted text",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["muted text", "secondary text", "--text-muted", "secondary/muted text"]
+    },
+    {
+      "term": "WCAG AA",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["WCAG AA", "WCAG AA contrast", "4.5:1 contrast ratio", "accessibility contrast"]
+    },
+    {
+      "term": "font-serif",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["font-serif", "serif", "Fraunces", "serif font"]
+    },
+    {
+      "term": "font-sans",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["font-sans", "sans-serif", "Instrument Sans", "sans-serif font"]
+    },
+    {
+      "term": "tabular-nums",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["tabular-nums", "tabular figures", "monospaced figures", "font-variant-numeric: tabular-nums"]
+    },
+    {
+      "term": "color indicator",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["color indicator", "project color indicator", "color dot", "hollow ring", "solid dot"]
+    },
+    {
+      "term": "ProjectListCard",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["ProjectListCard", "ProjectListCard.vue", "project list card", ".card-v27"]
+    },
+    {
+      "term": "DashboardTimerHero",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["DashboardTimerHero", "DashboardTimerHero.vue", "timer card", "timer hero"]
+    },
+    {
+      "term": "UTabs",
+      "usageLocations": ["spec.md", "plan.md", "tasks.md"],
+      "variants": ["UTabs", "tab control", "active/inactive tab", "segmented control"]
+    }
+  ],
+  "metrics": {
+    "totalRequirements": 9,
+    "totalStories": 4,
+    "totalTasks": 15,
+    "totalPhases": 7,
+    "totalEdgeCases": 4,
+    "totalPrinciples": 11
+  }
+}

@@ -504,6 +504,8 @@ Use `Sentry.createConsolaReporter()` (reporter pattern), not `consolaIntegration
 ## Active Technologies
 - TypeScript 5 / Vue 3 / Nuxt 4 + Nuxt UI 4 (UModal, UTable, UTooltip), TanStack Query (Vue Query) (008-stint-progress-modal)
 - Supabase PostgreSQL (existing `stints` table — read-only access, no migrations) (008-stint-progress-modal)
+- TypeScript 5 / Vue 3 / Nuxt 4 + Nuxt UI 4 (Reka UI), Tailwind CSS v4, Google Fonts (Fraunces, Instrument Sans) (009-dashboard-ui-polish)
+- N/A — no database changes (009-dashboard-ui-polish)
 
 ## Recent Changes
 - 008-stint-progress-modal: Added TypeScript 5 / Vue 3 / Nuxt 4 + Nuxt UI 4 (UModal, UTable, UTooltip), TanStack Query (Vue Query)
