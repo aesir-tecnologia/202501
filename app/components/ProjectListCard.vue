@@ -320,8 +320,7 @@ function handleCompleteStint() {
 
 .card-v27.state-running {
   background: var(--bg-active-row);
-  border-left: 3px solid var(--accent-primary);
-  box-shadow: 0 2px 12px rgba(22, 163, 74, 0.1);
+  box-shadow: inset 3px 0 0 var(--accent-primary), 0 2px 12px rgba(22, 163, 74, 0.1);
 }
 
 .card-v27.state-paused {
@@ -520,7 +519,7 @@ function handleCompleteStint() {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
 .edit-btn:hover {
@@ -644,7 +643,7 @@ function handleCompleteStint() {
   border: 1px solid rgba(22, 101, 52, 0.25);
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
 .play-btn:hover:not(:disabled) {
@@ -702,6 +701,13 @@ function handleCompleteStint() {
     margin-left: auto;
   }
 
+  .card-v27 .edit-btn,
+  .card-v27 .play-btn {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
   .card-v27 .edit-btn,
   .card-v27 .play-btn {
     opacity: 1;

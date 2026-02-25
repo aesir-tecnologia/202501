@@ -41,6 +41,7 @@ const snapshotMeta = ref<{
 
 const snapshotIsOvertime = ref(false);
 const snapshotIsPaused = ref(false);
+const snapshotProgress = ref(0);
 
 // Update snapshots only when we have active data
 watch(
@@ -67,6 +68,23 @@ watch(
   (paused) => {
     if (props.activeStint) {
       snapshotIsPaused.value = paused;
+    }
+  },
+  { immediate: true },
+);
+
+const progressPercentage = computed(() => {
+  if (!props.activeStint?.planned_duration) return 0;
+  const plannedSeconds = props.activeStint.planned_duration * 60;
+  const elapsed = plannedSeconds - secondsRemaining.value;
+  return Math.min(100, Math.max(0, (elapsed / plannedSeconds) * 100));
+});
+
+watch(
+  progressPercentage,
+  (pct) => {
+    if (props.activeStint) {
+      snapshotProgress.value = pct;
     }
   },
   { immediate: true },
@@ -102,6 +120,8 @@ const displayTimerValue = computed(() => snapshotTimerDisplay.value);
 const displayMeta = computed(() => snapshotMeta.value);
 const displayIsOvertime = computed(() => snapshotIsOvertime.value);
 const displayIsPaused = computed(() => snapshotIsPaused.value);
+const displayProgress = computed(() => snapshotProgress.value);
+const timerSegments = computed(() => displayTimerValue.value.split(':'));
 
 function handlePause(stint: StintRow) {
   emit('pause', stint);
@@ -157,15 +177,38 @@ function handleComplete(stint: StintRow) {
       </div>
 
       <!-- Timer Display -->
-      <div class="session-timer">
+      <div
+        class="session-timer"
+        :class="{ 'timer-paused': displayIsPaused, 'timer-overtime': displayIsOvertime }"
+      >
+        <div class="timer-glow-ring" />
         <div
           class="timer-display"
           :class="{ 'is-paused': displayIsPaused, 'is-overtime': displayIsOvertime }"
         >
-          {{ displayTimerValue }}
+          <template
+            v-for="(segment, idx) in timerSegments"
+            :key="idx"
+          >
+            <span
+              v-if="idx > 0"
+              class="timer-colon"
+            >:</span>
+            <span class="timer-segment">{{ segment }}</span>
+          </template>
         </div>
         <div class="timer-label">
           {{ displayIsOvertime ? 'Overtime' : 'Time Remaining' }}
+        </div>
+        <div class="stint-progress-track">
+          <div
+            class="stint-progress-fill"
+            :style="{ width: `${displayProgress}%` }"
+          />
+          <div
+            class="stint-progress-bubble"
+            :style="{ left: `${displayProgress}%` }"
+          />
         </div>
       </div>
 
@@ -272,8 +315,9 @@ function handleComplete(stint: StintRow) {
 }
 
 .session-project {
+  font-family: var(--font-display);
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
   margin: 0;
 }
@@ -318,7 +362,7 @@ function handleComplete(stint: StintRow) {
 .meta-value {
   font-family: var(--font-mono);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--text-primary);
 }
@@ -352,13 +396,19 @@ function handleComplete(stint: StintRow) {
 }
 
 .timer-display {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: 48px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
   line-height: 1;
   text-shadow: 0 0 40px var(--accent-primary-glow);
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 768px) {
@@ -376,15 +426,13 @@ function handleComplete(stint: StintRow) {
   color: var(--accent-danger);
 }
 
-.dark .timer-display.is-overtime {
-  color: var(--accent-danger);
-}
-
 .timer-label {
   font-size: 13px;
   color: var(--accent-primary);
   margin-top: 8px;
   font-weight: 500;
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 768px) {
@@ -413,6 +461,122 @@ function handleComplete(stint: StintRow) {
     padding: 14px 28px !important;
     font-size: 14px !important;
   }
+}
+
+/* Timer Segments */
+.timer-segment { display: inline-block; }
+
+.timer-colon {
+  display: inline-block;
+  margin: 0 2px;
+  animation: colon-blink 1s step-end infinite;
+}
+
+@keyframes colon-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.timer-display.is-paused .timer-colon {
+  animation: none;
+  color: var(--accent-amber);
+}
+
+.timer-display.is-overtime .timer-colon {
+  color: var(--accent-danger);
+}
+
+/* Timer Glow Ring */
+.timer-glow-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, var(--accent-primary-glow) 0%, transparent 70%);
+  filter: blur(20px);
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@media (min-width: 768px) {
+  .timer-glow-ring { width: 320px; height: 320px; }
+}
+
+.timer-paused .timer-glow-ring {
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.2) 0%, transparent 70%);
+}
+.timer-overtime .timer-glow-ring {
+  background: radial-gradient(circle, rgba(220, 38, 38, 0.2) 0%, transparent 70%);
+}
+:root.dark .timer-paused .timer-glow-ring {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%);
+}
+:root.dark .timer-overtime .timer-glow-ring {
+  background: radial-gradient(circle, rgba(248, 113, 113, 0.2) 0%, transparent 70%);
+}
+
+/* Session Progress Bar */
+.stint-progress-track {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  background: var(--border-light);
+  border-radius: 2px;
+  margin-top: 16px;
+  overflow: visible;
+}
+
+.stint-progress-fill {
+  height: 100%;
+  background: var(--accent-primary);
+  border-radius: 2px;
+  transition: width 1s linear;
+}
+
+.stint-progress-bubble {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  box-shadow: var(--shadow-progress-glow);
+  transition: left 1s linear;
+}
+
+@media (min-width: 768px) {
+  .stint-progress-bubble { width: 12px; height: 12px; }
+  .stint-progress-track { margin-top: 20px; }
+}
+
+.timer-paused .stint-progress-fill { background: var(--accent-amber); }
+.timer-paused .stint-progress-bubble {
+  background: var(--accent-amber);
+  box-shadow: 0 0 8px rgba(217, 119, 6, 0.4), 0 0 16px rgba(217, 119, 6, 0.2);
+}
+:root.dark .timer-paused .stint-progress-bubble {
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.5), 0 0 16px rgba(251, 191, 36, 0.3);
+}
+
+.timer-overtime .stint-progress-fill { background: var(--accent-danger); }
+.timer-overtime .stint-progress-bubble {
+  background: var(--accent-danger);
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.4), 0 0 16px rgba(220, 38, 38, 0.2);
+}
+:root.dark .timer-overtime .stint-progress-bubble {
+  box-shadow: 0 0 8px rgba(248, 113, 113, 0.5), 0 0 16px rgba(248, 113, 113, 0.3);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .timer-colon { animation: none; }
+  .timer-glow-ring { display: none; }
+  .stint-progress-fill { transition: none; }
+  .stint-progress-bubble { transition: none; box-shadow: none; }
 }
 
 /* Empty State */
