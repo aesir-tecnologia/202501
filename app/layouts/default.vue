@@ -4,6 +4,7 @@ import { SpeedInsights } from '@vercel/speed-insights/vue';
 
 const appConfig = useAppConfig();
 const route = useRoute();
+const isOnDashboard = computed(() => route.path === '/dashboard');
 const supabase = useSupabaseClient();
 const toast = useToast();
 const colorMode = useColorMode();
@@ -103,7 +104,7 @@ const formattedTime = computed(() => formatCountdown(secondsRemaining.value));
               leave-to-class="opacity-0 scale-95"
             >
               <div
-                v-if="activeStint && activeStint.status !== 'completed'"
+                v-if="activeStint && activeStint.status !== 'completed' && !isOnDashboard"
                 class="flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
                 :class="isPaused
                   ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
