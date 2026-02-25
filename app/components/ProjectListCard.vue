@@ -320,6 +320,7 @@ function handleCompleteStint() {
 
 .card-v27.state-running {
   background: var(--bg-active-row);
+  border-left: 3px solid var(--accent-primary);
   box-shadow: 0 2px 12px rgba(22, 163, 74, 0.1);
 }
 
@@ -424,8 +425,9 @@ function handleCompleteStint() {
 }
 
 .project-name {
+  font-family: var(--font-display);
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-stone-900);
   margin-bottom: 2px;
   white-space: nowrap;
@@ -534,6 +536,26 @@ function handleCompleteStint() {
 :root.dark .edit-btn:hover {
   background: rgba(255, 255, 255, 0.12);
   color: var(--color-stone-200);
+}
+
+.card-v27 .edit-btn,
+.card-v27 .play-btn {
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.card-v27:hover .edit-btn,
+.card-v27:hover .play-btn,
+.card-v27:focus-within .edit-btn,
+.card-v27:focus-within .play-btn {
+  opacity: 1;
+}
+
+.card-v27.state-running .edit-btn,
+.card-v27.state-running .play-btn,
+.card-v27.state-paused .edit-btn,
+.card-v27.state-paused .play-btn {
+  opacity: 1;
 }
 
 .action-buttons {
@@ -678,6 +700,11 @@ function handleCompleteStint() {
   .play-btn {
     order: 3;
     margin-left: auto;
+  }
+
+  .card-v27 .edit-btn,
+  .card-v27 .play-btn {
+    opacity: 1;
   }
 }
 </style>

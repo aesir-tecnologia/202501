@@ -224,7 +224,7 @@ async function handleConfirmComplete(payload: { notes: string, attributedDate?: 
         >
           <!-- Header -->
           <div class="flex items-center justify-between">
-            <h2 class="text-xl lg:text-2xl font-semibold text-stone-900 dark:text-stone-50">
+            <h2 class="text-xl lg:text-2xl font-display font-bold text-stone-900 dark:text-stone-50">
               Your Projects
             </h2>
             <UButton

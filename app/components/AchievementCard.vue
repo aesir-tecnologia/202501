@@ -167,7 +167,7 @@ const focusRatio = computed(() => {
       </div>
 
       <!-- Total -->
-      <div class="stat-item stat-item--bordered">
+      <div class="stat-item">
         <div
           v-if="isLoading"
           class="stat-skeleton"
@@ -187,7 +187,7 @@ const focusRatio = computed(() => {
       </div>
 
       <!-- Break -->
-      <div class="stat-item stat-item--bordered stat-item--muted">
+      <div class="stat-item stat-item--muted">
         <div
           v-if="isLoading"
           class="stat-skeleton"
@@ -253,8 +253,9 @@ const focusRatio = computed(() => {
 
 .date-label {
   flex: 1;
+  font-family: var(--font-display);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-secondary);
   text-align: center;
 }
@@ -337,9 +338,9 @@ const focusRatio = computed(() => {
 }
 
 .hero-value {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: 36px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-primary);
   line-height: 1;
 }
@@ -405,22 +406,21 @@ const focusRatio = computed(() => {
 .stats-row {
   display: flex;
   justify-content: space-between;
+  gap: 4px;
 }
 
 .stat-item {
   flex: 1;
   text-align: center;
-  padding: 0 8px;
-}
-
-.stat-item--bordered {
-  border-left: 1px solid var(--border-light);
+  padding: 8px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
 }
 
 .stat-value {
   font-family: var(--font-mono);
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
   line-height: 1.2;
 }
