@@ -27,6 +27,8 @@ const emit = defineEmits<{
 
 const { secondsRemaining, isPaused } = useStintTimer();
 
+const colonVisible = computed(() => Math.abs(secondsRemaining.value) % 2 === 0);
+
 const hasSession = computed(() => props.activeStint !== null);
 const isRunning = computed(() => props.activeStint !== null && !isPaused.value);
 
@@ -216,6 +218,7 @@ function handleComplete(stint: StintRow) {
             <span
               v-if="idx > 0"
               class="timer-colon"
+              :class="{ 'colon-hidden': !colonVisible }"
             >:</span>
             <span class="timer-segment">{{ segment }}</span>
           </template>
@@ -340,6 +343,7 @@ function handleComplete(stint: StintRow) {
   display: flex;
   align-items: center;
   gap: 10px;
+  font-family: var(--font-display);
   font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
@@ -402,6 +406,7 @@ function handleComplete(stint: StintRow) {
   font-size: 14px;
   font-weight: 500;
   letter-spacing: -0.02em;
+  white-space: nowrap;
   color: var(--text-primary);
 }
 
@@ -511,16 +516,14 @@ function handleComplete(stint: StintRow) {
 .timer-colon {
   display: inline-block;
   margin: 0 2px;
-  animation: colon-blink 1s step-end infinite;
+  transition: opacity 0.1s ease;
 }
 
-@keyframes colon-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+.timer-colon.colon-hidden {
+  opacity: 0;
 }
 
 .timer-display.is-paused .timer-colon {
-  animation: none;
   color: var(--accent-amber);
 }
 
@@ -564,9 +567,9 @@ function handleComplete(stint: StintRow) {
 .stint-progress-track {
   position: relative;
   width: 100%;
-  height: 3px;
+  height: 6px;
   background: var(--border-light);
-  border-radius: 2px;
+  border-radius: var(--radius-full);
   margin-top: 16px;
   overflow: visible;
 }
@@ -574,7 +577,7 @@ function handleComplete(stint: StintRow) {
 .stint-progress-fill {
   height: 100%;
   background: var(--accent-primary);
-  border-radius: 2px;
+  border-radius: var(--radius-full);
   transition: width 1s linear;
 }
 
@@ -591,8 +594,8 @@ function handleComplete(stint: StintRow) {
 }
 
 @media (min-width: 768px) {
+  .stint-progress-track { height: 8px; margin-top: 20px; }
   .stint-progress-bubble { width: 12px; height: 12px; }
-  .stint-progress-track { margin-top: 20px; }
 }
 
 .timer-paused .stint-progress-fill { background: var(--accent-amber); }
@@ -615,7 +618,7 @@ function handleComplete(stint: StintRow) {
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
-  .timer-colon { animation: none; }
+  .timer-colon { opacity: 1 !important; }
   .timer-glow-ring { display: none; }
   .stint-progress-fill { transition: none; }
   .stint-progress-bubble { transition: none; box-shadow: none; }

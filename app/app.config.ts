@@ -15,6 +15,11 @@ export default defineAppConfig({
       secondary: 'green',
       neutral: 'stone',
     },
+    button: {
+      slots: {
+        base: 'justify-center',
+      },
+    },
   },
   project: {
     colors: PROJECT.COLORS,

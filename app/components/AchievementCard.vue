@@ -157,16 +157,8 @@ const focusRatio = computed(() => {
           class="stat-skeleton"
         />
         <template v-else>
-          <div class="stat-value">
-            {{ aggregatedStats.completedStints || '-' }}
-          </div>
-          <div class="stat-label">
-            <UIcon
-              name="i-lucide-hash"
-              class="stat-label-icon"
-            />
-            Stints
-          </div>
+          <span class="stat-label">Stints</span>
+          <span class="stat-value">{{ aggregatedStats.completedStints || '-' }}</span>
         </template>
       </div>
 
@@ -177,36 +169,20 @@ const focusRatio = computed(() => {
           class="stat-skeleton"
         />
         <template v-else>
-          <div class="stat-value">
-            {{ totalDisplay }}
-          </div>
-          <div class="stat-label">
-            <UIcon
-              name="i-lucide-clock"
-              class="stat-label-icon"
-            />
-            Total
-          </div>
+          <span class="stat-label">Total</span>
+          <span class="stat-value">{{ totalDisplay }}</span>
         </template>
       </div>
 
       <!-- Break -->
-      <div class="stat-item stat-item--muted">
+      <div class="stat-item">
         <div
           v-if="isLoading"
           class="stat-skeleton"
         />
         <template v-else>
-          <div class="stat-value">
-            {{ breakDisplay }}
-          </div>
-          <div class="stat-label">
-            <UIcon
-              name="i-lucide-coffee"
-              class="stat-label-icon"
-            />
-            Break
-          </div>
+          <span class="stat-label">Paused</span>
+          <span class="stat-value">{{ breakDisplay }}</span>
         </template>
       </div>
     </div>
@@ -218,13 +194,13 @@ const focusRatio = computed(() => {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  padding: 16px;
+  padding: 20px;
   box-shadow: var(--shadow-soft);
 }
 
 @media (min-width: 768px) {
   .achievement-card {
-    padding: 24px;
+    padding: 32px;
     border-radius: var(--radius-xl);
   }
 }
@@ -234,9 +210,7 @@ const focusRatio = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-bottom: 16px;
   margin-bottom: 16px;
-  border-bottom: 1px solid var(--border-light);
 }
 
 .nav-title-row {
@@ -247,7 +221,7 @@ const focusRatio = computed(() => {
 
 .nav-title {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -297,12 +271,11 @@ const focusRatio = computed(() => {
 @media (min-width: 768px) {
   .nav-header {
     gap: 16px;
-    padding-bottom: 20px;
     margin-bottom: 20px;
   }
 
   .nav-title {
-    font-size: 18px;
+    font-size: 22px;
   }
 
   .date-label {
@@ -316,14 +289,12 @@ const focusRatio = computed(() => {
 
 /* Hero Section */
 .hero-section {
-  padding-bottom: 16px;
+  text-align: center;
   margin-bottom: 16px;
-  border-bottom: 1px solid var(--border-light);
 }
 
 @media (min-width: 768px) {
   .hero-section {
-    padding-bottom: 20px;
     margin-bottom: 20px;
   }
 }
@@ -331,6 +302,7 @@ const focusRatio = computed(() => {
 .hero-label {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   font-size: 14px;
   color: var(--text-muted);
@@ -425,67 +397,61 @@ const focusRatio = computed(() => {
 
 /* Stats Row */
 .stats-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .stats-row {
+    gap: 12px;
+  }
 }
 
 .stat-item {
-  flex: 1;
-  text-align: center;
-  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
   background: var(--bg-secondary);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 768px) {
+  .stat-item {
+    padding: 10px 16px;
+    gap: 6px;
+  }
 }
 
 .stat-value {
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 500;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
   color: var(--text-primary);
-  line-height: 1.2;
 }
 
 @media (min-width: 768px) {
   .stat-value {
-    font-size: 22px;
+    font-size: 18px;
   }
 }
 
 .stat-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
-  margin-top: 4px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-.stat-label-icon {
-  width: 12px;
-  height: 12px;
-}
-
-.stat-item--muted .stat-value {
-  opacity: 0.7;
-}
-
-.stat-item--muted .stat-label-icon {
-  color: var(--accent-tertiary);
-}
-
 @media (min-width: 768px) {
   .stat-label {
-    font-size: 12px;
-  }
-
-  .stat-label-icon {
-    width: 14px;
-    height: 14px;
+    font-size: 11px;
   }
 }
 
