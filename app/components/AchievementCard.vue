@@ -63,17 +63,21 @@ const focusRatio = computed(() => {
   <div class="achievement-card">
     <!-- Navigation Header -->
     <div class="nav-header">
-      <!-- Period Type Tabs -->
-      <div class="nav-tabs">
-        <UTabs
-          v-model="periodType"
-          :items="periodTabs"
-          :content="false"
-          variant="pill"
-          size="sm"
-          :ui="{ list: 'justify-center' }"
-          @update:model-value="(v) => onPeriodChange(v as PeriodType)"
-        />
+      <div class="nav-title-row">
+        <h3 class="nav-title">
+          Overview
+        </h3>
+        <!-- Period Type Tabs -->
+        <div class="nav-tabs">
+          <UTabs
+            v-model="periodType"
+            :items="periodTabs"
+            :content="false"
+            variant="pill"
+            size="sm"
+            @update:model-value="(v) => onPeriodChange(v as PeriodType)"
+          />
+        </div>
       </div>
 
       <!-- Period Navigation -->
@@ -235,9 +239,22 @@ const focusRatio = computed(() => {
   border-bottom: 1px solid var(--border-light);
 }
 
+.nav-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
 .nav-tabs {
   display: flex;
-  justify-content: center;
 }
 
 .nav-period {
@@ -284,6 +301,10 @@ const focusRatio = computed(() => {
     margin-bottom: 20px;
   }
 
+  .nav-title {
+    font-size: 18px;
+  }
+
   .date-label {
     font-size: 15px;
   }
@@ -295,7 +316,6 @@ const focusRatio = computed(() => {
 
 /* Hero Section */
 .hero-section {
-  text-align: center;
   padding-bottom: 16px;
   margin-bottom: 16px;
   border-bottom: 1px solid var(--border-light);
@@ -311,7 +331,6 @@ const focusRatio = computed(() => {
 .hero-label {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
   font-size: 14px;
   color: var(--text-muted);
@@ -385,6 +404,8 @@ const focusRatio = computed(() => {
   color: var(--text-muted);
   margin-top: 6px;
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 @media (min-width: 768px) {
@@ -440,6 +461,8 @@ const focusRatio = computed(() => {
   color: var(--text-muted);
   margin-top: 4px;
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .stat-label-icon {

@@ -137,15 +137,15 @@ describe('usePeriodNavigation', () => {
   });
 
   describe('label formatting', () => {
-    it('should show "Today" for current day', () => {
+    it('should show "Today — date" for current day', () => {
       const { formattedLabel } = usePeriodNavigation('daily');
-      expect(formattedLabel.value).toBe('Today');
+      expect(formattedLabel.value).toBe('Today — Jan 17');
     });
 
-    it('should show "Yesterday" for previous day', () => {
+    it('should show "Yesterday — date" for previous day', () => {
       const { formattedLabel, previous } = usePeriodNavigation('daily');
       previous();
-      expect(formattedLabel.value).toBe('Yesterday');
+      expect(formattedLabel.value).toBe('Yesterday — Jan 16');
     });
 
     it('should show formatted date for older days', () => {
@@ -155,33 +155,33 @@ describe('usePeriodNavigation', () => {
       expect(formattedLabel.value).toBe('Jan 15');
     });
 
-    it('should show "This Week" for current week', () => {
+    it('should show "This Week — range" for current week', () => {
       const { formattedLabel } = usePeriodNavigation('weekly');
-      expect(formattedLabel.value).toBe('This Week');
+      expect(formattedLabel.value).toMatch(/^This Week — \w{3} \d+ – \w{3} \d+$/);
     });
 
-    it('should show "Last Week" for previous week', () => {
+    it('should show "Last Week — range" for previous week', () => {
       const { formattedLabel, previous } = usePeriodNavigation('weekly');
       previous();
-      expect(formattedLabel.value).toBe('Last Week');
+      expect(formattedLabel.value).toMatch(/^Last Week — \w{3} \d+ – \w{3} \d+$/);
     });
 
     it('should show date range for older weeks', () => {
       const { formattedLabel, previous } = usePeriodNavigation('weekly');
       previous();
       previous();
-      expect(formattedLabel.value).toMatch(/^\w{3} \d+ - \w{3} \d+$/);
+      expect(formattedLabel.value).toMatch(/^\w{3} \d+ – \w{3} \d+$/);
     });
 
-    it('should show "This Month" for current month', () => {
+    it('should show "This Month — name" for current month', () => {
       const { formattedLabel } = usePeriodNavigation('monthly');
-      expect(formattedLabel.value).toBe('This Month');
+      expect(formattedLabel.value).toBe('This Month — January');
     });
 
-    it('should show "Last Month" for previous month', () => {
+    it('should show "Last Month — name" for previous month', () => {
       const { formattedLabel, previous } = usePeriodNavigation('monthly');
       previous();
-      expect(formattedLabel.value).toBe('Last Month');
+      expect(formattedLabel.value).toBe('Last Month — December');
     });
 
     it('should show month name for older months', () => {

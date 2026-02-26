@@ -4,6 +4,7 @@ import type { ProjectRow } from '~/lib/supabase/projects';
 import { useStintTimer } from '~/composables/useStintTimer';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { formatCountdown, formatDuration } from '~/utils/time-format';
+import { PROJECT, type ProjectColor } from '~/constants';
 
 interface DailyProgress {
   completed: number
@@ -114,6 +115,24 @@ watch(
   { immediate: true },
 );
 
+const colorDotClass = computed(() => {
+  const color = props.project?.color_tag;
+  if (!color || !PROJECT.COLORS.includes(color as ProjectColor)) {
+    return 'bg-stone-400 dark:bg-stone-500';
+  }
+  const dotColorMap: Record<ProjectColor, string> = {
+    red: 'bg-red-500',
+    orange: 'bg-orange-500',
+    amber: 'bg-amber-500',
+    green: 'bg-green-500',
+    teal: 'bg-teal-500',
+    blue: 'bg-blue-500',
+    purple: 'bg-purple-500',
+    pink: 'bg-pink-500',
+  };
+  return dotColorMap[color as ProjectColor];
+});
+
 // Display values use snapshots (persist during fade)
 const displayProjectName = computed(() => snapshotProjectName.value);
 const displayTimerValue = computed(() => snapshotTimerDisplay.value);
@@ -148,6 +167,10 @@ function handleComplete(stint: StintRow) {
     <div class="session-content">
       <div class="session-header">
         <h2 class="session-project">
+          <span
+            class="project-dot"
+            :class="colorDotClass"
+          />
           {{ displayProjectName }}
         </h2>
       </div>
@@ -157,22 +180,22 @@ function handleComplete(stint: StintRow) {
         v-if="displayMeta"
         class="session-meta"
       >
-        <div class="meta-item">
-          <span class="meta-value">{{ displayMeta.started }}</span>
+        <div class="meta-chip">
           <span class="meta-label">Started</span>
+          <span class="meta-value">{{ displayMeta.started }}</span>
         </div>
-        <div class="meta-item">
+        <div class="meta-chip">
+          <span class="meta-label">Duration</span>
           <span class="meta-value">
             {{ displayMeta.plannedDuration }}<span
               v-if="displayMeta.pausedDisplay"
               class="text-(--ui-text-muted)"
             > {{ displayMeta.pausedDisplay }}</span>
           </span>
-          <span class="meta-label">Duration</span>
         </div>
-        <div class="meta-item">
-          <span class="meta-value">{{ displayMeta.ends }}</span>
+        <div class="meta-chip">
           <span class="meta-label">Ends</span>
+          <span class="meta-value">{{ displayMeta.ends }}</span>
         </div>
       </div>
 
@@ -304,7 +327,6 @@ function handleComplete(stint: StintRow) {
 
 /* Session Header */
 .session-header {
-  text-align: center;
   margin-bottom: 16px;
 }
 
@@ -315,16 +337,30 @@ function handleComplete(stint: StintRow) {
 }
 
 .session-project {
-  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+}
+
+.project-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 @media (min-width: 768px) {
   .session-project {
     font-size: 22px;
+  }
+
+  .project-dot {
+    width: 12px;
+    height: 12px;
   }
 }
 
@@ -338,24 +374,26 @@ function handleComplete(stint: StintRow) {
 
 @media (min-width: 768px) {
   .session-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
     margin-bottom: 20px;
   }
 }
 
-.meta-item {
+.meta-chip {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
 }
 
 @media (min-width: 768px) {
-  .meta-item {
-    gap: 4px;
+  .meta-chip {
+    padding: 10px 16px;
+    gap: 6px;
   }
 }
 
@@ -374,7 +412,7 @@ function handleComplete(stint: StintRow) {
 }
 
 .meta-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -431,6 +469,8 @@ function handleComplete(stint: StintRow) {
   color: var(--accent-primary);
   margin-top: 8px;
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   position: relative;
   z-index: 1;
 }
@@ -444,22 +484,24 @@ function handleComplete(stint: StintRow) {
 
 /* Control Buttons */
 .session-controls {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
-  justify-content: center;
 }
 
 .ctrl-btn {
-  min-height: 44px;
-  padding: 12px 20px !important;
-  font-size: 13px !important;
-  border-radius: 100px !important;
+  width: 100%;
+  min-height: 48px;
+  padding: 14px 20px !important;
+  font-size: 14px !important;
+  border-radius: var(--radius-lg) !important;
 }
 
 @media (min-width: 768px) {
   .ctrl-btn {
-    padding: 14px 28px !important;
-    font-size: 14px !important;
+    min-height: 52px;
+    padding: 16px 28px !important;
+    font-size: 15px !important;
   }
 }
 

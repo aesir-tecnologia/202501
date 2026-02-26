@@ -82,21 +82,22 @@ function formatPeriodLabel(date: Date, periodType: PeriodType): string {
 
   switch (periodType) {
     case 'daily':
-      if (isToday(date)) return 'Today';
-      if (isYesterday(date)) return 'Yesterday';
+      if (isToday(date)) return `Today — ${format(date, 'MMM d')}`;
+      if (isYesterday(date)) return `Yesterday — ${format(date, 'MMM d')}`;
       return format(date, 'MMM d');
 
     case 'weekly': {
-      if (isSameWeek(date, now, { weekStartsOn: 1 })) return 'This Week';
-      if (isSameWeek(subWeeks(now, 1), date, { weekStartsOn: 1 })) return 'Last Week';
       const weekStart = startOfWeek(date, { weekStartsOn: 1 });
       const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
-      return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d')}`;
+      const range = `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d')}`;
+      if (isSameWeek(date, now, { weekStartsOn: 1 })) return `This Week — ${range}`;
+      if (isSameWeek(subWeeks(now, 1), date, { weekStartsOn: 1 })) return `Last Week — ${range}`;
+      return range;
     }
 
     case 'monthly':
-      if (isSameMonth(date, now)) return 'This Month';
-      if (isSameMonth(subMonths(now, 1), date)) return 'Last Month';
+      if (isSameMonth(date, now)) return `This Month — ${format(date, 'MMMM')}`;
+      if (isSameMonth(subMonths(now, 1), date)) return `Last Month — ${format(date, 'MMMM')}`;
       return format(date, 'MMMM yyyy');
   }
 }
