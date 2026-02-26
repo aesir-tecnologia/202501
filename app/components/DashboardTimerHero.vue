@@ -4,7 +4,6 @@ import type { ProjectRow } from '~/lib/supabase/projects';
 import { useStintTimer } from '~/composables/useStintTimer';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { formatCountdown, formatDuration } from '~/utils/time-format';
-import { PROJECT, type ProjectColor } from '~/constants';
 
 interface DailyProgress {
   completed: number
@@ -117,32 +116,7 @@ watch(
   { immediate: true },
 );
 
-const colorDotClass = computed(() => {
-  const color = props.project?.color_tag;
-  if (!color || !PROJECT.COLORS.includes(color as ProjectColor)) {
-    return 'bg-stone-400 dark:bg-stone-500';
-  }
-  const dotColorMap: Record<ProjectColor, string> = {
-    red: 'bg-red-500',
-    orange: 'bg-orange-500',
-    amber: 'bg-amber-500',
-    green: 'bg-green-500',
-    teal: 'bg-teal-500',
-    blue: 'bg-blue-500',
-    purple: 'bg-purple-500',
-    pink: 'bg-pink-500',
-  };
-  return dotColorMap[color as ProjectColor];
-});
-
-// Display values use snapshots (persist during fade)
-const displayProjectName = computed(() => snapshotProjectName.value);
-const displayTimerValue = computed(() => snapshotTimerDisplay.value);
-const displayMeta = computed(() => snapshotMeta.value);
-const displayIsOvertime = computed(() => snapshotIsOvertime.value);
-const displayIsPaused = computed(() => snapshotIsPaused.value);
-const displayProgress = computed(() => snapshotProgress.value);
-const timerSegments = computed(() => displayTimerValue.value.split(':'));
+const timerSegments = computed(() => snapshotTimerDisplay.value.split(':'));
 
 function handlePause(stint: StintRow) {
   emit('pause', stint);
@@ -169,47 +143,43 @@ function handleComplete(stint: StintRow) {
     <div class="session-content">
       <div class="session-header">
         <h2 class="session-project">
-          <span
-            class="project-dot"
-            :class="colorDotClass"
-          />
-          {{ displayProjectName }}
+          {{ snapshotProjectName }}
         </h2>
       </div>
 
       <!-- Session Metadata -->
       <div
-        v-if="displayMeta"
+        v-if="snapshotMeta"
         class="session-meta"
       >
         <div class="meta-chip">
           <span class="meta-label">Started</span>
-          <span class="meta-value">{{ displayMeta.started }}</span>
+          <span class="meta-value">{{ snapshotMeta.started }}</span>
         </div>
         <div class="meta-chip">
           <span class="meta-label">Duration</span>
           <span class="meta-value">
-            {{ displayMeta.plannedDuration }}<span
-              v-if="displayMeta.pausedDisplay"
+            {{ snapshotMeta.plannedDuration }}<span
+              v-if="snapshotMeta.pausedDisplay"
               class="text-(--ui-text-muted)"
-            > {{ displayMeta.pausedDisplay }}</span>
+            > {{ snapshotMeta.pausedDisplay }}</span>
           </span>
         </div>
         <div class="meta-chip">
           <span class="meta-label">Ends</span>
-          <span class="meta-value">{{ displayMeta.ends }}</span>
+          <span class="meta-value">{{ snapshotMeta.ends }}</span>
         </div>
       </div>
 
       <!-- Timer Display -->
       <div
         class="session-timer"
-        :class="{ 'timer-paused': displayIsPaused, 'timer-overtime': displayIsOvertime }"
+        :class="{ 'timer-paused': snapshotIsPaused, 'timer-overtime': snapshotIsOvertime }"
       >
         <div class="timer-glow-ring" />
         <div
           class="timer-display"
-          :class="{ 'is-paused': displayIsPaused, 'is-overtime': displayIsOvertime }"
+          :class="{ 'is-paused': snapshotIsPaused, 'is-overtime': snapshotIsOvertime }"
         >
           <template
             v-for="(segment, idx) in timerSegments"
@@ -224,16 +194,16 @@ function handleComplete(stint: StintRow) {
           </template>
         </div>
         <div class="timer-label">
-          {{ displayIsOvertime ? 'Overtime' : 'Time Remaining' }}
+          {{ snapshotIsOvertime ? 'Overtime' : 'Time Remaining' }}
         </div>
         <div class="stint-progress-track">
           <div
             class="stint-progress-fill"
-            :style="{ width: `${displayProgress}%` }"
+            :style="{ width: `${snapshotProgress}%` }"
           />
           <div
             class="stint-progress-bubble"
-            :style="{ left: `${displayProgress}%` }"
+            :style="{ left: `${snapshotProgress}%` }"
           />
         </div>
       </div>
@@ -340,31 +310,19 @@ function handleComplete(stint: StintRow) {
 }
 
 .session-project {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
-}
-
-.project-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (min-width: 768px) {
   .session-project {
     font-size: 22px;
-  }
-
-  .project-dot {
-    width: 12px;
-    height: 12px;
   }
 }
 
@@ -622,62 +580,5 @@ function handleComplete(stint: StintRow) {
   .timer-glow-ring { display: none; }
   .stint-progress-fill { transition: none; }
   .stint-progress-bubble { transition: none; box-shadow: none; }
-}
-
-/* Empty State */
-.no-session {
-  text-align: center;
-  padding: 32px 16px;
-}
-
-@media (min-width: 768px) {
-  .no-session {
-    padding: 48px 24px;
-  }
-}
-
-.no-session-icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-secondary);
-  border-radius: 50%;
-  color: var(--text-muted);
-}
-
-@media (min-width: 768px) {
-  .no-session-icon {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 20px;
-  }
-}
-
-.no-session h3 {
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--text-primary);
-  margin: 0 0 8px;
-}
-
-@media (min-width: 768px) {
-  .no-session h3 {
-    font-size: 20px;
-  }
-}
-
-.no-session p {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-@media (min-width: 768px) {
-  .no-session p {
-    font-size: 14px;
-  }
 }
 </style>
