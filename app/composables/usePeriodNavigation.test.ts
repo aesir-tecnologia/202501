@@ -157,13 +157,13 @@ describe('usePeriodNavigation', () => {
 
     it('should show "This Week — range" for current week', () => {
       const { formattedLabel } = usePeriodNavigation('weekly');
-      expect(formattedLabel.value).toMatch(/^This Week — \w{3} \d+ – \w{3} \d+$/);
+      expect(formattedLabel.value).toBe('This Week — Jan 13 – Jan 19');
     });
 
     it('should show "Last Week — range" for previous week', () => {
       const { formattedLabel, previous } = usePeriodNavigation('weekly');
       previous();
-      expect(formattedLabel.value).toMatch(/^Last Week — \w{3} \d+ – \w{3} \d+$/);
+      expect(formattedLabel.value).toBe('Last Week — Jan 6 – Jan 12');
     });
 
     it('should show date range for older weeks', () => {

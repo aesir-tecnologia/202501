@@ -55,6 +55,10 @@
   --shadow-glow: 0 0 40px rgba(194, 65, 12, 0.15);
   --shadow-card: 0 1px 3px rgba(120, 113, 108, 0.06), 0 8px 24px rgba(120, 113, 108, 0.08);
   --shadow-progress-glow: 0 0 8px rgba(194, 65, 12, 0.4), 0 0 16px rgba(194, 65, 12, 0.2);
+  --accent-amber-glow: rgba(217, 119, 6, 0.2);
+  --accent-danger-glow: rgba(220, 38, 38, 0.2);
+  --shadow-amber-glow: 0 0 8px rgba(217, 119, 6, 0.4), 0 0 16px rgba(217, 119, 6, 0.2);
+  --shadow-danger-glow: 0 0 8px rgba(220, 38, 38, 0.4), 0 0 16px rgba(220, 38, 38, 0.2);
 }
 
 /* ===== DARK MODE ===== */
@@ -92,6 +96,10 @@
   --shadow-glow: 0 0 60px rgba(234, 88, 12, 0.2);
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.25);
   --shadow-progress-glow: 0 0 8px rgba(234, 88, 12, 0.5), 0 0 16px rgba(234, 88, 12, 0.3);
+  --accent-amber-glow: rgba(251, 191, 36, 0.2);
+  --accent-danger-glow: rgba(248, 113, 113, 0.2);
+  --shadow-amber-glow: 0 0 8px rgba(251, 191, 36, 0.5), 0 0 16px rgba(251, 191, 36, 0.3);
+  --shadow-danger-glow: 0 0 8px rgba(248, 113, 113, 0.5), 0 0 16px rgba(248, 113, 113, 0.3);
 }
 
 /* ===== UTILITY CLASSES ===== */

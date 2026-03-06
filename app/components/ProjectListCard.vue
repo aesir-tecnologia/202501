@@ -310,7 +310,7 @@ function handleCompleteStint() {
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 20px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
-  transition: all 0.15s ease;
+  transition: box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 
 :root.dark .card-v27 {
@@ -473,7 +473,7 @@ function handleCompleteStint() {
 
 .progress-badge-btn {
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .progress-badge-btn:hover {
@@ -571,7 +571,7 @@ function handleCompleteStint() {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   background: transparent;
 }
 
@@ -708,6 +708,13 @@ function handleCompleteStint() {
 }
 
 @media (hover: none) {
+  .card-v27 .edit-btn,
+  .card-v27 .play-btn {
+    opacity: 1;
+  }
+}
+
+@media (pointer: coarse) {
   .card-v27 .edit-btn,
   .card-v27 .play-btn {
     opacity: 1;

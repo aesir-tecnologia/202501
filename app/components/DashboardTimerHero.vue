@@ -4,6 +4,9 @@ import type { ProjectRow } from '~/lib/supabase/projects';
 import { useStintTimer } from '~/composables/useStintTimer';
 import { parseSafeDate } from '~/utils/date-helpers';
 import { formatCountdown, formatDuration } from '~/utils/time-format';
+import { createLogger } from '~/utils/logger';
+
+const log = createLogger('timer-hero');
 
 interface DailyProgress {
   completed: number
@@ -32,7 +35,7 @@ const hasSession = computed(() => props.activeStint !== null);
 const isRunning = computed(() => props.activeStint !== null && !isPaused.value);
 
 // Snapshot refs - preserve last known values during hide animation
-const snapshotProjectName = ref<string | null>(null);
+const snapshotProjectName = ref('');
 const snapshotTimerDisplay = ref('00:00');
 const snapshotMeta = ref<{
   started: string
@@ -99,7 +102,10 @@ watch(
     if (!stint) return;
 
     const startedAt = parseSafeDate(stint.started_at);
-    if (!startedAt) return;
+    if (!startedAt) {
+      log.warn('Skipping metadata update: invalid started_at', { stintId: stint.id });
+      return;
+    }
 
     const plannedMinutes = stint.planned_duration || 30;
     const pausedSeconds = stint.paused_duration || 0;
@@ -109,7 +115,7 @@ watch(
     snapshotMeta.value = {
       started: startedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       plannedDuration: formatDuration(plannedMinutes * 60),
-      pausedDisplay: formatDuration(pausedSeconds, { delta: true }),
+      pausedDisplay: pausedSeconds > 0 ? formatDuration(pausedSeconds, { delta: true }) : '',
       ends: endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
   },
@@ -118,16 +124,28 @@ watch(
 
 const timerSegments = computed(() => snapshotTimerDisplay.value.split(':'));
 
-function handlePause(stint: StintRow) {
-  emit('pause', stint);
+function handlePause() {
+  if (!props.activeStint) {
+    log.error('handlePause called but activeStint is null');
+    return;
+  }
+  emit('pause', props.activeStint);
 }
 
-function handleResume(stint: StintRow) {
-  emit('resume', stint);
+function handleResume() {
+  if (!props.activeStint) {
+    log.error('handleResume called but activeStint is null');
+    return;
+  }
+  emit('resume', props.activeStint);
 }
 
-function handleComplete(stint: StintRow) {
-  emit('complete', stint);
+function handleComplete() {
+  if (!props.activeStint) {
+    log.error('handleComplete called but activeStint is null');
+    return;
+  }
+  emit('complete', props.activeStint);
 }
 </script>
 
@@ -215,7 +233,7 @@ function handleComplete(stint: StintRow) {
           variant="outline"
           color="warning"
           class="ctrl-btn"
-          @click="handlePause(activeStint!)"
+          @click="handlePause()"
         >
           <Icon
             name="i-lucide-pause"
@@ -228,7 +246,7 @@ function handleComplete(stint: StintRow) {
           variant="outline"
           color="success"
           class="ctrl-btn"
-          @click="handleResume(activeStint!)"
+          @click="handleResume()"
         >
           <Icon
             name="i-lucide-redo"
@@ -240,7 +258,7 @@ function handleComplete(stint: StintRow) {
           variant="outline"
           color="error"
           class="ctrl-btn"
-          @click="handleComplete(activeStint!)"
+          @click="handleComplete()"
         >
           <Icon
             name="i-lucide-square"
@@ -509,16 +527,10 @@ function handleComplete(stint: StintRow) {
 }
 
 .timer-paused .timer-glow-ring {
-  background: radial-gradient(circle, rgba(217, 119, 6, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--accent-amber-glow) 0%, transparent 70%);
 }
 .timer-overtime .timer-glow-ring {
-  background: radial-gradient(circle, rgba(220, 38, 38, 0.2) 0%, transparent 70%);
-}
-:root.dark .timer-paused .timer-glow-ring {
-  background: radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%);
-}
-:root.dark .timer-overtime .timer-glow-ring {
-  background: radial-gradient(circle, rgba(248, 113, 113, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--accent-danger-glow) 0%, transparent 70%);
 }
 
 /* Session Progress Bar */
@@ -559,19 +571,13 @@ function handleComplete(stint: StintRow) {
 .timer-paused .stint-progress-fill { background: var(--accent-amber); }
 .timer-paused .stint-progress-bubble {
   background: var(--accent-amber);
-  box-shadow: 0 0 8px rgba(217, 119, 6, 0.4), 0 0 16px rgba(217, 119, 6, 0.2);
-}
-:root.dark .timer-paused .stint-progress-bubble {
-  box-shadow: 0 0 8px rgba(251, 191, 36, 0.5), 0 0 16px rgba(251, 191, 36, 0.3);
+  box-shadow: var(--shadow-amber-glow);
 }
 
 .timer-overtime .stint-progress-fill { background: var(--accent-danger); }
 .timer-overtime .stint-progress-bubble {
   background: var(--accent-danger);
-  box-shadow: 0 0 8px rgba(220, 38, 38, 0.4), 0 0 16px rgba(220, 38, 38, 0.2);
-}
-:root.dark .timer-overtime .stint-progress-bubble {
-  box-shadow: 0 0 8px rgba(248, 113, 113, 0.5), 0 0 16px rgba(248, 113, 113, 0.3);
+  box-shadow: var(--shadow-danger-glow);
 }
 
 /* Accessibility */

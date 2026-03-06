@@ -81,10 +81,12 @@ function formatPeriodLabel(date: Date, periodType: PeriodType): string {
   const now = new Date();
 
   switch (periodType) {
-    case 'daily':
-      if (isToday(date)) return `Today — ${format(date, 'MMM d')}`;
-      if (isYesterday(date)) return `Yesterday — ${format(date, 'MMM d')}`;
-      return format(date, 'MMM d');
+    case 'daily': {
+      const label = format(date, 'MMM d');
+      if (isToday(date)) return `Today — ${label}`;
+      if (isYesterday(date)) return `Yesterday — ${label}`;
+      return label;
+    }
 
     case 'weekly': {
       const weekStart = startOfWeek(date, { weekStartsOn: 1 });

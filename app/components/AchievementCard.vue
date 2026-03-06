@@ -22,10 +22,6 @@ const periodTabs: TabsItem[] = [
   { label: 'Monthly', value: 'monthly' },
 ];
 
-function onPeriodChange(value: PeriodType) {
-  setPeriodType(value);
-}
-
 const { data: summaries, isLoading } = useDailySummariesQuery(dateRange);
 
 const aggregatedStats = computed(() => {
@@ -75,7 +71,7 @@ const focusRatio = computed(() => {
             :content="false"
             variant="pill"
             size="sm"
-            @update:model-value="(v) => onPeriodChange(v as PeriodType)"
+            @update:model-value="(v) => setPeriodType(v as PeriodType)"
           />
         </div>
       </div>
