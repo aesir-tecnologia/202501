@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-LifeStint is a productivity tracking application that helps busy professionals maintain focus across multiple projects through a "stint-based" approach—predetermined focused work sessions with single-session enforcement to prevent multitasking.
+LifeStint is a productivity tracking application that helps busy professionals maintain focus across multiple projects through a "stint-based" approach—predetermined focused work sessions with single active session enforcement to prevent multitasking.
 
 **The Core Innovation:** Unlike traditional time trackers that log work retroactively or Pomodoro apps that ignore project context, LifeStint combines project-level focus tracking with professional reporting capabilities while maintaining zero administrative overhead.
 

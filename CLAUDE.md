@@ -86,7 +86,7 @@ npm run supabase:types   # Generate TypeScript types from local Supabase schema
 ### SSG + Client-Side Auth Pattern
 
 **Critical:** This is a **static site** with client-side authentication:
-- Public routes (`/`, `/auth/*`) are pre-rendered at build time
+- Public routes (`/`, `/auth/*`, `/gallery`, `/legal/*`) are pre-rendered at build time
 - Protected routes (`/dashboard`, `/analytics`, `/reports`, `/settings`) use `ssr: false` and client-side auth middleware
 - Auth middleware in `app/middleware/auth.ts` only runs on client (`if (import.meta.server) return`)
 - Supabase credentials are embedded at build time from `.env` (only use anon keys!)
@@ -446,7 +446,7 @@ See `README.md` for detailed deployment instructions.
 
 3. **Testing:**
    - Write tests alongside implementation
-   - Run `npm test` during development (uses local Supabase)
+   - Run `npm run test:run` during development (uses local Supabase)
    - Verify with `npm run test:run` before committing
    - CI runs tests against local Supabase with migrations applied
 
@@ -501,11 +501,3 @@ Use `Sentry.createConsolaReporter()` (reporter pattern), not `consolaIntegration
 - **Vite** - Build tool and dev server (Nuxt 4 built-in)
 - **Target Platform** - Vercel or any static hosting provider
 
-## Active Technologies
-- TypeScript 5 / Vue 3 / Nuxt 4 + Nuxt UI 4 (UModal, UTable, UTooltip), TanStack Query (Vue Query) (008-stint-progress-modal)
-- Supabase PostgreSQL (existing `stints` table — read-only access, no migrations) (008-stint-progress-modal)
-- TypeScript 5 / Vue 3 / Nuxt 4 + Nuxt UI 4 (Reka UI), Tailwind CSS v4, Google Fonts (Fraunces, Instrument Sans) (009-dashboard-ui-polish)
-- N/A — no database changes (009-dashboard-ui-polish)
-
-## Recent Changes
-- 008-stint-progress-modal: Added TypeScript 5 / Vue 3 / Nuxt 4 + Nuxt UI 4 (UModal, UTable, UTooltip), TanStack Query (Vue Query)

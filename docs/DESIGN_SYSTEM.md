@@ -32,9 +32,10 @@ This project uses **Tailwind CSS v4** with the new CSS-first approach:
 @import "./tokens.css";
 
 @theme {
+  --font-sans: 'DM Sans', system-ui, sans-serif;
   --font-serif: 'Fraunces', Georgia, serif;
-  --font-sans: 'Instrument Sans', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-mono: 'DM Mono', monospace;
+  --font-display: 'Outfit', system-ui, sans-serif;
 }
 ```
 
@@ -68,8 +69,9 @@ All design tokens are defined in `app/assets/css/tokens.css` with semantic CSS v
 #### Typography Tokens
 ```css
 --font-serif: 'Fraunces', Georgia, serif;      /* LifeStint logo only */
---font-sans: 'Instrument Sans', system-ui, sans-serif;  /* Headings, body, UI elements */
---font-mono: 'JetBrains Mono', monospace;      /* Timers, code */
+--font-sans: 'DM Sans', system-ui, sans-serif;  /* Headings, body, UI elements */
+--font-mono: 'DM Mono', monospace;              /* Code, metadata values */
+--font-display: 'Outfit', system-ui, sans-serif; /* Timer hero, display headings */
 ```
 
 #### Radius Tokens
@@ -248,13 +250,15 @@ The design system uses a distinctive typographic hierarchy with three font famil
 | Font | Variable | Usage | Characteristics |
 |------|----------|-------|-----------------|
 | **Fraunces** | `--font-serif` | LifeStint logo only | Warm, friendly serif with optical sizing |
-| **Instrument Sans** | `--font-sans` | All headings, body text, UI elements | Clean, modern sans-serif |
-| **JetBrains Mono** | `--font-mono` | Timers, code, numbers | Monospace with ligatures |
+| **DM Sans** | `--font-sans` | All headings, body text, UI elements | Clean, modern sans-serif |
+| **DM Mono** | `--font-mono` | Code, metadata values | Monospace with ligatures |
+| **Outfit** | `--font-display` | Timer hero, display headings | Geometric sans with tabular figures |
 
 ```css
 --font-serif: 'Fraunces', Georgia, serif;
---font-sans: 'Instrument Sans', system-ui, sans-serif;
---font-mono: 'JetBrains Mono', monospace;
+--font-sans: 'DM Sans', system-ui, sans-serif;
+--font-mono: 'DM Mono', monospace;
+--font-display: 'Outfit', system-ui, sans-serif;
 ```
 
 ### Typography Scale
@@ -314,14 +318,14 @@ The design system uses a distinctive typographic hierarchy with three font famil
 </p>
 ```
 
-**Timer Display (Monospace):**
+**Timer Display (Display Font):**
 ```vue
 <!-- Under 1 hour: MM:SS -->
-<div class="font-mono text-5xl font-semibold tabular-nums text-stone-900 dark:text-stone-50">
+<div class="font-display text-5xl font-bold tabular-nums text-stone-900 dark:text-stone-50">
   25:00
 </div>
 <!-- 1 hour or more: H:MM:SS -->
-<div class="font-mono text-5xl font-semibold tabular-nums text-stone-900 dark:text-stone-50">
+<div class="font-display text-5xl font-bold tabular-nums text-stone-900 dark:text-stone-50">
   1:30:00
 </div>
 ```
@@ -965,10 +969,11 @@ Project list cards use custom-styled action buttons for stint control:
 ### Typography Summary
 
 - **Logo**: Fraunces (serif) - `font-serif` (LifeStint logo only)
-- **Headings**: Instrument Sans - `font-sans`
-- **Body**: Instrument Sans - `font-sans`
-- **Mono**: JetBrains Mono - `font-mono`
-- **Timer**: `font-mono text-5xl tabular-nums`
+- **Headings**: DM Sans - `font-sans`
+- **Body**: DM Sans - `font-sans`
+- **Mono**: DM Mono - `font-mono`
+- **Display**: Outfit - `font-display`
+- **Timer**: `font-display text-5xl font-bold tabular-nums`
 
 ### Tailwind Palette Reference
 
@@ -1043,7 +1048,7 @@ nuxt.config.ts                # Nuxt config (UI module, color mode)
 1. **Use CSS Tokens**: Prefer `var(--token-name)` for design system values
 2. **Semantic Colors**: Use `color="primary"` not `color="orange"` in components
 3. **Dark Mode**: Always include `dark:` variants for custom styling
-4. **Typography**: Use `font-sans` for headings and body text, `font-serif` only for the LifeStint logo, `font-mono` for timers
+4. **Typography**: Use `font-sans` for headings and body text, `font-serif` only for the LifeStint logo, `font-display` for timer hero, `font-mono` for code and metadata
 5. **Icon Accessibility**: All icon-only buttons must have `UTooltip`
 6. **Warm Backgrounds**: Use `bg-[#fffbf5]` not pure white for page backgrounds
 7. **Consistent Spacing**: Use the spacing scale, avoid arbitrary values

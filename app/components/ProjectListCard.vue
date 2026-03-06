@@ -310,7 +310,7 @@ function handleCompleteStint() {
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 20px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
-  transition: all 0.15s ease;
+  transition: box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 
 :root.dark .card-v27 {
@@ -320,7 +320,7 @@ function handleCompleteStint() {
 
 .card-v27.state-running {
   background: var(--bg-active-row);
-  box-shadow: 0 2px 12px rgba(22, 163, 74, 0.1);
+  box-shadow: inset 3px 0 0 var(--accent-primary), 0 2px 12px rgba(22, 163, 74, 0.1);
 }
 
 .card-v27.state-paused {
@@ -424,8 +424,9 @@ function handleCompleteStint() {
 }
 
 .project-name {
+  font-family: var(--font-display);
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-stone-900);
   margin-bottom: 2px;
   white-space: nowrap;
@@ -472,7 +473,7 @@ function handleCompleteStint() {
 
 .progress-badge-btn {
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .progress-badge-btn:hover {
@@ -518,7 +519,7 @@ function handleCompleteStint() {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
 .edit-btn:hover {
@@ -536,6 +537,26 @@ function handleCompleteStint() {
   color: var(--color-stone-200);
 }
 
+.card-v27 .edit-btn,
+.card-v27 .play-btn {
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.card-v27:hover .edit-btn,
+.card-v27:hover .play-btn,
+.card-v27:focus-within .edit-btn,
+.card-v27:focus-within .play-btn {
+  opacity: 1;
+}
+
+.card-v27.state-running .edit-btn,
+.card-v27.state-running .play-btn,
+.card-v27.state-paused .edit-btn,
+.card-v27.state-paused .play-btn {
+  opacity: 1;
+}
+
 .action-buttons {
   display: flex;
   gap: 8px;
@@ -550,7 +571,7 @@ function handleCompleteStint() {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   background: transparent;
 }
 
@@ -622,7 +643,7 @@ function handleCompleteStint() {
   border: 1px solid rgba(22, 101, 52, 0.25);
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
 .play-btn:hover:not(:disabled) {
@@ -678,6 +699,25 @@ function handleCompleteStint() {
   .play-btn {
     order: 3;
     margin-left: auto;
+  }
+
+  .card-v27 .edit-btn,
+  .card-v27 .play-btn {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
+  .card-v27 .edit-btn,
+  .card-v27 .play-btn {
+    opacity: 1;
+  }
+}
+
+@media (pointer: coarse) {
+  .card-v27 .edit-btn,
+  .card-v27 .play-btn {
+    opacity: 1;
   }
 }
 </style>

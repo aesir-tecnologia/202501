@@ -22,10 +22,6 @@ const periodTabs: TabsItem[] = [
   { label: 'Monthly', value: 'monthly' },
 ];
 
-function onPeriodChange(value: PeriodType) {
-  setPeriodType(value);
-}
-
 const { data: summaries, isLoading } = useDailySummariesQuery(dateRange);
 
 const aggregatedStats = computed(() => {
@@ -63,17 +59,21 @@ const focusRatio = computed(() => {
   <div class="achievement-card">
     <!-- Navigation Header -->
     <div class="nav-header">
-      <!-- Period Type Tabs -->
-      <div class="nav-tabs">
-        <UTabs
-          v-model="periodType"
-          :items="periodTabs"
-          :content="false"
-          variant="pill"
-          size="sm"
-          :ui="{ list: 'justify-center' }"
-          @update:model-value="(v) => onPeriodChange(v as PeriodType)"
-        />
+      <div class="nav-title-row">
+        <h3 class="nav-title">
+          Overview
+        </h3>
+        <!-- Period Type Tabs -->
+        <div class="nav-tabs">
+          <UTabs
+            v-model="periodType"
+            :items="periodTabs"
+            :content="false"
+            variant="pill"
+            size="sm"
+            @update:model-value="(v) => setPeriodType(v as PeriodType)"
+          />
+        </div>
       </div>
 
       <!-- Period Navigation -->
@@ -153,56 +153,32 @@ const focusRatio = computed(() => {
           class="stat-skeleton"
         />
         <template v-else>
-          <div class="stat-value">
-            {{ aggregatedStats.completedStints || '-' }}
-          </div>
-          <div class="stat-label">
-            <UIcon
-              name="i-lucide-hash"
-              class="stat-label-icon"
-            />
-            Stints
-          </div>
+          <span class="stat-label">Stints</span>
+          <span class="stat-value">{{ aggregatedStats.completedStints || '-' }}</span>
         </template>
       </div>
 
       <!-- Total -->
-      <div class="stat-item stat-item--bordered">
+      <div class="stat-item">
         <div
           v-if="isLoading"
           class="stat-skeleton"
         />
         <template v-else>
-          <div class="stat-value">
-            {{ totalDisplay }}
-          </div>
-          <div class="stat-label">
-            <UIcon
-              name="i-lucide-clock"
-              class="stat-label-icon"
-            />
-            Total
-          </div>
+          <span class="stat-label">Total</span>
+          <span class="stat-value">{{ totalDisplay }}</span>
         </template>
       </div>
 
       <!-- Break -->
-      <div class="stat-item stat-item--bordered stat-item--muted">
+      <div class="stat-item">
         <div
           v-if="isLoading"
           class="stat-skeleton"
         />
         <template v-else>
-          <div class="stat-value">
-            {{ breakDisplay }}
-          </div>
-          <div class="stat-label">
-            <UIcon
-              name="i-lucide-coffee"
-              class="stat-label-icon"
-            />
-            Break
-          </div>
+          <span class="stat-label">Paused</span>
+          <span class="stat-value">{{ breakDisplay }}</span>
         </template>
       </div>
     </div>
@@ -214,13 +190,13 @@ const focusRatio = computed(() => {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  padding: 16px;
+  padding: 20px;
   box-shadow: var(--shadow-soft);
 }
 
 @media (min-width: 768px) {
   .achievement-card {
-    padding: 24px;
+    padding: 32px;
     border-radius: var(--radius-xl);
   }
 }
@@ -230,14 +206,25 @@ const focusRatio = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-bottom: 16px;
   margin-bottom: 16px;
-  border-bottom: 1px solid var(--border-light);
+}
+
+.nav-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
 }
 
 .nav-tabs {
   display: flex;
-  justify-content: center;
 }
 
 .nav-period {
@@ -253,8 +240,9 @@ const focusRatio = computed(() => {
 
 .date-label {
   flex: 1;
+  font-family: var(--font-display);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-secondary);
   text-align: center;
 }
@@ -279,8 +267,11 @@ const focusRatio = computed(() => {
 @media (min-width: 768px) {
   .nav-header {
     gap: 16px;
-    padding-bottom: 20px;
     margin-bottom: 20px;
+  }
+
+  .nav-title {
+    font-size: 22px;
   }
 
   .date-label {
@@ -295,14 +286,11 @@ const focusRatio = computed(() => {
 /* Hero Section */
 .hero-section {
   text-align: center;
-  padding-bottom: 16px;
   margin-bottom: 16px;
-  border-bottom: 1px solid var(--border-light);
 }
 
 @media (min-width: 768px) {
   .hero-section {
-    padding-bottom: 20px;
     margin-bottom: 20px;
   }
 }
@@ -337,9 +325,9 @@ const focusRatio = computed(() => {
 }
 
 .hero-value {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: 36px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-primary);
   line-height: 1;
 }
@@ -384,6 +372,8 @@ const focusRatio = computed(() => {
   color: var(--text-muted);
   margin-top: 6px;
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 @media (min-width: 768px) {
@@ -403,66 +393,61 @@ const focusRatio = computed(() => {
 
 /* Stats Row */
 .stats-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .stats-row {
+    gap: 12px;
+  }
 }
 
 .stat-item {
-  flex: 1;
-  text-align: center;
-  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
 }
 
-.stat-item--bordered {
-  border-left: 1px solid var(--border-light);
+@media (min-width: 768px) {
+  .stat-item {
+    padding: 10px 16px;
+    gap: 6px;
+  }
 }
 
 .stat-value {
   font-family: var(--font-mono);
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
   color: var(--text-primary);
-  line-height: 1.2;
 }
 
 @media (min-width: 768px) {
   .stat-value {
-    font-size: 22px;
+    font-size: 18px;
   }
 }
 
 .stat-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-muted);
-  margin-top: 4px;
   font-weight: 500;
-}
-
-.stat-label-icon {
-  width: 12px;
-  height: 12px;
-}
-
-.stat-item--muted .stat-value {
-  opacity: 0.7;
-}
-
-.stat-item--muted .stat-label-icon {
-  color: var(--accent-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 @media (min-width: 768px) {
   .stat-label {
-    font-size: 12px;
-  }
-
-  .stat-label-icon {
-    width: 14px;
-    height: 14px;
+    font-size: 11px;
   }
 }
 

@@ -4,6 +4,7 @@ import { SpeedInsights } from '@vercel/speed-insights/vue';
 
 const appConfig = useAppConfig();
 const route = useRoute();
+const isOnDashboard = computed(() => route.path === '/dashboard');
 const supabase = useSupabaseClient();
 const toast = useToast();
 const colorMode = useColorMode();
@@ -58,7 +59,7 @@ const formattedTime = computed(() => formatCountdown(secondsRemaining.value));
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#fffbf5] dark:bg-stone-900">
+  <div class="noise-texture min-h-screen bg-[#fffbf5] dark:bg-stone-900">
     <!-- Header wrapper for mobile nav positioning -->
     <div class="relative sticky top-0 z-50 bg-[#fffbf5]/80 dark:bg-stone-900/80 backdrop-blur-md supports-[backdrop-filter]:bg-[#fffbf5]/60 dark:supports-[backdrop-filter]:bg-stone-900/60">
       <header class="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 lg:px-8 max-w-(--ui-container) mx-auto w-full">
@@ -103,7 +104,7 @@ const formattedTime = computed(() => formatCountdown(secondsRemaining.value));
               leave-to-class="opacity-0 scale-95"
             >
               <div
-                v-if="activeStint && activeStint.status !== 'completed'"
+                v-if="activeStint && activeStint.status !== 'completed' && !isOnDashboard"
                 class="flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300"
                 :class="isPaused
                   ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 text-amber-700 dark:text-amber-400'
